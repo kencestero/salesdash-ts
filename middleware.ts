@@ -18,13 +18,13 @@ export async function middleware(req: NextRequest) {
   // Check for dashboard access
   if (pathname.startsWith("/en/dashboard") || pathname.startsWith("/en/")) {
     if (!token) {
-      return NextResponse.redirect(new URL("/en/auth/register", req.url));
+      return NextResponse.redirect(new URL("/en/auth/join", req.url));
     }
     
     // Check if user has member access via JWT token
     const member = (token as any).member === true;
     if (!member) {
-      const url = new URL("/en/auth/register", req.url);
+      const url = new URL("/en/auth/join", req.url);
       url.searchParams.set("error", "NO_ACCESS");
       return NextResponse.redirect(url);
     }

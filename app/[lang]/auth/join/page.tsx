@@ -15,7 +15,7 @@ export default function RegisterPage() {
     });
     if (r.ok) {
       // cookie join_ok is now set; kick to Google sign-in
-      window.location.href = "/api/auth/signin?provider=google";
+      window.location.href = "/api/auth/signin/google?callbackUrl=/en/dashboard";
     } else {
       const j = await r.json().catch(() => ({}));
       setErr(j?.message || "Invalid code.");

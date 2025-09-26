@@ -13,7 +13,7 @@ importers:
         version: 40.2.0
       '@ckeditor/ckeditor5-react':
         specifier: ^6.2.0
-        version: 6.3.0(@ckeditor/ckeditor5-core@40.2.0)(@ckeditor/ckeditor5-editor-multi-root@46.1.1)(@ckeditor/ckeditor5-engine@40.2.0)(@ckeditor/ckeditor5-utils@40.2.0)(@ckeditor/ckeditor5-watchdog@40.2.0)(react@18.2.0)
+        version: 6.3.0(@ckeditor/ckeditor5-core@46.1.1)(@ckeditor/ckeditor5-editor-multi-root@46.1.1)(@ckeditor/ckeditor5-engine@46.1.1)(@ckeditor/ckeditor5-utils@46.1.1)(@ckeditor/ckeditor5-watchdog@46.1.1)(react@18.2.0)
       '@dnd-kit/core':
         specifier: ^6.0.8
         version: 6.3.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -254,6 +254,9 @@ importers:
       html-to-image:
         specifier: ^1.11.11
         version: 1.11.13
+      jose:
+        specifier: ^6.1.0
+        version: 6.1.0
       leaflet:
         specifier: ^1.9.4
         version: 1.9.4
@@ -6096,6 +6099,9 @@ packages:
   jose@4.15.9:
     resolution: {integrity: sha512-1vUQX+IdDMVPj4k8kOxgUqlcK518yluMuGZwqlr44FS1ppZB/5GWh4rZG89erpOBOJjU/OBsnCVFfapsRz6nEA==}
 
+  jose@6.1.0:
+    resolution: {integrity: sha512-TTQJyoEoKcC1lscpVDCSsVgYzUDg/0Bt3WE//WiTPK6uOCQC2KZS4MpugbMWt/zyjkopgZoXhZuCi00gLudfUA==}
+
   js-beautify@1.15.4:
     resolution: {integrity: sha512-9/KXeZUKKJwqCXUdBxFJ3vPh467OCckSBmYDwSK/EtV090K+iMJ7zx2S3HLVDIWFQdqMIsZWbnaGiba18aWhaA==}
     engines: {node: '>=14'}
@@ -9843,6 +9849,8 @@ snapshots:
       '@ckeditor/ckeditor5-utils': 46.1.1
       '@ckeditor/ckeditor5-widget': 46.1.1
       ckeditor5: 46.1.1
+    transitivePeerDependencies:
+      - supports-color
 
   '@ckeditor/ckeditor5-mention@46.1.1':
     dependencies:
@@ -9901,13 +9909,13 @@ snapshots:
       '@ckeditor/ckeditor5-engine': 46.1.1
       ckeditor5: 46.1.1
 
-  '@ckeditor/ckeditor5-react@6.3.0(@ckeditor/ckeditor5-core@40.2.0)(@ckeditor/ckeditor5-editor-multi-root@46.1.1)(@ckeditor/ckeditor5-engine@40.2.0)(@ckeditor/ckeditor5-utils@40.2.0)(@ckeditor/ckeditor5-watchdog@40.2.0)(react@18.2.0)':
+  '@ckeditor/ckeditor5-react@6.3.0(@ckeditor/ckeditor5-core@46.1.1)(@ckeditor/ckeditor5-editor-multi-root@46.1.1)(@ckeditor/ckeditor5-engine@46.1.1)(@ckeditor/ckeditor5-utils@46.1.1)(@ckeditor/ckeditor5-watchdog@46.1.1)(react@18.2.0)':
     dependencies:
-      '@ckeditor/ckeditor5-core': 40.2.0
+      '@ckeditor/ckeditor5-core': 46.1.1
       '@ckeditor/ckeditor5-editor-multi-root': 46.1.1
-      '@ckeditor/ckeditor5-engine': 40.2.0
-      '@ckeditor/ckeditor5-utils': 40.2.0
-      '@ckeditor/ckeditor5-watchdog': 40.2.0
+      '@ckeditor/ckeditor5-engine': 46.1.1
+      '@ckeditor/ckeditor5-utils': 46.1.1
+      '@ckeditor/ckeditor5-watchdog': 46.1.1
       prop-types: 15.8.1
       react: 18.2.0
 
@@ -9918,6 +9926,8 @@ snapshots:
       '@ckeditor/ckeditor5-ui': 46.1.1
       '@ckeditor/ckeditor5-utils': 46.1.1
       ckeditor5: 46.1.1
+    transitivePeerDependencies:
+      - supports-color
 
   '@ckeditor/ckeditor5-restricted-editing@46.1.1':
     dependencies:
@@ -9927,8 +9937,6 @@ snapshots:
       '@ckeditor/ckeditor5-ui': 46.1.1
       '@ckeditor/ckeditor5-utils': 46.1.1
       ckeditor5: 46.1.1
-    transitivePeerDependencies:
-      - supports-color
 
   '@ckeditor/ckeditor5-select-all@40.2.0':
     dependencies:
@@ -15454,6 +15462,8 @@ snapshots:
   jiti@1.21.7: {}
 
   jose@4.15.9: {}
+
+  jose@6.1.0: {}
 
   js-beautify@1.15.4:
     dependencies:
