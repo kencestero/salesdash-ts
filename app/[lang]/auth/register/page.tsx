@@ -5,29 +5,36 @@ export default function RegisterPage() {
   const [code, setCode] = useState("");
   const [err, setErr] = useState("");
 
-  async function submit(e: React.FormEvent) {
-    e.preventDefault(); setErr("");
-    const r = await fetch("/api/join/verify", {
-      method: "POST", headers: { "Content-Type": "application/json" },
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setErr("");
+    const r = await fetch("/api/join/validate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ code }),
     });
     if (r.ok) {
-      // After cookie set, send them to Google sign-in
-      window.location.href = "/api/auth/signin/google?callbackUrl=/en/dashboard";
+      // cookie join_ok is now set; kick to Google sign-in
+      window.location.href = "/api/auth/signin?provider=google";
     } else {
-      setErr("Invalid or expired code. Ask your manager for today's code.");
+      const j = await r.json().catch(() => ({}));
+      setErr(j?.message || "Invalid code.");
     }
   }
 
   return (
-    <div className="p-8 max-w-sm mx-auto">
-      <h1 className="text-xl font-semibold">Enter Join Code</h1>
-      <form onSubmit={submit} className="mt-4 space-y-3">
-        <input value={code} onChange={e=>setCode(e.target.value)}
-               placeholder="6-digit code" className="w-full px-3 py-2 rounded bg-black/20 border" />
-        {err && <p className="text-sm text-red-500">{err}</p>}
-        <button className="px-4 py-2 rounded bg-orange-600 text-white">Continue</button>
+    <main className="mx-auto max-w-sm p-6">
+      <h1 className="text-xl font-semibold mb-4">Enter Join Code</h1>
+      <form onSubmit={handleSubmit} className="space-y-3">
+        <input
+          value={code}
+          onChange={(e) => setCode(e.target.value.toUpperCase())}
+          placeholder="ABC123"
+          className="w-full border rounded-lg px-3 py-2"
+        />
+        {err && <p className="text-red-600 text-sm">{err}</p>}
+        <button className="w-full rounded-lg px-3 py-2 border">Continue</button>
       </form>
-    </div>
+    </main>
   );
 }
