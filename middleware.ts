@@ -1,34 +1,33 @@
 import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
-import { jwtVerify } from "jose";
 import type { NextRequest } from "next/server";
 
-async function hasJoinCookie(req: NextRequest) {
-  const joinCookie = req.cookies.get("join_ok")?.value;
-  if (!joinCookie) return false;
-  try {
-    await jwtVerify(
-      joinCookie,
-      new TextEncoder().encode(process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET)
-    );
-    return true;
-  } catch { 
-    return false; 
-  }
-}
-
 export async function middleware(req: NextRequest) {
-  const token = await getToken({ req, secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET });
   const { pathname } = req.nextUrl;
-
+  
+  // Allow auth pages
+  if (pathname.startsWith("/en/auth")) return NextResponse.next();
+  
+  const token = await getToken({ req, secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET });
+  
+  // Redirect root to dashboard if logged in
   if (token && (pathname === "/" || pathname === "/en")) {
     return NextResponse.redirect(new URL("/en/dashboard", req.url));
   }
   
-  if (pathname.startsWith("/en/dashboard")) {
-    if (!token) return NextResponse.redirect(new URL("/en/auth/login", req.url));
-    const ok = await hasJoinCookie(req);
-    if (!ok) return NextResponse.redirect(new URL("/en/auth/register", req.url));
+  // Check for dashboard access
+  if (pathname.startsWith("/en/dashboard") || pathname.startsWith("/en/")) {
+    if (!token) {
+      return NextResponse.redirect(new URL("/en/auth/register", req.url));
+    }
+    
+    // Check if user has member access via JWT token
+    const member = (token as any).member === true;
+    if (!member) {
+      const url = new URL("/en/auth/register", req.url);
+      url.searchParams.set("error", "NO_ACCESS");
+      return NextResponse.redirect(url);
+    }
   }
   
   return NextResponse.next();
