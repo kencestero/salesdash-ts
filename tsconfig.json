@@ -1,18 +1,28 @@
 {
   "compilerOptions": {
-    "target": "ES2017",
     "lib": ["dom", "dom.iterable", "esnext"],
+    "target": "esnext",
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
     "noEmit": true,
+    "incremental": true,
     "esModuleInterop": true,
     "module": "esnext",
-    "moduleResolution": "bundler",
+    "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
-    "incremental": true,
+    // new
+    "noUnusedParameters": false,
+    "preserveWatchOutput": true,
+    "strictNullChecks": true,
+    "composite": false,
+    "declaration": true,
+    "declarationMap": true,
+    "forceConsistentCasingInFileNames": true,
+    "inlineSources": false,
+    "noUnusedLocals": false,
     "plugins": [
       {
         "name": "next"
@@ -22,6 +32,22 @@
       "@/*": ["./*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "include": [
+    "next-env.d.ts",
+    ".next/types/**/*.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    "lib/utils.js",
+    "components/ui/switch.jsx",
+    "components/ui/input.tsx",
+    "components/dasboard-select.jsx",
+    "components/ui/tabs.jsx",
+    "components/ui/slider.jsx",
+    "app/[lang]/not-found.js",
+    "app/[lang]/(dashboard)/(chart)/(re-chart)/charts-rechart-pie/twolevel-pie.jsx",
+    "app/[lang]/(dashboard)/(chart)/(re-chart)/charts-rechart-pie/two-simple-pie.jsx",
+    "app/[lang]/(dashboard)/(chart)/(re-chart)/charts-rechart-radialbar/basic-radial-bar.jsx",
+    "app/[lang]/(dashboard)/(chart)/(re-chart)/charts-rechart-bar/barchart-with-multixaxis.tsx"
+  ],
   "exclude": ["node_modules"]
 }
