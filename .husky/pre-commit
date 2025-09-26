@@ -1,0 +1,5 @@
+branch="$(git rev-parse --abbrev-ref HEAD)"
+[ "$branch" = "main" ] && echo "❌ No commits on main. Use feature/fix branch." && exit 1
+# Re-enable later:
+# pnpm lint || exit 1
+# pnpm typecheck || exit 1
