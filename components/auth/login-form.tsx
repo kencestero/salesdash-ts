@@ -12,9 +12,9 @@ import toast from "react-hot-toast";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import Image from "next/image";
-import { SiteLogo } from "@/components/svg";
 import { Icon } from "@iconify/react";
 import { Checkbox } from "@/components/ui/checkbox";
+import { DEFAULT_LANG } from "@/lib/i18n";
 
 import googleIcon from "@/public/images/auth/google.png";
 import facebook from "@/public/images/auth/facebook.png";
@@ -65,7 +65,7 @@ const LogInForm = () => {
       });
       if (response?.ok) {
         toast.success("Login Successful");
-        window.location.assign("/dashboard");
+        window.location.assign(`/${DEFAULT_LANG}/dashboard`);
         reset();
       } else if (response?.error) {
         toast.error(response?.error);
@@ -75,7 +75,7 @@ const LogInForm = () => {
   return (
     <div className="w-full py-10">
       <Link href="/dashboard" className="inline-block">
-        <SiteLogo className="h-10 w-10 2xl:w-14 2xl:h-14 text-primary" />
+        <Image src="/mj.svg" alt="MJ Cargo" width={56} height={56} priority />
       </Link>
       <div className="2xl:mt-8 mt-6 2xl:text-3xl text-2xl font-bold text-default-900">
         Hey, Hello 👋
@@ -159,7 +159,7 @@ const LogInForm = () => {
               Remember me
             </Label>
           </div>
-          <Link href="/auth/forgot" className="flex-none text-sm text-primary">
+          <Link href={`/${DEFAULT_LANG}/auth/forgot`} className="flex-none text-sm text-primary">
             Forget Password?
           </Link>
         </div>
@@ -181,7 +181,7 @@ const LogInForm = () => {
           disabled={isPending}
           onClick={() =>
             signIn("google", {
-              callbackUrl: "/dashboard",
+              callbackUrl: `/${DEFAULT_LANG}/dashboard`,
             })
           }
         >
@@ -195,7 +195,7 @@ const LogInForm = () => {
           disabled={isPending}
           onClick={() =>
             signIn("github", {
-              callbackUrl: "/dashboard",
+              callbackUrl: `/${DEFAULT_LANG}/dashboard`,
               redirect: false,
             })
           }
@@ -221,7 +221,7 @@ const LogInForm = () => {
       </div>
       <div className="mt-5 2xl:mt-8 text-center text-base text-default-600">
         Don't have an account?{" "}
-        <Link href="/auth/register" className="text-primary">
+        <Link href={`/${DEFAULT_LANG}/auth/join`} className="text-primary">
           {" "}
           Sign Up{" "}
         </Link>

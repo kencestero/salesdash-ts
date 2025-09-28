@@ -1,0 +1,13 @@
+import Image from "next/image";
+
+const SiteLogo = (props) => (
+  <Image
+    src="/images/logo/your-logo.png" // Replace with your actual logo filename
+    alt="MJ Cargo Logo"
+    width={32}
+    height={32}
+    {...props}
+  />
+);
+
+export default SiteLogo;
