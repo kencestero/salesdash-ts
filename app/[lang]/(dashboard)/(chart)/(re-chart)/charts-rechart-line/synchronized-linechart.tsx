@@ -66,7 +66,14 @@ const SynchronizedLineChart = ({ height = 300 }) => {
   ];
 
   return (
-    <>
+    <div
+      className="w-full min-h-screen p-4"
+      style={{
+        backgroundImage: "url('/mj-background.png')",
+        backgroundRepeat: "repeat",
+        backgroundSize: "200px 200px", // tweak to fit the logo tile size
+      }}
+    >
       <ResponsiveContainer height={height}>
         <LineChart height={height} data={data} syncId="anyId">
           <CartesianGrid
@@ -230,7 +237,7 @@ const SynchronizedLineChart = ({ height = 300 }) => {
           />
         </AreaChart>
       </ResponsiveContainer>
-    </>
+    </div>
   );
 };
 

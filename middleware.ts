@@ -1,35 +1,68 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
-import type { NextRequest } from "next/server";
+
+const DEFAULT_LANG = "en";
+const LOGIN = `/${DEFAULT_LANG}/login`;
+const AUTH_PREFIX = `/${DEFAULT_LANG}/auth`;
+const DASHBOARD = `/${DEFAULT_LANG}/dashboard`;
+
+const ALLOW_STATIC = [
+  "/_next",
+  "/favicon.ico",
+  "/robots.txt",
+  "/sitemap.xml",
+  "/images",
+  "/icons",
+  "/assets",
+  "/public",
+];
+
+// Optional: Block marketing pages once logged in
+const MARKETING = new Set([
+  `/${DEFAULT_LANG}/ecommerce`,
+  `/${DEFAULT_LANG}/marketing`,
+  `/${DEFAULT_LANG}/landing`,
+]);
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
-  
-  // Allow auth pages
-  if (pathname.startsWith("/en/auth")) return NextResponse.next();
-  
-  const token = await getToken({ req, secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET });
-  
-  // Redirect root to dashboard if logged in
-  if (token && (pathname === "/" || pathname === "/en")) {
-    return NextResponse.redirect(new URL("/en/dashboard", req.url));
+
+  // 1. Allow static files (skip middleware)
+  if (ALLOW_STATIC.some(path => pathname.startsWith(path))) {
+    return NextResponse.next();
   }
-  
-  // Check for dashboard access
-  if (pathname.startsWith("/en/dashboard") || pathname.startsWith("/en/")) {
-    if (!token) {
-      return NextResponse.redirect(new URL("/en/auth/join", req.url));
-    }
-    
-    // Check if user has member access via JWT token
-    const member = (token as any).member === true;
-    if (!member) {
-      const url = new URL("/en/auth/join", req.url);
-      url.searchParams.set("error", "NO_ACCESS");
+
+  // 2. Add /en prefix if missing
+  if (!pathname.startsWith(`/${DEFAULT_LANG}`)) {
+    const url = req.nextUrl.clone();
+    url.pathname = `/${DEFAULT_LANG}${pathname}`;
+    return NextResponse.redirect(url);
+  }
+
+  // 3. Auth check
+  const token = await getToken({ req, secret: process.env.AUTH_SECRET });
+  const isAuthRoute = pathname === LOGIN || pathname.startsWith(AUTH_PREFIX);
+
+  if (!token) {
+    if (!isAuthRoute) {
+      const url = req.nextUrl.clone();
+      url.pathname = LOGIN;
       return NextResponse.redirect(url);
     }
+    return NextResponse.next();
   }
-  
+
+  // 4. Authenticated users can't access marketing pages
+  if (MARKETING.has(pathname)) {
+    const url = req.nextUrl.clone();
+    url.pathname = DASHBOARD;
+    return NextResponse.redirect(url);
+  }
+
   return NextResponse.next();
 }
-export const config = { matcher: ["/", "/en", "/en/:path*"] };
+
+// Match everything under / except API and static files
+export const config = {
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml).*)"],
+};
