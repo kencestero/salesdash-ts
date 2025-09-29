@@ -1,0 +1,18 @@
+* [33m8752250[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mfeat/access-control[m[33m, [m[1;31morigin/feat/access-control[m[33m)[m Fix watermark useEffect and dependency cleanup
+* [33mb5a8c32[m WIP: Logo update, auth cleanup, working state before break
+* [33m74cfbe8[m Remove unnecessary jsconfig.json (using tsconfig.json)
+* [33m7910da7[m Remove .env.local from version control and update .gitignore
+* [33m13c2403[m Remove .env.local from version control
+* [33mba71938[m fix(route): resolve register route conflict
+* [33m66e01aa[m refactor(join): simplify to daily code with NextAuth callbacks
+* [33mc5831fa[m fix(join): improve join code page UI and error handling
+* [33m22ebf8d[m feat(join): daily join code flow (admin display + register + middleware gate)
+*   [33m054ff9d[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmain[m[33m)[m Merge pull request #1 from kencestero/fix/nextauth-secret
+[32m|[m[33m\[m  
+[32m|[m * [33m7a90cc5[m[33m ([m[1;31morigin/fix/nextauth-secret[m[33m)[m chore(husky): remove deprecated header
+[32m|[m * [33m5c79221[m chore: enable husky + minimal eslint for pre-commit
+[32m|[m * [33m41062ba[m test: hook runs
+[32m|[m * [33maf93c43[m feat: auth routing lock via middleware
+[32m|[m[32m/[m  
+* [33m8ba83a7[m wip: local changes
+* [33m4041815[m init salesdash-ts
