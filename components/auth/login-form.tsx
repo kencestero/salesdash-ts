@@ -12,6 +12,7 @@ import toast from "react-hot-toast";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import Image from "next/image";
+import { SiteLogo } from "@/components/svg";
 import { Icon } from "@iconify/react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DEFAULT_LANG } from "@/lib/i18n";
@@ -75,13 +76,13 @@ const LogInForm = () => {
   return (
     <div className="w-full py-10">
       <Link href="/dashboard" className="inline-block">
-        <Image src="/mj.svg" alt="MJ Cargo" width={56} height={56} priority />
+        <SiteLogo className="w-14 h-14" />
       </Link>
       <div className="2xl:mt-8 mt-6 2xl:text-3xl text-2xl font-bold text-default-900">
         Hey, Hello 👋
       </div>
       <div className="2xl:text-lg text-base text-default-600 2xl:mt-2 leading-6">
-        Enter the information you entered while registering.
+        Welcome back to your office space!
       </div>
       <form onSubmit={handleSubmit(onSubmit)} className="mt-5 2xl:mt-7">
         <div>
@@ -220,10 +221,9 @@ const LogInForm = () => {
         </Button>
       </div>
       <div className="mt-5 2xl:mt-8 text-center text-base text-default-600">
-        Don't have an account?{" "}
+        Don&apos;t have an account?{" "}
         <Link href={`/${DEFAULT_LANG}/auth/join`} className="text-primary">
-          {" "}
-          Sign Up{" "}
+          Sign Up
         </Link>
       </div>
     </div>

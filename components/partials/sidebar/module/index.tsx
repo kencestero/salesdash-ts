@@ -15,6 +15,7 @@ import { useMediaQuery } from "@/hooks/use-media-query";
 import MenuOverlayPortal from "./MenuOverlayPortal";
 import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { SiteLogo } from "@/components/svg";
 
 const ModuleSidebar = ({ trans }: { trans: any }) => {
   const menus = menusConfig?.sidebarNav?.modern || [];
@@ -158,7 +159,7 @@ const ModuleSidebar = ({ trans }: { trans: any }) => {
         >
           <div className=" pt-4 ">
             <Link href="/dashboard">
-              <Image src="/mj.svg" alt="MJ Cargo" width={32} height={32} priority className="mx-auto" />
+              <SiteLogo className="w-8 h-8 mx-auto" />
             </Link>
           </div>
           {/* end logo */}
