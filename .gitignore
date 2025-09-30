@@ -37,3 +37,5 @@ tsconfig.tsbuildinfo
 /.contentlayer/
 .env.local
 .env.local
+
+/lib/generated/prisma
