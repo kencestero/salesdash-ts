@@ -1,88 +1,56 @@
-import Credentials from "next-auth/providers/credentials";
-import { User as UserType, user } from "@/app/api/user/data";
 import GoogleProvider from "next-auth/providers/google";
-import GithubProvider from "next-auth/providers/github";
-import { cookies } from "next/headers";
+import { PrismaAdapter } from "@next-auth/prisma-adapter";
+import { prisma } from "./prisma";
 
 export const authOptions = {
+  adapter: PrismaAdapter(prisma),
+  session: {
+    strategy: "jwt" as const,
+  },
   providers: [
     GoogleProvider({
       clientId: process.env.AUTH_GOOGLE_ID as string,
       clientSecret: process.env.AUTH_GOOGLE_SECRET as string,
     }),
-    GithubProvider({
-      clientId: process.env.AUTH_GITHUB_ID as string,
-      clientSecret: process.env.AUTH_GITHUB_SECRET as string,
-    }),
-    Credentials({
-      name: "credentials",
-      credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" },
-      },
-      async authorize(credentials) {
-        const { email, password } = credentials as {
-          email: string,
-          password: string,
-        };
-          
-        const foundUser = user.find((u) => u.email === email)
-
-        if (!foundUser) {
-          return null;
-        }
-
-        const valid = password === foundUser.password  
-
-        if (!valid) {
-          return null;
-        }
-
-        if (foundUser) {
-          return foundUser as any
-        }
-        return null;
-      }
-    }),
   ],
-  
+
   callbacks: {
-    async jwt({ token, account }: any) {
-      // persist existing claim
-      if (token.member) return token;
+    async signIn({ user, account, profile }: any) {
+      console.log("=== SignIn Callback ===");
+      console.log("User:", user.email);
+      console.log("Account:", account?.provider);
+      console.log("Profile:", profile?.email);
 
-      // fresh Google login path:
-      const c = cookies().get("join_ok");
-      const allowlistEnabled = process.env.ACCESS_ALLOWLIST_ENABLED === "true";
+      // Check if email restriction is enabled
+      const allowedEmails = process.env.ALLOWED_EMAILS?.split(',').map(e => e.trim()) || [];
 
-      // Optionally, email allowlist:
-      if (allowlistEnabled) {
-        const email = (token.email || account?.email || "").toLowerCase();
-        const allowed = (process.env.ACCESS_ALLOWLIST || "")
-          .split(",").map((s: string) => s.trim().toLowerCase()).filter(Boolean);
-        if (!allowed.some((a: string) => email.endsWith(a))) {
-          token.member = false; // blocked
-          return token;
+      if (allowedEmails.length > 0) {
+        const userEmail = user.email || profile?.email;
+        if (!allowedEmails.includes(userEmail)) {
+          console.log("❌ Access denied - email not in allowed list:", userEmail);
+          return false;
         }
+        console.log("✅ Access granted - email in allowed list:", userEmail);
       }
 
-      if (c?.value === "1") {
-        token.member = true; // one-time grant via join code
-        // clear cookie after consumption
-        cookies().set("join_ok", "", { path: "/", maxAge: 0 });
+      return true;
+    },
+    async jwt({ token, user }: any) {
+      // Persist user ID to JWT token
+      if (user) {
+        token.id = user.id;
       }
       return token;
     },
-    
     async session({ session, token }: any) {
-      (session as any).member = !!token.member;
+      // Attach user ID from JWT to session
+      if (session?.user) {
+        session.user.id = token.id;
+      }
       return session;
     },
   },
-  
+
   secret: process.env.AUTH_SECRET,
-  session: {
-    strategy: "jwt" as const,
-  },
   debug: process.env.NODE_ENV !== "production",
 };
