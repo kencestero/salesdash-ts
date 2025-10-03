@@ -7,7 +7,6 @@ import { X } from "lucide-react";
 import { Fragment, useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import LogInForm from "@/components/auth/login-form";
-import CargoGame from "@/components/auth/CargoGame";
 
 const LoginPage = () => {
   const [openVideo, setOpenVideo] = useState<boolean>(false);
@@ -16,18 +15,17 @@ const LoginPage = () => {
       <div className="min-h-screen bg-background  flex items-center  overflow-hidden w-full">
         <div className="min-h-screen basis-full flex flex-wrap w-full  justify-center overflow-y-auto">
           <div
-            className="basis-1/2 bg-primary w-full  relative hidden xl:flex justify-center items-center bg-gradient-to-br
-          from-primary-600 via-primary-400 to-primary-600
-         "
+            className="basis-1/2 bg-primary w-full  relative hidden xl:flex justify-center items-center overflow-hidden"
           >
-            <Image
-              src={background}
-              alt="image"
-              className="absolute top-0 left-0 w-full h-full "
-            />
-            <div className="relative z-10 w-full h-full">
-              <CargoGame />
-            </div>
+            <video
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="absolute top-0 left-0 w-full h-full object-cover"
+            >
+              <source src="/images/login video.mp4" type="video/mp4" />
+            </video>
           </div>
 
           <div className=" min-h-screen basis-full md:basis-1/2 w-full px-4 py-5 flex justify-center items-center">
