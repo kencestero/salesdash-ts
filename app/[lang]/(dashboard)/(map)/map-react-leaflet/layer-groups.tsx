@@ -37,15 +37,17 @@ const LayerGroupMap = ({ height = 350 }: { height?: number }) => {
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
             <LayerGroup>
-                <Circle center={position} pathOptions={{ fillColor: "blue" }} />
+                <Circle center={position} pathOptions={{ fillColor: "blue" }} radius={200} />
                 <Circle
                     center={position}
                     pathOptions={{ fillColor: `hsla(${theme?.cssVars[mode === "dark" ? "dark" : "light"].primary})` }}
+                    radius={200}
                 />
                 <LayerGroup>
                     <Circle
                         center={[51.51, -0.08]}
                         pathOptions={{ fillColor: `hsla(${theme?.cssVars[mode === "dark" ? "dark" : "light"].warning})` }}
+                        radius={200}
                     />
                 </LayerGroup>
             </LayerGroup>
