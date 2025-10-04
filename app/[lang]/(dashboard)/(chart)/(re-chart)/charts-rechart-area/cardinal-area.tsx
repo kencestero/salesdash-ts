@@ -11,6 +11,7 @@ import {
   AreaChart,
   Area,
 } from "recharts";
+// @ts-ignore - d3-shape types issue
 import { curveCardinal } from "d3-shape";
 
 
@@ -33,6 +34,7 @@ const CardinalAreaChart = ({ height = 300 }) => {
   const { theme: config } = useThemeStore();
   const { theme: mode } = useTheme();
   const theme = themes.find((theme) => theme.name === config);
+  // @ts-ignore
   const cardinal = curveCardinal.tension(0.2);
 
   const data = [
@@ -81,7 +83,7 @@ const CardinalAreaChart = ({ height = 300 }) => {
           } as React.CSSProperties}
         />
         <Area
-          type={cardinal}
+          type={cardinal as any}
           dataKey="uv"
           stackId="1"
           stroke={`hsl(${theme?.cssVars[mode === "dark" ? "dark" : "light"].success})`}
