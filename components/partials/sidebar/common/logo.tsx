@@ -1,8 +1,6 @@
 import { useSidebar } from "@/store";
 import React from "react";
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
-import { signIn } from "next-auth/react";
 
 function SidebarLogo({ hovered }: { hovered?: boolean; }) {
   const { sidebarType, setCollapsed, collapsed } = useSidebar();
@@ -10,7 +8,7 @@ function SidebarLogo({ hovered }: { hovered?: boolean; }) {
     <div className="px-4 py-4 ">
       <div className=" flex items-center">
         <div className="flex flex-1 items-center gap-x-3  ">
-          <Image src="/logo.svg" alt="MJ Cargo" width={32} height={32} priority />
+          <Image src="/images/logo/logo.svg" alt="MJ Cargo" width={32} height={32} priority />
           {(!collapsed || hovered) && (
             <div className="flex-1  text-xl text-primary  font-semibold">
               SalesDash
@@ -30,13 +28,6 @@ function SidebarLogo({ hovered }: { hovered?: boolean; }) {
           </div>
         )}
       </div>
-      {/* Google sign-in button - removed broken icon line */}
-      <Button 
-        onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
-        className="w-full bg-[#E96114] hover:bg-[#d4530e] text-white py-2 rounded-md mt-2"
-      >
-        Continue with Google
-      </Button>
     </div>
   );
 }
