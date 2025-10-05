@@ -42,6 +42,7 @@ import {
   LucideIcon,
   CustomIcon,
   Mail,
+  Sheild as Shield,
 } from "@/components/svg";
 
 
@@ -1014,6 +1015,11 @@ export const menusConfig = {
         title: "Application",
         icon: Application,
         child: [
+          {
+            title: "Manager Access",
+            icon: Shield,
+            href: "/manager",
+          },
           {
             title: "chat",
             icon: Messages,
