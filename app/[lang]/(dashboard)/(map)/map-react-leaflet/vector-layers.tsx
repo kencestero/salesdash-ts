@@ -84,7 +84,9 @@ const VectorLayersMap = ({ height = 350 }) => {
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
             <Circle center={position}
-                pathOptions={{ fillColor: `hsla(${theme?.cssVars[mode === "dark" ? "dark" : "light"].primary})` }} />
+                pathOptions={{ fillColor: `hsla(${theme?.cssVars[mode === "dark" ? "dark" : "light"].primary})` }}
+                // @ts-expect-error - react-leaflet v4 Circle radius typing issue
+                radius={200} />
             <CircleMarker
                 center={[51.51, -0.12]}
                 color={`hsla(${theme?.cssVars[mode === "dark" ? "dark" : "light"].warning})`}

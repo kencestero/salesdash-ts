@@ -206,9 +206,9 @@ export const generateStyle = (
     },
 });
 
-export const mapStyleLight  = generateStyle('#DFE5EB', '#FEFEFE', '#DFE5EB', '#D3D8DE')
+export const mapStyleLight: any  = generateStyle('#DFE5EB', '#FEFEFE', '#DFE5EB', '#D3D8DE')
 
-export const mapStyleDark  = generateStyle('#292b34', '#5b5f6d', '#2a2a2a', '#2a2a2a')
+export const mapStyleDark: any  = generateStyle('#292b34', '#5b5f6d', '#2a2a2a', '#2a2a2a')
 
 export const choroplethData = [
     {
