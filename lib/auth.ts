@@ -21,17 +21,9 @@ export const authOptions = {
       console.log("Account:", account?.provider);
       console.log("Profile:", profile?.email);
 
-      // Check if email restriction is enabled
-      const allowedEmails = process.env.ALLOWED_EMAILS?.split(',').map(e => e.trim()) || [];
-
-      if (allowedEmails.length > 0) {
-        const userEmail = user.email || profile?.email;
-        if (!allowedEmails.includes(userEmail)) {
-          console.log("❌ Access denied - email not in allowed list:", userEmail);
-          return false;
-        }
-        console.log("✅ Access granted - email in allowed list:", userEmail);
-      }
+      // NO EMAIL RESTRICTIONS - Join code is the only gatekeeper!
+      // If they got here, they already validated the daily join code.
+      console.log("✅ Access granted - join code already validated");
 
       return true;
     },
