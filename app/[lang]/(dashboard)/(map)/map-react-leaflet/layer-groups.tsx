@@ -37,16 +37,19 @@ const LayerGroupMap = ({ height = 350 }: { height?: number }) => {
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
             <LayerGroup>
+                {/* @ts-ignore - react-leaflet v4 Circle radius typing issue */}
                 <Circle center={position} pathOptions={{ fillColor: "blue" }} radius={200} />
                 <Circle
                     center={position}
                     pathOptions={{ fillColor: `hsla(${theme?.cssVars[mode === "dark" ? "dark" : "light"].primary})` }}
+                    // @ts-expect-error - react-leaflet v4 Circle radius typing issue
                     radius={200}
                 />
                 <LayerGroup>
                     <Circle
                         center={[51.51, -0.08]}
                         pathOptions={{ fillColor: `hsla(${theme?.cssVars[mode === "dark" ? "dark" : "light"].warning})` }}
+                        // @ts-expect-error - react-leaflet v4 Circle radius typing issue
                         radius={200}
                     />
                 </LayerGroup>
@@ -55,7 +58,8 @@ const LayerGroupMap = ({ height = 350 }: { height?: number }) => {
              pathOptions={{ fillColor: `hsla(${theme?.cssVars[mode === "dark" ? "dark" : "light"].info})` }}
             >
                 <Popup>Popup in FeatureGroup</Popup>
-                <Circle center={[51.51, -0.06]}  />
+                {/* @ts-ignore - react-leaflet v4 Circle radius typing issue */}
+                <Circle center={[51.51, -0.06]} radius={200} />
                 <Rectangle bounds={rectangle} />
             </FeatureGroup>
         </MapContainer>

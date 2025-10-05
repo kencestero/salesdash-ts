@@ -14,7 +14,7 @@ const GeoJSONMap = ({ height = 350 }: { height?: number }) => {
             html: name,
             className: "icon",
         });
-    const setIcon = (feature: any, latlng: LatLng) => {
+    const setIcon = (feature: any, latlng: LatLng): any => {
         return L.marker(latlng, { icon: customMarkerIcon(feature.properties.Name) });
     };
     return (
