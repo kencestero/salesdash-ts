@@ -37,8 +37,12 @@ const LayerGroupMap = ({ height = 350 }: { height?: number }) => {
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
             <LayerGroup>
-                {/* @ts-ignore - react-leaflet v4 Circle radius typing issue */}
-                <Circle center={position} pathOptions={{ fillColor: "blue" }} radius={200} />
+                <Circle
+                    center={position}
+                    pathOptions={{ fillColor: "blue" }}
+                    // @ts-expect-error - react-leaflet v4 Circle radius typing issue
+                    radius={200}
+                />
                 <Circle
                     center={position}
                     pathOptions={{ fillColor: `hsla(${theme?.cssVars[mode === "dark" ? "dark" : "light"].primary})` }}
