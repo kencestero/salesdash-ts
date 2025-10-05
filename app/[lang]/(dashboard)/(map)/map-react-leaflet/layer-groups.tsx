@@ -62,8 +62,11 @@ const LayerGroupMap = ({ height = 350 }: { height?: number }) => {
              pathOptions={{ fillColor: `hsla(${theme?.cssVars[mode === "dark" ? "dark" : "light"].info})` }}
             >
                 <Popup>Popup in FeatureGroup</Popup>
-                {/* @ts-ignore - react-leaflet v4 Circle radius typing issue */}
-                <Circle center={[51.51, -0.06]} radius={200} />
+                <Circle
+                    center={[51.51, -0.06]}
+                    // @ts-expect-error - react-leaflet v4 Circle radius typing issue
+                    radius={200}
+                />
                 <Rectangle bounds={rectangle} />
             </FeatureGroup>
         </MapContainer>
