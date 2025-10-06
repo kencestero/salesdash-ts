@@ -1,12 +1,13 @@
 import { NextResponse, NextRequest } from "next/server";
 import { db } from "@/lib/firebase";
 import { collection, addDoc, serverTimestamp, doc, getDoc, setDoc } from "firebase/firestore";
-import { auth } from "@/auth";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest, response: NextResponse) {
-  const session = await auth();
+  const session = await getServerSession(authOptions);
 
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

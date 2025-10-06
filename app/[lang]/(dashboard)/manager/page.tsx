@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { auth } from "@/auth";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -46,7 +47,7 @@ function getTimeUntilMidnight(): string {
 }
 
 export default async function ManagerPage() {
-  const session = await auth();
+  const session = await getServerSession(authOptions);
 
   if (!session?.user?.email) {
     redirect("/auth/login");
