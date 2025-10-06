@@ -45,3 +45,24 @@ tsconfig.tsbuildinfo
 .vercel
 
 .env*.local
+
+# Ignore env and backup files
+.env
+.env.local
+.env.production
+.env.vercel
+backups/
+
+# safety
+backups/
+.env
+.env.local
+.env.production
+.env.vercel
+.vercel
+
+
+# misc noise
+next/
+dash-tail@1.0.0
+

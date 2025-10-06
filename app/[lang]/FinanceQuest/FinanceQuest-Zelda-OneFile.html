@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MJ Cargo — FinanceQuest (Zelda Style, One File)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+  <style>
+  :root{
+    --bg:#0b1f34;
+    --accent:#E96114;
+    --grass:#7dbb57;
+    --panel:#14314e;
+    --card:#0e2740;
+    --text:#e6f0ff;
+    --muted:#9bb2c8;
+    --mono:'VT323', ui-monospace, monospace;
+    --pix:'Press Start 2P', system-ui;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    font-family:var(--mono);
+    background:
+      radial-gradient(circle at 30% 20%, #113355 0%, transparent 60%),
+      radial-gradient(circle at 70% 80%, #0a1b2d 0%, transparent 55%),
+      var(--bg);
+    color:var(--text);
+  }
+  .screen{max-width:1200px; margin:0 auto; padding:12px}
+  .hud{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:8px 12px; background:var(--panel); border:3px solid #203a5e; border-radius:8px;
+    text-shadow:1px 1px #000;
+  }
+  .hearts{color:#ff6b81; letter-spacing:4px}
+  .brand{font-family:var(--pix); font-size:14px}
+  .rupees{font-size:18px}
+  .panel{display:grid; grid-template-columns: 1.2fr 1fr; gap:12px; margin-top:12px}
+  .panel-left, .panel-right{background:var(--panel); padding:12px; border:3px solid #203a5e; border-radius:8px}
+  .title{font-family:var(--pix); color:var(--accent); text-shadow:2px 2px #000; margin:0 0 10px}
+  .form-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+  .form-grid label{display:flex; flex-direction:column; gap:6px; font-size:16px}
+  input{
+    padding:10px; border:3px solid #203a5e; border-radius:6px;
+    background:#0b2238; color:var(--text); font:inherit;
+    outline:none;
+  }
+  input:focus{border-color:var(--accent)}
+  .actions{grid-column:1 / -1; display:flex; gap:8px}
+  .btn{
+    font-family:var(--pix); font-size:12px; letter-spacing:1px;
+    padding:10px 12px; border:3px solid #203a5e; border-radius:6px;
+    background:#09213c; color:var(--text); cursor:pointer;
+  }
+  .btn:hover{transform:translateY(-1px)}
+  .btn.primary{background:var(--accent); color:#111}
+  .toggle{display:flex; align-items:center; gap:6px; margin-left:auto}
+  .card{background:var(--card); border:3px solid #203a5e; border-radius:8px; padding:10px; margin-bottom:10px}
+  .card h2{font-family:var(--pix); color:var(--grass); margin:0 0 8px}
+  .kv{display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px dashed #2b4e79}
+  .kv:last-child{border-bottom:none}
+  pre{white-space:pre-wrap; max-height:220px; overflow:auto; background:#061220; padding:8px; border-radius:6px; border:1px solid #0d2a47}
+  .footer{opacity:.7; text-align:center; margin-top:10px; font-size:14px}
+  @media (max-width:900px){ .panel{grid-template-columns:1fr} }
+  </style>
+</head>
+<body>
+  <div class="screen">
+    <header class="hud">
+      <div class="hearts" aria-label="lives">❤❤❤</div>
+      <div class="brand">MJ Cargo • FinanceQuest</div>
+      <div class="rupees">💎 <span id="rupeeCount">001</span></div>
+    </header>
+
+    <main class="panel">
+      <div class="panel-left">
+        <h1 class="title">Trailer Finance</h1>
+        <form id="calcForm" class="form-grid">
+          <label>Trailer Price ($)
+            <input type="number" id="price" min="0" step="0.01" value="7995" required />
+          </label>
+          <label>Down Payment ($)
+            <input type="number" id="down" min="0" step="0.01" value="1000" />
+          </label>
+          <label>APR (%)
+            <input type="number" id="apr" min="0" step="0.01" value="9.99" />
+          </label>
+          <label>Term (months)
+            <input type="number" id="term" min="1" step="1" value="60" />
+          </label>
+          <label>Taxes (%)
+            <input type="number" id="taxPct" min="0" step="0.01" value="0" />
+          </label>
+          <label>Fees ($)
+            <input type="number" id="fees" min="0" step="0.01" value="0" />
+          </label>
+
+          <div class="actions">
+            <button type="submit" class="btn primary" id="btnCalc">CALCULATE</button>
+            <button type="button" class="btn" id="btnSolveAPR" title="Solve APR from payment & term">Solve APR</button>
+            <button type="button" class="btn" id="btnClear">Clear</button>
+          </div>
+
+          <label>Target Monthly ($) <small>(for Solve APR)</small>
+            <input type="number" id="targetPayment" min="0" step="0.01" value="200" />
+          </label>
+        </form>
+
+        <div class="export-row" style="margin-top:8px; display:flex; gap:8px; align-items:center;">
+          <button class="btn" id="btnExportCSV">Export CSV</button>
+          <button class="btn" id="btnExportPDF">Export PDF</button>
+          <button class="btn" id="btnScreenshot">Export PNG</button>
+          <label class="toggle">
+            <input type="checkbox" id="musicToggle" />
+            <span>Music</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="panel-right">
+        <section class="card" id="resultCard">
+          <h2>Results</h2>
+          <div class="kv"><span>Principal</span><strong id="outPrincipal">$0.00</strong></div>
+          <div class="kv"><span>Monthly</span><strong id="outMonthly">$0.00</strong></div>
+          <div class="kv"><span>Total Interest</span><strong id="outInterest">$0.00</strong></div>
+          <div class="kv"><span>Total Cost</span><strong id="outTotal">$0.00</strong></div>
+        </section>
+
+        <section class="card" id="debugCard">
+          <h2>Debug</h2>
+          <pre id="debugLog"></pre>
+        </section>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <small>© MJ Cargo • Zelda-themed UI for internal tool use only.</small>
+    </footer>
+  </div>
+
+  <script>
+    // Lazy loader for optional libs
+    window.lazyLoadScript = (src) => new Promise((res, rej) => {
+      const s = document.createElement('script');
+      s.src = src; s.async = true;
+      s.onload = res; s.onerror = rej;
+      document.head.appendChild(s);
+    });
+
+    // --- Finance Core ---
+    function toMonthlyRate(aprPercent){ const r=(aprPercent||0)/100; return r/12; }
+    function computePrincipal(price,down,taxPct,fees){
+      const taxes=(price||0)*((taxPct||0)/100);
+      return Math.max(0,(price||0)-(down||0)+taxes+(fees||0));
+    }
+    function computeMonthlyPayment({principal,aprPercent,termMonths}){
+      const n=Math.max(1,Math.round(termMonths||0));
+      const r=toMonthlyRate(aprPercent);
+      if (r===0) return principal/n;
+      const pow=Math.pow(1+r,n);
+      return principal*r*pow/(pow-1);
+    }
+    function solveAPRFromPayment({principal,payment,termMonths,guessApr=8.0}){
+      const n=Math.max(1,Math.round(termMonths||0));
+      const P=principal; const PMT=payment;
+      let apr=Math.max(0.0001,guessApr);
+      for(let i=0;i<30;i++){
+        const r=toMonthlyRate(apr);
+        const pow=Math.pow(1+r,n);
+        const f=(P*r*pow)/(pow-1)-PMT;
+        const df=(P*pow*((pow-1)-r*(n*Math.pow(1+r,n-1))))/Math.pow(pow-1,2);
+        if(!isFinite(f)||!isFinite(df)||Math.abs(df)<1e-12) break;
+        const nextApr = apr - (f/df)*12*100;
+        if(Math.abs(nextApr-apr)<1e-6){ apr=nextApr; break; }
+        apr=Math.max(0,nextApr);
+      }
+      return apr;
+    }
+    function totals({principal,monthly,termMonths}){
+      const total=monthly*termMonths;
+      const interest=Math.max(0,total-principal);
+      return { total, interest };
+    }
+    function fmtUSD(v){ return (new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'})).format(v||0); }
+
+    // --- Exporters ---
+    async function exportCSV(rows, filename='financequest.csv'){
+      const header=Object.keys(rows[0]||{}).join(',');
+      const body=rows.map(r=>Object.values(r).map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+      const blob=new Blob([header+'\n'+body],{type:'text/csv;charset=utf-8;'});
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a'); a.href=url; a.download=filename; a.click(); URL.revokeObjectURL(url);
+    }
+    async function exportPDF(element, filename='financequest.pdf'){
+      if(!window.jspdf){ await window.lazyLoadScript('https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js'); }
+      if(!window.html2canvas){ await window.lazyLoadScript('https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js'); }
+      const canvas=await window.html2canvas(element);
+      const imgData=canvas.toDataURL('image/png');
+      const { jsPDF }=window.jspdf;
+      const pdf=new jsPDF({unit:'pt',format:'a4'});
+      const pageWidth=pdf.internal.pageSize.getWidth();
+      const pageHeight=pdf.internal.pageSize.getHeight();
+      const ratio=Math.min(pageWidth/canvas.width,pageHeight/canvas.height);
+      const w=canvas.width*ratio, h=canvas.height*ratio;
+      const x=(pageWidth-w)/2, y=40;
+      pdf.addImage(imgData,'PNG',x,y,w,h);
+      pdf.save(filename);
+    }
+    async function exportPNG(element, filename='financequest.png'){
+      if(!window.html2canvas){ await window.lazyLoadScript('https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js'); }
+      const canvas=await window.html2canvas(element);
+      const url=canvas.toDataURL('image/png');
+      const a=document.createElement('a'); a.href=url; a.download=filename; a.click();
+    }
+
+    // --- Analytics ---
+    function track(event,payload={}){
+      const data={event,ts:new Date().toISOString(),...payload};
+      console.log('[track]',data);
+      window.dataLayer=window.dataLayer||[]; window.dataLayer.push(data);
+      try{
+        const key='financequest_events';
+        const arr=JSON.parse(localStorage.getItem(key)||'[]'); arr.push(data);
+        localStorage.setItem(key, JSON.stringify(arr).slice(0,500000));
+      }catch{}
+    }
+
+    // --- App wiring ---
+    const $=(s)=>document.querySelector(s);
+    const log=(msg,obj)=>{
+      const el=$('#debugLog');
+      el.textContent += (typeof msg==='string'?msg:JSON.stringify(msg,null,2))+'\n';
+      if(obj) el.textContent += JSON.stringify(obj,null,2)+'\n';
+      el.scrollTop=el.scrollHeight;
+    };
+    function beep(type='click'){
+      const ctx=new (window.AudioContext||window.webkitAudioContext)();
+      const o=ctx.createOscillator(); const g=ctx.createGain();
+      o.type= type==='success' ? 'triangle' : 'square';
+      o.frequency.value= type==='success' ? 880 : 440;
+      o.connect(g); g.connect(ctx.destination);
+      g.gain.setValueAtTime(0.1,ctx.currentTime);
+      o.start(); o.stop(ctx.currentTime+0.12);
+    }
+    let musicCtx, musicOsc;
+    function toggleMusic(on){
+      if(on){
+        if(!musicCtx) musicCtx=new (window.AudioContext||window.webkitAudioContext)();
+        musicOsc=musicCtx.createOscillator(); const g=musicCtx.createGain();
+        musicOsc.type='square'; musicOsc.frequency.setValueAtTime(220,musicCtx.currentTime);
+        musicOsc.connect(g); g.connect(musicCtx.destination);
+        g.gain.setValueAtTime(0.03,musicCtx.currentTime); musicOsc.start();
+      } else if(musicOsc){ musicOsc.stop(); musicOsc.disconnect(); musicOsc=null; }
+    }
+    function readInputs(){
+      return {
+        price: parseFloat($('#price').value)||0,
+        down: parseFloat($('#down').value)||0,
+        apr: parseFloat($('#apr').value)||0,
+        term: Math.round(parseFloat($('#term').value)||0),
+        taxPct: parseFloat($('#taxPct').value)||0,
+        fees: parseFloat($('#fees').value)||0,
+        targetPayment: parseFloat($('#targetPayment').value)||0,
+      };
+    }
+    function renderOutputs({principal,monthly,interest,total}){
+      $('#outPrincipal').textContent=fmtUSD(principal);
+      $('#outMonthly').textContent=fmtUSD(monthly);
+      $('#outInterest').textContent=fmtUSD(interest);
+      $('#outTotal').textContent=fmtUSD(total);
+    }
+    function calculate(){
+      const i=readInputs();
+      const principal=computePrincipal(i.price,i.down,i.taxPct,i.fees);
+      const monthly=computeMonthlyPayment({principal,aprPercent:i.apr,termMonths:i.term});
+      const {total,interest}=totals({principal,monthly,termMonths:i.term});
+      renderOutputs({principal,monthly,interest,total});
+      log('CALC',{...i,principal,monthly,interest,total});
+      beep('success'); track('calc_submit',{...i,principal,monthly,interest,total});
+      return {...i,principal,monthly,interest,total};
+    }
+    function solveAPR(){
+      const i=readInputs();
+      const principal=computePrincipal(i.price,i.down,i.taxPct,i.fees);
+      if(!i.targetPayment||i.targetPayment<=0){ log('Set a Target Monthly to solve APR.'); return; }
+      const apr=solveAPRFromPayment({principal,payment:i.targetPayment,termMonths:i.term});
+      $('#apr').value=(Math.round(apr*100)/100).toFixed(2);
+      log('APR_SOLVED',{apr,principal,payment:i.targetPayment,term:i.term});
+      beep('success'); track('apr_solved',{apr,principal,payment:i.targetPayment,term:i.term});
+      calculate();
+    }
+    function clearForm(){
+      $('#calcForm').reset();
+      $('#apr').value='9.99'; $('#term').value='60';
+      $('#rupeeCount').textContent=String(parseInt($('#rupeeCount').textContent)+1).padStart(3,'0');
+      log('CLEARED');
+    }
+    async function exportData(kind){
+      const last=calculate(); const rows=[last];
+      if(kind==='csv') return exportCSV(rows);
+      if(kind==='pdf') return exportPDF(document.querySelector('.panel'),'financequest.pdf');
+      if(kind==='png') return exportPNG(document.querySelector('.panel'),'financequest.png');
+    }
+    function init(){
+      $('#calcForm').addEventListener('submit', (e)=>{e.preventDefault(); calculate();});
+      $('#btnSolveAPR').addEventListener('click', solveAPR);
+      $('#btnClear').addEventListener('click', clearForm);
+      $('#btnExportCSV').addEventListener('click', ()=>exportData('csv'));
+      $('#btnExportPDF').addEventListener('click', ()=>exportData('pdf'));
+      $('#btnScreenshot').addEventListener('click', ()=>exportData('png'));
+      $('#musicToggle').addEventListener('change', (e)=>toggleMusic(e.target.checked));
+      log('READY • Zelda skin loaded');
+    }
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
