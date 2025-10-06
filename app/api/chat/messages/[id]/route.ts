@@ -1,13 +1,14 @@
 import { NextResponse, NextRequest } from "next/server";
 import { db } from "@/lib/firebase";
-import { auth } from "@/auth";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { collection, query, orderBy, getDocs, doc, deleteDoc, getDoc } from "firebase/firestore";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest, response: any) {
-  const session = await auth();
+  const session = await getServerSession(authOptions);
 
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
