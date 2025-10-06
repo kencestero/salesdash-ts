@@ -1,36 +1,60 @@
 import { NextResponse, NextRequest } from "next/server";
-import { chats } from "../data";
+import { db } from "@/lib/firebase";
+import { collection, addDoc, serverTimestamp, doc, getDoc, setDoc } from "firebase/firestore";
+import { auth } from "@/lib/auth";
+
+export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest, response: NextResponse) {
-  const obj = await request.json();
+  const session = await auth();
 
-  let activeChat = chats.find((item) => item.id === parseInt(obj.contact.id));
-
-  const newMessageData = {
-    message: obj.message,
-    time: new Date(),
-    senderId: 11,
-    replayMetadata: obj.replayMetadata,
-  };
-  if (!activeChat) {
-    activeChat = {
-      id: obj.contact.id,
-      userId: obj.contact.id,
-      unseenMsgs: 0,
-      chat: [newMessageData],
-    };
-    chats.push(activeChat);
-  } else {
-    activeChat.chat.push(newMessageData);
+  if (!session?.user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  return NextResponse.json(
-    {
-      chat: activeChat,
-      contact: obj.contact,
-      newMessageData,
-      id: obj.contact.id,
-    },
-    { status: 201 }
-  );
+  const obj = await request.json();
+  const { message, contact, replayMetadata } = obj;
+
+  try {
+    // Create or get chat document
+    const chatId = `chat_${session.user.id}_${contact.id}`;
+    const chatRef = doc(db, "chats", chatId);
+
+    // Create message data
+    const newMessageData = {
+      message,
+      time: serverTimestamp(),
+      senderId: session.user.id,
+      senderEmail: session.user.email,
+      receiverId: contact.id,
+      replayMetadata: replayMetadata || false,
+    };
+
+    // Add message to messages subcollection
+    const messagesRef = collection(chatRef, "messages");
+    const messageDoc = await addDoc(messagesRef, newMessageData);
+
+    // Update chat metadata
+    await setDoc(chatRef, {
+      participants: [session.user.id, contact.id],
+      lastMessage: message,
+      lastMessageTime: serverTimestamp(),
+      unseenMsgs: 0,
+    }, { merge: true });
+
+    return NextResponse.json(
+      {
+        id: messageDoc.id,
+        chatId,
+        ...newMessageData,
+      },
+      { status: 201 }
+    );
+  } catch (error) {
+    console.error("Error sending message:", error);
+    return NextResponse.json(
+      { error: "Failed to send message" },
+      { status: 500 }
+    );
+  }
 }

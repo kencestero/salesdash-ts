@@ -1,45 +1,100 @@
 import { NextResponse, NextRequest } from "next/server";
-import { chats, contacts } from "../../data";
+import { db } from "@/lib/firebase";
+import { auth } from "@/lib/auth";
+import { collection, query, orderBy, getDocs, doc, deleteDoc, getDoc } from "firebase/firestore";
+import { prisma } from "@/lib/prisma";
+
+export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest, response: any) {
-  const id = response.params.id;
+  const session = await auth();
 
-  // Find the item with the given ID
-  const chat = chats.find((item) => item.id === parseInt(id));
-  const contact = contacts.find((item) => item.id === parseInt(id));
+  if (!session?.user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
-  const combinedData = { chat, contact };
+  const contactId = response.params.id;
 
-  if (combinedData.chat && combinedData.contact) {
+  try {
+    // Get contact info from database
+    const contact = await prisma.user.findUnique({
+      where: { id: contactId },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        image: true,
+      },
+    });
+
+    if (!contact) {
+      return NextResponse.json({ message: "Contact not found" }, { status: 404 });
+    }
+
+    // Get messages from Firebase
+    const chatId = `chat_${session.user.id}_${contactId}`;
+    const chatRef = doc(db, "chats", chatId);
+    const messagesRef = collection(chatRef, "messages");
+    const messagesQuery = query(messagesRef, orderBy("time", "asc"));
+
+    const messagesSnapshot = await getDocs(messagesQuery);
+    const messages = messagesSnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+      time: doc.data().time?.toDate?.()?.toISOString() || new Date().toISOString(),
+    }));
+
+    // Get chat metadata
+    const chatDoc = await getDoc(chatRef);
+    const chatData = chatDoc.exists() ? chatDoc.data() : { unseenMsgs: 0 };
+
+    const combinedData = {
+      chat: {
+        id: chatId,
+        userId: contactId,
+        unseenMsgs: chatData.unseenMsgs || 0,
+        chat: messages,
+      },
+      contact: {
+        id: contact.id,
+        fullName: contact.name,
+        avatar: contact.image,
+        email: contact.email,
+      },
+    };
+
     return NextResponse.json(combinedData, { status: 200 });
-  } else {
-    return NextResponse.json({ message: "Item not found" }, { status: 404 });
+  } catch (error) {
+    console.error("Error fetching messages:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch messages" },
+      { status: 500 }
+    );
   }
 }
 
 export async function DELETE(request: NextRequest, response: any) {
-  const { selectedChatId, index } = await request.json();
+  const session = await auth();
 
-  const chatIndex = chats.findIndex(
-    (chat) => chat.id === parseInt(selectedChatId)
-  );
+  if (!session?.user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
-  if (chatIndex !== -1) {
-    const chat = chats[chatIndex];
-    if (index >= 0 && index < chat.chat.length) {
-      // Remove the message from the chat based on the received index
-      chat.chat.splice(index, 1);
-      return NextResponse.json(
-        { message: "Message deleted successfully" },
-        { status: 200 }
-      );
-    } else {
-      return NextResponse.json(
-        { message: "Invalid message index" },
-        { status: 400 }
-      );
-    }
-  } else {
-    return NextResponse.json({ message: "Chat not found" }, { status: 404 });
+  const { selectedChatId, messageId } = await request.json();
+
+  try {
+    const messageRef = doc(db, "chats", selectedChatId, "messages", messageId);
+    await deleteDoc(messageRef);
+
+    return NextResponse.json(
+      { message: "Message deleted successfully" },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Error deleting message:", error);
+    return NextResponse.json(
+      { error: "Failed to delete message" },
+      { status: 500 }
+    );
   }
 }

@@ -1,0 +1,25 @@
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyBXsjW24xZW4uOhwmOhl2Y4LW5DdiwCKEo",
+  authDomain: "mj-cargo-dashboard-chat.firebaseapp.com",
+  projectId: "mj-cargo-dashboard-chat",
+  storageBucket: "mj-cargo-dashboard-chat.firebasestorage.app",
+  messagingSenderId: "80963634717",
+  appId: "1:80963634717:web:0d8fa2eca050e29161e8f4"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+
+
+firebase/
+│
+├─ firestore.rules          ← copy your live Firestore security rules here
+├─ config-reference.txt     ← paste your Firebase console SDK snippet here
+├─ firebase.json            ← optional (for deploy setup if you ever use Firebase CLI)
+└─ storage.rules            ← optional, for Firebase Storage permissions

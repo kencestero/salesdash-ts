@@ -16,12 +16,17 @@ export const getMessages = async (id: any) => {
   }
 };
 export const deleteMessage = async (obj: any) => {
-  console.log("Object to be sent:", obj); // Add this log statement
+  console.log("Object to be sent:", obj);
   try {
-    await api.delete(`/chat/messages/${obj.selectedChatId}`, { data: obj });
+    await api.delete(`/chat/messages/${obj.selectedChatId}`, {
+      data: {
+        selectedChatId: obj.selectedChatId,
+        messageId: obj.messageId
+      }
+    });
   } catch (error) {
     console.error("Error deleting message:", error);
-    // Handle error gracefully (e.g., display an error message to the user)
+    throw error;
   }
 };
 

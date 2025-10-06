@@ -27,7 +27,7 @@ interface MessagesProps {
   message: any;
   contact: ContactType;
   profile: ProfileUser;
-  onDelete: (selectedChatId: any, index: number) => void;
+  onDelete: (selectedChatId: any, messageId: string) => void;
   index: number;
   selectedChatId: string;
   handleReply: (data: any, contact: ContactType) => void;
@@ -107,7 +107,7 @@ const Messages = ({
                         side="top"
                       >
                         <DropdownMenuItem
-                          onClick={() => onDelete(selectedChatId, index)}
+                          onClick={() => onDelete(selectedChatId, message.id)}
 
                         >
                           Delete
@@ -179,7 +179,7 @@ const Messages = ({
                         side="top"
                       >
                         <DropdownMenuItem
-                          onClick={() => onDelete(selectedChatId, index)}
+                          onClick={() => onDelete(selectedChatId, message.id)}
                         >
                           Remove
                         </DropdownMenuItem>

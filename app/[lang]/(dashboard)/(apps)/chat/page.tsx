@@ -104,13 +104,13 @@ const ChatPage = () => {
     },
   });
 
-  const onDelete = (selectedChatId: any, index: number) => {
-    const obj = { selectedChatId, index };
+  const onDelete = (selectedChatId: any, messageId: string) => {
+    const obj = { selectedChatId, messageId };
     deleteMutation.mutate(obj);
 
     // Remove the deleted message from pinnedMessages if it exists
     const updatedPinnedMessages = pinnedMessages.filter(
-      (msg) => msg.selectedChatId !== selectedChatId && msg.index !== index
+      (msg) => msg.messageId !== messageId
     );
 
     setPinnedMessages(updatedPinnedMessages);
