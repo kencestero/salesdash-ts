@@ -1,7 +1,7 @@
 import { NextResponse, NextRequest } from "next/server";
 import { db } from "@/lib/firebase";
 import { collection, addDoc, serverTimestamp, doc, getDoc, setDoc } from "firebase/firestore";
-import { auth } from "@/lib/auth";
+import { auth } from "@/auth";
 
 export const dynamic = 'force-dynamic';
 
