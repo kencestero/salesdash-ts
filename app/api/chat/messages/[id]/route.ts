@@ -1,6 +1,6 @@
 import { NextResponse, NextRequest } from "next/server";
 import { db } from "@/lib/firebase";
-import { auth } from "@/lib/auth";
+import { auth } from "@/auth";
 import { collection, query, orderBy, getDocs, doc, deleteDoc, getDoc } from "firebase/firestore";
 import { prisma } from "@/lib/prisma";
 
