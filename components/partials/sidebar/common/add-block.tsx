@@ -24,7 +24,7 @@ const AddBlock = ({
     <>
       <div
         className={cn(
-          "bg-primary dark:bg-default-400 text-primary-foreground pt-5 pb-4 px-4  rounded  m-3 hidden xl:block",
+          "bg-primary dark:bg-default-400 text-primary-foreground pt-5 pb-4 px-4  rounded  m-3 hidden",
           className
         )}
       >
