@@ -11,8 +11,28 @@ import User from "@/public/images/avatar/user.png";
 import { cn } from "@/lib/utils";
 import { usePathname } from "next/navigation";
 import { Fragment } from "react";
-const Header = () => {
+import { Session } from "next-auth";
+
+interface UserProfile {
+  phone?: string;
+  city?: string;
+  zip?: string;
+  role?: string;
+}
+
+interface HeaderProps {
+  session: Session | null;
+  userProfile: UserProfile | null;
+}
+
+const Header = ({ session, userProfile }: HeaderProps) => {
   const location = usePathname();
+  
+  // Use real user data or fallback to defaults
+  const userName = session?.user?.name || "User";
+  const userImage = session?.user?.image || User;
+  const userRole = userProfile?.role || "Team Member";
+  
   return (
     <Fragment>
       <Breadcrumbs>
@@ -28,27 +48,20 @@ const Header = () => {
           <div className="relative h-[200px] lg:h-[296px] rounded-t-2xl w-full object-cover bg-no-repeat"
             style={{ backgroundImage: `url(${coverImage.src})` }}
           >
-            <div className="flex justify-end pt-6 pr-6  divide-x divide-primary-foreground  gap-4">
-              <div>
-                <div className="text-xl font-semibold text-primary-foreground">24.5K</div>
-                <div className="text-sm text-default-200">Followers</div>
-              </div>
-              <div className="pl-4">
-                <div className="text-xl font-semibold text-primary-foreground">22.5K</div>
-                <div className="text-sm text-default-200">Following</div>
-              </div>
-            </div>
+            {/* Removed hardcoded followers/following - can add real stats later */}
             <div className="flex items-center gap-4 absolute ltr:left-10 rtl:right-10 -bottom-2 lg:-bottom-8">
               <div>
                 <Image
-                  src={User}
+                  src={typeof userImage === 'string' ? userImage : User}
                   alt="user"
-                  className="h-20 w-20 lg:w-32 lg:h-32 rounded-full"
+                  width={128}
+                  height={128}
+                  className="h-20 w-20 lg:w-32 lg:h-32 rounded-full object-cover"
                 />
               </div>
               <div>
-                <div className="text-xl lg:text-2xl font-semibold text-primary-foreground mb-1">Jennyfer Franking</div>
-                <div className="text-xs lg:text-sm font-medium text-default-100 dark:text-default-900 pb-1.5">Data Analytics</div>
+                <div className="text-xl lg:text-2xl font-semibold text-primary-foreground mb-1">{userName}</div>
+                <div className="text-xs lg:text-sm font-medium text-default-100 dark:text-default-900 pb-1.5 capitalize">{userRole}</div>
               </div>
             </div>
             <Button asChild className="absolute bottom-5 ltr:right-6 rtl:left-6 rounded px-5 hidden lg:flex" size="sm">

@@ -5,7 +5,21 @@ import { Home } from "lucide-react";
 import coverImage from "@/public/images/all-img/user-cover.png"
 import { Button } from "@/components/ui/button";
 import { Icon } from "@iconify/react";
-const SettingsHeader = () => {
+import { Session } from "next-auth";
+
+interface UserProfile {
+  phone?: string;
+  city?: string;
+  zip?: string;
+  role?: string;
+}
+
+interface SettingsHeaderProps {
+  session: Session | null;
+  userProfile: UserProfile | null;
+}
+
+const SettingsHeader = ({ session, userProfile }: SettingsHeaderProps) => {
 
   return (
     <>

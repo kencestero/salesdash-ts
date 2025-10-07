@@ -1,40 +1,47 @@
+"use client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { User, Phone, Location, Calender, CalenderCheck } from "@/components/svg";
-import FigmaImage from "@/public/images/all-img/figma.png"
-import ReactImage from "@/public/images/all-img/react.png"
-import Image from "next/image";
+import { User, Phone, Location, CalenderCheck } from "@/components/svg";
+import { Session } from "next-auth";
+
 interface UserInfoItem {
   icon: React.ComponentType<{ className?: string }>;
   label: string;
   value: string;
 }
 
-const UserInfo = () => {
+interface UserProfile {
+  phone?: string;
+  city?: string;
+  zip?: string;
+  role?: string;
+}
+
+interface UserInfoProps {
+  session: Session | null;
+  userProfile: UserProfile | null;
+}
+
+const UserInfo = ({ session, userProfile }: UserInfoProps) => {
   const userInfo: UserInfoItem[] = [
     {
       icon: User,
       label: "Full Name",
-      value: "Jennyfer Frankin"
+      value: session?.user?.name || "Not provided"
     },
     {
       icon: Phone,
       label: "Mobile",
-      value: "+(1) 987 6543"
+      value: userProfile?.phone || "Not provided"
     },
     {
       icon: Location,
       label: "Location",
-      value: "101, California"
+      value: userProfile?.city ? `${userProfile.city}${userProfile.zip ? ', ' + userProfile.zip : ''}` : "Not provided"
     },
     {
       icon: CalenderCheck,
-      label: "Joining Date",
-      value: "24 Nov 2021"
-    },
-    {
-      icon: Calender,
-      label: "Last Task Complete ",
-      value: "09 Mar 2024"
+      label: "Role",
+      value: userProfile?.role ? userProfile.role.charAt(0).toUpperCase() + userProfile.role.slice(1) : "Team Member"
     },
   ]
   return (
@@ -43,10 +50,10 @@ const UserInfo = () => {
         <CardTitle className="text-lg font-medium text-default-800">Information</CardTitle>
       </CardHeader>
       <CardContent className="px-4">
-        <p className="text-sm text-default-600">
-          Tart I love sugar plum I love oat cake. Sweet roll caramels I love jujubes. Topping cake wafer..
+        <p className="text-sm text-default-600 mb-6">
+          {session?.user?.email || "Email not available"}
         </p>
-        <ul className="mt-6 space-y-4">
+        <ul className="space-y-4">
           {
             userInfo.map((item, index) => (
               <li
@@ -62,36 +69,6 @@ const UserInfo = () => {
             ))
           }
         </ul>
-        <div className="mt-6 text-lg font-medium text-default-800 mb-4">Active Teams</div>
-        <div className="space-y-3">
-          {
-            [
-              {
-                title: "UI/UX Designer",
-                img: FigmaImage,
-                total: 65
-              },
-              {
-                title: "Frontend Developer",
-                img: ReactImage,
-                total: 126
-              }
-            ].map((item, index) => (
-              <div
-                key={`active-team-${index}`}
-                className="flex items-center gap-2"
-              >
-                <Image src={item.img} alt={item.title} className="w-4 h-4" />
-                <div className="text-sm font-medium text-default-800">
-                  {item.title}
-                  <span className="font-normal">
-                    ({item.total} members)
-                  </span>
-                </div>
-              </div>
-            ))
-          }
-        </div>
       </CardContent>
     </Card>
   );
