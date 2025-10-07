@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getToken } from "next-auth/jwt";
 
 const DEFAULT_LANG = "en";
 const LOGIN = `/${DEFAULT_LANG}/login`;
@@ -39,11 +38,12 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // 3. Auth check
-  const token = await getToken({ req, secret: process.env.AUTH_SECRET });
+  // 3. Auth check - Check for session cookie (database strategy)
+  const sessionToken = req.cookies.get("next-auth.session-token") ||
+                       req.cookies.get("__Secure-next-auth.session-token");
   const isAuthRoute = pathname === LOGIN || pathname.startsWith(AUTH_PREFIX);
 
-  if (!token) {
+  if (!sessionToken) {
     if (!isAuthRoute) {
       const url = req.nextUrl.clone();
       url.pathname = LOGIN;
