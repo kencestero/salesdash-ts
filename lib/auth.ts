@@ -5,7 +5,7 @@ import { prisma } from "./prisma";
 export const authOptions = {
   adapter: PrismaAdapter(prisma),
   session: {
-    strategy: "jwt" as const,
+    strategy: "database" as const,
   },
   providers: [
     GoogleProvider({
@@ -27,17 +27,10 @@ export const authOptions = {
 
       return true;
     },
-    async jwt({ token, user }: any) {
-      // Persist user ID to JWT token
-      if (user) {
-        token.id = user.id;
-      }
-      return token;
-    },
-    async session({ session, token }: any) {
-      // Attach user ID from JWT to session
+    async session({ session, user }: any) {
+      // Attach user ID from database to session (database strategy)
       if (session?.user) {
-        session.user.id = token.id;
+        session.user.id = user.id;
       }
       return session;
     },
