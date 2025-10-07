@@ -65,9 +65,9 @@ const ProfileInfo = () => {
               href:"/user-profile"
             },
             {
-              name: "Billing",
-              icon: "heroicons:megaphone",
-              href:"/dashboard"
+              name: "Secret Code Instructions",
+              icon: "heroicons:key",
+              href:"/secret-code-instructions"
             },
             {
               name: "Settings",
