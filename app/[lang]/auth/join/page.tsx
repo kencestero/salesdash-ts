@@ -131,7 +131,13 @@ export default function RegisterPage() {
       return;
     }
 
-    // Store the data temporarily before OAuth
+    // Store the data in cookies before OAuth (so server can access it)
+    document.cookie = `signup_firstName=${encodeURIComponent(firstName)}; path=/; max-age=900`; // 15 min
+    document.cookie = `signup_lastName=${encodeURIComponent(lastName)}; path=/; max-age=900`;
+    document.cookie = `signup_phone=${encodeURIComponent(phone)}; path=/; max-age=900`;
+    document.cookie = `signup_zipcode=${encodeURIComponent(zipcode)}; path=/; max-age=900`;
+
+    // Also store in sessionStorage as backup
     sessionStorage.setItem("signup_data", JSON.stringify({ firstName, lastName, phone, zipcode }));
 
     // Proceed with Google OAuth

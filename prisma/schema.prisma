@@ -70,19 +70,24 @@ model VerificationToken {
 // MJ Cargo SalesDash Models
 
 model UserProfile {
-  id        String   @id @default(cuid())
-  userId    String   @unique
-  phone     String?
-  city      String?
-  zip       String?
-  role      String   @default("salesperson") // "owner", "manager", "salesperson"
-  member    Boolean  @default(false) // Join code verified
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  firstName       String?
+  lastName        String?
+  phone           String?
+  zipcode         String?
+  city            String?
+  zip             String?  // Legacy field, use zipcode instead
+  salespersonCode String   @unique // REP12345, SMR12345, or VIP12345
+  role            String   @default("salesperson") // "owner", "manager", "salesperson"
+  member          Boolean  @default(false) // Join code verified
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([role])
   @@index([member])
+  @@index([salespersonCode])
 }
