@@ -72,7 +72,9 @@ Welcome to MJ Cargo Trailers!
 To access the SalesDash system:
 1. Go to: https://salesdash-ts.vercel.app/en/auth/join
 2. Enter this code: ABC123
-3. Sign in with your Google account
+3. Click "Validate" to unlock the form
+4. Fill out your information (name, phone, email, password)
+5. Either create an account with email/password OR sign up with Google
 
 The code expires at midnight (NY time), so please complete
 registration today.
@@ -86,7 +88,8 @@ Questions? Contact [Your Name] at [Your Contact]
 
 - ✅ Codes rotate **daily at midnight** (New York time)
 - ✅ Each code assigns a **specific role** automatically
-- ✅ Users must have a **Google account** to sign in
+- ✅ Users can sign up with **email/password OR Google/OAuth**
+- ✅ Email/password users must **verify their email within 2 minutes**
 - ✅ Once registered, users **don't need codes again**
 - ⚠️ Keep the **Owner code confidential**
 
@@ -102,38 +105,92 @@ Your manager or team lead will provide you with a 6-character code.
 
 ---
 
-### Step 2: Navigate to the Join Page
+### Step 2: Navigate to the Sign-Up Page
 
 **Open your browser and go to:**
 - https://salesdash-ts.vercel.app/en/auth/join
 
-You should see a page with a join code input field.
+You should see the **"Join MJ Cargo Sales Team"** page with a secret code input field.
 
 ---
 
-### Step 3: Enter Your Code
+### Step 3: Enter and Validate Your Secret Code
 
-1. Type or paste the code into the input field
-2. Code is **case-insensitive** (ABC123 = abc123)
-3. Click **"Continue"**
+1. **Enter the code** in the "Secret Code" field at the top
+2. Click **"Validate"** button
+3. Wait for the green checkmark ✓ **"Verified"** confirmation
+4. The form below will unlock automatically
 
----
-
-### Step 4: Sign In with Google
-
-1. You'll be redirected to Google sign-in
-2. Choose your Google account
-3. Approve the authentication request
-4. You'll be redirected back to SalesDash
+**Important:** The form is locked until you validate your secret code. If you click on the grey form fields before validating, you'll see an arrow pointing up reminding you to enter the code first!
 
 ---
 
-### Step 5: Access Your Dashboard
+### Step 4: Fill Out Required Information
 
-After successful sign-in:
+Once your code is validated, complete the registration form:
+
+**Required Fields:**
+- **First Name** - Your legal first name
+- **Last Name** - Your legal last name
+- **Phone Number** - Your contact number (format: +1 (555) 000-0000)
+- **Email Address** - Your work or personal email
+- **Password** - Create a secure password (minimum 4 characters)
+
+**Tips:**
+- Use the eye icon to show/hide your password
+- All fields marked with * are required
+
+---
+
+### Step 5: Choose Your Sign-Up Method
+
+You have two options:
+
+#### Option A: Email/Password Sign-Up
+1. Fill out all required fields (name, phone, email, password)
+2. Click **"Create Account & Verify Email"**
+3. You'll be redirected to the email verification page
+4. Check your email for verification link
+5. Click the link in the email within 2 minutes
+6. Your email will be verified and you can log in
+
+#### Option B: Sign Up with Google/OAuth
+1. Fill out required fields: **First Name, Last Name, Phone Number**
+2. Click the **Google** icon (or GitHub/Facebook/Twitter when available)
+3. Sign in with your selected provider
+4. Your account will be created automatically
+5. You'll be redirected to the dashboard
+
+**Note:** Even with Google sign-up, you must fill in your name and phone number first!
+
+---
+
+### Step 6: Email Verification (Email/Password Only)
+
+If you signed up with email/password:
+
+1. **Check your email inbox** for verification message from MJ SalesDash
+2. **Check SPAM folder** if you don't see it
+3. Click **"Open email"** button or manually check your email
+4. Click the verification link in the email
+5. **You have 2 minutes** (countdown timer shown)
+6. If expired, click **"Resend email verification"**
+
+The verification page shows:
+- MJ SalesDash branding (blue and yellow design)
+- 2-minute countdown timer (00:00 format)
+- "Open email" button to launch your email client
+- Option to resend verification after countdown ends
+
+---
+
+### Step 7: Access Your Dashboard
+
+After successful verification/sign-in:
 - You'll land on the **Dashboard** homepage
-- Your role is automatically assigned based on the code you used
+- Your role is automatically assigned based on the secret code you used
 - Full access to features based on your role
+- Welcome to MJ Cargo Sales Team! 🚀
 
 ---
 
@@ -326,11 +383,14 @@ INVITE PROCESS:
 
 ```
 JOIN PROCESS:
-1. Receive code from manager
+1. Receive secret code from manager
 2. Go to: salesdash-ts.vercel.app/en/auth/join
-3. Enter code
-4. Sign in with Google
-5. Access dashboard
+3. Enter code and click "Validate"
+4. Fill out required info (name, phone, email, password)
+5. Either:
+   - Create account with email/password (verify email)
+   - OR sign up with Google
+6. Access dashboard
 
 NEED HELP?
 Email: mjcargotrailers@gmail.com
@@ -392,6 +452,11 @@ const code = hash.slice(0, 6).toUpperCase(); // "A1B2C3"
 ## Changelog
 
 ### October 7, 2025
+- ✅ **NEW:** Complete sign-up flow with email/password option
+- ✅ **NEW:** Email verification page with 2-minute countdown
+- ✅ **NEW:** Form locked until secret code validated
+- ✅ **NEW:** Arrow indicator when clicking disabled form
+- ✅ **NEW:** "Game Time" login page branding
 - ✅ Implemented role-based join codes
 - ✅ Restricted join-code page to managers/owners
 - ✅ Auto role assignment on signup
