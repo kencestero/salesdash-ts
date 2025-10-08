@@ -1,6 +1,7 @@
 import GoogleProvider from "next-auth/providers/google";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { prisma } from "./prisma";
+import { generateUniqueSalespersonCode } from "./salespersonCode";
 
 export const authOptions = {
   adapter: PrismaAdapter(prisma),
@@ -36,15 +37,41 @@ export const authOptions = {
         });
 
         if (!existing) {
-          // Create new profile with role from join code
+          // Get signup data from cookies (set before OAuth redirect)
+          const firstName = cookies().get("signup_firstName")?.value;
+          const lastName = cookies().get("signup_lastName")?.value;
+          const phone = cookies().get("signup_phone")?.value;
+          const zipcode = cookies().get("signup_zipcode")?.value;
+
+          // Generate unique salesperson code based on role
+          const salespersonCode = await generateUniqueSalespersonCode(
+            joinRole,
+            prisma
+          );
+
+          // Create new profile with role from join code AND signup data
           await prisma.userProfile.create({
             data: {
               userId: user.id,
+              firstName: firstName ? decodeURIComponent(firstName) : undefined,
+              lastName: lastName ? decodeURIComponent(lastName) : undefined,
+              phone: phone ? decodeURIComponent(phone) : undefined,
+              zipcode: zipcode ? decodeURIComponent(zipcode) : undefined,
+              salespersonCode,
               role: joinRole as "owner" | "manager" | "salesperson",
               member: true,
             },
           });
-          console.log(`✅ Created UserProfile with role: ${joinRole}`);
+
+          // Clear signup cookies
+          cookies().delete("signup_firstName");
+          cookies().delete("signup_lastName");
+          cookies().delete("signup_phone");
+          cookies().delete("signup_zipcode");
+
+          console.log(
+            `✅ Created UserProfile with role: ${joinRole}, code: ${salespersonCode}`
+          );
         } else if (!existing.member) {
           // Update existing profile to mark as member
           await prisma.userProfile.update({

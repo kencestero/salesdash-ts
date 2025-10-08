@@ -2,18 +2,33 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
+import { cookies } from "next/headers";
+import { generateUniqueSalespersonCode } from "@/lib/salespersonCode";
 
 export async function POST(req: NextRequest) {
   try {
-    const { firstName, lastName, phone, email, password } = await req.json();
+    const { firstName, lastName, phone, zipcode, email, password } =
+      await req.json();
 
     // Validate required fields
-    if (!firstName || !lastName || !phone || !email || !password) {
+    if (
+      !firstName ||
+      !lastName ||
+      !phone ||
+      !zipcode ||
+      !email ||
+      !password
+    ) {
       return NextResponse.json(
         { message: "All fields are required" },
         { status: 400 }
       );
     }
+
+    // Get role from cookie (set during join code validation)
+    const cookieStore = cookies();
+    const roleFromCookie = cookieStore.get("join_role")?.value || "salesperson";
+    const joinVerified = cookieStore.get("join_ok")?.value === "1";
 
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({
@@ -34,6 +49,12 @@ export async function POST(req: NextRequest) {
     const verificationToken = crypto.randomBytes(32).toString("hex");
     const verificationExpiry = new Date(Date.now() + 2 * 60 * 1000); // 2 minutes
 
+    // Generate unique salesperson code based on role
+    const salespersonCode = await generateUniqueSalespersonCode(
+      roleFromCookie,
+      prisma
+    );
+
     // Create user (but not verified yet)
     const user = await prisma.user.create({
       data: {
@@ -53,14 +74,17 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // Store additional user data (phone, firstName, lastName) in a temporary table or session
-    // For now, we'll use the UserProfile table with a pending flag
+    // Create user profile with ALL registration data
     await prisma.userProfile.create({
       data: {
         userId: user.id,
-        role: "salesperson", // Default, will be updated based on join code
-        member: false, // Not a member until email is verified
-        // TODO: Add phone, firstName, lastName fields to UserProfile schema
+        firstName,
+        lastName,
+        phone,
+        zipcode,
+        salespersonCode,
+        role: roleFromCookie,
+        member: joinVerified, // true if join code was validated
       },
     });
 
@@ -70,6 +94,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       {
         message: "Account created! Please verify your email.",
+        salespersonCode, // Return the code so user knows their tracking code
         verificationToken, // Remove this in production
       },
       { status: 201 }
