@@ -23,9 +23,13 @@ export default function RegisterPage() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [phone, setPhone] = useState("");
+  const [zipcode, setZipcode] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordType, setPasswordType] = useState("password");
+  const [confirmPasswordType, setConfirmPasswordType] = useState("password");
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   async function validateCode() {
     if (!code.trim()) {
@@ -69,8 +73,26 @@ export default function RegisterPage() {
     }
 
     // Validate required fields
-    if (!firstName || !lastName || !phone || !email || !password) {
+    if (!firstName || !lastName || !phone || !zipcode || !email || !password || !confirmPassword) {
       setErr("Please fill all required fields");
+      return;
+    }
+
+    // Validate password match
+    if (password !== confirmPassword) {
+      setErr("Passwords do not match");
+      return;
+    }
+
+    // Validate password length
+    if (password.length < 6) {
+      setErr("Password must be at least 6 characters");
+      return;
+    }
+
+    // Validate terms acceptance
+    if (!acceptedTerms) {
+      setErr("You must accept the Terms and Conditions to continue");
       return;
     }
 
@@ -82,6 +104,7 @@ export default function RegisterPage() {
         firstName,
         lastName,
         phone,
+        zipcode,
         email,
         password,
       }),
@@ -103,13 +126,13 @@ export default function RegisterPage() {
     }
 
     // Even with Google, we need basic info filled
-    if (!firstName || !lastName || !phone) {
-      setErr("Please fill required fields (name and phone) before signing up with Google");
+    if (!firstName || !lastName || !phone || !zipcode) {
+      setErr("Please fill required fields (name, phone, zipcode) before signing up with Google");
       return;
     }
 
     // Store the data temporarily before OAuth
-    sessionStorage.setItem("signup_data", JSON.stringify({ firstName, lastName, phone }));
+    sessionStorage.setItem("signup_data", JSON.stringify({ firstName, lastName, phone, zipcode }));
 
     // Proceed with Google OAuth
     signIn("google", {
@@ -119,6 +142,10 @@ export default function RegisterPage() {
 
   const togglePasswordType = () => {
     setPasswordType(passwordType === "password" ? "text" : "password");
+  };
+
+  const toggleConfirmPasswordType = () => {
+    setConfirmPasswordType(confirmPasswordType === "password" ? "text" : "password");
   };
 
   return (
@@ -146,7 +173,7 @@ export default function RegisterPage() {
               onChange={(e) => setCode(e.target.value.toUpperCase())}
               placeholder="ENTER CODE"
               disabled={codeValidated}
-              className="flex-1 bg-white/90 backdrop-blur-sm border-0 rounded-xl px-4 py-3 text-center text-lg font-mono tracking-wider focus:ring-2 focus:ring-primary focus:outline-none disabled:opacity-50 disabled:bg-green-100"
+              className="flex-1 bg-white/90 backdrop-blur-sm border-0 rounded-xl px-4 py-3 text-center text-lg font-mono tracking-wider focus:ring-2 focus:ring-primary focus:outline-none disabled:opacity-50 disabled:bg-green-100 text-orange-600 placeholder:text-gray-400"
             />
             {!codeValidated && (
               <Button
@@ -212,17 +239,32 @@ export default function RegisterPage() {
               </div>
             </div>
 
-            {/* Phone */}
-            <div>
-              <Label className="text-white font-semibold mb-2 block">Phone Number *</Label>
-              <Input
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="+1 (555) 000-0000"
-                className="bg-white/90 backdrop-blur-sm border-0"
-                required
-              />
+            {/* Phone and Zipcode */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label className="text-white font-semibold mb-2 block">Phone Number *</Label>
+                <Input
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="+1 (555) 000-0000"
+                  className="bg-white/90 backdrop-blur-sm border-0"
+                  required
+                />
+              </div>
+              <div>
+                <Label className="text-white font-semibold mb-2 block">Zipcode Residence *</Label>
+                <Input
+                  type="text"
+                  value={zipcode}
+                  onChange={(e) => setZipcode(e.target.value)}
+                  placeholder="12345"
+                  maxLength={5}
+                  pattern="[0-9]{5}"
+                  className="bg-white/90 backdrop-blur-sm border-0"
+                  required
+                />
+              </div>
             </div>
 
             {/* Email */}
@@ -240,7 +282,7 @@ export default function RegisterPage() {
 
             {/* Password */}
             <div>
-              <Label className="text-white font-semibold mb-2 block">Password *</Label>
+              <Label className="text-white font-semibold mb-2 block">New Password *</Label>
               <div className="relative">
                 <Input
                   type={passwordType}
@@ -249,6 +291,7 @@ export default function RegisterPage() {
                   placeholder="••••••••"
                   className="bg-white/90 backdrop-blur-sm border-0 pr-10"
                   required
+                  minLength={6}
                 />
                 <div
                   className="absolute top-1/2 -translate-y-1/2 right-3 cursor-pointer"
@@ -261,12 +304,69 @@ export default function RegisterPage() {
                   )}
                 </div>
               </div>
+              <p className="text-xs text-white/60 mt-1">Must be at least 6 characters</p>
+            </div>
+
+            {/* Confirm Password */}
+            <div>
+              <Label className="text-white font-semibold mb-2 block">Confirm Password *</Label>
+              <div className="relative">
+                <Input
+                  type={confirmPasswordType}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="bg-white/90 backdrop-blur-sm border-0 pr-10"
+                  required
+                />
+                <div
+                  className="absolute top-1/2 -translate-y-1/2 right-3 cursor-pointer"
+                  onClick={toggleConfirmPasswordType}
+                >
+                  {confirmPasswordType === "password" ? (
+                    <Icon icon="heroicons:eye" className="w-5 h-5 text-default-400" />
+                  ) : (
+                    <Icon icon="heroicons:eye-slash" className="w-5 h-5 text-default-400" />
+                  )}
+                </div>
+              </div>
+              {confirmPassword && password !== confirmPassword && (
+                <p className="text-xs text-red-300 mt-1">Passwords must match</p>
+              )}
+              {confirmPassword && password === confirmPassword && (
+                <p className="text-xs text-green-300 mt-1">✓ Passwords match</p>
+              )}
+            </div>
+
+            {/* Terms and Conditions */}
+            <div className="flex items-start gap-3 p-4 bg-white/5 backdrop-blur-sm rounded-xl border border-white/20">
+              <input
+                type="checkbox"
+                id="terms"
+                checked={acceptedTerms}
+                onChange={(e) => setAcceptedTerms(e.target.checked)}
+                className="mt-1 w-5 h-5 rounded border-white/30 text-primary focus:ring-2 focus:ring-primary cursor-pointer"
+                required
+              />
+              <label htmlFor="terms" className="text-sm text-white/90 cursor-pointer">
+                I accept the{" "}
+                <a
+                  href={`/${DEFAULT_LANG}/auth/terms`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary-foreground font-semibold underline hover:no-underline"
+                >
+                  Terms and Conditions
+                </a>{" "}
+                and acknowledge that I am an independent contractor, not an employee. I agree to protect customer confidential information and comply with all data privacy laws.
+              </label>
             </div>
 
             {/* Submit Button */}
             <Button
               type="submit"
-              className="w-full bg-primary/90 hover:bg-primary text-primary-foreground rounded-xl py-6 font-semibold text-lg transition-all hover:scale-105"
+              disabled={!acceptedTerms}
+              className="w-full bg-primary/90 hover:bg-primary text-primary-foreground rounded-xl py-6 font-semibold text-lg transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Create Account & Verify Email
             </Button>
