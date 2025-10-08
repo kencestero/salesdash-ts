@@ -10108,8 +10108,6 @@ snapshots:
       '@ckeditor/ckeditor5-utils': 46.1.1
       ckeditor5: 46.1.1
       es-toolkit: 1.39.5
-    transitivePeerDependencies:
-      - supports-color
 
   '@ckeditor/ckeditor5-editor-multi-root@46.1.1':
     dependencies:
