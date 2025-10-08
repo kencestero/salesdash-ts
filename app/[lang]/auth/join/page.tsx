@@ -1,27 +1,125 @@
 "use client";
 import { useState } from "react";
 import Image from "next/image";
+import { Icon } from "@iconify/react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { signIn } from "next-auth/react";
+import { DEFAULT_LANG } from "@/lib/i18n";
+import googleIcon from "@/public/images/auth/google.png";
+import GithubIcon from "@/public/images/auth/github.png";
+import facebook from "@/public/images/auth/facebook.png";
+import twitter from "@/public/images/auth/twitter.png";
 
 export default function RegisterPage() {
   const [code, setCode] = useState("");
+  const [codeValidated, setCodeValidated] = useState(false);
+  const [validatingCode, setValidatingCode] = useState(false);
   const [err, setErr] = useState("");
+  const [showArrow, setShowArrow] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  // Form fields
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [passwordType, setPasswordType] = useState("password");
+
+  async function validateCode() {
+    if (!code.trim()) {
+      setErr("Please enter a secret code");
+      return;
+    }
+
+    setValidatingCode(true);
     setErr("");
+
     const r = await fetch("/api/join/validate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ code }),
     });
+
+    setValidatingCode(false);
+
     if (r.ok) {
-      // cookie join_ok is now set; kick to Google sign-in
-      window.location.href = "/api/auth/signin/google?callbackUrl=/en/dashboard";
+      setCodeValidated(true);
+      setErr("");
     } else {
       const j = await r.json().catch(() => ({}));
-      setErr(j?.message || "Invalid code.");
+      setErr(j?.message || "Invalid or expired code.");
     }
   }
+
+  function handleFormClick() {
+    if (!codeValidated) {
+      setShowArrow(true);
+      setTimeout(() => setShowArrow(false), 3000);
+    }
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+
+    if (!codeValidated) {
+      handleFormClick();
+      return;
+    }
+
+    // Validate required fields
+    if (!firstName || !lastName || !phone || !email || !password) {
+      setErr("Please fill all required fields");
+      return;
+    }
+
+    // Create account with email/password
+    const res = await fetch("/api/auth/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        firstName,
+        lastName,
+        phone,
+        email,
+        password,
+      }),
+    });
+
+    if (res.ok) {
+      // Redirect to email verification page
+      window.location.href = `/${DEFAULT_LANG}/auth/verify-email?email=${encodeURIComponent(email)}`;
+    } else {
+      const data = await res.json().catch(() => ({}));
+      setErr(data?.message || "Failed to create account");
+    }
+  }
+
+  async function handleGoogleSignUp() {
+    if (!codeValidated) {
+      handleFormClick();
+      return;
+    }
+
+    // Even with Google, we need basic info filled
+    if (!firstName || !lastName || !phone) {
+      setErr("Please fill required fields (name and phone) before signing up with Google");
+      return;
+    }
+
+    // Store the data temporarily before OAuth
+    sessionStorage.setItem("signup_data", JSON.stringify({ firstName, lastName, phone }));
+
+    // Proceed with Google OAuth
+    signIn("google", {
+      callbackUrl: `/${DEFAULT_LANG}/dashboard`,
+    });
+  }
+
+  const togglePasswordType = () => {
+    setPasswordType(passwordType === "password" ? "text" : "password");
+  };
 
   return (
     <main className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden">
@@ -33,21 +131,211 @@ export default function RegisterPage() {
         quality={75}
         priority
       />
-      <div className="absolute inset-0 bg-black/20 z-10" />
-      <div className="relative z-20 mx-auto max-w-sm w-full bg-white/10 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-white/20">
-        <h1 className="text-2xl font-semibold mb-6 text-white text-center">Enter Join Code</h1>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            value={code}
-            onChange={(e) => setCode(e.target.value.toUpperCase())}
-            placeholder="ABC123"
-            className="w-full bg-white/90 backdrop-blur-sm border-0 rounded-xl px-4 py-3 text-center text-lg font-mono tracking-wider focus:ring-2 focus:ring-primary focus:outline-none"
-          />
-          {err && <p className="text-red-300 text-sm text-center bg-red-500/20 backdrop-blur-sm rounded-lg py-2 px-3">{err}</p>}
-          <button className="w-full bg-primary/90 hover:bg-primary text-primary-foreground rounded-xl px-4 py-3 font-semibold transition-all hover:scale-105">
-            Continue
-          </button>
+      <div className="absolute inset-0 bg-black/30 z-10" />
+
+      <div className="relative z-20 mx-auto max-w-2xl w-full bg-white/10 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-white/20">
+        <h1 className="text-3xl font-bold mb-2 text-white text-center">Join MJ Cargo Sales Team</h1>
+        <p className="text-white/80 text-center mb-8">Enter your secret code to get started</p>
+
+        {/* Secret Code Section */}
+        <div className="mb-8 relative">
+          <Label className="text-white font-semibold mb-2 block">Secret Code *</Label>
+          <div className="flex gap-3">
+            <input
+              value={code}
+              onChange={(e) => setCode(e.target.value.toUpperCase())}
+              placeholder="ENTER CODE"
+              disabled={codeValidated}
+              className="flex-1 bg-white/90 backdrop-blur-sm border-0 rounded-xl px-4 py-3 text-center text-lg font-mono tracking-wider focus:ring-2 focus:ring-primary focus:outline-none disabled:opacity-50 disabled:bg-green-100"
+            />
+            {!codeValidated && (
+              <Button
+                onClick={validateCode}
+                disabled={validatingCode}
+                className="bg-primary/90 hover:bg-primary px-6"
+              >
+                {validatingCode ? "Validating..." : "Validate"}
+              </Button>
+            )}
+            {codeValidated && (
+              <div className="flex items-center gap-2 bg-green-500/20 backdrop-blur-sm px-4 rounded-xl">
+                <Icon icon="heroicons:check-circle" className="text-green-400 w-6 h-6" />
+                <span className="text-green-300 font-semibold">Verified</span>
+              </div>
+            )}
+          </div>
+          {err && <p className="text-red-300 text-sm mt-2 bg-red-500/20 backdrop-blur-sm rounded-lg py-2 px-3">{err}</p>}
+
+          {/* Arrow pointing up */}
+          {showArrow && !codeValidated && (
+            <div className="absolute -bottom-32 left-1/2 -translate-x-1/2 text-center animate-bounce z-50">
+              <Icon icon="heroicons:arrow-up" className="text-yellow-400 w-12 h-12 mx-auto mb-2" />
+              <p className="text-yellow-300 font-bold text-lg bg-yellow-500/20 backdrop-blur-sm px-4 py-2 rounded-lg">
+                Enter Secret Code First!
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Application Form */}
+        <form onSubmit={handleSubmit} className="space-y-5 relative">
+          {/* Overlay when code not validated */}
+          {!codeValidated && (
+            <div
+              className="absolute inset-0 bg-black/40 backdrop-blur-[2px] rounded-2xl z-30 cursor-not-allowed"
+              onClick={handleFormClick}
+            />
+          )}
+
+          <div className={`space-y-5 ${!codeValidated ? 'opacity-50 pointer-events-none' : ''}`}>
+            {/* Name Fields */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label className="text-white font-semibold mb-2 block">First Name *</Label>
+                <Input
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  placeholder="John"
+                  className="bg-white/90 backdrop-blur-sm border-0"
+                  required
+                />
+              </div>
+              <div>
+                <Label className="text-white font-semibold mb-2 block">Last Name *</Label>
+                <Input
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  placeholder="Doe"
+                  className="bg-white/90 backdrop-blur-sm border-0"
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Phone */}
+            <div>
+              <Label className="text-white font-semibold mb-2 block">Phone Number *</Label>
+              <Input
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="+1 (555) 000-0000"
+                className="bg-white/90 backdrop-blur-sm border-0"
+                required
+              />
+            </div>
+
+            {/* Email */}
+            <div>
+              <Label className="text-white font-semibold mb-2 block">Email Address *</Label>
+              <Input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="john@example.com"
+                className="bg-white/90 backdrop-blur-sm border-0"
+                required
+              />
+            </div>
+
+            {/* Password */}
+            <div>
+              <Label className="text-white font-semibold mb-2 block">Password *</Label>
+              <div className="relative">
+                <Input
+                  type={passwordType}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="bg-white/90 backdrop-blur-sm border-0 pr-10"
+                  required
+                />
+                <div
+                  className="absolute top-1/2 -translate-y-1/2 right-3 cursor-pointer"
+                  onClick={togglePasswordType}
+                >
+                  {passwordType === "password" ? (
+                    <Icon icon="heroicons:eye" className="w-5 h-5 text-default-400" />
+                  ) : (
+                    <Icon icon="heroicons:eye-slash" className="w-5 h-5 text-default-400" />
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Submit Button */}
+            <Button
+              type="submit"
+              className="w-full bg-primary/90 hover:bg-primary text-primary-foreground rounded-xl py-6 font-semibold text-lg transition-all hover:scale-105"
+            >
+              Create Account & Verify Email
+            </Button>
+
+            {/* Divider */}
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-white/20"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-4 bg-white/10 backdrop-blur-sm text-white rounded-full">Or sign up with</span>
+              </div>
+            </div>
+
+            {/* OAuth Buttons */}
+            <div className="flex justify-center gap-4">
+              <Button
+                type="button"
+                size="icon"
+                variant="outline"
+                className="rounded-full border-white/30 bg-white/10 hover:bg-white/20 w-12 h-12"
+                onClick={handleGoogleSignUp}
+              >
+                <Image src={googleIcon} alt="google" className="w-5 h-5" />
+              </Button>
+              <Button
+                type="button"
+                size="icon"
+                variant="outline"
+                className="rounded-full border-white/30 bg-white/10 hover:bg-white/20 w-12 h-12"
+                onClick={() => {
+                  if (!codeValidated) {
+                    handleFormClick();
+                  } else {
+                    signIn("github", { callbackUrl: `/${DEFAULT_LANG}/dashboard` });
+                  }
+                }}
+              >
+                <Image src={GithubIcon} alt="github" className="w-5 h-5" />
+              </Button>
+              <Button
+                type="button"
+                size="icon"
+                variant="outline"
+                className="rounded-full border-white/30 bg-white/10 hover:bg-white/20 w-12 h-12"
+                onClick={handleFormClick}
+              >
+                <Image src={facebook} alt="facebook" className="w-5 h-5" />
+              </Button>
+              <Button
+                type="button"
+                size="icon"
+                variant="outline"
+                className="rounded-full border-white/30 bg-white/10 hover:bg-white/20 w-12 h-12"
+                onClick={handleFormClick}
+              >
+                <Image src={twitter} alt="twitter" className="w-5 h-5" />
+              </Button>
+            </div>
+          </div>
         </form>
+
+        {/* Already have account */}
+        <div className="mt-6 text-center text-white/80">
+          Already have an account?{" "}
+          <a href={`/${DEFAULT_LANG}/auth/login`} className="text-primary-foreground font-semibold hover:underline">
+            Sign In
+          </a>
+        </div>
       </div>
     </main>
   );

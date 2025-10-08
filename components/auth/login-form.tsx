@@ -79,10 +79,13 @@ const LogInForm = () => {
         <SiteLogo className="w-14 h-14" />
       </Link>
       <div className="2xl:mt-8 mt-6 2xl:text-3xl text-2xl font-bold text-default-900">
-        Hey, Hello 👋
+        Game Time 🚀
       </div>
       <div className="2xl:text-lg text-base text-default-600 2xl:mt-2 leading-6">
-        Welcome back to your office space!
+        MJ Cargo Sales Command Center
+      </div>
+      <div className="text-sm text-default-500 mt-1">
+        Your AI-powered virtual desk where deals get done. Latest tools. Real-time data. Zero limits.
       </div>
       <form onSubmit={handleSubmit(onSubmit)} className="mt-5 2xl:mt-7">
         <div>
@@ -221,10 +224,13 @@ const LogInForm = () => {
         </Button>
       </div>
       <div className="mt-5 2xl:mt-8 text-center text-base text-default-600">
-        Don&apos;t have an account?{" "}
+        🔑 Got your Secret Code?{" "}
         <Link href={`/${DEFAULT_LANG}/auth/join`} className="text-primary">
           Sign Up
         </Link>
+      </div>
+      <div className="text-center text-sm text-default-500 mt-2">
+        📱 Need access? Contact your team manager
       </div>
     </div>
   );
