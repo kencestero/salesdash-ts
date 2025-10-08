@@ -85,3 +85,7 @@ Build activity tracking system with Prisma
 Replace all mock profile data with database queries
 
 Create admin dashboard for role assignment
+.env
+.env.*
+*.env
+.env.local
