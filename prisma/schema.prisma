@@ -78,7 +78,7 @@ model UserProfile {
   zipcode         String?
   city            String?
   zip             String?  // Legacy field, use zipcode instead
-  salespersonCode String   @unique // REP12345, SMR12345, or VIP12345
+  salespersonCode String?  @unique // REP12345, SMR12345, or VIP12345
   role            String   @default("salesperson") // "owner", "manager", "salesperson"
   member          Boolean  @default(false) // Join code verified
   createdAt       DateTime @default(now())
