@@ -212,6 +212,9 @@ importers:
       bcrypt:
         specifier: ^5.1.1
         version: 5.1.1
+      bcryptjs:
+        specifier: ^3.0.2
+        version: 3.0.2
       chart.js:
         specifier: ^4.4.0
         version: 4.5.0
@@ -420,6 +423,9 @@ importers:
       '@svgr/webpack':
         specifier: ^8.1.0
         version: 8.1.0(typescript@5.9.2)
+      '@types/bcryptjs':
+        specifier: ^3.0.0
+        version: 3.0.0
       '@types/d3-shape':
         specifier: ^3.1.7
         version: 3.1.7
@@ -4035,6 +4041,10 @@ packages:
   '@types/acorn@4.0.6':
     resolution: {integrity: sha512-veQTnWP+1D/xbxVrPC3zHnCZRjSrKfhbMUlEA43iMZLu7EsnTtkJklIuwrCPbOi8YkvDQAiW05VQQFvvz9oieQ==}
 
+  '@types/bcryptjs@3.0.0':
+    resolution: {integrity: sha512-WRZOuCuaz8UcZZE4R5HXTco2goQSI2XxjGY3hbM/xDvwmqFWd4ivooImsMx65OKM6CtNKbnZ5YL+YwAwK7c1dg==}
+    deprecated: This is a stub types definition. bcryptjs provides its own type definitions, so you do not need this installed.
+
   '@types/cleave.js@1.4.12':
     resolution: {integrity: sha512-d+TDoy5wsWfG/lTLNV4CCziGzJovbX5RCrYzrfG2iB5F6yvrzeTtGEgoXW3/7oRj0H6gAzLxuvwmgNEx4Og4QA==}
 
@@ -4762,6 +4772,10 @@ packages:
   bcrypt@5.1.1:
     resolution: {integrity: sha512-AGBHOG5hPYZ5Xl9KXzU5iKq9516yEmvCKDg3ecP5kX2aB6UqTeXZxk2ELnDgDm6BQSMlLt9rDB4LoSMx0rYwww==}
     engines: {node: '>= 10.0.0'}
+
+  bcryptjs@3.0.2:
+    resolution: {integrity: sha512-k38b3XOZKv60C4E2hVsXTolJWfkGRMbILBIe2IBITXciy5bOsTKot5kDrf3ZfufQtQOUN5mXceUEpU1rTl9Uog==}
+    hasBin: true
 
   binary-extensions@2.3.0:
     resolution: {integrity: sha512-Ceh+7ox5qe7LJuLHoY0feh3pHuUDHAcRUeyL2VYghZwfpkNIy/+8Ocg0a3UuSoYzavmylwuLWQOf3hl0jjMMIw==}
@@ -9841,8 +9855,6 @@ snapshots:
       '@ckeditor/ckeditor5-core': 46.1.1
       '@ckeditor/ckeditor5-upload': 46.1.1
       ckeditor5: 46.1.1
-    transitivePeerDependencies:
-      - supports-color
 
   '@ckeditor/ckeditor5-alignment@46.1.1':
     dependencies:
@@ -10076,8 +10088,6 @@ snapshots:
       '@ckeditor/ckeditor5-utils': 46.1.1
       ckeditor5: 46.1.1
       es-toolkit: 1.39.5
-    transitivePeerDependencies:
-      - supports-color
 
   '@ckeditor/ckeditor5-editor-decoupled@46.1.1':
     dependencies:
@@ -10087,6 +10097,8 @@ snapshots:
       '@ckeditor/ckeditor5-utils': 46.1.1
       ckeditor5: 46.1.1
       es-toolkit: 1.39.5
+    transitivePeerDependencies:
+      - supports-color
 
   '@ckeditor/ckeditor5-editor-inline@46.1.1':
     dependencies:
@@ -10229,8 +10241,6 @@ snapshots:
       '@ckeditor/ckeditor5-utils': 46.1.1
       '@ckeditor/ckeditor5-widget': 46.1.1
       ckeditor5: 46.1.1
-    transitivePeerDependencies:
-      - supports-color
 
   '@ckeditor/ckeditor5-html-embed@46.1.1':
     dependencies:
@@ -10514,8 +10524,6 @@ snapshots:
       '@ckeditor/ckeditor5-ui': 46.1.1
       '@ckeditor/ckeditor5-utils': 46.1.1
       ckeditor5: 46.1.1
-    transitivePeerDependencies:
-      - supports-color
 
   '@ckeditor/ckeditor5-special-characters@46.1.1':
     dependencies:
@@ -13455,6 +13463,10 @@ snapshots:
     dependencies:
       '@types/estree': 1.0.8
 
+  '@types/bcryptjs@3.0.0':
+    dependencies:
+      bcryptjs: 3.0.2
+
   '@types/cleave.js@1.4.12':
     dependencies:
       '@types/react': 18.3.24
@@ -14287,6 +14299,8 @@ snapshots:
     transitivePeerDependencies:
       - encoding
       - supports-color
+
+  bcryptjs@3.0.2: {}
 
   binary-extensions@2.3.0: {}
 
