@@ -37,41 +37,47 @@ export const authOptions = {
         });
 
         if (!existing) {
-          // Get signup data from cookies (set before OAuth redirect)
-          const firstName = cookies().get("signup_firstName")?.value;
-          const lastName = cookies().get("signup_lastName")?.value;
-          const phone = cookies().get("signup_phone")?.value;
-          const zipcode = cookies().get("signup_zipcode")?.value;
+          try {
+            // Get signup data from cookies (set before OAuth redirect)
+            const firstName = cookies().get("signup_firstName")?.value;
+            const lastName = cookies().get("signup_lastName")?.value;
+            const phone = cookies().get("signup_phone")?.value;
+            const zipcode = cookies().get("signup_zipcode")?.value;
 
-          // Generate unique salesperson code based on role
-          const salespersonCode = await generateUniqueSalespersonCode(
-            joinRole,
-            prisma
-          );
+            // Generate unique salesperson code based on role
+            const salespersonCode = await generateUniqueSalespersonCode(
+              joinRole,
+              prisma
+            );
 
-          // Create new profile with role from join code AND signup data
-          await prisma.userProfile.create({
-            data: {
-              userId: user.id,
-              firstName: firstName ? decodeURIComponent(firstName) : undefined,
-              lastName: lastName ? decodeURIComponent(lastName) : undefined,
-              phone: phone ? decodeURIComponent(phone) : undefined,
-              zipcode: zipcode ? decodeURIComponent(zipcode) : undefined,
-              salespersonCode,
-              role: joinRole as "owner" | "manager" | "salesperson",
-              member: true,
-            },
-          });
+            // Create new profile with role from join code AND signup data
+            await prisma.userProfile.create({
+              data: {
+                userId: user.id,
+                firstName: firstName ? decodeURIComponent(firstName) : undefined,
+                lastName: lastName ? decodeURIComponent(lastName) : undefined,
+                phone: phone ? decodeURIComponent(phone) : undefined,
+                zipcode: zipcode ? decodeURIComponent(zipcode) : undefined,
+                salespersonCode,
+                role: joinRole as "owner" | "manager" | "salesperson",
+                member: true,
+              },
+            });
 
-          // Clear signup cookies
-          cookies().delete("signup_firstName");
-          cookies().delete("signup_lastName");
-          cookies().delete("signup_phone");
-          cookies().delete("signup_zipcode");
+            // Clear signup cookies
+            cookies().delete("signup_firstName");
+            cookies().delete("signup_lastName");
+            cookies().delete("signup_phone");
+            cookies().delete("signup_zipcode");
 
-          console.log(
-            `✅ Created UserProfile with role: ${joinRole}, code: ${salespersonCode}`
-          );
+            console.log(
+              `✅ Created UserProfile with role: ${joinRole}, code: ${salespersonCode}`
+            );
+          } catch (error) {
+            console.error("❌ Failed to create UserProfile during OAuth:", error);
+            // Allow sign-in to proceed even if profile creation fails
+            // User can complete profile setup later
+          }
         } else if (!existing.member) {
           // Update existing profile to mark as member
           await prisma.userProfile.update({
@@ -89,11 +95,11 @@ export const authOptions = {
       return true;
     },
     async session({ session, user }: any) {
-      // Attach user ID from database to session (database strategy)
-      if (session?.user) {
+      // Database strategy: use user.id from database session
+      if (session?.user && user?.id) {
         session.user.id = user.id;
 
-        // Also attach role to session
+        // Fetch user profile to attach role
         const userProfile = await prisma.userProfile.findUnique({
           where: { userId: user.id },
         });

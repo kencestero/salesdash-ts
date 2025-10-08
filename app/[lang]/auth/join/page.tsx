@@ -97,7 +97,7 @@ export default function RegisterPage() {
     }
 
     // Create account with email/password
-    const res = await fetch("/api/auth/register", {
+    const res = await fetch("/api/join/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -111,8 +111,8 @@ export default function RegisterPage() {
     });
 
     if (res.ok) {
-      // Redirect to email verification page
-      window.location.href = `/${DEFAULT_LANG}/auth/verify-email?email=${encodeURIComponent(email)}`;
+      // Successfully created account - redirect to login
+      window.location.href = `/${DEFAULT_LANG}/auth/login?registered=true`;
     } else {
       const data = await res.json().catch(() => ({}));
       setErr(data?.message || "Failed to create account");
@@ -157,7 +157,7 @@ export default function RegisterPage() {
   return (
     <main className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden">
       <Image
-        src="/images/trailerbgimg.png"
+        src="/images/trailerbgimg.webp"
         alt="Cargo Trailer Interior"
         fill
         className="object-cover"
