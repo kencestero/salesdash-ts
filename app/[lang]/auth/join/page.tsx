@@ -9,6 +9,8 @@ import { signIn } from "next-auth/react";
 import { DEFAULT_LANG } from "@/lib/i18n";
 import googleIcon from "@/public/images/auth/google.png";
 import GithubIcon from "@/public/images/auth/github.png";
+import facebook from "@/public/images/auth/facebook.png";
+import twitter from "@/public/images/auth/twitter.png";
 
 type SignupPath = null | "social" | "email";
 
@@ -260,22 +262,22 @@ export default function RegisterPage() {
             {/* Basic Info */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label className="text-white font-semibold mb-2 block">First Name *</Label>
+                <Label className="text-[#f5a623] font-bold mb-2 block text-sm uppercase tracking-wide">First Name *</Label>
                 <Input
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
                   placeholder="John"
-                  className="bg-white/90 backdrop-blur-sm border-0"
+                  className="bg-white border-2 border-[#f5a623]/30 focus:border-[#f5a623] text-gray-900 font-semibold placeholder:text-gray-400 placeholder:font-normal"
                   required
                 />
               </div>
               <div>
-                <Label className="text-white font-semibold mb-2 block">Last Name *</Label>
+                <Label className="text-[#f5a623] font-bold mb-2 block text-sm uppercase tracking-wide">Last Name *</Label>
                 <Input
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
                   placeholder="Doe"
-                  className="bg-white/90 backdrop-blur-sm border-0"
+                  className="bg-white border-2 border-[#f5a623]/30 focus:border-[#f5a623] text-gray-900 font-semibold placeholder:text-gray-400 placeholder:font-normal"
                   required
                 />
               </div>
@@ -283,18 +285,18 @@ export default function RegisterPage() {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label className="text-white font-semibold mb-2 block">Phone Number *</Label>
+                <Label className="text-[#f5a623] font-bold mb-2 block text-sm uppercase tracking-wide">Phone Number *</Label>
                 <Input
                   type="tel"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="+1 (555) 000-0000"
-                  className="bg-white/90 backdrop-blur-sm border-0"
+                  className="bg-white border-2 border-[#f5a623]/30 focus:border-[#f5a623] text-gray-900 font-semibold placeholder:text-gray-400 placeholder:font-normal"
                   required
                 />
               </div>
               <div>
-                <Label className="text-white font-semibold mb-2 block">Zipcode *</Label>
+                <Label className="text-[#f5a623] font-bold mb-2 block text-sm uppercase tracking-wide">Zipcode *</Label>
                 <Input
                   type="text"
                   value={zipcode}
@@ -302,7 +304,7 @@ export default function RegisterPage() {
                   placeholder="12345"
                   maxLength={5}
                   pattern="[0-9]{5}"
-                  className="bg-white/90 backdrop-blur-sm border-0"
+                  className="bg-white border-2 border-[#f5a623]/30 focus:border-[#f5a623] text-gray-900 font-semibold placeholder:text-gray-400 placeholder:font-normal"
                   required
                 />
               </div>
@@ -335,7 +337,7 @@ export default function RegisterPage() {
             <div className="space-y-3">
               <Button
                 onClick={() => handleSocialSignup("google")}
-                className="w-full bg-white hover:bg-white/90 text-gray-900 py-6 text-lg flex items-center justify-center gap-3"
+                className="w-full bg-white hover:bg-gray-50 text-gray-900 font-semibold py-6 text-lg flex items-center justify-center gap-3 border-2 border-white/50 shadow-lg"
               >
                 <Image src={googleIcon} alt="Google" className="w-6 h-6" />
                 Continue with Google
@@ -343,10 +345,28 @@ export default function RegisterPage() {
 
               <Button
                 onClick={() => handleSocialSignup("github")}
-                className="w-full bg-gray-900 hover:bg-gray-800 text-white py-6 text-lg flex items-center justify-center gap-3"
+                className="w-full bg-[#24292e] hover:bg-[#1b1f23] text-white font-semibold py-6 text-lg flex items-center justify-center gap-3 border-2 border-white/20 shadow-lg"
               >
                 <Image src={GithubIcon} alt="GitHub" className="w-6 h-6" />
                 Continue with GitHub
+              </Button>
+
+              <Button
+                type="button"
+                onClick={() => alert('Facebook login coming soon!')}
+                className="w-full bg-[#1877f2] hover:bg-[#166fe5] text-white font-semibold py-6 text-lg flex items-center justify-center gap-3 border-2 border-white/20 shadow-lg"
+              >
+                <Image src={facebook} alt="Facebook" className="w-6 h-6" />
+                Continue with Facebook
+              </Button>
+
+              <Button
+                type="button"
+                onClick={() => alert('Twitter login coming soon!')}
+                className="w-full bg-[#1da1f2] hover:bg-[#1a91da] text-white font-semibold py-6 text-lg flex items-center justify-center gap-3 border-2 border-white/20 shadow-lg"
+              >
+                <Image src={twitter} alt="Twitter" className="w-6 h-6" />
+                Continue with Twitter
               </Button>
             </div>
           </div>
