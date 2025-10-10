@@ -22,9 +22,28 @@ export const authOptions = {
       console.log("Account:", account?.provider);
       console.log("Profile:", profile?.email);
 
-      // NO EMAIL RESTRICTIONS - Join code is the only gatekeeper!
-      // If they got here, they already validated the daily join code.
-      console.log("✅ Access granted - join code already validated");
+      // Check if user already exists in database
+      const existingUser = await prisma.user.findUnique({
+        where: { email: user.email },
+      });
+
+      // If existing user, allow login
+      if (existingUser) {
+        console.log("✅ Existing user - login allowed");
+        return true;
+      }
+
+      // New user: Check for join code validation
+      const { cookies } = await import("next/headers");
+      const joinCodeValid = cookies().get("join_ok")?.value;
+
+      if (!joinCodeValid) {
+        console.log("❌ New user without join code - blocking signup");
+        // Redirect to join page by returning a URL string
+        return `/en/auth/join?error=join_code_required`;
+      }
+
+      console.log("✅ New user with valid join code - allowing signup");
 
       // Create or update UserProfile with role from join code
       if (user?.id) {
