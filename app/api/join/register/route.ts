@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
+import { generateUniqueSalespersonCode } from "@/lib/salespersonCode";
 import bcrypt from "bcryptjs";
 
 export async function POST(req: Request) {
@@ -65,8 +66,11 @@ export async function POST(req: Request) {
 
     console.log('✅ User created:', user.id);
 
-    // Generate unique salesperson code
-    const salespersonCode = `REP${Date.now().toString().slice(-5)}`;
+    // Generate unique salesperson code based on role
+    const salespersonCode = await generateUniqueSalespersonCode(
+      joinRole || "salesperson",
+      prisma
+    );
 
     await prisma.userProfile.create({
       data: {
