@@ -91,3 +91,312 @@ model UserProfile {
   @@index([member])
   @@index([salespersonCode])
 }
+
+// Inventory Management
+model Trailer {
+  id              String   @id @default(cuid())
+  vin             String   @unique // Vehicle Identification Number
+  stockNumber     String   @unique // Internal stock number
+
+  // Basic Info
+  manufacturer    String   // e.g., "Big Tex", "PJ Trailers"
+  model           String
+  year            Int
+  category        String   // e.g., "Utility", "Dump", "Enclosed", "Gooseneck"
+
+  // Specifications
+  length          Float    // in feet
+  width           Float    // in feet
+  height          Float?   // in feet
+  gvwr            Int?     // Gross Vehicle Weight Rating (lbs)
+  capacity        Int?     // payload capacity (lbs)
+  axles           Int?     // number of axles
+
+  // Pricing
+  msrp            Float    // Manufacturer's Suggested Retail Price
+  salePrice       Float    // Current sale price
+  cost            Float    // Dealer cost (sensitive!)
+
+  // Status
+  status          String   @default("available") // "available", "sold", "reserved", "pending"
+  location        String?  // Physical location (lot, warehouse)
+
+  // Media
+  images          String[] // Array of image URLs
+  description     String?  @db.Text
+  features        String[] // Array of feature strings
+
+  // Metadata
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  createdBy       String?  // User ID who added it
+  soldAt          DateTime?
+  soldBy          String?  // Salesperson ID who sold it
+
+  // Relations
+  deals           Deal[]
+  creditApps      CreditApplication[]
+
+  @@index([status])
+  @@index([category])
+  @@index([manufacturer])
+  @@index([soldBy])
+}
+
+// CRM - Customer Relationship Management
+model Customer {
+  id              String   @id @default(cuid())
+
+  // Personal Info
+  firstName       String
+  lastName        String
+  email           String   @unique
+  phone           String
+
+  // Address
+  street          String?
+  city            String?
+  state           String?
+  zipcode         String?
+
+  // Business Info (for commercial customers)
+  companyName     String?
+  businessType    String?  // "individual", "business", "contractor"
+
+  // Lead Info
+  source          String?  // "website", "referral", "walk-in", "phone"
+  assignedTo      String?  // Salesperson ID
+  status          String   @default("lead") // "lead", "contacted", "qualified", "negotiating", "won", "lost"
+
+  // Tags for segmentation
+  tags            String[]
+
+  // Notes
+  notes           String?  @db.Text
+
+  // Metadata
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  lastContactedAt DateTime?
+
+  // Relations
+  deals           Deal[]
+  creditApps      CreditApplication[]
+  activities      Activity[]
+  emails          Email[]
+
+  @@index([email])
+  @@index([status])
+  @@index([assignedTo])
+}
+
+// Deal/Opportunity Tracking
+model Deal {
+  id              String   @id @default(cuid())
+
+  // Customer & Trailer
+  customerId      String
+  trailerId       String?  // Nullable in case of custom orders
+
+  // Deal Info
+  dealNumber      String   @unique
+  status          String   @default("pending") // "pending", "financing", "approved", "closed", "lost"
+  dealType        String   // "cash", "finance", "trade"
+
+  // Pricing
+  offeredPrice    Float
+  finalPrice      Float?
+  tradeInValue    Float?
+  tradeInDesc     String?  @db.Text
+  deposit         Float?
+
+  // Finance Info
+  financeAmount   Float?
+  downPayment     Float?
+  apr             Float?
+  term            Int?     // months
+  monthlyPayment  Float?
+
+  // Ownership
+  salespersonId   String
+  managerId       String?  // Manager who approved
+
+  // Timeline
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  closedAt        DateTime?
+  expectedCloseDate DateTime?
+
+  // Notes
+  notes           String?  @db.Text
+
+  // Relations
+  customer        Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  trailer         Trailer? @relation(fields: [trailerId], references: [id])
+
+  @@index([customerId])
+  @@index([trailerId])
+  @@index([salespersonId])
+  @@index([status])
+}
+
+// Credit Application System
+model CreditApplication {
+  id              String   @id @default(cuid())
+  appNumber       String   @unique
+
+  // Customer Info
+  customerId      String
+  trailerId       String?
+
+  // Application Details
+  requestedAmount Float
+  requestedTerm   Int      // months
+
+  // Personal Info
+  ssn             String?  // Encrypted! Handle with care
+  dob             DateTime?
+  driverLicense   String?
+  dlState         String?
+
+  // Employment
+  employer        String?
+  jobTitle        String?
+  employmentYears Int?
+  monthlyIncome   Float?
+
+  // Housing
+  housingStatus   String?  // "own", "rent", "other"
+  monthlyPayment  Float?
+  yearsAtAddress  Int?
+
+  // References
+  references      Json?    // Array of reference objects
+
+  // Status
+  status          String   @default("pending") // "pending", "submitted", "approved", "declined"
+  submittedAt     DateTime?
+  decidedAt       DateTime?
+
+  // Approval Details
+  approvedAmount  Float?
+  approvedTerm    Int?
+  approvedApr     Float?
+  lender          String?  // Which finance company approved
+
+  // Notes
+  notes           String?  @db.Text
+
+  // Metadata
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  createdBy       String   // Salesperson who created it
+
+  // Relations
+  customer        Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  trailer         Trailer? @relation(fields: [trailerId], references: [id])
+
+  @@index([customerId])
+  @@index([status])
+  @@index([createdBy])
+}
+
+// Activity Tracking (for CRM)
+model Activity {
+  id              String   @id @default(cuid())
+
+  // Related To
+  customerId      String?
+  userId          String?  // User who performed activity
+
+  // Activity Details
+  type            String   // "call", "email", "meeting", "note", "task"
+  subject         String
+  description     String?  @db.Text
+
+  // Status (for tasks)
+  status          String?  // "pending", "completed", "cancelled"
+  dueDate         DateTime?
+  completedAt     DateTime?
+
+  // Metadata
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  customer        Customer? @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@index([customerId])
+  @@index([userId])
+  @@index([type])
+  @@index([dueDate])
+}
+
+// Email System
+model Email {
+  id              String   @id @default(cuid())
+
+  // Email Details
+  from            String
+  to              String[]
+  cc              String[]
+  bcc             String[]
+  subject         String
+  body            String   @db.Text
+  htmlBody        String?  @db.Text
+
+  // Attachments
+  attachments     Json?    // Array of attachment metadata
+
+  // Status
+  status          String   @default("draft") // "draft", "sent", "failed", "scheduled"
+  sentAt          DateTime?
+  scheduledFor    DateTime?
+
+  // Tracking
+  opened          Boolean  @default(false)
+  openedAt        DateTime?
+  clicked         Boolean  @default(false)
+  clickedAt       DateTime?
+
+  // Relations
+  customerId      String?
+  userId          String   // User who sent/created
+
+  // Template
+  templateId      String?
+
+  // Metadata
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  customer        Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+
+  @@index([customerId])
+  @@index([userId])
+  @@index([status])
+  @@index([sentAt])
+}
+
+// Email Templates
+model EmailTemplate {
+  id              String   @id @default(cuid())
+  name            String
+  subject         String
+  body            String   @db.Text
+  htmlBody        String?  @db.Text
+
+  // Variables (e.g., {{firstName}}, {{trailerModel}})
+  variables       String[]
+
+  // Category
+  category        String?  // "follow-up", "thank-you", "reminder", "marketing"
+
+  // Metadata
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  createdBy       String
+
+  @@index([category])
+}
