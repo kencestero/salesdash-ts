@@ -1,12 +1,12 @@
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { prisma } from "./prisma";
 import { generateUniqueSalespersonCode } from "./salespersonCode";
+import { CustomPrismaAdapter } from "./customPrismaAdapter";
 import bcrypt from "bcryptjs";
 
 export const authOptions = {
-  adapter: PrismaAdapter(prisma),
+  adapter: CustomPrismaAdapter(prisma),
   session: {
     strategy: "jwt" as const, // Changed to JWT for credentials support
   },
@@ -69,10 +69,34 @@ export const authOptions = {
       // Check if user already exists in database
       const existingUser = await prisma.user.findUnique({
         where: { email: user.email },
+        include: { profile: true },
       });
 
-      // If existing user, allow login
+      // If existing user, check if email is verified
       if (existingUser) {
+        // For OAuth users, if they're signing in again and email wasn't verified, verify it now
+        if (account?.provider && !existingUser.emailVerified) {
+          await prisma.user.update({
+            where: { id: existingUser.id },
+            data: { emailVerified: new Date() },
+          });
+
+          // Mark as member if not already
+          if (existingUser.profile && !existingUser.profile.member) {
+            await prisma.userProfile.update({
+              where: { userId: existingUser.id },
+              data: { member: true },
+            });
+          }
+          console.log("✅ Verified OAuth user email");
+        }
+
+        // Block access if email not verified for credentials login
+        if (!account?.provider && !existingUser.emailVerified) {
+          console.log("❌ Email not verified - blocking login");
+          return `/en/auth/verify-email?email=${encodeURIComponent(user.email)}&error=not_verified`;
+        }
+
         console.log("✅ Existing user - login allowed");
         return true;
       }
@@ -123,7 +147,7 @@ export const authOptions = {
                 zipcode: zipcode ? decodeURIComponent(zipcode) : undefined,
                 salespersonCode,
                 role: joinRole as "owner" | "manager" | "salesperson",
-                member: true,
+                member: false, // Not a member until email verified
               },
             });
 
@@ -153,6 +177,12 @@ export const authOptions = {
         // Clear the join cookies
         cookies().delete("join_ok");
         cookies().delete("join_role");
+
+        // For new OAuth signups, redirect to verification page
+        if (account?.provider) {
+          console.log("🔄 Redirecting new OAuth user to verification page");
+          return `/en/auth/verify-email?email=${encodeURIComponent(user.email)}`;
+        }
       }
 
       return true;

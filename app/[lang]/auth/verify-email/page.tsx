@@ -28,12 +28,31 @@ export default function VerifyEmailPage() {
   };
 
   const handleResend = async () => {
+    if (!email) return;
+
     setResending(true);
-    // TODO: Call API to resend verification email
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    setResending(false);
-    setCountdown(120);
-    setCanResend(false);
+
+    try {
+      const res = await fetch("/api/auth/resend-verification", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        alert(data.message || "Verification email sent!");
+        setCountdown(120);
+        setCanResend(false);
+      } else {
+        alert(data.message || "Failed to resend email");
+      }
+    } catch (error) {
+      alert("Failed to resend verification email");
+    } finally {
+      setResending(false);
+    }
   };
 
   const handleOpenEmail = () => {
