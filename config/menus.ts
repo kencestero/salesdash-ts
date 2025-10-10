@@ -43,8 +43,6 @@ import {
   CustomIcon,
   Mail,
   Sheild as Shield,
-  Cart,
-  ClipBoard,
   Users,
 } from "@/components/svg";
 
