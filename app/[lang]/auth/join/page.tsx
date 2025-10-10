@@ -111,8 +111,9 @@ export default function RegisterPage() {
     });
 
     if (res.ok) {
-      // Successfully created account - redirect to login
-      window.location.href = `/${DEFAULT_LANG}/auth/login?registered=true`;
+      const data = await res.json();
+      // Successfully created account - redirect to verify email page
+      window.location.href = `/${DEFAULT_LANG}/auth/verify-email?email=${encodeURIComponent(email)}`;
     } else {
       const data = await res.json().catch(() => ({}));
       setErr(data?.message || "Failed to create account");

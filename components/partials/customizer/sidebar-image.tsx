@@ -9,6 +9,7 @@ import { hslToHex, hexToRGB } from "@/lib/utils";
 const SidebarImage = () => {
   const { sidebarBg, setSidebarBg } = useSidebar();
   const [selectedFiles, setSelectedFiles] = useState([
+    "/images/mjsidebar.webp", // Default MJ Cargo background
     "/images/all-img/img-2.jpeg",
     "/images/all-img/img-1.jpeg",
   ]);
