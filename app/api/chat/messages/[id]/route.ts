@@ -32,8 +32,9 @@ export async function GET(request: NextRequest, response: any) {
       return NextResponse.json({ message: "Contact not found" }, { status: 404 });
     }
 
-    // Get messages from Firebase
-    const chatId = `chat_${session.user.id}_${contactId}`;
+    // Get messages from Firebase with consistent chat ID
+    const [userId1, userId2] = [session.user.id, contactId].sort();
+    const chatId = `chat_${userId1}_${userId2}`;
     const chatRef = doc(db, "chats", chatId);
     const messagesRef = collection(chatRef, "messages");
     const messagesQuery = query(messagesRef, orderBy("time", "asc"));
@@ -75,7 +76,7 @@ export async function GET(request: NextRequest, response: any) {
 }
 
 export async function DELETE(request: NextRequest, response: any) {
-  const session = await auth();
+  const session = await getServerSession(authOptions);
 
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

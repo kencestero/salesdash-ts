@@ -43,6 +43,9 @@ import {
   CustomIcon,
   Mail,
   Sheild as Shield,
+  Cart,
+  ClipBoard,
+  Users,
 } from "@/components/svg";
 
 
@@ -810,6 +813,32 @@ export const menusConfig = {
             title: "Analytics",
             href: "/dashboard",
             icon: Graph,
+          },
+        ],
+      },
+      {
+        title: "Sales Tools",
+        icon: Cart,
+        child: [
+          {
+            title: "Inventory",
+            icon: Stacks2,
+            href: "/inventory",
+          },
+          {
+            title: "Finance Calculator",
+            icon: ChartBar,
+            href: "/finance",
+          },
+          {
+            title: "Credit Applications",
+            icon: ClipBoard,
+            href: "/credit",
+          },
+          {
+            title: "Customers (CRM)",
+            icon: Users,
+            href: "/customers",
           },
         ],
       },
@@ -1627,6 +1656,30 @@ export const menusConfig = {
             icon: Graph,
           },
         ],
+      },
+      {
+        isHeader: true,
+        title: "Sales Tools",
+      },
+      {
+        title: "Inventory",
+        icon: Stacks2,
+        href: "/inventory",
+      },
+      {
+        title: "Finance Calculator",
+        icon: ChartBar,
+        href: "/finance",
+      },
+      {
+        title: "Credit Applications",
+        icon: ClipBoard,
+        href: "/credit",
+      },
+      {
+        title: "Customers (CRM)",
+        icon: Users,
+        href: "/customers",
       },
       {
         isHeader: true,

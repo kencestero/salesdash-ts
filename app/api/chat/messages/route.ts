@@ -17,8 +17,9 @@ export async function POST(request: NextRequest, response: NextResponse) {
   const { message, contact, replayMetadata } = obj;
 
   try {
-    // Create or get chat document
-    const chatId = `chat_${session.user.id}_${contact.id}`;
+    // Create or get chat document with consistent ID regardless of sender
+    const [userId1, userId2] = [session.user.id, contact.id].sort();
+    const chatId = `chat_${userId1}_${userId2}`;
     const chatRef = doc(db, "chats", chatId);
 
     // Create message data
