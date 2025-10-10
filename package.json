@@ -132,6 +132,7 @@
     "react-resizable-panels": "^0.0.55",
     "react-select": "^5.8.0",
     "react-shepherd": "^4.2.0",
+    "react-signature-canvas": "1.1.0-alpha.2",
     "react-syntax-highlighter": "^15.5.0",
     "react-wrap-balancer": "^1.1.0",
     "reactflow": "^11.10.4",

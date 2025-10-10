@@ -1,41 +1,43 @@
-const { PrismaClient } = require('@prisma/client');
+// Quick script to check if user exists
+const { PrismaClient } = require('../lib/generated/prisma');
 const prisma = new PrismaClient();
 
-async function main() {
-  const user = await prisma.user.findUnique({
-    where: { email: 'kencestero@gmail.com' },
-    include: { userProfile: true }
-  });
+async function checkUser() {
+  try {
+    const email = process.argv[2];
+    if (!email) {
+      console.log('Usage: node check-user.js <email>');
+      process.exit(1);
+    }
 
-  if (user) {
-    console.log('\n✅ User exists:');
-    console.log('ID:', user.id);
-    console.log('Email:', user.email);
-    console.log('Email Verified:', user.emailVerified);
-    console.log('Name:', user.name);
-    console.log('\nProfile:');
-    console.log('Salesperson Code:', user.userProfile?.salespersonCode);
-    console.log('Role:', user.userProfile?.role);
-    console.log('Member:', user.userProfile?.member);
-  } else {
-    console.log('\n❌ User does not exist');
+    const user = await prisma.user.findUnique({
+      where: { email },
+      include: { profile: true },
+    });
+
+    if (user) {
+      console.log('✅ User found!');
+      console.log('ID:', user.id);
+      console.log('Email:', user.email);
+      console.log('Name:', user.name);
+      console.log('Email Verified:', user.emailVerified ? 'Yes' : 'No');
+      console.log('Has Password:', user.password ? 'Yes' : 'No');
+      if (user.profile) {
+        console.log('Role:', user.profile.role);
+        console.log('Salesperson Code:', user.profile.salespersonCode);
+        console.log('Member:', user.profile.member ? 'Yes' : 'No');
+      } else {
+        console.log('⚠️ No profile found');
+      }
+    } else {
+      console.log('❌ No user found with email:', email);
+      console.log('You need to sign up first!');
+    }
+  } catch (error) {
+    console.error('Error:', error.message);
+  } finally {
+    await prisma.$disconnect();
   }
-
-  // Check for verification token
-  const token = await prisma.verificationToken.findFirst({
-    where: { identifier: 'kencestero@gmail.com' },
-    orderBy: { expires: 'desc' }
-  });
-
-  if (token) {
-    console.log('\n✅ Verification token exists:');
-    console.log('Token:', token.token);
-    console.log('Expires:', token.expires);
-  } else {
-    console.log('\n❌ No verification token found');
-  }
-
-  await prisma.$disconnect();
 }
 
-main().catch(console.error);
+checkUser();

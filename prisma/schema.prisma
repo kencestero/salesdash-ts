@@ -247,15 +247,25 @@ model CreditApplication {
   id              String   @id @default(cuid())
   appNumber       String   @unique
 
+  // Shareable Link
+  shareToken      String?  @unique // For public access
+  shareEnabled    Boolean  @default(true)
+  expiresAt       DateTime? // Optional expiration
+
   // Customer Info
-  customerId      String
+  customerId      String?  // Optional - public forms may create new customers
   trailerId       String?
 
-  // Application Details
-  requestedAmount Float
-  requestedTerm   Int      // months
+  // Personal Info (from form)
+  firstName       String
+  lastName        String
+  email           String
+  phone           String
+  street          String?
+  city            String?
+  state           String?
+  zipcode         String?
 
-  // Personal Info
   ssn             String?  // Encrypted! Handle with care
   dob             DateTime?
   driverLicense   String?
@@ -272,11 +282,25 @@ model CreditApplication {
   monthlyPayment  Float?
   yearsAtAddress  Int?
 
+  // Equipment Details
+  requestedAmount Float?
+  requestedTerm   Int?      // months
+  equipmentType   String?   // "utility", "dump", "enclosed", etc.
+  equipmentDesc   String?   @db.Text
+
   // References
   references      Json?    // Array of reference objects
 
+  // E-Signature & Legal
+  signatureData   String?  @db.Text // Base64 signature image
+  signedAt        DateTime?
+  ipAddress       String?
+  userAgent       String?
+  legalConsent    Boolean  @default(false)
+  legalText       String?  @db.Text // What they agreed to
+
   // Status
-  status          String   @default("pending") // "pending", "submitted", "approved", "declined"
+  status          String   @default("pending") // "pending", "submitted", "approved", "declined", "needs_review"
   submittedAt     DateTime?
   decidedAt       DateTime?
 
@@ -292,15 +316,17 @@ model CreditApplication {
   // Metadata
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
-  createdBy       String   // Salesperson who created it
+  createdBy       String?  // Salesperson who created it (nullable for public submissions)
 
   // Relations
-  customer        Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  customer        Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
   trailer         Trailer? @relation(fields: [trailerId], references: [id])
 
   @@index([customerId])
   @@index([status])
   @@index([createdBy])
+  @@index([shareToken])
+  @@index([email])
 }
 
 // Activity Tracking (for CRM)

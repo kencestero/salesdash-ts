@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, Search, FileText, CheckCircle, XCircle, Clock } from "lucide-react";
+import { Plus, Search, FileText, CheckCircle, XCircle, Clock, Link2, Copy, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { nanoid } from "nanoid";
 import {
   Card,
   CardContent,
@@ -31,13 +32,16 @@ import {
 interface CreditApp {
   id: string;
   appNumber: string;
-  customer: {
+  customer?: {
     firstName: string;
     lastName: string;
     email: string;
-  };
-  requestedAmount: number;
-  requestedTerm: number;
+  } | null;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  requestedAmount?: number;
+  requestedTerm?: number;
   status: string;
   createdAt: string;
   decidedAt?: string;
@@ -51,6 +55,7 @@ export default function CreditApplicationsPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [copiedToken, setCopiedToken] = useState<string | null>(null);
 
   useEffect(() => {
     fetchApplications();
@@ -74,11 +79,14 @@ export default function CreditApplicationsPage() {
 
   const filteredApplications = applications.filter((app) => {
     const search = searchTerm.toLowerCase();
+    const firstName = app.customer?.firstName || app.firstName || "";
+    const lastName = app.customer?.lastName || app.lastName || "";
+    const email = app.customer?.email || app.email || "";
     return (
       app.appNumber.toLowerCase().includes(search) ||
-      app.customer.firstName.toLowerCase().includes(search) ||
-      app.customer.lastName.toLowerCase().includes(search) ||
-      app.customer.email.toLowerCase().includes(search)
+      firstName.toLowerCase().includes(search) ||
+      lastName.toLowerCase().includes(search) ||
+      email.toLowerCase().includes(search)
     );
   });
 
@@ -119,19 +127,75 @@ export default function CreditApplicationsPage() {
     declined: applications.filter((a) => a.status === "declined").length,
   };
 
+  const generateShareLink = () => {
+    const token = nanoid(16);
+    const baseUrl = window.location.origin;
+    const shareUrl = `${baseUrl}/apply/${token}`;
+    return { token, shareUrl };
+  };
+
+  const copyShareLink = async () => {
+    const { token, shareUrl } = generateShareLink();
+
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setCopiedToken(token);
+      setTimeout(() => setCopiedToken(null), 3000);
+    } catch (error) {
+      console.error("Failed to copy link:", error);
+    }
+  };
+
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-white">Credit Applications</h1>
-          <p className="text-gray-400">Manage customer financing applications</p>
+          <p className="text-gray-400">Share application links with customers</p>
         </div>
-        <Button className="bg-[#f5a623] hover:bg-[#e09612] text-white">
-          <Plus className="mr-2 h-4 w-4" />
-          New Application
-        </Button>
+        <div className="flex gap-3">
+          <Button
+            onClick={copyShareLink}
+            className="bg-[#f5a623] hover:bg-[#e09612] text-white"
+          >
+            {copiedToken ? (
+              <>
+                <Check className="mr-2 h-4 w-4" />
+                Link Copied!
+              </>
+            ) : (
+              <>
+                <Link2 className="mr-2 h-4 w-4" />
+                Copy Application Link
+              </>
+            )}
+          </Button>
+        </div>
       </div>
+
+      {/* Info Card */}
+      <Card className="bg-[#1a1d29] border-gray-700">
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Link2 className="h-5 w-5 text-[#f5a623]" />
+            <CardTitle className="text-white">Share Credit Application</CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-gray-300">
+            Click "Copy Application Link" above to generate a unique link you can share with customers.
+            They can fill out the credit application without needing to log in.
+          </p>
+          <div className="flex items-start gap-2 p-3 bg-blue-900/20 border border-blue-700/30 rounded-lg">
+            <FileText className="h-5 w-5 text-blue-400 mt-0.5" />
+            <div className="text-sm text-blue-300">
+              <strong>How it works:</strong> Share the link via text, email, or in person.
+              Customers complete the form with e-signature, and submissions appear below automatically.
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -231,22 +295,33 @@ export default function CreditApplicationsPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredApplications.map((app) => (
+                  {filteredApplications.map((app) => {
+                    const firstName = app.customer?.firstName || app.firstName || "N/A";
+                    const lastName = app.customer?.lastName || app.lastName || "";
+                    const email = app.customer?.email || app.email || "N/A";
+
+                    return (
                     <TableRow key={app.id} className="border-gray-700">
                       <TableCell className="font-medium text-white">
                         {app.appNumber}
                       </TableCell>
                       <TableCell className="text-white">
                         <div className="font-semibold">
-                          {app.customer.firstName} {app.customer.lastName}
+                          {firstName} {lastName}
                         </div>
-                        <div className="text-sm text-gray-400">{app.customer.email}</div>
+                        <div className="text-sm text-gray-400">{email}</div>
                       </TableCell>
                       <TableCell className="text-white">
-                        <div>${app.requestedAmount.toLocaleString()}</div>
-                        <div className="text-xs text-gray-400">
-                          {app.requestedTerm} months
-                        </div>
+                        {app.requestedAmount ? (
+                          <>
+                            <div>${app.requestedAmount.toLocaleString()}</div>
+                            <div className="text-xs text-gray-400">
+                              {app.requestedTerm} months
+                            </div>
+                          </>
+                        ) : (
+                          <span className="text-gray-500">—</span>
+                        )}
                       </TableCell>
                       <TableCell className="text-white">
                         {app.approvedAmount ? (
@@ -282,7 +357,8 @@ export default function CreditApplicationsPage() {
                         </Button>
                       </TableCell>
                     </TableRow>
-                  ))}
+                    );
+                  })}
                 </TableBody>
               </Table>
             </div>
