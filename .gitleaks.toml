@@ -62,6 +62,7 @@ paths = [
   '''\.env\.template$''',
   '''\.env\.local\.template$''',
   '''SECURITY_INCIDENT_RESPONSE\.md$''',
+  '''INCIDENT_RESPONSE_PLAN\.md$''',
   '''EMAIL_SYSTEM_SETUP\.md$''',
   '''FIREBASE_SETUP\.md$''',
   '''WALKTHROUGH\.md$''',
@@ -76,4 +77,6 @@ regexes = [
   '''localhost:3000''',
   '''sk_test_[a-zA-Z0-9]+''',  # Test keys
   '''pk_test_[a-zA-Z0-9]+''',
+  '''postgresql://\.\.\.''',  # Placeholder database URLs
+  '''mysql://\.\.\.''',
 ]
