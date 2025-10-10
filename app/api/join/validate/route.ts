@@ -6,8 +6,17 @@ export async function POST(req: Request) {
   const { code } = await req.json().catch(() => ({}));
   if (!code) return NextResponse.json({ message: "Missing code" }, { status: 400 });
 
+  // DEBUG: Log what we're checking
+  console.log('🔍 Validating code:', code.trim());
+  console.log('📅 Checking against codes:', {
+    salesperson: validateCodeAndGetRole('__SALESPERSON__'),
+    manager: validateCodeAndGetRole('__MANAGER__'),
+    owner: validateCodeAndGetRole('__OWNER__'),
+  });
+
   // Validate code and get role
   const role = validateCodeAndGetRole(code.trim());
+  console.log('✅ Role found:', role);
 
   if (!role) {
     return NextResponse.json({ message: "Wrong or expired code" }, { status: 401 });
