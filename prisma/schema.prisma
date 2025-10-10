@@ -136,6 +136,7 @@ model Trailer {
   // Relations
   deals           Deal[]
   creditApps      CreditApplication[]
+  quotes          Quote[]
 
   @@index([status])
   @@index([category])
@@ -184,6 +185,7 @@ model Customer {
   creditApps      CreditApplication[]
   activities      Activity[]
   emails          Email[]
+  quotes          Quote[]
 
   @@index([email])
   @@index([status])
@@ -399,4 +401,153 @@ model EmailTemplate {
   createdBy       String
 
   @@index([category])
+}
+
+// Finance Quote System
+enum PricingMode {
+  CASH
+  FINANCE
+  RTO
+}
+
+enum QuoteStatus {
+  DRAFT
+  SENT
+  ACCEPTED
+  CONVERTED
+  EXPIRED
+  REJECTED
+}
+
+enum QuoteAction {
+  CREATED
+  VIEWED_BY_REP
+  VIEWED_BY_CUSTOMER
+  EDITED
+  LINK_GENERATED
+  LINK_CLICKED
+  PDF_GENERATED
+  PDF_DOWNLOADED
+  EMAIL_SENT
+  SMS_SENT
+  FORMULA_COPIED
+  ACCEPTED
+  REJECTED
+  EXPIRED
+  CONVERTED_TO_SALE
+}
+
+model Quote {
+  id              String       @id @default(cuid())
+  userId          String       // Rep who created the quote
+  salespersonCode String       // Rep's unique code for filtering
+
+  // Related entities
+  trailerId       String?
+  trailer         Trailer?     @relation(fields: [trailerId], references: [id])
+
+  customerId      String?
+  customer        Customer?    @relation(fields: [customerId], references: [id])
+
+  // Pricing mode
+  mode            PricingMode  @default(FINANCE)
+
+  // Shared fields
+  unitPrice       Float
+  downPayment     Float        @default(0)
+  taxRate         Float        // Percentage (e.g., 8.25)
+  fees            Float        @default(0)
+  termMonths      Int
+
+  // Finance-specific fields
+  apr             Float?
+  monthlyPayment  Float?
+  totalInterest   Float?
+  principal       Float?
+
+  // RTO-specific fields
+  monthlyRent     Float?
+  monthlyTax      Float?
+  docFee          Float?
+  buyoutFee       Float?
+  rtoPrice        Float?
+
+  // Cash-specific
+  totalCash       Float?
+
+  // Status and lifecycle
+  status          QuoteStatus  @default(DRAFT)
+  expiresAt       DateTime
+
+  // Sharing settings
+  shareToken      String?      @unique
+  shareEnabled    Boolean      @default(false)
+  visibilitySettings Json?     // { showAPR: false, showFees: true, ... }
+
+  // Metadata
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  // Relations
+  activities      QuoteActivity[]
+
+  @@index([salespersonCode])
+  @@index([status])
+  @@index([trailerId])
+  @@index([customerId])
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model QuoteActivity {
+  id            String      @id @default(cuid())
+  quoteId       String
+  quote         Quote       @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+
+  // Actor information
+  userId        String?
+  salespersonCode String?
+  actorType     String      // "REP" | "CUSTOMER" | "SYSTEM"
+  actorName     String?
+
+  // Action details
+  action        QuoteAction
+  changes       Json?       // Field-level changes for EDITED action
+
+  // Request metadata
+  ipAddress     String?
+  userAgent     String?
+  durationMs    Int?        // Time spent viewing (for VIEWED actions)
+
+  // Timestamp
+  occurredAt    DateTime    @default(now())
+
+  @@index([quoteId])
+  @@index([salespersonCode])
+  @@index([action])
+  @@index([occurredAt])
+}
+
+model PricingPolicy {
+  id                    Int      @id @default(1)
+
+  // RTO defaults
+  rtoBaseMarkupUsd      Float    @default(1400)
+  rtoMonthlyFactor      Float    @default(0.035)  // 3.5%
+  rtoMinDownUsd         Float    @default(200)
+  rtoDocFeeUsd          Float    @default(99)
+  rtoBuyoutFeeUsd       Float    @default(250)
+  rtoDefaultTermMonths  Int      @default(36)
+
+  // Finance defaults
+  defaultApr            Float    @default(8.99)
+  defaultTermMonths     Int      @default(60)
+
+  // Cash defaults
+  defaultFees           Float    @default(125)
+
+  // Quote settings
+  quoteExpirationDays   Int      @default(90)
+
+  updatedAt             DateTime @updatedAt
 }
