@@ -6,7 +6,21 @@ export async function POST(req: Request) {
   const { code } = await req.json().catch(() => ({}));
   if (!code) return NextResponse.json({ message: "Missing code" }, { status: 400 });
 
-  const role = validateCodeAndGetRole(code);
+  // TEMPORARY: Manual override for testing
+  const testCodes: Record<string, string> = {
+    'OWNER1': 'owner',
+    'MGR001': 'manager',
+    'REP001': 'salesperson'
+  };
+
+  let role = validateCodeAndGetRole(code);
+
+  // If normal validation fails, check test codes
+  if (!role && testCodes[code.toUpperCase()]) {
+    role = testCodes[code.toUpperCase()];
+    console.log('✅ Using test code:', code, '→', role);
+  }
+
   if (!role) {
     return NextResponse.json({ message: "Wrong or expired code" }, { status: 401 });
   }
