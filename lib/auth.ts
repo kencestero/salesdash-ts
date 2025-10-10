@@ -2,13 +2,12 @@ import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { prisma } from "./prisma";
 import { generateUniqueSalespersonCode } from "./salespersonCode";
-import { CustomPrismaAdapter } from "./customPrismaAdapter";
 import bcrypt from "bcryptjs";
 
 export const authOptions = {
-  adapter: CustomPrismaAdapter(prisma),
+  // Note: No adapter needed - we're using JWT sessions and handling user creation in signIn callback
   session: {
-    strategy: "jwt" as const, // Changed to JWT for credentials support
+    strategy: "jwt" as const, // JWT for credentials support
   },
   providers: [
     CredentialsProvider({
@@ -178,8 +177,25 @@ export const authOptions = {
         cookies().delete("join_ok");
         cookies().delete("join_role");
 
-        // For new OAuth signups, redirect to verification page
+        // For new OAuth signups, create verification token and redirect to verification page
         if (account?.provider) {
+          console.log("🔄 Creating verification token for new OAuth user");
+
+          // Generate verification token
+          const verificationToken = `${Math.random().toString(36).substring(2)}${Date.now().toString(36)}`;
+          const tokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
+          await prisma.verificationToken.create({
+            data: {
+              identifier: user.email,
+              token: verificationToken,
+              expires: tokenExpiry,
+            },
+          });
+
+          const verificationUrl = `${process.env.NEXTAUTH_URL}/api/auth/verify?token=${verificationToken}`;
+          console.log("📧 Verification URL:", verificationUrl);
+
           console.log("🔄 Redirecting new OAuth user to verification page");
           return `/en/auth/verify-email?email=${encodeURIComponent(user.email)}`;
         }
