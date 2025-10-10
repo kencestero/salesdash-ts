@@ -58,6 +58,7 @@ export async function POST(req: Request) {
       data: {
         email,
         name: `${firstName} ${lastName}`,
+        password: hashedPassword, // Store hashed password
         emailVerified: null, // NOT verified yet
       },
     });
