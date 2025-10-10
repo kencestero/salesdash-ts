@@ -76,3 +76,7 @@ AUTH-FIX-*.md
 *-ROTATION-*.md
 update-vercel-secrets.md
 .env.vercel.*
+.env.production.test
+*.test.env
+scripts/verify-user.js
+scripts/*-verify*.js
