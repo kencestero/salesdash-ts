@@ -176,6 +176,34 @@ const LogInForm = () => {
           {isPending ? "Loading..." : "Sign In"}
         </Button>
       </form>
+
+      <div className="mt-6 2xl:mt-8">
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-default-300"></div>
+          </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="px-4 bg-background text-default-600">Or continue with</span>
+          </div>
+        </div>
+
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full mt-4 flex items-center justify-center gap-3 border-default-300 hover:bg-default-50"
+          disabled={isPending}
+          size={!isDesktop2xl ? "lg" : "md"}
+          onClick={() =>
+            signIn("google", {
+              callbackUrl: `/${DEFAULT_LANG}/dashboard`,
+            })
+          }
+        >
+          <Image src={googleIcon} alt="google" className="w-5 h-5" priority={true} />
+          <span>Sign in with Google</span>
+        </Button>
+      </div>
+
       <div className="mt-5 2xl:mt-8 text-center text-base text-default-600">
         🔑 Got your Secret Code?{" "}
         <Link href={`/${DEFAULT_LANG}/auth/join`} className="text-primary">
