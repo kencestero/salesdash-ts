@@ -176,53 +176,6 @@ const LogInForm = () => {
           {isPending ? "Loading..." : "Sign In"}
         </Button>
       </form>
-      <div className="mt-6 xl:mt-8 flex flex-wrap justify-center gap-4">
-        <Button
-          type="button"
-          size="icon"
-          variant="outline"
-          className="rounded-full  border-default-300 hover:bg-transparent"
-          disabled={isPending}
-          onClick={() =>
-            signIn("google", {
-              callbackUrl: `/${DEFAULT_LANG}/dashboard`,
-            })
-          }
-        >
-          <Image src={googleIcon} alt="google" className="w-5 h-5" priority={true} />
-        </Button>
-        <Button
-          type="button"
-          size="icon"
-          variant="outline"
-          className="rounded-full  border-default-300 hover:bg-transparent"
-          disabled={isPending}
-          onClick={() =>
-            signIn("github", {
-              callbackUrl: `/${DEFAULT_LANG}/dashboard`,
-              redirect: false,
-            })
-          }
-        >
-          <Image src={GithubIcon} alt="google" className="w-5 h-5" priority={true} />
-        </Button>
-        <Button
-          type="button"
-          size="icon"
-          variant="outline"
-          className="rounded-full border-default-300 hover:bg-transparent"
-        >
-          <Image src={facebook} alt="google" className="w-5 h-5" priority={true} />
-        </Button>
-        <Button
-          type="button"
-          size="icon"
-          variant="outline"
-          className="rounded-full  border-default-300 hover:bg-transparent"
-        >
-          <Image src={twitter} alt="google" className="w-5 h-5" priority={true} />
-        </Button>
-      </div>
       <div className="mt-5 2xl:mt-8 text-center text-base text-default-600">
         🔑 Got your Secret Code?{" "}
         <Link href={`/${DEFAULT_LANG}/auth/join`} className="text-primary">
