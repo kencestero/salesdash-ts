@@ -70,16 +70,6 @@ export const menusConfig = {
           href: "/dashboard",
           icon: Graph,
         },
-        {
-          title: "Ecommerce",
-          href: "/ecommerce",
-          icon: Cart,
-        },
-        {
-          title: "Project ",
-          href: "/project",
-          icon: ClipBoard,
-        },
       ],
     },
     {
@@ -110,12 +100,6 @@ export const menusConfig = {
           title: "calendar",
           icon: Calendar,
           href: "/calendar",
-        },
-
-        {
-          title: "project",
-          icon: ClipBoard,
-          href: "/projects",
         },
       ],
     },
@@ -370,191 +354,19 @@ export const menusConfig = {
       icon: Files,
       megaMenu: [
         {
-          title: "Authentication",
-          icon: Sheild,
+          title: "Invoice",
+          icon: Files,
           child: [
-            {
-              title: "Sign In 01",
-              href: "/auth/login",
-            },
-            {
-              title: "Sign In 02",
-              href: "/auth/login2",
-            },
-            {
-              title: "Sign In 03",
-              href: "/auth/login3",
-            },
-            {
-              title: "Sign In 04",
-              href: "/auth/login4",
-            },
-            {
-              title: "Sign In 05",
-              href: "/auth/login5",
-            },
-            {
-              title: "Sign Up 01",
-              href: "./auth/register",
-            },
-            {
-              title: "Sign Up 02",
-              href: "/auth/register2",
-            },
-            {
-              title: "Sign Up 03",
-              href: "/auth/register3",
-            },
-            {
-              title: "Sign Up 04",
-              href: "/auth/register4",
-            },
-            {
-              title: "Sign Up 05",
-              href: "/auth/register5",
-            },
-            {
-              title: "Forget Password 01",
-              href: "/auth/forgot",
-            },
-            {
-              title: "Forget Password 02",
-              href: "/auth/forgot2",
-            },
-            {
-              title: "Forget Password 03",
-              href: "/auth/forgot3",
-            },
-            {
-              title: "Forget Password 04",
-              href: "/auth/forgot4",
-            },
-            {
-              title: "Forget Password 05",
-              href: "/auth/forgot5",
-            },
-            {
-              title: "Lock Screen 01",
-              href: "/auth/lock",
-            },
-            {
-              title: "Lock Screen 02",
-              href: "/auth/lock2",
-            },
-            {
-              title: "Lock Screen 03",
-              href: "/auth/lock3",
-            },
-            {
-              title: "Lock Screen 04",
-              href: "/auth/lock4",
-            },
-            {
-              title: "Lock Screen 05",
-              href: "/auth/lock5",
-            },
-            {
-              title: "Two-Step 01",
-              href: "/auth/verify",
-            },
-            {
-              title: "Two-Step 02",
-              href: "/auth/verify2",
-            },
-            {
-              title: "Two-Step 03",
-              href: "/auth/verify3",
-            },
-            {
-              title: "Two-Step 04",
-              href: "/auth/verify4",
-            },
-            {
-              title: "Two-Step 05",
-              href: "/auth/verify5",
-            },
-            {
-              title: "Password Create 01",
-              href: "/auth/create-password",
-            },
-            {
-              title: "Password Create 02",
-              href: "/auth/create-password2",
-            },
-            {
-              title: "Password Create 03",
-              href: "/auth/create-password3",
-            },
-            {
-              title: "Password Create 04",
-              href: "/auth/create-password4",
-            },
-            {
-              title: "Password Create 05",
-              href: "/auth/create-password5",
-            },
-          ],
-        },
-        {
-          title: "Error",
-          icon: Error,
-          child: [
-            {
-              title: "Error 401",
-              href: "/error-page/401",
-            },
-            {
-              title: "Error 403",
-              href: "/error-page/403",
-            },
-            {
-              title: "Error 404",
-              href: "/error-page/404",
-            },
-            {
-              title: "Error 419",
-              href: "/error-page/419",
-            },
-            {
-              title: "Error 429",
-              href: "/error-page/429",
-            },
-            {
-              title: "Error 500",
-              href: "/error-page/500",
-            },
-            {
-              title: "Error 503",
-              href: "/error-page/503",
-            },
-          ],
-        },
-        {
-          title: "Utility",
-          icon: Diamond,
-          child: [
-            {
-              title: "Blank Page",
-              href: "/blank",
-            },
-            {
-              title: "Comming Soon",
-              href: "/utility/comming-soon",
-            },
-            {
-              title: "Under Maintinance",
-              href: "/utility/maintinance",
-            },
             {
               title: "create Invoice",
               href: "/create-invoice",
             },
             {
-              title: "iunvoice-details",
+              title: "invoice-details",
               href: "/invoice-details",
             },
             {
-              title: "iunvoice-list",
+              title: "invoice-list",
               href: "/invoice-list",
             },
           ],
@@ -999,16 +811,6 @@ export const menusConfig = {
             href: "/dashboard",
             icon: Graph,
           },
-          {
-            title: "Ecommerce",
-            href: "/ecommerce",
-            icon: Cart,
-          },
-          {
-            title: "project ",
-            href: "/project",
-            icon: ClipBoard,
-          },
         ],
       },
       {
@@ -1044,23 +846,6 @@ export const menusConfig = {
             title: "calendar",
             icon: Calendar,
             href: "/calendar",
-          },
-
-          {
-            title: "project",
-            icon: ClipBoard,
-            nested: [
-              {
-                title: "project List",
-                icon: ClipBoard,
-                href: "/projects",
-              },
-              {
-                title: "project Details",
-                icon: ClipBoard,
-                href: "/projects/76b99e8a-4d5e-4818-92cb-7932a5b8f42a/overview",
-              },
-            ],
           },
         ],
       },
@@ -1326,205 +1111,6 @@ export const menusConfig = {
         title: "Pages",
         icon: Files,
         child: [
-          {
-            title: "Authentication",
-            icon: Sheild,
-            nested: [
-              {
-                title: "Sign In 01",
-                href: "/auth/login",
-              },
-              {
-                title: "Sign In 02",
-                href: "/auth/login2",
-              },
-              {
-                title: "Sign In 03",
-                href: "/auth/login3",
-              },
-              {
-                title: "Sign In 04",
-                href: "/auth/login4",
-              },
-              {
-                title: "Sign In 05",
-                href: "/auth/login5",
-              },
-              {
-                title: "Sign Up 01",
-                href: "./auth/register",
-              },
-              {
-                title: "Sign Up 02",
-                href: "/auth/register2",
-              },
-              {
-                title: "Sign Up 03",
-                href: "/auth/register3",
-              },
-              {
-                title: "Sign Up 04",
-                href: "/auth/register4",
-              },
-              {
-                title: "Sign Up 05",
-                href: "/auth/register5",
-              },
-              {
-                title: "Forget Password 01",
-                href: "/auth/forgot",
-              },
-              {
-                title: "Forget Password 02",
-                href: "/auth/forgot2",
-              },
-              {
-                title: "Forget Password 03",
-                href: "/auth/forgot3",
-              },
-              {
-                title: "Forget Password 04",
-                href: "/auth/forgot4",
-              },
-              {
-                title: "Forget Password 05",
-                href: "/auth/forgot5",
-              },
-              {
-                title: "Lock Screen 01",
-                href: "/auth/lock",
-              },
-              {
-                title: "Lock Screen 02",
-                href: "/auth/lock2",
-              },
-              {
-                title: "Lock Screen 03",
-                href: "/auth/lock3",
-              },
-              {
-                title: "Lock Screen 04",
-                href: "/auth/lock4",
-              },
-              {
-                title: "Lock Screen 05",
-                href: "/auth/lock5",
-              },
-              {
-                title: "Two-Step 01",
-                href: "/auth/verify",
-              },
-              {
-                title: "Two-Step 02",
-                href: "/auth/verify2",
-              },
-              {
-                title: "Two-Step 03",
-                href: "/auth/verify3",
-              },
-              {
-                title: "Two-Step 04",
-                href: "/auth/verify4",
-              },
-              {
-                title: "Two-Step 05",
-                href: "/auth/verify5",
-              },
-              {
-                title: "Password Create 01",
-                href: "/auth/create-password",
-              },
-              {
-                title: "Password Create 02",
-                href: "/auth/create-password2",
-              },
-              {
-                title: "Password Create 03",
-                href: "/auth/create-password3",
-              },
-              {
-                title: "Password Create 04",
-                href: "/auth/create-password4",
-              },
-              {
-                title: "Password Create 05",
-                href: "/auth/create-password5",
-              },
-            ],
-          },
-          {
-            title: "Error",
-            icon: Error,
-            nested: [
-              {
-                title: "Error 401",
-                href: "/error-page/401",
-              },
-              {
-                title: "Error 403",
-                href: "/error-page/403",
-              },
-              {
-                title: "Error 404",
-                href: "/error-page/404",
-              },
-              {
-                title: "Error 419",
-                href: "/error-page/419",
-              },
-              {
-                title: "Error 429",
-                href: "/error-page/429",
-              },
-              {
-                title: "Error 500",
-                href: "/error-page/500",
-              },
-              {
-                title: "Error 503",
-                href: "/error-page/503",
-              },
-            ],
-          },
-          {
-            title: "Utility",
-            icon: Diamond,
-            nested: [
-              {
-                title: "Blank Page",
-                href: "/blank",
-              },
-              {
-                title: "Comming Soon",
-                href: "/utility/comming-soon",
-              },
-              {
-                title: "Under Maintinance",
-                href: "/utility/maintinance",
-              },
-              {
-                title: "User Profile",
-                child: [
-                  {
-                    title: "Overview",
-                    href: "/user-profile",
-                  },
-                  {
-                    title: "Documents",
-                    href: "/user-profile/documents",
-                  },
-                  {
-                    title: "Activities",
-                    href: "/user-profile/activity",
-                  },
-                  {
-                    title: "Settings",
-                    href: "/user-profile/settings",
-                  },
-                ],
-              },
-            ],
-          },
           {
             title: "Invoice",
             icon: Files,
@@ -2032,23 +1618,13 @@ export const menusConfig = {
         title: "Dashboard",
         icon: DashBoard,
         href: "/dashboard",
-       
-        
+
+
         child: [
           {
             title: "Analytics",
             href: "/dashboard",
             icon: Graph,
-          },
-          {
-            title: "Ecommerce",
-            href: "/ecommerce",
-            icon: Cart,
-          },
-          {
-            title: "Project ",
-            href: "/project",
-            icon: ClipBoard,
           },
         ],
       },
@@ -2082,167 +1658,16 @@ export const menusConfig = {
         href: "/calendar",
       },
 
-      {
-        title: "project",
-        icon: ClipBoard,
-        href: "/projects",
-      },
 
       {
         isHeader: true,
         title: "Pages",
       },
       {
-        title: "Authentication",
-        icon: Sheild,
-        child: [
-          {
-            title: "Sign In 01",
-            href: "/auth/login",
-          },
-          {
-            title: "Sign In 02",
-            href: "/auth/login2",
-          },
-          {
-            title: "Sign In 03",
-            href: "/auth/login3",
-          },
-          {
-            title: "Sign In 04",
-            href: "/auth/login4",
-          },
-          {
-            title: "Sign In 05",
-            href: "/auth/login5",
-          },
-          {
-            title: "Sign Up 01",
-            href: "./auth/register",
-          },
-          {
-            title: "Sign Up 02",
-            href: "/auth/register2",
-          },
-          {
-            title: "Sign Up 03",
-            href: "/auth/register3",
-          },
-          {
-            title: "Sign Up 04",
-            href: "/auth/register4",
-          },
-          {
-            title: "Sign Up 05",
-            href: "/auth/register5",
-          },
-          {
-            title: "Forget Password 01",
-            href: "/auth/forgot",
-          },
-          {
-            title: "Forget Password 02",
-            href: "/auth/forgot2",
-          },
-          {
-            title: "Forget Password 03",
-            href: "/auth/forgot3",
-          },
-          {
-            title: "Forget Password 04",
-            href: "/auth/forgot4",
-          },
-          {
-            title: "Forget Password 05",
-            href: "/auth/forgot5",
-          },
-          {
-            title: "Lock Screen 01",
-            href: "/auth/lock",
-          },
-          {
-            title: "Lock Screen 02",
-            href: "/auth/lock2",
-          },
-          {
-            title: "Lock Screen 03",
-            href: "/auth/lock3",
-          },
-          {
-            title: "Lock Screen 04",
-            href: "/auth/lock4",
-          },
-          {
-            title: "Lock Screen 04",
-            href: "/auth/lock5",
-          },
-          {
-            title: "Two-Step 01",
-            href: "/auth/verify",
-          },
-          {
-            title: "Two-Step 02",
-            href: "/auth/verify2",
-          },
-          {
-            title: "Two-Step 03",
-            href: "/auth/verify3",
-          },
-          {
-            title: "Two-Step 04",
-            href: "/auth/verify4",
-          },
-          {
-            title: "Two-Step 05",
-            href: "/auth/verify5",
-          },
-          {
-            title: "Password Create 01",
-            href: "/auth/create-password",
-          },
-          {
-            title: "Password Create 02",
-            href: "/auth/create-password2",
-          },
-          {
-            title: "Password Create 03",
-            href: "/auth/create-password3",
-          },
-          {
-            title: "Password Create 04",
-            href: "/auth/create-password4",
-          },
-          {
-            title: "Password Create 05",
-            href: "/auth/create-password5",
-          },
-        ],
-      },
-      {
-        title: "Utility",
-        icon: Diamond,
-        href: "#",
-        
-        child: [
-          {
-            title: "Blank Page",
-            href: "/blank",
-          },
-          {
-            title: "Comming Soon",
-            href: "/utility/comming-soon",
-          },
-          {
-            title: "Under Maintinance",
-            href: "/utility/maintinance",
-          },
-        ],
-      },
-      {
         title: "Invoice",
         icon: Files,
         href: "#",
-        
+
         child: [
           {
             title: "Create Invoice",
@@ -2255,43 +1680,6 @@ export const menusConfig = {
           {
             title: "Invoice List",
             href: "/invoice-list",
-          },
-        ],
-      },
-
-      {
-        title: "Error",
-        icon: Error,
-        href: "#",
-        
-        child: [
-          {
-            title: "Error 401",
-            href: "/error-page/401",
-          },
-          {
-            title: "Error 403",
-            href: "/error-page/403",
-          },
-          {
-            title: "Error 404",
-            href: "/error-page/404",
-          },
-          {
-            title: "Error 419",
-            href: "/error-page/419",
-          },
-          {
-            title: "Error 429",
-            href: "/error-page/429",
-          },
-          {
-            title: "Error 500",
-            href: "/error-page/500",
-          },
-          {
-            title: "Error 503",
-            href: "/error-page/503",
           },
         ],
       },
