@@ -15,6 +15,6 @@ export const siteConfig = {
   // sticky, floating, static
   footerType: "static",
   // sticky,  static, hidden
-  sidebarBg: "none",
+  sidebarBg: "/images/mjsidebar.webp", // Default MJ Cargo sidebar background
   radius: 0.5,
 };

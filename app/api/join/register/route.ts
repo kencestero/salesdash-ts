@@ -49,12 +49,16 @@ export async function POST(req: Request) {
     // 4. Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // 5. Create user and profile in a transaction
+    // 5. Generate verification token
+    const verificationToken = `${Math.random().toString(36).substring(2)}${Date.now().toString(36)}`;
+    const tokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
+    // 6. Create user and profile in a transaction
     const user = await prisma.user.create({
       data: {
         email,
         name: `${firstName} ${lastName}`,
-        emailVerified: new Date(), // Auto-verify for now
+        emailVerified: null, // NOT verified yet
       },
     });
 
@@ -72,20 +76,38 @@ export async function POST(req: Request) {
         zipcode: zipcode || null,
         salespersonCode: salespersonCode,
         role: joinRole || "salesperson",
-        member: true, // Mark as verified member
+        member: false, // Not a member until email verified
       },
     });
 
     console.log('✅ UserProfile created');
 
-    // 6. Clear validation cookies
+    // 7. Create verification token
+    await prisma.verificationToken.create({
+      data: {
+        identifier: email,
+        token: verificationToken,
+        expires: tokenExpiry,
+      },
+    });
+
+    console.log('✅ Verification token created');
+
+    // 8. Send verification email
+    const verificationUrl = `${process.env.NEXTAUTH_URL}/en/auth/verify-email?token=${verificationToken}`;
+
+    // TODO: Send actual email here
+    console.log('📧 Verification URL:', verificationUrl);
+
+    // 9. Clear validation cookies
     cookieStore.delete("join_ok");
     cookieStore.delete("join_role");
 
     return NextResponse.json({
       ok: true,
-      message: "Account created successfully",
+      message: "Account created! Check your email to verify.",
       userId: user.id,
+      verificationUrl, // Remove this in production
     });
 
   } catch (error) {
