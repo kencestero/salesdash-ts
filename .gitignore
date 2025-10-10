@@ -67,3 +67,12 @@ backups/
 # misc noise
 next/
 dash-tail@1.0.0
+
+# Security documentation with secrets (NEVER commit these)
+SECURITY-*.md
+SECRET-*.md
+*-SECRETS.md
+AUTH-FIX-*.md
+*-ROTATION-*.md
+update-vercel-secrets.md
+.env.vercel.*
