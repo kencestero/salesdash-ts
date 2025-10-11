@@ -16,6 +16,11 @@ export const metadata = {
     template: `%s - ${siteConfig.name}`,
   },
   description: siteConfig.description,
+  icons: {
+    icon: '/icon.svg',
+    shortcut: '/icon.svg',
+    apple: '/icon.svg',
+  },
 };
 
 export default function RootLayout({ children, params: { lang } }: { children: React.ReactNode; params: { lang: string } }) {

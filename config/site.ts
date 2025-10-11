@@ -2,8 +2,8 @@
 
 
 export const siteConfig = {
-  name: "DashTail Next js Admin Template",
-  description: null,
+  name: "MJ Cargo Sales Dashboard",
+  description: "Sales training platform for MJ Cargo trailer reps",
   theme: "violet",
   layout: "vertical",
   // semi-box, horizontal, vertical
