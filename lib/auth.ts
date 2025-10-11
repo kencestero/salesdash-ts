@@ -101,23 +101,15 @@ export const authOptions = {
       }
 
       // New user: Check for join code validation ONLY if truly new
-      // If user exists (OAuth returning user), skip join code check
-      const existingUser = await prisma.user.findUnique({
-        where: { email: user.email },
-      });
+      // Note: existingUser already checked above, so we're here if user doesn't exist
+      // Only check join code for brand new users
+      const { cookies } = await import("next/headers");
+      const joinCodeValid = cookies().get("join_ok")?.value;
 
-      if (!existingUser) {
-        // Only check join code for brand new users
-        const { cookies } = await import("next/headers");
-        const joinCodeValid = cookies().get("join_ok")?.value;
-
-        if (!joinCodeValid) {
-          console.log("❌ New user without join code - blocking signup");
-          // Redirect to join page by returning a URL string
-          return `/en/auth/join?error=join_code_required`;
-        }
-      } else {
-        console.log("✅ Existing OAuth user - skipping join code check");
+      if (!joinCodeValid) {
+        console.log("❌ New user without join code - blocking signup");
+        // Redirect to join page by returning a URL string
+        return `/en/auth/join?error=join_code_required`;
       }
 
       console.log("✅ New user with valid join code - allowing signup");
