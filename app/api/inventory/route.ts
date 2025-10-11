@@ -23,7 +23,14 @@ export async function GET(req: Request) {
       orderBy: { createdAt: "desc" },
     });
 
-    return NextResponse.json({ trailers });
+    // Calculate daysOld for each trailer
+    const now = Date.now();
+    const trailersWithAge = trailers.map((trailer) => ({
+      ...trailer,
+      daysOld: Math.floor((now - trailer.createdAt.getTime()) / (1000 * 60 * 60 * 24)),
+    }));
+
+    return NextResponse.json({ trailers: trailersWithAge });
   } catch (error) {
     console.error("Inventory fetch error:", error);
     return NextResponse.json(

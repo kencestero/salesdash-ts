@@ -16,6 +16,16 @@ const ALLOW_STATIC = [
   "/public",
 ];
 
+// Public demo pages (no auth required)
+const PUBLIC_PAGES = [
+  "/demo-trailer-card",
+  "/particle-demo",
+  "/fire-demo",
+  "/fire-badge-demo",
+  "/playground",
+  "/apply", // Job application page
+];
+
 // Optional: Block marketing pages once logged in
 const MARKETING = new Set([
   `/${DEFAULT_LANG}/ecommerce`,
@@ -31,14 +41,25 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  // 2. Add /en prefix if missing
+  // 2. Allow public demo pages (no auth required)
+  if (PUBLIC_PAGES.some(path => pathname.startsWith(path))) {
+    return NextResponse.next();
+  }
+
+  // 3. Add /en prefix if missing
   if (!pathname.startsWith(`/${DEFAULT_LANG}`)) {
     const url = req.nextUrl.clone();
     url.pathname = `/${DEFAULT_LANG}${pathname}`;
     return NextResponse.redirect(url);
   }
 
-  // 3. Auth check - Check for session cookie (database strategy)
+  // 3b. Also check PUBLIC_PAGES with /en prefix (after redirect)
+  const pathnameWithoutLang = pathname.replace(`/${DEFAULT_LANG}`, '');
+  if (PUBLIC_PAGES.some(path => pathnameWithoutLang.startsWith(path))) {
+    return NextResponse.next();
+  }
+
+  // 4. Auth check - Check for session cookie (database strategy)
   const sessionToken = req.cookies.get("next-auth.session-token") ||
                        req.cookies.get("__Secure-next-auth.session-token");
   const isAuthRoute = pathname === LOGIN || pathname.startsWith(AUTH_PREFIX);
@@ -52,7 +73,7 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  // 4. Authenticated users can't access marketing pages
+  // 5. Authenticated users can't access marketing pages
   if (MARKETING.has(pathname)) {
     const url = req.nextUrl.clone();
     url.pathname = DASHBOARD;

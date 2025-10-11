@@ -27,6 +27,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { FireBadge } from "@/components/ui/fire-badge";
 
 interface Trailer {
   id: string;
@@ -44,6 +45,7 @@ interface Trailer {
   location?: string;
   images: string[];
   createdAt: string;
+  daysOld?: number; // Calculated on server
 }
 
 export default function InventoryPage() {
@@ -253,7 +255,12 @@ export default function InventoryPage() {
                   {filteredTrailers.map((trailer) => (
                     <TableRow key={trailer.id} className="border-gray-700">
                       <TableCell className="font-medium text-white">
-                        {trailer.stockNumber}
+                        <div className="flex items-center gap-2">
+                          {trailer.stockNumber}
+                          {trailer.daysOld !== undefined && trailer.daysOld <= 2 && (
+                            <FireBadge daysOld={trailer.daysOld} size="sm" />
+                          )}
+                        </div>
                       </TableCell>
                       <TableCell>
                         {trailer.images && trailer.images.length > 0 ? (
