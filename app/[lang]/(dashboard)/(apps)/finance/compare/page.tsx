@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Calculator } from "lucide-react";
+import { Calculator, User, Phone, Mail } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -16,8 +16,16 @@ import { FinanceMatrix } from "@/components/calculator/FinanceMatrix";
 import { RTOMatrix } from "@/components/calculator/RTOMatrix";
 import { CashSummary } from "@/components/calculator/CashSummary";
 import { toast } from "@/components/ui/use-toast";
+import { useSession } from "next-auth/react";
 
 export default function FinanceComparePage() {
+  const { data: session } = useSession();
+
+  // Customer Info
+  const [customerName, setCustomerName] = useState("");
+  const [customerPhone, setCustomerPhone] = useState("");
+  const [customerEmail, setCustomerEmail] = useState("");
+
   // Input states
   const [selectedUnit, setSelectedUnit] = useState("");
   const [price, setPrice] = useState(14000);
@@ -64,19 +72,89 @@ export default function FinanceComparePage() {
     <div className="min-h-screen bg-background p-6">
       <div className="mx-auto max-w-7xl space-y-6">
         {/* Header */}
-        <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
-            <Calculator className="h-6 w-6 text-primary" />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
+              <Calculator className="h-6 w-6 text-primary" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold text-foreground">
+                MJ Finance Calculator
+              </h1>
+              <p className="text-muted-foreground">
+                Compare Cash, Finance, and Rent-To-Own options side-by-side
+              </p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">
-              MJ Finance Calculator
-            </h1>
-            <p className="text-muted-foreground">
-              Compare Cash, Finance, and Rent-To-Own options side-by-side
-            </p>
-          </div>
+          {/* Employee Info */}
+          {session?.user && (
+            <div className="rounded-lg border border-primary/20 bg-primary/5 px-4 py-2">
+              <p className="text-sm font-medium text-primary">
+                {session.user.role === "REP" && `REP#${session.user.id?.slice(0, 6).toUpperCase()}`}
+                {session.user.role === "SMA" && `SMA#${session.user.id?.slice(0, 6).toUpperCase()}`}
+                {session.user.role === "DIR" && `DIR#${session.user.id?.slice(0, 6).toUpperCase()}`}
+                {session.user.role === "VIP" && `VIP#${session.user.id?.slice(0, 6).toUpperCase()}`}
+                {!["REP", "SMA", "DIR", "VIP"].includes(session.user.role || "") && session.user.name}
+              </p>
+              <p className="text-xs text-muted-foreground">{session.user.email}</p>
+            </div>
+          )}
         </div>
+
+        {/* Customer Information Card */}
+        <Card className="border-border bg-card">
+          <CardHeader>
+            <CardTitle className="text-foreground flex items-center gap-2">
+              <User className="h-5 w-5" />
+              Customer Information
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+              {/* Customer Name */}
+              <div className="space-y-2">
+                <Label htmlFor="customerName" className="text-foreground">
+                  Customer Name *
+                </Label>
+                <Input
+                  id="customerName"
+                  type="text"
+                  placeholder="John Doe"
+                  value={customerName}
+                  onChange={(e) => setCustomerName(e.target.value)}
+                />
+              </div>
+
+              {/* Customer Phone */}
+              <div className="space-y-2">
+                <Label htmlFor="customerPhone" className="text-foreground">
+                  Phone Number
+                </Label>
+                <Input
+                  id="customerPhone"
+                  type="tel"
+                  placeholder="(555) 123-4567"
+                  value={customerPhone}
+                  onChange={(e) => setCustomerPhone(e.target.value)}
+                />
+              </div>
+
+              {/* Customer Email */}
+              <div className="space-y-2">
+                <Label htmlFor="customerEmail" className="text-foreground">
+                  Email Address
+                </Label>
+                <Input
+                  id="customerEmail"
+                  type="email"
+                  placeholder="customer@example.com"
+                  value={customerEmail}
+                  onChange={(e) => setCustomerEmail(e.target.value)}
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Input Controls Card */}
         <Card className="border-border bg-card">

@@ -62,10 +62,18 @@ export function FinanceMatrix({
     setVisibleTerms((prev) => ({ ...prev, [term]: !prev[term] }));
   };
 
-  // Add custom term
+  // Add custom term OR re-enable existing term
   const addCustomTerm = () => {
     const term = parseInt(customTermInput);
-    if (term >= 1 && term <= 140 && !allTerms.includes(term)) {
+    if (term >= 1 && term <= 140) {
+      // If term already exists (either default or custom), just re-enable it
+      if (allTerms.includes(term)) {
+        setVisibleTerms((prev) => ({ ...prev, [term]: true }));
+        setCustomTermInput("");
+        setShowCustomTerm(false);
+        return;
+      }
+      // Otherwise add as new custom term
       setCustomTerms((prev) => [...prev, term]);
       setVisibleTerms((prev) => ({ ...prev, [term]: true }));
       setCustomTermInput("");
@@ -251,8 +259,8 @@ export function FinanceMatrix({
 
       {/* Helper text */}
       <p className="text-xs text-muted-foreground">
-        💡 Tip: Uncheck a term to remove it from the display and all quote generators.
-        Click any payment amount to save as a quote.
+        💡 Tip: Uncheck a term to hide it (you can re-add it by typing the number and clicking Add).
+        Click the X button to permanently remove custom terms. Click any payment amount to save as a quote.
       </p>
     </div>
   );
