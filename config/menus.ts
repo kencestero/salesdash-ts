@@ -826,7 +826,7 @@ export const menusConfig = {
           {
             title: "Finance Calculator",
             icon: ChartBar,
-            href: "/finance",
+            href: "/finance/compare",
           },
           {
             title: "Credit Applications",
@@ -1667,7 +1667,7 @@ export const menusConfig = {
       {
         title: "Finance Calculator",
         icon: ChartBar,
-        href: "/finance",
+        href: "/finance/compare",
       },
       {
         title: "Credit Applications",
