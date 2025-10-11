@@ -101,6 +101,8 @@
     "google-map-react": "^2.2.1",
     "html-to-image": "^1.11.11",
     "jose": "^6.1.0",
+    "jspdf": "^3.0.3",
+    "jspdf-autotable": "^5.0.2",
     "leaflet": "^1.9.4",
     "lucide": "^0.270.0",
     "lucide-react": "^0.269.0",

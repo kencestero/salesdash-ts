@@ -17,6 +17,9 @@ import { RTOMatrix } from "@/components/calculator/RTOMatrix";
 import { CashSummary } from "@/components/calculator/CashSummary";
 import { toast } from "@/components/ui/use-toast";
 import { useSession } from "next-auth/react";
+import { generateQuotePDF, SelectedPaymentOption } from "@/lib/finance/pdf-generator";
+import { Button } from "@/components/ui/button";
+import { FileDown, Check } from "lucide-react";
 
 export default function FinanceComparePage() {
   const { data: session } = useSession();
@@ -36,6 +39,9 @@ export default function FinanceComparePage() {
   // Down payment options (configurable)
   const downPaymentOptions = [0, 1000, 2500, 5000];
 
+  // Selected payment options for PDF
+  const [selectedOptions, setSelectedOptions] = useState<SelectedPaymentOption[]>([]);
+
   // Handle payment selection
   const handleSelectPayment = (payment: {
     down: number;
@@ -43,29 +49,130 @@ export default function FinanceComparePage() {
     monthly: number;
     mode: "FINANCE" | "RTO" | "CASH";
   }) => {
-    console.log("Selected payment:", payment);
+    // Check if already selected
+    const existingIndex = selectedOptions.findIndex(
+      (opt) =>
+        opt.mode === payment.mode &&
+        opt.down === payment.down &&
+        opt.term === payment.term
+    );
 
-    toast({
-      title: "Payment Option Selected",
-      description: `${payment.mode}: $${payment.monthly.toFixed(2)}/mo${payment.mode !== "CASH" ? ` for ${payment.term} months` : ""}`,
-      variant: "default",
-    });
-
-    // TODO: Open save quote dialog
-    // For now, just log it
+    if (existingIndex >= 0) {
+      // Remove if already selected
+      setSelectedOptions((prev) => prev.filter((_, i) => i !== existingIndex));
+      toast({
+        title: "Option Removed",
+        description: `${payment.mode} option deselected`,
+        variant: "default",
+      });
+    } else if (selectedOptions.length < 3) {
+      // Add if less than 3 selected
+      const newOption: SelectedPaymentOption = {
+        mode: payment.mode,
+        label: `${payment.mode} - ${payment.term} months`,
+        amount: payment.monthly,
+        term: payment.term,
+        down: payment.down,
+        details: payment.mode === "FINANCE" ? `APR ${apr.toFixed(2)}%` : undefined,
+      };
+      setSelectedOptions((prev) => [...prev, newOption]);
+      toast({
+        title: "Option Added",
+        description: `${payment.mode}: $${payment.monthly.toFixed(2)}/mo added to quote`,
+        variant: "default",
+      });
+    } else {
+      toast({
+        title: "Maximum Reached",
+        description: "You can select up to 3 payment options",
+        variant: "destructive",
+      });
+    }
   };
 
   // Handle cash quote save
   const handleSaveCashQuote = (quote: { totalCash: number; mode: "CASH" }) => {
-    console.log("Saving cash quote:", quote);
+    const existingIndex = selectedOptions.findIndex((opt) => opt.mode === "CASH");
 
-    toast({
-      title: "Cash Quote Saved",
-      description: `Total: $${quote.totalCash.toFixed(2)}`,
-      variant: "default",
+    if (existingIndex >= 0) {
+      // Remove cash option if already selected
+      setSelectedOptions((prev) => prev.filter((_, i) => i !== existingIndex));
+      toast({
+        title: "Cash Option Removed",
+        variant: "default",
+      });
+    } else if (selectedOptions.length < 3) {
+      // Add cash option
+      const newOption: SelectedPaymentOption = {
+        mode: "CASH",
+        label: "Cash Payment",
+        amount: quote.totalCash,
+        details: "Pay in full - No monthly payments",
+      };
+      setSelectedOptions((prev) => [...prev, newOption]);
+      toast({
+        title: "Cash Option Added",
+        description: `Total: $${quote.totalCash.toFixed(2)}`,
+        variant: "default",
+      });
+    } else {
+      toast({
+        title: "Maximum Reached",
+        description: "You can select up to 3 payment options",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Generate PDF Quote
+  const handleGeneratePDF = () => {
+    if (!customerName.trim()) {
+      toast({
+        title: "Customer Name Required",
+        description: "Please enter customer name before generating PDF",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (selectedOptions.length === 0) {
+      toast({
+        title: "No Options Selected",
+        description: "Please select at least one payment option",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const repId =
+      session?.user?.role && ["REP", "SMA", "DIR", "VIP"].includes(session.user.role)
+        ? `${session.user.role}#${session.user.id?.slice(0, 6).toUpperCase()}`
+        : "REP#UNKNOWN";
+
+    generateQuotePDF({
+      customerName,
+      customerPhone,
+      customerEmail,
+      repId,
+      repName: session?.user?.name || "MJ Cargo Rep",
+      repEmail: session?.user?.email || "",
+      unitDescription: selectedUnit || "Cargo Trailer",
+      unitPrice: price,
+      taxPercent: taxPct,
+      fees,
+      selectedOptions,
+      quoteDate: new Date().toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      }),
     });
 
-    // TODO: Actually save the quote via API
+    toast({
+      title: "PDF Generated!",
+      description: `Quote for ${customerName} has been downloaded`,
+      variant: "default",
+    });
   };
 
   return (
@@ -307,12 +414,81 @@ export default function FinanceComparePage() {
           </CardContent>
         </Card>
 
+        {/* Selected Options & PDF Generation */}
+        {selectedOptions.length > 0 && (
+          <Card className="border-primary/30 bg-primary/5">
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between text-foreground">
+                <span className="flex items-center gap-2">
+                  <Check className="h-5 w-5 text-primary" />
+                  Selected Payment Options ({selectedOptions.length}/3)
+                </span>
+                <Button
+                  onClick={handleGeneratePDF}
+                  disabled={!customerName.trim()}
+                  className="gap-2"
+                  size="lg"
+                >
+                  <FileDown className="h-5 w-5" />
+                  Generate PDF Quote
+                </Button>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                {selectedOptions.map((option, index) => (
+                  <div
+                    key={index}
+                    className="relative rounded-lg border-2 border-primary/30 bg-card p-4"
+                  >
+                    <div
+                      className={`absolute right-2 top-2 rounded-full px-2 py-0.5 text-xs font-bold text-white ${
+                        option.mode === "CASH"
+                          ? "bg-green-500"
+                          : option.mode === "FINANCE"
+                          ? "bg-blue-500"
+                          : "bg-purple-500"
+                      }`}
+                    >
+                      {option.mode}
+                    </div>
+                    <div className="mt-2 text-2xl font-bold text-foreground">
+                      {option.mode === "CASH"
+                        ? `$${option.amount.toLocaleString()}`
+                        : `$${option.amount.toFixed(2)}/mo`}
+                    </div>
+                    {option.term && (
+                      <p className="text-sm text-muted-foreground">
+                        {option.term} months
+                      </p>
+                    )}
+                    {option.down !== undefined && (
+                      <p className="text-sm text-muted-foreground">
+                        Down: ${option.down.toLocaleString()}
+                      </p>
+                    )}
+                    {option.details && (
+                      <p className="text-xs text-muted-foreground">
+                        {option.details}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+              {!customerName.trim() && (
+                <p className="mt-4 text-sm text-destructive">
+                  ⚠️ Please enter customer name above to generate PDF
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
         {/* Info Footer */}
         <div className="rounded-lg border border-border bg-muted/50 p-4">
           <p className="text-sm text-muted-foreground">
             💡 <strong>Pro Tip:</strong> Click any payment amount in the matrix
-            to save it as a quote. Uncheck terms to hide them from all exports
-            and customer-facing quotes.
+            to select it for the PDF quote (max 3 options). Uncheck terms to hide them from the display.
           </p>
         </div>
       </div>
