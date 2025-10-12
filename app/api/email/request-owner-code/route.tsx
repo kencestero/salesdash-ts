@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { sendEmail, isEmailServiceConfigured } from "@/lib/email/resend-service";
-import { generateTodayCode } from "@/lib/join-codes";
+import { todayCodeForRole } from "@/lib/joinCode";
 
 /**
  * POST /api/email/request-owner-code
@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Generate today's owner code
-    const ownerCode = generateTodayCode("owner");
+    const ownerCode = todayCodeForRole("owner");
 
     // Get requester info
     const requesterName = session.user.name || session.user.email;
