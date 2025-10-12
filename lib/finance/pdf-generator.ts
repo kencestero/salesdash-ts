@@ -49,15 +49,15 @@ export function generateQuotePDF(data: QuoteData): void {
   doc.setFillColor(...orangeColor);
   doc.rect(0, 0, pageWidth, 35, "F");
 
-  // MJ CARGO TRAILERS title
-  doc.setTextColor(255, 255, 255);
-  doc.setFontSize(24);
+  // MJ CARGO TRAILERS title - WHITE ON ORANGE, BOLD, LARGE
+  doc.setTextColor(255, 255, 255); // White color
+  doc.setFontSize(28); // Larger font
   doc.setFont("helvetica", "bold");
   doc.text("MJ CARGO TRAILERS", pageWidth / 2, 15, { align: "center" });
 
-  // Finance Calculator subtitle
-  doc.setFontSize(12);
-  doc.setFont("helvetica", "normal");
+  // Finance Calculator subtitle - White, medium bold
+  doc.setFontSize(14);
+  doc.setFont("helvetica", "bold"); // Medium bold
   doc.text("FINANCE CALCULATOR - Payment Quote", pageWidth / 2, 25, {
     align: "center",
   });
@@ -213,25 +213,22 @@ export function generateQuotePDF(data: QuoteData): void {
 
   yPos += 55;
 
-  // === SIGNATURE LINE ===
-  if (yPos + 40 > pageHeight - 30) {
-    doc.addPage();
-    yPos = 20;
-  }
+  // === SIGNATURE LINE (MOVED TO BOTTOM) ===
+  const footerY = pageHeight - 20;
+  const signatureY = footerY - 25; // Place signature above footer
 
   doc.setFontSize(9);
   doc.setTextColor(...darkBlue);
-  doc.text("Customer Signature:", 15, yPos);
-  doc.text("Date:", pageWidth - 60, yPos);
+  doc.text("Customer Signature:", 15, signatureY);
+  doc.text("Date:", pageWidth - 60, signatureY);
 
   // Signature lines
   doc.setLineWidth(0.5);
   doc.setDrawColor(...darkBlue);
-  doc.line(15, yPos + 10, pageWidth / 2, yPos + 10);
-  doc.line(pageWidth - 60, yPos + 10, pageWidth - 15, yPos + 10);
+  doc.line(15, signatureY + 10, pageWidth / 2, signatureY + 10);
+  doc.line(pageWidth - 60, signatureY + 10, pageWidth - 15, signatureY + 10);
 
   // === FOOTER ===
-  const footerY = pageHeight - 20;
   doc.setFillColor(...darkBlue);
   doc.rect(0, footerY, pageWidth, 20, "F");
 
@@ -239,22 +236,28 @@ export function generateQuotePDF(data: QuoteData): void {
   doc.setFontSize(8);
   doc.setFont("helvetica", "normal");
   doc.text(
-    "MJ Cargo Trailers - Premium Cargo & Equipment Trailers",
+    "MJ Cargo Trailers - Premium Enclosed Cargo Trailers & Equipment Trailers",
     pageWidth / 2,
-    footerY + 7,
+    footerY + 5,
     { align: "center" }
   );
   doc.text(
-    "This quote is valid for 30 days. Prices subject to change without notice.",
+    "We offer delivery service, and deliver for free subject to distance from our location.",
     pageWidth / 2,
-    footerY + 12,
+    footerY + 10,
+    { align: "center" }
+  );
+  doc.text(
+    "This quote and prices subject to change without notice.",
+    pageWidth / 2,
+    footerY + 14,
     { align: "center" }
   );
   doc.setFontSize(7);
   doc.text(
     `Rep: ${data.repName} | ${data.repEmail}`,
     pageWidth / 2,
-    footerY + 16,
+    footerY + 17,
     { align: "center" }
   );
 

@@ -363,7 +363,7 @@ export default function FinanceComparePage() {
                 </div>
               </div>
 
-              {/* Unit Selector (placeholder) */}
+              {/* Unit Selector - ALL 37 TRAILER SIZES */}
               <div className="space-y-2">
                 <Label htmlFor="unit" className="text-foreground">
                   Select Unit
@@ -373,15 +373,44 @@ export default function FinanceComparePage() {
                     <SelectValue placeholder="Choose trailer..." />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="demo1">
-                      2024 Diamond 6x12 SA - $14,000
-                    </SelectItem>
-                    <SelectItem value="demo2">
-                      2024 Quality 7x14 TA - $18,500
-                    </SelectItem>
-                    <SelectItem value="demo3">
-                      2024 PJ 8x20 Gooseneck - $25,000
-                    </SelectItem>
+                    {/* Single Axle (SA) Options */}
+                    <SelectItem value="4x6-sa">4x6 SA</SelectItem>
+                    <SelectItem value="5x8-sa">5x8 SA</SelectItem>
+                    <SelectItem value="5x10-sa">5x10 SA</SelectItem>
+                    <SelectItem value="6x10-sa">6x10 SA</SelectItem>
+                    <SelectItem value="6x12-sa">6x12 SA</SelectItem>
+                    <SelectItem value="6x14-sa">6x14 SA</SelectItem>
+                    <SelectItem value="7x12-sa">7x12 SA</SelectItem>
+                    <SelectItem value="7x14-sa">7x14 SA</SelectItem>
+                    <SelectItem value="7x16-sa">7x16 SA</SelectItem>
+
+                    {/* Tandem Axle (TA) Options */}
+                    <SelectItem value="6x10-ta">6x10 TA</SelectItem>
+                    <SelectItem value="6x12-ta">6x12 TA</SelectItem>
+                    <SelectItem value="6x14-ta">6x14 TA</SelectItem>
+                    <SelectItem value="6x16-ta">6x16 TA</SelectItem>
+                    <SelectItem value="7x12-ta">7x12 TA</SelectItem>
+                    <SelectItem value="7x14-ta">7x14 TA</SelectItem>
+                    <SelectItem value="7x16-ta">7x16 TA</SelectItem>
+                    <SelectItem value="7x18-ta">7x18 TA</SelectItem>
+                    <SelectItem value="7x20-ta">7x20 TA</SelectItem>
+                    <SelectItem value="8.5x14-ta">8.5x14 TA</SelectItem>
+                    <SelectItem value="8.5x16-ta">8.5x16 TA</SelectItem>
+                    <SelectItem value="8.5x18-ta">8.5x18 TA</SelectItem>
+                    <SelectItem value="8.5x20-ta">8.5x20 TA</SelectItem>
+                    <SelectItem value="8.5x22-ta">8.5x22 TA</SelectItem>
+                    <SelectItem value="8.5x24-ta">8.5x24 TA</SelectItem>
+                    <SelectItem value="8.5x26-ta">8.5x26 TA</SelectItem>
+                    <SelectItem value="8.5x28-ta">8.5x28 TA</SelectItem>
+                    <SelectItem value="8.5x30-ta">8.5x30 TA</SelectItem>
+                    <SelectItem value="8.5x32-ta">8.5x32 TA</SelectItem>
+
+                    {/* Gooseneck (GN) Options */}
+                    <SelectItem value="8.5x28-gn">8.5x28 GN (Gooseneck)</SelectItem>
+                    <SelectItem value="8.5x30-gn">8.5x30 GN (Gooseneck)</SelectItem>
+                    <SelectItem value="8.5x32-gn">8.5x32 GN (Gooseneck)</SelectItem>
+                    <SelectItem value="8.5x34-gn">8.5x34 GN (Gooseneck)</SelectItem>
+                    <SelectItem value="8.5x36-gn">8.5x36 GN (Gooseneck)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
