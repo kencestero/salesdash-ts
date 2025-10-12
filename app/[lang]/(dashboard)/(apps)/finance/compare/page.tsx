@@ -94,6 +94,52 @@ export default function FinanceComparePage() {
     }
   };
 
+  // Handle finance quote save - adds best option (lowest down, longest term)
+  const handleSaveFinanceQuote = () => {
+    // Find best finance option (60 months, lowest down payment)
+    const bestTerm = 60; // Most popular term
+    const bestDown = downPaymentOptions[0]; // Lowest down payment
+    const result = calculateFinance({
+      price,
+      down: bestDown,
+      taxPct,
+      fees,
+      aprPercent: apr,
+      termMonths: bestTerm,
+    });
+
+    const payment = {
+      down: bestDown,
+      term: bestTerm,
+      monthly: result.monthlyPayment,
+      mode: "FINANCE" as const,
+    };
+
+    handleSelectPayment(payment);
+  };
+
+  // Handle RTO quote save - adds best option (lowest down, longest term)
+  const handleSaveRTOQuote = () => {
+    // Find best RTO option (48 months, lowest down payment)
+    const bestTerm = 48; // Most popular RTO term
+    const bestDown = downPaymentOptions[0]; // Lowest down payment
+    const result = calculateRTO({
+      price,
+      down: bestDown,
+      taxPct,
+      termMonths: bestTerm,
+    });
+
+    const payment = {
+      down: bestDown,
+      term: bestTerm,
+      monthly: result.monthlyTotal,
+      mode: "RTO" as const,
+    };
+
+    handleSelectPayment(payment);
+  };
+
   // Handle cash quote save
   const handleSaveCashQuote = (quote: { totalCash: number; mode: "CASH" }) => {
     const existingIndex = selectedOptions.findIndex((opt) => opt.mode === "CASH");
@@ -328,17 +374,47 @@ export default function FinanceComparePage() {
           )}
         </div>
 
-        {/* MJ Cargo Trailers Finance Center Logo Badge - Overlapping */}
+        {/* MJ Cargo Trailers Finance Center Logo Badge - Overlapping with Cursor */}
         <div className="relative -mb-12 z-10 flex justify-center">
           <div className="relative">
-            <Image
-              src="/images/mjctfc.webp"
-              alt="MJ Cargo Trailers Finance Center"
-              width={400}
-              height={120}
-              className="h-32 w-auto object-contain drop-shadow-2xl"
-              priority
-            />
+            {/* Large Cursor/Pointer Outline */}
+            <svg
+              className="absolute -left-48 -top-32 w-[500px] h-[500px] pointer-events-none opacity-90"
+              viewBox="0 0 200 200"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              {/* Cursor Arrow */}
+              <path
+                d="M 40 40 L 40 140 L 100 100 L 140 140 L 150 130 L 110 90 L 150 90 Z"
+                stroke="white"
+                strokeWidth="4"
+                fill="none"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              {/* Target Circle */}
+              <circle
+                cx="160"
+                cy="60"
+                r="25"
+                stroke="white"
+                strokeWidth="3"
+                fill="none"
+              />
+            </svg>
+
+            {/* Logo positioned in the target area */}
+            <div className="relative z-20">
+              <Image
+                src="/images/mjctfc.webp"
+                alt="MJ Cargo Trailers Finance Center"
+                width={400}
+                height={120}
+                className="h-32 w-auto object-contain drop-shadow-2xl"
+                priority
+              />
+            </div>
           </div>
         </div>
 
@@ -547,6 +623,7 @@ export default function FinanceComparePage() {
               apr={apr}
               downPaymentOptions={downPaymentOptions}
               onSelectPayment={handleSelectPayment}
+              onSaveQuote={handleSaveFinanceQuote}
               onCopySMS={handleCopyFinanceSMS}
             />
           </CardContent>
@@ -560,6 +637,7 @@ export default function FinanceComparePage() {
               taxPct={taxPct}
               downPaymentOptions={downPaymentOptions}
               onSelectPayment={handleSelectPayment}
+              onSaveQuote={handleSaveRTOQuote}
               onCopySMS={handleCopyRTOSMS}
             />
           </CardContent>

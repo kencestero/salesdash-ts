@@ -194,7 +194,7 @@ export function RTOMatrix({
           {onSaveQuote && (
             <Button
               onClick={onSaveQuote}
-              className="flex-1 bg-purple-500 hover:bg-purple-600 text-white"
+              className="flex-1 bg-green-500 hover:bg-green-600 text-white"
             >
               ✅ Click to add RTO Scenario to Quote to share
             </Button>
