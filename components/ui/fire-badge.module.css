@@ -1,0 +1,128 @@
+.fireContainer {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.fireContainerMj {
+  filter: drop-shadow(0 0 4px rgba(238, 104, 50, 0.6));
+}
+
+.fireContainerClassic {
+  filter: drop-shadow(0 0 4px rgba(255, 69, 0, 0.6));
+}
+
+.flame {
+  position: absolute;
+  bottom: 0;
+  width: 50%;
+  height: 80%;
+  border-radius: 50% 50% 50% 50% / 70% 70% 30% 30%;
+  mix-blend-mode: screen;
+}
+
+.flameMj {
+  background: radial-gradient(
+    ellipse at 50% 100%,
+    #ff8c42 0%,
+    #ee6832 30%,
+    #d45a1f 50%,
+    transparent 75%
+  );
+}
+
+.flameClassic {
+  background: radial-gradient(
+    ellipse at 50% 100%,
+    #ff6347 0%,
+    #ff4500 30%,
+    #dc2626 50%,
+    transparent 75%
+  );
+}
+
+.flame1 {
+  animation: riseFlame 0.6s ease-in-out infinite;
+  animation-delay: 0s;
+  opacity: 1;
+  transform-origin: bottom center;
+}
+
+.flame2 {
+  animation: riseFlame 0.6s ease-in-out infinite;
+  animation-delay: 0.12s;
+  opacity: 0.9;
+  transform: scale(0.85);
+  transform-origin: bottom center;
+}
+
+.flame3 {
+  animation: riseFlame 0.6s ease-in-out infinite;
+  animation-delay: 0.24s;
+  opacity: 0.8;
+  transform: scale(0.7);
+  transform-origin: bottom center;
+}
+
+.flame4 {
+  animation: flickerSide 0.5s ease-in-out infinite;
+  animation-delay: 0.1s;
+  opacity: 0.7;
+  transform: translateX(-30%) scale(0.6);
+  transform-origin: bottom center;
+}
+
+.flame5 {
+  animation: flickerSide 0.5s ease-in-out infinite;
+  animation-delay: 0.3s;
+  opacity: 0.7;
+  transform: translateX(30%) scale(0.6);
+  transform-origin: bottom center;
+}
+
+@keyframes riseFlame {
+  0% {
+    transform: translateY(0) scaleY(1) scaleX(1);
+    opacity: 1;
+  }
+  25% {
+    transform: translateY(-2px) scaleY(1.15) scaleX(0.95);
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(-4px) scaleY(1.25) scaleX(0.9);
+    opacity: 0.95;
+  }
+  75% {
+    transform: translateY(-2px) scaleY(1.1) scaleX(0.95);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(0) scaleY(1) scaleX(1);
+    opacity: 1;
+  }
+}
+
+@keyframes flickerSide {
+  0% {
+    opacity: 0.7;
+    transform: translateY(0) scale(0.6);
+  }
+  50% {
+    opacity: 0.9;
+    transform: translateY(-3px) scale(0.65);
+  }
+  100% {
+    opacity: 0.7;
+    transform: translateY(0) scale(0.6);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flame {
+    animation: none;
+  }
+}
