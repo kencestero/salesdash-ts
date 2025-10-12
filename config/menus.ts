@@ -836,7 +836,7 @@ export const menusConfig = {
           {
             title: "Customers (CRM)",
             icon: Users,
-            href: "/customers",
+            href: "/crm/customers",
           },
         ],
       },
@@ -1677,7 +1677,7 @@ export const menusConfig = {
       {
         title: "Customers (CRM)",
         icon: Users,
-        href: "/customers",
+        href: "/crm/customers",
       },
       {
         isHeader: true,
