@@ -209,22 +209,22 @@ export default function FinanceComparePage() {
           )}
         </div>
 
-        {/* MJ Cargo Trailers Finance Center Logo Badge */}
-        <div className="flex justify-center">
-          <div className="relative h-24 w-auto">
+        {/* MJ Cargo Trailers Finance Center Logo Badge - Overlapping */}
+        <div className="relative -mb-12 z-10 flex justify-center">
+          <div className="relative">
             <Image
               src="/images/mjctfc.webp"
               alt="MJ Cargo Trailers Finance Center"
               width={400}
-              height={96}
-              className="h-24 w-auto object-contain"
+              height={120}
+              className="h-32 w-auto object-contain drop-shadow-2xl"
               priority
             />
           </div>
         </div>
 
         {/* Customer Information Card */}
-        <Card className="border-border bg-card">
+        <Card className="border-border bg-card pt-16">
           <CardHeader>
             <CardTitle className="text-foreground flex items-center gap-2">
               <User className="h-5 w-5" />
