@@ -148,7 +148,7 @@ export default function FinanceComparePage() {
     const repId =
       session?.user?.role && ["REP", "SMA", "DIR", "VIP"].includes(session.user.role)
         ? `${session.user.role}#${session.user.id?.slice(0, 6).toUpperCase()}`
-        : "REP#UNKNOWN";
+        : session?.user?.name || session?.user?.email || "MJ Cargo Rep";
 
     generateQuotePDF({
       customerName,

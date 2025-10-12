@@ -180,6 +180,7 @@ export function FinanceMatrix({
                       />
                       <span className="text-sm font-medium">
                         {term} {term === 1 ? "month" : "months"}
+                        {term === 72 && " (Not Common)"}
                       </span>
                       {isCustomTerm(term) && (
                         <button

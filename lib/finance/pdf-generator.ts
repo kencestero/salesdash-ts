@@ -119,15 +119,49 @@ export function generateQuotePDF(data: QuoteData): void {
   doc.setTextColor(...darkBlue);
   doc.setFontSize(10);
   doc.setFont("helvetica", "normal");
+
+  // Enhanced unit description with brand and warranty
   if (data.unitDescription) {
-    doc.text(`Unit: ${data.unitDescription}`, 15, yPos);
+    // Determine brand and warranty based on unit size (this would come from inventory in real system)
+    const unitSize = data.unitDescription;
+    const isDiamond = true; // Would check inventory - defaulting to Diamond for now
+    const brand = isDiamond ? "Diamond Cargo" : "Quality Cargo LLC";
+    const warranty = isDiamond ? "5 Year Limited Warranty" : "3 Year Limited Warranty";
+
+    doc.setFont("helvetica", "bold");
+    doc.text(`${brand} Unit (Brand New)`, 15, yPos);
+    yPos += 5;
+    doc.setFont("helvetica", "normal");
+    doc.text(`with a ${warranty} at no extra cost`, 15, yPos);
+    yPos += 5;
+    doc.setFont("helvetica", "bold");
+    doc.text(`Unit Size: ${unitSize}`, 15, yPos);
     yPos += 6;
+    doc.setFont("helvetica", "normal");
   }
+
   doc.text(`Base Price: $${data.unitPrice.toLocaleString()}`, 15, yPos);
   yPos += 6;
-  doc.text(`Tax: ${data.taxPercent.toFixed(2)}%`, 15, yPos);
-  doc.text(`Fees: $${data.fees.toLocaleString()}`, pageWidth / 2, yPos);
-  yPos += 10;
+
+  // Only show tax/fees if Cash option is selected
+  const hasCashOption = data.selectedOptions.some(opt => opt.mode === "CASH");
+  if (hasCashOption) {
+    doc.text(`Tax: ${data.taxPercent.toFixed(2)}%`, 15, yPos);
+    doc.text(`Fees: $${data.fees.toLocaleString()}`, pageWidth / 2, yPos);
+    yPos += 5;
+    // Add tax disclaimer for Cash option
+    doc.setFontSize(8);
+    doc.setFont("helvetica", "italic");
+    doc.text("* Prices may vary depending on State and County.", 15, yPos);
+    yPos += 4;
+    doc.text("If Cash deal, customer will be responsible to pay taxes and registration at The Department of Motor Vehicles.", 15, yPos);
+    yPos += 4;
+    doc.text("For more information on local registration fees visit: https://www.fhwa.dot.gov/ohim/hwytaxes/2001/pt11b.htm", 15, yPos);
+    yPos += 6;
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+  }
+  yPos += 5;
 
   // === PAYMENT OPTIONS (Side-by-side comparison) ===
   doc.setFillColor(...orangeColor);
