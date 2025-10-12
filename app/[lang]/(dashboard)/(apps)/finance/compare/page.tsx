@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Calculator, User, Phone, Mail } from "lucide-react";
+import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -206,6 +207,20 @@ export default function FinanceComparePage() {
               <p className="text-xs text-muted-foreground">{session.user.email}</p>
             </div>
           )}
+        </div>
+
+        {/* MJ Cargo Trailers Finance Center Logo Badge */}
+        <div className="flex justify-center">
+          <div className="relative h-24 w-auto">
+            <Image
+              src="/images/mjctfc.webp"
+              alt="MJ Cargo Trailers Finance Center"
+              width={400}
+              height={96}
+              className="h-24 w-auto object-contain"
+              priority
+            />
+          </div>
         </div>
 
         {/* Customer Information Card */}
@@ -483,6 +498,13 @@ export default function FinanceComparePage() {
             </CardContent>
           </Card>
         )}
+
+        {/* Disclaimer */}
+        <div className="rounded-lg border border-yellow-500/30 bg-yellow-500/10 p-4">
+          <p className="text-sm text-foreground font-medium text-center">
+            ⚠️ All quotes are subject to top tier credit approval and fees may vary depending on location of residence.
+          </p>
+        </div>
 
         {/* Info Footer */}
         <div className="rounded-lg border border-border bg-muted/50 p-4">

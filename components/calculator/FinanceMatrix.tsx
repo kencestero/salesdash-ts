@@ -28,7 +28,7 @@ export type FinanceMatrixProps = {
 };
 
 const DEFAULT_DOWN_PAYMENTS = [0, 1000, 2500, 5000];
-const DEFAULT_TERMS = [24, 36, 48, 60];
+const DEFAULT_TERMS = [24, 36, 48, 60, 72]; // Updated to include 72 months
 
 export function FinanceMatrix({
   price,
@@ -44,7 +44,11 @@ export function FinanceMatrix({
     36: true,
     48: true,
     60: true,
+    72: true,
   });
+
+  // APR visibility state
+  const [showAPR, setShowAPR] = useState(true);
 
   // Custom term state
   const [showCustomTerm, setShowCustomTerm] = useState(false);
@@ -122,7 +126,19 @@ export function FinanceMatrix({
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold text-foreground">Finance Options</h3>
-        <span className="text-sm text-muted-foreground">APR: {apr.toFixed(2)}%</span>
+        <div className="flex items-center gap-3">
+          {showAPR && (
+            <span className="text-sm text-muted-foreground">APR: {apr.toFixed(2)}%</span>
+          )}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowAPR(!showAPR)}
+            className="gap-2"
+          >
+            {showAPR ? "Hide APR%" : "Show APR%"}
+          </Button>
+        </div>
       </div>
 
       {/* Matrix Table */}
@@ -193,9 +209,11 @@ export function FinanceMatrix({
                         <div className="text-2xl font-bold tabular-nums">
                           ${monthly.toFixed(2)}
                         </div>
-                        <div className="text-xs text-muted-foreground">
-                          APR {apr.toFixed(2)}%
-                        </div>
+                        {showAPR && (
+                          <div className="text-xs text-muted-foreground">
+                            APR {apr.toFixed(2)}%
+                          </div>
+                        )}
                       </div>
                     </td>
                   ))}

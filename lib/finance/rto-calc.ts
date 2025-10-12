@@ -1,32 +1,47 @@
 // Rent-To-Own (RTO) calculation utilities
+// Updated with Matt's official RTO formula (2.32 finance factor)
 
 export type RTOInput = {
   price: number;
   down: number;
   taxPct: number;
   termMonths: number;
-  baseMarkupUsd?: number;      // Default: 1400
-  monthlyFactor?: number;       // Default: 0.035 (3.5%)
-  minDownUsd?: number;          // Default: 200
-  docFeeUsd?: number;           // Default: 99
-  buyoutFeeUsd?: number;        // Default: 250
+  countyTaxPct?: number;        // Default: 1.5
+  filingFee?: number;           // Default: 170
+  nonRefundableFee?: number;    // Default: 300
+  financeFactor?: number;       // Default: 2.32 (Matt's formula)
+  downPaymentFactor?: number;   // Default: 0.1035 (10.35% of price)
+
+  // Legacy params (for backwards compatibility)
+  baseMarkupUsd?: number;
+  monthlyFactor?: number;
+  minDownUsd?: number;
+  docFeeUsd?: number;
+  buyoutFeeUsd?: number;
 };
 
 export type RTOOutput = {
-  rtoPrice: number;             // Base price + markup
-  down: number;                 // Actual down payment (max of input or minimum)
-  monthlyRent: number;          // Monthly rent before tax
-  monthlyTax: number;           // Tax on monthly rent
+  rtoPrice: number;             // Base price × finance factor (2.32)
+  down: number;                 // Actual down payment used
+  monthlyRent: number;          // Monthly base payment before tax
+  monthlyTax: number;           // Tax on monthly payment
   monthlyTotal: number;         // Total monthly payment (rent + tax)
-  dueAtSigning: number;         // Down + doc fee + first month
+  dueAtSigning: number;         // Down + filing fee + non-refundable fee
   buyoutFee: number;            // Fee to buyout early
   totalPaid: number;            // Total if all payments made
-  docFee: number;               // Documentation fee
+  docFee: number;               // Documentation fee (now includes filing + non-refundable)
+  financedCost: number;         // Total financed cost (price × 2.32)
 };
 
 /**
- * Calculate Rent-To-Own pricing
- * RTO structure: Higher monthly payments, lower down payment, option to buy out
+ * Calculate Rent-To-Own pricing using Matt's official formula
+ *
+ * MATT'S RTO FORMULA:
+ * - Finance Factor: 2.32 (price × 2.32 = total financed cost)
+ * - Down Payment: 10.35% of original price
+ * - Monthly Payment: financedCost / term + tax
+ * - Tax: calculated on monthly base payment
+ * - Initial Due: down payment + $300 non-refundable + $170 filing fee
  */
 export function calculateRTO(input: RTOInput): RTOOutput {
   const {
@@ -34,63 +49,95 @@ export function calculateRTO(input: RTOInput): RTOOutput {
     down: downInput,
     taxPct,
     termMonths,
-    baseMarkupUsd = 1400,
-    monthlyFactor = 0.035,
+    countyTaxPct = 1.5,
+    filingFee = 170,
+    nonRefundableFee = 300,
+    financeFactor = 2.32,
+    downPaymentFactor = 0.1035,
+    // Legacy compatibility
+    baseMarkupUsd,
+    monthlyFactor,
     minDownUsd = 200,
-    docFeeUsd = 99,
+    docFeeUsd,
     buyoutFeeUsd = 250,
   } = input;
 
-  // Calculate RTO price (base price + markup)
-  const rtoPrice = price + baseMarkupUsd;
+  // Use Matt's formula (NEW METHOD) if legacy params not provided
+  const useNewFormula = !monthlyFactor && !baseMarkupUsd;
 
-  // Ensure down payment meets minimum
-  const down = Math.max(downInput, minDownUsd);
+  if (useNewFormula) {
+    // MATT'S OFFICIAL RTO FORMULA
+    const totalTaxRate = (taxPct + countyTaxPct) / 100;
+    const financedCost = price * financeFactor;
+    const baseMonthly = financedCost / termMonths;
+    const taxPerMonth = baseMonthly * totalTaxRate;
+    const totalMonthly = baseMonthly + taxPerMonth;
 
-  // Calculate monthly rent (percentage of RTO price)
-  const monthlyRent = rtoPrice * monthlyFactor;
+    // Calculate down payment (10.35% of price or user input, whichever is higher)
+    const calculatedDown = price * downPaymentFactor;
+    const down = Math.max(downInput, calculatedDown, minDownUsd);
 
-  // Calculate monthly tax (tax on the rent payment)
-  const taxRate = taxPct / 100;
-  const monthlyTax = monthlyRent * taxRate;
+    // Initial due at signing
+    const initialDue = down + nonRefundableFee + filingFee;
 
-  // Total monthly payment
-  const monthlyTotal = monthlyRent + monthlyTax;
+    // Total paid over life of RTO
+    const totalPaid = totalMonthly * termMonths + down + filingFee + nonRefundableFee;
 
-  // Due at signing (down + doc fee + first month)
-  const dueAtSigning = down + docFeeUsd + monthlyTotal;
+    return {
+      rtoPrice: financedCost,
+      down,
+      monthlyRent: baseMonthly,
+      monthlyTax: taxPerMonth,
+      monthlyTotal: totalMonthly,
+      dueAtSigning: initialDue,
+      buyoutFee: buyoutFeeUsd,
+      totalPaid,
+      docFee: filingFee + nonRefundableFee,
+      financedCost,
+    };
+  } else {
+    // LEGACY FORMULA (for backwards compatibility)
+    const rtoPrice = price + (baseMarkupUsd || 1400);
+    const down = Math.max(downInput, minDownUsd);
+    const monthlyRent = rtoPrice * (monthlyFactor || 0.035);
+    const taxRate = taxPct / 100;
+    const monthlyTax = monthlyRent * taxRate;
+    const monthlyTotal = monthlyRent + monthlyTax;
+    const dueAtSigning = down + (docFeeUsd || 99) + monthlyTotal;
+    const totalPaid = monthlyTotal * termMonths + down + (docFeeUsd || 99);
 
-  // Total paid over life of RTO (all monthly payments + down + doc fee)
-  const totalPaid = monthlyTotal * termMonths + down + docFeeUsd;
-
-  return {
-    rtoPrice,
-    down,
-    monthlyRent,
-    monthlyTax,
-    monthlyTotal,
-    dueAtSigning,
-    buyoutFee: buyoutFeeUsd,
-    totalPaid,
-    docFee: docFeeUsd,
-  };
+    return {
+      rtoPrice,
+      down,
+      monthlyRent,
+      monthlyTax,
+      monthlyTotal,
+      dueAtSigning,
+      buyoutFee: buyoutFeeUsd,
+      totalPaid,
+      docFee: docFeeUsd || 99,
+      financedCost: rtoPrice,
+    };
+  }
 }
 
 /**
  * Calculate RTO monthly payment for matrix display
  * Simplified version that only returns the monthly total
+ * Uses Matt's formula by default (finance factor 2.32)
  */
 export function calculateRTOMonthly(
   price: number,
-  down: number,
+  termMonths: number,
   taxPct: number,
-  baseMarkupUsd: number = 1400,
-  monthlyFactor: number = 0.035
+  countyTaxPct: number = 1.5,
+  financeFactor: number = 2.32,
 ): number {
-  const rtoPrice = price + baseMarkupUsd;
-  const monthlyRent = rtoPrice * monthlyFactor;
-  const monthlyTax = monthlyRent * (taxPct / 100);
-  return monthlyRent + monthlyTax;
+  const totalTaxRate = (taxPct + countyTaxPct) / 100;
+  const financedCost = price * financeFactor;
+  const baseMonthly = financedCost / termMonths;
+  const taxPerMonth = baseMonthly * totalTaxRate;
+  return baseMonthly + taxPerMonth;
 }
 
 /**

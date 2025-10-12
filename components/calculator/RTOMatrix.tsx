@@ -75,7 +75,7 @@ export function RTOMatrix({
           Lease / Rent-To-Own Options
         </h3>
         <span className="text-sm text-muted-foreground">
-          Base Markup: ${baseMarkup.toLocaleString()}
+          Finance Factor: 2.32x
         </span>
       </div>
 
@@ -140,7 +140,7 @@ export function RTOMatrix({
                           ${monthly.toFixed(2)}
                         </div>
                         <div className="text-xs text-muted-foreground">
-                          {monthlyFactor * 100}% monthly
+                          {term} months
                         </div>
                       </div>
                     </td>
