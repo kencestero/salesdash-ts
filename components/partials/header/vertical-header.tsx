@@ -6,6 +6,7 @@ import { Search } from "lucide-react";
 import { SiteLogo } from "@/components/svg";
 import Link from "next/link";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import { motion } from "framer-motion";
 
 const MenuBar = ({ collapsed, setCollapsed }: { collapsed: boolean, setCollapsed: (value: boolean) => void; }) => {
   return (
@@ -68,7 +69,25 @@ const VerticalHeader: React.FC<VerticalHeaderProps> = ({ handleOpenSearch }) => 
 
   const MainLogo = (
     <Link href="/dashboard" className=" text-primary ">
-      <SiteLogo className="h-7 w-7" />
+      <motion.div
+        animate={{
+          filter: [
+            "drop-shadow(0 0 0px #ee6832)",
+            "drop-shadow(0 0 8px #ee6832)",
+            "drop-shadow(0 0 12px #ee6832)",
+            "drop-shadow(0 0 8px #ee6832)",
+            "drop-shadow(0 0 0px #ee6832)"
+          ]
+        }}
+        transition={{
+          duration: 2,
+          repeat: Infinity,
+          repeatDelay: 298, // 5 minutes = 300 seconds - 2 second animation
+          ease: "easeInOut"
+        }}
+      >
+        <SiteLogo className="h-7 w-7" />
+      </motion.div>
     </Link>
   );
   const SearchButton = (

@@ -16,6 +16,7 @@ import MenuOverlayPortal from "./MenuOverlayPortal";
 import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SiteLogo } from "@/components/svg";
+import { motion } from "framer-motion";
 
 const ModuleSidebar = ({ trans }: { trans: any }) => {
   const menus = menusConfig?.sidebarNav?.modern || [];
@@ -159,7 +160,26 @@ const ModuleSidebar = ({ trans }: { trans: any }) => {
         >
           <div className=" pt-4 ">
             <Link href="/dashboard">
-              <SiteLogo className="h-8 w-8 mx-auto" />
+              <motion.div
+                className="mx-auto"
+                animate={{
+                  filter: [
+                    "drop-shadow(0 0 0px #ee6832)",
+                    "drop-shadow(0 0 8px #ee6832)",
+                    "drop-shadow(0 0 12px #ee6832)",
+                    "drop-shadow(0 0 8px #ee6832)",
+                    "drop-shadow(0 0 0px #ee6832)"
+                  ]
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  repeatDelay: 298, // 5 minutes = 300 seconds - 2 second animation
+                  ease: "easeInOut"
+                }}
+              >
+                <SiteLogo className="h-8 w-8" />
+              </motion.div>
             </Link>
           </div>
           {/* end logo */}

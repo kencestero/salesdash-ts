@@ -48,10 +48,6 @@ const LogInForm = () => {
   } = useForm({
     resolver: zodResolver(schema),
     mode: "all",
-    defaultValues: {
-      email: "dashtail@codeshaper.net",
-      password: "password",
-    },
   });
   const [isVisible, setIsVisible] = React.useState(false);
 
@@ -101,6 +97,7 @@ const LogInForm = () => {
               "border-destructive": errors.email,
             })}
             size={!isDesktop2xl ? "xl" : "lg"}
+            placeholder="dashtail@codeshaper.net"
           />
         </div>
         {errors.email && (
@@ -122,7 +119,7 @@ const LogInForm = () => {
               id="password"
               className="peer "
               size={!isDesktop2xl ? "xl" : "lg"}
-              placeholder=" "
+              placeholder="Enter your password"
             />
 
             <div
