@@ -25,6 +25,8 @@ export type FinanceMatrixProps = {
     monthly: number;
     mode: "FINANCE";
   }) => void;
+  onSaveQuote?: () => void;
+  onCopySMS?: () => void;
 };
 
 const DEFAULT_DOWN_PAYMENTS = [0, 1000, 2500, 5000];
@@ -37,6 +39,8 @@ export function FinanceMatrix({
   apr,
   downPaymentOptions = DEFAULT_DOWN_PAYMENTS,
   onSelectPayment,
+  onSaveQuote,
+  onCopySMS,
 }: FinanceMatrixProps) {
   // Term visibility state (all checked by default)
   const [visibleTerms, setVisibleTerms] = useState<Record<number, boolean>>({
@@ -281,6 +285,25 @@ export function FinanceMatrix({
         💡 Tip: Uncheck a term to hide it (you can re-add it by typing the number and clicking Add).
         Click the X button to permanently remove custom terms. Click any payment amount to save as a quote.
       </p>
+
+      {/* Action Buttons */}
+      {(onSaveQuote || onCopySMS) && (
+        <div className="mt-6 flex gap-3">
+          {onSaveQuote && (
+            <Button
+              onClick={onSaveQuote}
+              className="flex-1 bg-blue-500 hover:bg-blue-600 text-white"
+            >
+              ✅ Click to add Finance scenario to Quote to share
+            </Button>
+          )}
+          {onCopySMS && (
+            <Button variant="outline" onClick={onCopySMS} className="flex-1">
+              📋 Copy SMS Text
+            </Button>
+          )}
+        </div>
+      )}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Calculator, User, Phone, Mail } from "lucide-react";
 import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,6 +21,9 @@ import { useSession } from "next-auth/react";
 import { generateQuotePDF, SelectedPaymentOption } from "@/lib/finance/pdf-generator";
 import { Button } from "@/components/ui/button";
 import { FileDown, Check } from "lucide-react";
+import { generateCashSnippet, generateFinanceSnippet, generateRTOSnippet, copyToClipboard } from "@/lib/finance/sms-snippets";
+import { calculateFinance } from "@/lib/finance/finance-calc";
+import { calculateRTO } from "@/lib/finance/rto-calc";
 
 export default function FinanceComparePage() {
   const { data: session } = useSession();
@@ -174,6 +177,122 @@ export default function FinanceComparePage() {
       description: `Quote for ${customerName} has been downloaded`,
       variant: "default",
     });
+  };
+
+  // SMS Copy Handlers
+  const handleCopyCashSMS = async () => {
+    const snippet = generateCashSnippet({
+      customerName,
+      unitDescription: selectedUnit || "Cargo Trailer",
+      unitPrice: price,
+      taxPercent: taxPct,
+      fees,
+    });
+
+    const success = await copyToClipboard(snippet);
+    if (success) {
+      toast({
+        title: "✅ Copied to clipboard!",
+        description: "Cash deal SMS text ready to send",
+      });
+    } else {
+      toast({
+        title: "❌ Copy failed",
+        description: "Please try again",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleCopyFinanceSMS = async () => {
+    // Calculate all finance payments for the matrix
+    const terms = [24, 36, 48, 60, 72];
+    const payments: Record<number, Record<number, number>> = {};
+
+    terms.forEach(term => {
+      payments[term] = {};
+      downPaymentOptions.forEach(down => {
+        const result = calculateFinance({
+          price,
+          down,
+          taxPct,
+          fees,
+          aprPercent: apr,
+          termMonths: term
+        });
+        payments[term][down] = result.monthlyPayment;
+      });
+    });
+
+    const snippet = generateFinanceSnippet({
+      customerName,
+      unitDescription: selectedUnit || "Cargo Trailer",
+      unitPrice: price,
+      taxPercent: taxPct,
+      fees,
+      apr,
+      downPayments: downPaymentOptions,
+      terms,
+      payments,
+    });
+
+    const success = await copyToClipboard(snippet);
+    if (success) {
+      toast({
+        title: "✅ Copied to clipboard!",
+        description: "Finance options SMS text ready to send",
+      });
+    } else {
+      toast({
+        title: "❌ Copy failed",
+        description: "Please try again",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleCopyRTOSMS = async () => {
+    // Calculate all RTO payments for the matrix
+    const terms = [24, 36, 48];
+    const payments: Record<number, Record<number, number>> = {};
+
+    terms.forEach(term => {
+      payments[term] = {};
+      downPaymentOptions.forEach(down => {
+        const result = calculateRTO({
+          price,
+          down,
+          taxPct,
+          termMonths: term
+        });
+        payments[term][down] = result.monthlyTotal;
+      });
+    });
+
+    const snippet = generateRTOSnippet({
+      customerName,
+      unitDescription: selectedUnit || "Cargo Trailer",
+      unitPrice: price,
+      taxPercent: taxPct,
+      fees,
+      downPayments: downPaymentOptions,
+      terms,
+      payments,
+    });
+
+    const success = await copyToClipboard(snippet);
+    if (success) {
+      toast({
+        title: "✅ Copied to clipboard!",
+        description: "RTO options SMS text ready to send",
+      });
+    } else {
+      toast({
+        title: "❌ Copy failed",
+        description: "Please try again",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -428,6 +547,7 @@ export default function FinanceComparePage() {
               apr={apr}
               downPaymentOptions={downPaymentOptions}
               onSelectPayment={handleSelectPayment}
+              onCopySMS={handleCopyFinanceSMS}
             />
           </CardContent>
         </Card>
@@ -440,6 +560,7 @@ export default function FinanceComparePage() {
               taxPct={taxPct}
               downPaymentOptions={downPaymentOptions}
               onSelectPayment={handleSelectPayment}
+              onCopySMS={handleCopyRTOSMS}
             />
           </CardContent>
         </Card>
@@ -452,8 +573,7 @@ export default function FinanceComparePage() {
               taxPct={taxPct}
               fees={fees}
               onSaveQuote={handleSaveCashQuote}
-              onShare={() => toast({ title: "Share feature coming soon!" })}
-              onGeneratePDF={() => toast({ title: "PDF generation coming soon!" })}
+              onShare={handleCopyCashSMS}
             />
           </CardContent>
         </Card>

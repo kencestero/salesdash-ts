@@ -110,16 +110,11 @@ export function CashSummary({
             onClick={() => onSaveQuote?.({ totalCash: cashData.totalCash, mode: "CASH" })}
             className="flex-1 bg-success hover:bg-success/90"
           >
-            💾 Save Cash Quote
+            ✅ Click to add Cash scenario to Quote to share
           </Button>
           {onShare && (
-            <Button variant="outline" onClick={onShare}>
-              📤 Share
-            </Button>
-          )}
-          {onGeneratePDF && (
-            <Button variant="outline" onClick={onGeneratePDF}>
-              📄 PDF
+            <Button variant="outline" onClick={onShare} className="flex-1">
+              📋 Copy SMS Text
             </Button>
           )}
         </div>

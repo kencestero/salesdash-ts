@@ -18,6 +18,8 @@ export type RTOMatrixProps = {
     monthly: number;
     mode: "RTO";
   }) => void;
+  onSaveQuote?: () => void;
+  onCopySMS?: () => void;
 };
 
 const DEFAULT_DOWN_PAYMENTS = [0, 1000, 2500, 5000];
@@ -30,6 +32,8 @@ export function RTOMatrix({
   baseMarkup = 1400,
   monthlyFactor = 0.035,
   onSelectPayment,
+  onSaveQuote,
+  onCopySMS,
 }: RTOMatrixProps) {
   // Term visibility state (all checked by default)
   const [visibleTerms, setVisibleTerms] = useState<Record<number, boolean>>({
@@ -183,6 +187,25 @@ export function RTOMatrix({
         💡 Tip: Uncheck a term to remove it from the display. Click any payment
         amount to save as a quote.
       </p>
+
+      {/* Action Buttons */}
+      {(onSaveQuote || onCopySMS) && (
+        <div className="mt-6 flex gap-3">
+          {onSaveQuote && (
+            <Button
+              onClick={onSaveQuote}
+              className="flex-1 bg-purple-500 hover:bg-purple-600 text-white"
+            >
+              ✅ Click to add RTO Scenario to Quote to share
+            </Button>
+          )}
+          {onCopySMS && (
+            <Button variant="outline" onClick={onCopySMS} className="flex-1">
+              📋 Copy SMS Text
+            </Button>
+          )}
+        </div>
+      )}
     </div>
   );
 }
