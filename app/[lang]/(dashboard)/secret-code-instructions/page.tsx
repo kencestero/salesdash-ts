@@ -63,7 +63,7 @@ export default async function SecretCodeInstructionsPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Users className="h-5 w-5" />
-            How the 3-Code System Works
+            How the 4-Code System Works
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -136,12 +136,12 @@ export default async function SecretCodeInstructionsPage() {
         </CardContent>
       </Card>
 
-      {/* The 3 Code Types */}
+      {/* The 4 Code Types */}
       <Card className="mb-6">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Shield className="h-5 w-5" />
-            The 3 Code Types
+            The 4 Code Types
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -175,6 +175,24 @@ export default async function SecretCodeInstructionsPage() {
               <li>✅ All Salesperson permissions</li>
               <li>✅ Can view join codes (Salesperson + Manager)</li>
               <li>✅ Team management features</li>
+              <li>❌ Cannot see Owner code</li>
+            </ul>
+          </div>
+
+          {/* Director */}
+          <div className="border-l-4 border-purple-500 pl-4 py-2">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded font-medium">DIRECTOR</span>
+              <h3 className="font-semibold">Director Code</h3>
+            </div>
+            <p className="text-sm text-muted-foreground mb-2">
+              For hiring senior management and directors
+            </p>
+            <ul className="text-sm space-y-1 text-muted-foreground">
+              <li>✅ All Manager permissions</li>
+              <li>✅ Multi-team oversight</li>
+              <li>✅ Advanced analytics and reporting</li>
+              <li>✅ Can view all team member activities</li>
               <li>❌ Cannot see Owner code</li>
             </ul>
           </div>
@@ -227,6 +245,13 @@ export default async function SecretCodeInstructionsPage() {
             <AlertDescription className="flex items-start gap-2">
               <span className="font-semibold">📧 Google Account Required:</span>
               <span>New users must have a Google account to sign in. No other sign-in methods are available.</span>
+            </AlertDescription>
+          </Alert>
+
+          <Alert>
+            <AlertDescription className="flex items-start gap-2">
+              <span className="font-semibold">🔢 Employee Numbers:</span>
+              <span>Every team member gets a unique employee number (e.g., REP123456, SMA123456, DIR123456). All their activity in the Dashboard is tracked and can be viewed by Managers, Directors, and Owners.</span>
             </AlertDescription>
           </Alert>
 
