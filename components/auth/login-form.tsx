@@ -21,7 +21,6 @@ import googleIcon from "@/public/images/auth/google.png";
 import facebook from "@/public/images/auth/facebook.png";
 import twitter from "@/public/images/auth/twitter.png";
 import GithubIcon from "@/public/images/auth/github.png";
-import { AnimatedLogo } from "./animated-logo";
 
 const schema = z.object({
   email: z.string().email({ message: "Your email is invalid." }),
@@ -72,13 +71,11 @@ const LogInForm = () => {
   };
   return (
     <div className="w-full py-10">
-      {/* Animated Logo */}
-      <div className="mb-12">
-        <AnimatedLogo />
-      </div>
-
-      <div className="2xl:mt-8 mt-6 2xl:text-3xl text-2xl font-bold text-default-900 text-center">
-        Welcome to MJ Cargo Sales Dashboard
+      <Link href="/dashboard" className="inline-block">
+        <SiteLogo className="w-14 h-14" />
+      </Link>
+      <div className="2xl:mt-8 mt-6 2xl:text-3xl text-2xl font-bold text-default-900">
+        Game Time 🚀
       </div>
       <div className="2xl:text-lg text-base text-default-600 2xl:mt-2 leading-6">
         MJ Cargo Sales Command Center
