@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, Search, Filter, Eye, Edit, Trash2 } from "lucide-react";
+import { Plus, Search, Filter, Eye, Edit, Trash2, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -28,6 +29,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { FireBadge } from "@/components/ui/fire-badge";
+import { toast } from "@/components/ui/use-toast";
 
 interface Trailer {
   id: string;
@@ -45,7 +47,8 @@ interface Trailer {
   location?: string;
   images: string[];
   createdAt: string;
-  daysOld?: number; // Calculated on server
+  daysOld?: number;
+  features?: string[];
 }
 
 export default function InventoryPage() {
@@ -54,6 +57,8 @@ export default function InventoryPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
+  const [selectedTrailers, setSelectedTrailers] = useState<string[]>([]);
+  const [generatingPDF, setGeneratingPDF] = useState(false);
 
   useEffect(() => {
     fetchInventory();
@@ -86,6 +91,79 @@ export default function InventoryPage() {
     );
   });
 
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedTrailers(filteredTrailers.map(t => t.id));
+    } else {
+      setSelectedTrailers([]);
+    }
+  };
+
+  const handleSelectTrailer = (trailerId: string, checked: boolean) => {
+    if (checked) {
+      setSelectedTrailers(prev => [...prev, trailerId]);
+    } else {
+      setSelectedTrailers(prev => prev.filter(id => id !== trailerId));
+    }
+  };
+
+  const handleGeneratePDF = async () => {
+    if (selectedTrailers.length === 0) {
+      toast({
+        title: "No trailers selected",
+        description: "Please select at least one trailer to generate a quote.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setGeneratingPDF(true);
+
+      // Get selected trailer data
+      const selected = trailers.filter(t => selectedTrailers.includes(t.id));
+
+      // Call PDF generation API
+      const response = await fetch("/api/quotes/generate-pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ trailers: selected }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to generate PDF");
+      }
+
+      // Download the PDF
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `MJ-Cargo-Quote-${new Date().toISOString().split('T')[0]}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      toast({
+        title: "PDF Generated",
+        description: `Quote generated for ${selectedTrailers.length} trailer(s)`,
+      });
+
+      // Clear selection after successful generation
+      setSelectedTrailers([]);
+    } catch (error) {
+      console.error("PDF generation error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to generate PDF quote. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setGeneratingPDF(false);
+    }
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "available":
@@ -111,6 +189,9 @@ export default function InventoryPage() {
       .reduce((sum, t) => sum + t.salePrice, 0),
   };
 
+  const allSelected = filteredTrailers.length > 0 && selectedTrailers.length === filteredTrailers.length;
+  const someSelected = selectedTrailers.length > 0 && selectedTrailers.length < filteredTrailers.length;
+
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
@@ -119,10 +200,22 @@ export default function InventoryPage() {
           <h1 className="text-3xl font-bold text-white">Live Inventory</h1>
           <p className="text-gray-400">Manage your trailer inventory</p>
         </div>
-        <Button className="bg-[#f5a623] hover:bg-[#e09612] text-white">
-          <Plus className="mr-2 h-4 w-4" />
-          Add Trailer
-        </Button>
+        <div className="flex gap-3">
+          {selectedTrailers.length > 0 && (
+            <Button
+              onClick={handleGeneratePDF}
+              disabled={generatingPDF}
+              className="bg-green-500 hover:bg-green-600 text-white"
+            >
+              <FileText className="mr-2 h-4 w-4" />
+              {generatingPDF ? "Generating..." : `Generate PDF (${selectedTrailers.length})`}
+            </Button>
+          )}
+          <Button className="bg-[#f5a623] hover:bg-[#e09612] text-white">
+            <Plus className="mr-2 h-4 w-4" />
+            Add Trailer
+          </Button>
+        </div>
       </div>
 
       {/* Stats Cards */}
@@ -217,6 +310,8 @@ export default function InventoryPage() {
                 <SelectItem value="Gooseneck">Gooseneck</SelectItem>
                 <SelectItem value="Flatbed">Flatbed</SelectItem>
                 <SelectItem value="Car Hauler">Car Hauler</SelectItem>
+                <SelectItem value="Concession">Concession</SelectItem>
+                <SelectItem value="Motorcycle">Motorcycle</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -226,9 +321,16 @@ export default function InventoryPage() {
       {/* Inventory Table */}
       <Card className="bg-[#1a1d29] border-gray-700">
         <CardHeader>
-          <CardTitle className="text-white">
-            {filteredTrailers.length} Trailers
-          </CardTitle>
+          <div className="flex justify-between items-center">
+            <CardTitle className="text-white">
+              {filteredTrailers.length} Trailers
+            </CardTitle>
+            {selectedTrailers.length > 0 && (
+              <p className="text-sm text-gray-400">
+                {selectedTrailers.length} selected
+              </p>
+            )}
+          </div>
         </CardHeader>
         <CardContent>
           {loading ? (
@@ -242,6 +344,13 @@ export default function InventoryPage() {
               <Table>
                 <TableHeader>
                   <TableRow className="border-gray-700">
+                    <TableHead className="text-gray-400 w-12">
+                      <Checkbox
+                        checked={allSelected}
+                        onCheckedChange={handleSelectAll}
+                        aria-label="Select all"
+                      />
+                    </TableHead>
                     <TableHead className="text-gray-400">Stock #</TableHead>
                     <TableHead className="text-gray-400">Image</TableHead>
                     <TableHead className="text-gray-400">Details</TableHead>
@@ -254,6 +363,15 @@ export default function InventoryPage() {
                 <TableBody>
                   {filteredTrailers.map((trailer) => (
                     <TableRow key={trailer.id} className="border-gray-700">
+                      <TableCell>
+                        <Checkbox
+                          checked={selectedTrailers.includes(trailer.id)}
+                          onCheckedChange={(checked) =>
+                            handleSelectTrailer(trailer.id, checked as boolean)
+                          }
+                          aria-label={`Select ${trailer.stockNumber}`}
+                        />
+                      </TableCell>
                       <TableCell className="font-medium text-white">
                         <div className="flex items-center gap-2">
                           {trailer.stockNumber}
