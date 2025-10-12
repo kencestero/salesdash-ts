@@ -31,6 +31,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/components/ui/use-toast";
 import Link from "next/link";
+import { AddCustomerDialog } from "./add-customer-dialog";
 
 interface Customer {
   id: string;
@@ -81,6 +82,7 @@ export default function CustomersPage() {
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [showAddDialog, setShowAddDialog] = useState(false);
 
   // Fetch customers
   const fetchCustomers = async () => {
@@ -165,7 +167,10 @@ export default function CustomersPage() {
             Manage your leads, customers, and sales opportunities
           </p>
         </div>
-        <Button className="bg-orange-500 hover:bg-orange-600 text-white">
+        <Button
+          onClick={() => setShowAddDialog(true)}
+          className="bg-orange-500 hover:bg-orange-600 text-white"
+        >
           <Plus className="w-4 h-4 mr-2" />
           Add Customer
         </Button>
@@ -394,6 +399,13 @@ export default function CustomersPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Add Customer Dialog */}
+      <AddCustomerDialog
+        open={showAddDialog}
+        onOpenChange={setShowAddDialog}
+        onSuccess={fetchCustomers}
+      />
     </div>
   );
 }
