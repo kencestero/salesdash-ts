@@ -34,14 +34,20 @@ export type RTOOutput = {
 };
 
 /**
- * Calculate Rent-To-Own pricing using Matt's official formula
+ * Calculate Rent-To-Own pricing using Matt's ACTUAL formula from ownyourtrailer.com
  *
- * MATT'S RTO FORMULA:
- * - Finance Factor: 2.32 (price × 2.32 = total financed cost)
- * - Down Payment: 10.35% of original price
- * - Monthly Payment: financedCost / term + tax
- * - Tax: calculated on monthly base payment
- * - Initial Due: down payment + $300 non-refundable + $170 filing fee
+ * MATT'S REAL RTO FORMULA (from ownyourtrailer.com):
+ * - Monthly Payment Factors by term:
+ *   - 24 months: 0.065789
+ *   - 36 months: 0.049020
+ *   - 48 months: 0.044945
+ * - Principal = price - capCostReduction (down payment)
+ * - Base Monthly = principal × factor[term]
+ * - Monthly LDW = $19.99
+ * - Sales Tax = (baseMonthly + monthlyLDW) × taxRate
+ * - Total Monthly = baseMonthly + monthlyLDW + salesTax
+ *
+ * Fees: Title/Tag ($200), Registration ($75), GPS ($350), Doc ($195)
  */
 export function calculateRTO(input: RTOInput): RTOOutput {
   const {
@@ -49,7 +55,7 @@ export function calculateRTO(input: RTOInput): RTOOutput {
     down: downInput,
     taxPct,
     termMonths,
-    countyTaxPct = 1.5,
+    countyTaxPct = 0, // Not used in Matt's real calculator
     filingFee = 170,
     nonRefundableFee = 300,
     financeFactor = 2.32,
@@ -57,7 +63,7 @@ export function calculateRTO(input: RTOInput): RTOOutput {
     // Legacy compatibility
     baseMarkupUsd,
     monthlyFactor,
-    minDownUsd = 200,
+    minDownUsd = 0,
     docFeeUsd,
     buyoutFeeUsd = 250,
   } = input;
@@ -66,34 +72,64 @@ export function calculateRTO(input: RTOInput): RTOOutput {
   const useNewFormula = !monthlyFactor && !baseMarkupUsd;
 
   if (useNewFormula) {
-    // MATT'S OFFICIAL RTO FORMULA
-    const totalTaxRate = (taxPct + countyTaxPct) / 100;
-    const financedCost = price * financeFactor;
-    const baseMonthly = financedCost / termMonths;
-    const taxPerMonth = baseMonthly * totalTaxRate;
-    const totalMonthly = baseMonthly + taxPerMonth;
+    // MATT'S ACTUAL RTO FORMULA FROM OWNYOURTRAILER.COM
+    // Monthly payment factors by term
+    const paymentFactors: Record<number, number> = {
+      24: 0.065789,
+      30: 0.054348,
+      36: 0.049020,
+      42: 0.046620,
+      48: 0.044945,
+    };
 
-    // Calculate down payment (10.35% of price or user input, whichever is higher)
-    const calculatedDown = price * downPaymentFactor;
-    const down = Math.max(downInput, calculatedDown, minDownUsd);
+    const factor = paymentFactors[termMonths] || 0.044945; // Default to 48 month factor
 
-    // Initial due at signing
-    const initialDue = down + nonRefundableFee + filingFee;
+    // Principal = price minus cap cost reduction (down payment)
+    const principal = price - downInput;
 
-    // Total paid over life of RTO
-    const totalPaid = totalMonthly * termMonths + down + filingFee + nonRefundableFee;
+    // Base monthly payment
+    const baseMonthly = principal * factor;
+
+    // Monthly LDW (Loss Damage Waiver)
+    const monthlyLDW = 19.99;
+
+    // Sales tax on (base + LDW)
+    const taxRate = taxPct / 100;
+    const monthlyTax = (baseMonthly + monthlyLDW) * taxRate;
+
+    // Total monthly payment
+    const totalMonthly = baseMonthly + monthlyLDW + monthlyTax;
+
+    // Matt's fees structure
+    const titleTag = 200;
+    const registration = 75;
+    const gpsFee = 350;
+    const docFee = 195;
+    const adminFee = 0;
+
+    // Security deposit (simplified - varies by ZIP in real calc)
+    const securityDeposit = baseMonthly * 0.5; // Approximate
+
+    // Total up front
+    const totalUpFront = downInput + titleTag + registration + gpsFee + docFee + adminFee + securityDeposit;
+
+    // Total term cost
+    const totalTermCost = totalMonthly * termMonths;
+
+    // Total paid over life (includes all fees and payments)
+    const totalPaid = totalUpFront + (totalMonthly * termMonths);
 
     return {
-      rtoPrice: financedCost,
-      down,
+      rtoPrice: principal, // Principal being financed
+      down: downInput,
       monthlyRent: baseMonthly,
-      monthlyTax: taxPerMonth,
+      monthlyTax: monthlyTax,
       monthlyTotal: totalMonthly,
-      dueAtSigning: initialDue,
+      dueAtSigning: totalUpFront,
       buyoutFee: buyoutFeeUsd,
-      totalPaid,
-      docFee: filingFee + nonRefundableFee,
-      financedCost,
+      totalPaid: totalPaid,
+      docFee: titleTag + registration + gpsFee + docFee,
+      financedCost: principal,
     };
   } else {
     // LEGACY FORMULA (for backwards compatibility)

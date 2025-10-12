@@ -75,7 +75,7 @@ export function RTOMatrix({
           Lease / Rent-To-Own Options
         </h3>
         <span className="text-sm text-muted-foreground">
-          Finance Factor: 2.32x
+          Includes $19.99/mo LDW + Fees
         </span>
       </div>
 
