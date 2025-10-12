@@ -36,12 +36,70 @@ export default function FinanceComparePage() {
   // Input states
   const [selectedUnit, setSelectedUnit] = useState("");
   const [price, setPrice] = useState(14000);
+  const [zipcode, setZipcode] = useState("");
   const [taxPct, setTaxPct] = useState(8.25);
   const [fees, setFees] = useState(125);
   const [apr, setApr] = useState(8.99);
 
+  // Zipcode to tax rate mapping (Kentucky counties)
+  const getTaxRateFromZip = (zip: string): number => {
+    // Remove any non-numeric characters
+    const cleanZip = zip.replace(/\D/g, '');
+
+    // Default KY state sales tax is 6%
+    // Local taxes vary by county (typically 0-2.5%)
+    // Bowling Green area (Warren County) is typically 6% + 3.5% = 9.5%
+
+    const zipTaxMap: Record<string, number> = {
+      // Warren County (Bowling Green area)
+      '42101': 9.5, '42102': 9.5, '42103': 9.5, '42104': 9.5,
+      // Jefferson County (Louisville area)
+      '40201': 6.0, '40202': 6.0, '40203': 6.0, '40204': 6.0, '40205': 6.0,
+      '40206': 6.0, '40207': 6.0, '40208': 6.0, '40209': 6.0, '40210': 6.0,
+      '40211': 6.0, '40212': 6.0, '40213': 6.0, '40214': 6.0, '40215': 6.0,
+      '40216': 6.0, '40217': 6.0, '40218': 6.0, '40219': 6.0, '40220': 6.0,
+      '40221': 6.0, '40222': 6.0, '40223': 6.0, '40224': 6.0, '40225': 6.0,
+      '40228': 6.0, '40229': 6.0, '40231': 6.0, '40232': 6.0, '40233': 6.0,
+      '40241': 6.0, '40242': 6.0, '40243': 6.0, '40245': 6.0, '40250': 6.0,
+      '40251': 6.0, '40252': 6.0, '40253': 6.0, '40255': 6.0, '40256': 6.0,
+      '40257': 6.0, '40258': 6.0, '40259': 6.0, '40261': 6.0, '40266': 6.0,
+      '40268': 6.0, '40269': 6.0, '40270': 6.0, '40272': 6.0, '40280': 6.0,
+      '40281': 6.0, '40282': 6.0, '40283': 6.0, '40285': 6.0, '40287': 6.0,
+      '40289': 6.0, '40290': 6.0, '40291': 6.0, '40292': 6.0, '40293': 6.0,
+      '40294': 6.0, '40295': 6.0, '40296': 6.0, '40297': 6.0, '40298': 6.0, '40299': 6.0,
+      // Fayette County (Lexington area)
+      '40502': 6.0, '40503': 6.0, '40504': 6.0, '40505': 6.0, '40506': 6.0,
+      '40507': 6.0, '40508': 6.0, '40509': 6.0, '40510': 6.0, '40511': 6.0,
+      '40512': 6.0, '40513': 6.0, '40514': 6.0, '40515': 6.0, '40516': 6.0,
+      '40517': 6.0, '40522': 6.0, '40523': 6.0, '40524': 6.0, '40526': 6.0,
+      '40533': 6.0, '40536': 6.0, '40544': 6.0, '40546': 6.0, '40550': 6.0,
+      '40555': 6.0, '40574': 6.0, '40575': 6.0, '40576': 6.0, '40577': 6.0,
+      '40578': 6.0, '40579': 6.0, '40580': 6.0, '40581': 6.0, '40582': 6.0,
+      '40583': 6.0, '40588': 6.0, '40591': 6.0, '40598': 6.0,
+    };
+
+    // Return mapped tax rate or default to 6%
+    return zipTaxMap[cleanZip] || 6.0;
+  };
+
+  // Handle zipcode change and auto-update tax
+  const handleZipcodeChange = (value: string) => {
+    setZipcode(value);
+    if (value.length === 5) {
+      const newTaxRate = getTaxRateFromZip(value);
+      setTaxPct(newTaxRate);
+      if (newTaxRate !== taxPct) {
+        toast({
+          title: "Tax Rate Updated",
+          description: `Tax rate set to ${newTaxRate}% based on ZIP code`,
+          variant: "default",
+        });
+      }
+    }
+  };
+
   // Down payment options (configurable)
-  const downPaymentOptions = [0, 1000, 2500, 5000];
+  const downPaymentOptions = [0, 1000, 2000, 3000];
 
   // Selected payment options for PDF
   const [selectedOptions, setSelectedOptions] = useState<SelectedPaymentOption[]>([]);
@@ -252,7 +310,7 @@ export default function FinanceComparePage() {
 
   const handleCopyFinanceSMS = async () => {
     // Calculate all finance payments for the matrix
-    const terms = [24, 36, 48, 60, 72];
+    const terms = [36, 48, 60, 72, 84];
     const payments: Record<number, Record<number, number>> = {};
 
     terms.forEach(term => {
@@ -479,14 +537,14 @@ export default function FinanceComparePage() {
             <CardTitle className="text-foreground">Quote Details</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-5">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-6">
               {/* Unit Price */}
               <div className="space-y-2">
                 <Label htmlFor="price" className="text-foreground">
                   Unit Price
                 </Label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground font-semibold">
                     $
                   </span>
                   <Input
@@ -497,6 +555,22 @@ export default function FinanceComparePage() {
                     className="pl-7"
                   />
                 </div>
+              </div>
+
+              {/* Zipcode */}
+              <div className="space-y-2">
+                <Label htmlFor="zipcode" className="text-foreground">
+                  ZIP Code
+                </Label>
+                <Input
+                  id="zipcode"
+                  type="text"
+                  maxLength={5}
+                  placeholder="42101"
+                  value={zipcode}
+                  onChange={(e) => handleZipcodeChange(e.target.value)}
+                  className="font-mono"
+                />
               </div>
 
               {/* Tax % */}

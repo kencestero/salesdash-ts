@@ -29,8 +29,8 @@ export type FinanceMatrixProps = {
   onCopySMS?: () => void;
 };
 
-const DEFAULT_DOWN_PAYMENTS = [0, 1000, 2500, 5000];
-const DEFAULT_TERMS = [24, 36, 48, 60, 72]; // Updated to include 72 months
+const DEFAULT_DOWN_PAYMENTS = [0, 1000, 2000, 3000];
+const DEFAULT_TERMS = [36, 48, 60, 72, 84]; // Bank-approved terms only
 
 export function FinanceMatrix({
   price,
@@ -44,11 +44,11 @@ export function FinanceMatrix({
 }: FinanceMatrixProps) {
   // Term visibility state (all checked by default)
   const [visibleTerms, setVisibleTerms] = useState<Record<number, boolean>>({
-    24: true,
     36: true,
     48: true,
     60: true,
     72: true,
+    84: true,
   });
 
   // APR visibility state
@@ -184,7 +184,6 @@ export function FinanceMatrix({
                       />
                       <span className="text-sm font-medium">
                         {term} {term === 1 ? "month" : "months"}
-                        {term === 72 && " (Not Common)"}
                       </span>
                       {isCustomTerm(term) && (
                         <button
