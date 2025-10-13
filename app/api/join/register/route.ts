@@ -101,8 +101,22 @@ export async function POST(req: Request) {
     // 8. Send verification email
     const verificationUrl = `${process.env.NEXTAUTH_URL}/en/auth/verify-email?token=${verificationToken}`;
 
-    // TODO: Send actual email here
     console.log('📧 Verification URL:', verificationUrl);
+
+    // Send verification email using Resend
+    try {
+      const { sendVerificationEmail } = await import('@/lib/email/resend-service');
+      await sendVerificationEmail(
+        email,
+        `${firstName} ${lastName}`,
+        verificationUrl,
+        24 // 24 hours expiry
+      );
+      console.log('✅ Verification email sent successfully');
+    } catch (emailError) {
+      console.error('❌ Failed to send verification email:', emailError);
+      // Don't fail registration if email fails - user can request resend
+    }
 
     // 9. Clear validation cookies
     cookieStore.delete("join_ok");

@@ -143,6 +143,27 @@ export async function sendPasswordResetEmail(
 }
 
 /**
+ * Send email verification link
+ */
+export async function sendVerificationEmail(
+  email: string,
+  userName: string,
+  verificationLink: string,
+  expiresInHours: number = 24
+) {
+  const VerifyEmail = (await import('./templates/verify-email')).default;
+
+  return sendEmail({
+    to: email,
+    subject: 'Verify Your Email - MJ Cargo Sales Dashboard',
+    react: VerifyEmail({ userName, verificationLink, expiresInHours }),
+    tags: [
+      { name: 'category', value: 'email-verification' },
+    ],
+  });
+}
+
+/**
  * Test email service (for development)
  */
 export async function testEmailService(testEmail: string) {
