@@ -604,18 +604,32 @@ export async function GET(req: Request) {
     const statusFilter = searchParams.get("status");
     const categoryFilter = searchParams.get("category");
 
-    // Filter sample trailers
-    let trailers = [...SAMPLE_TRAILERS];
+    // Fetch real trailers from database
+    const whereClause: any = {};
 
     if (statusFilter && statusFilter !== "all") {
-      trailers = trailers.filter(t => t.status === statusFilter);
+      whereClause.status = statusFilter;
     }
 
     if (categoryFilter && categoryFilter !== "all") {
-      trailers = trailers.filter(t => t.category === categoryFilter);
+      whereClause.category = categoryFilter;
     }
 
-    return NextResponse.json({ trailers });
+    const trailers = await prisma.trailer.findMany({
+      where: whereClause,
+      orderBy: [
+        { createdAt: 'desc' },
+        { stockNumber: 'asc' }
+      ]
+    });
+
+    // Calculate daysOld for each trailer
+    const trailersWithAge = trailers.map(trailer => ({
+      ...trailer,
+      daysOld: Math.floor((Date.now() - new Date(trailer.createdAt).getTime()) / (1000 * 60 * 60 * 24))
+    }));
+
+    return NextResponse.json({ trailers: trailersWithAge });
   } catch (error) {
     console.error("Inventory fetch error:", error);
     return NextResponse.json(

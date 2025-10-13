@@ -25,8 +25,22 @@ import { generateCashSnippet, generateFinanceSnippet, generateRTOSnippet, copyTo
 import { calculateFinance } from "@/lib/finance/finance-calc";
 import { calculateRTO } from "@/lib/finance/rto-calc";
 
+interface Trailer {
+  id: string;
+  stockNumber: string;
+  manufacturer: string;
+  model: string;
+  year: number;
+  salePrice: number;
+  status: string;
+}
+
 export default function FinanceComparePage() {
   const { data: session } = useSession();
+
+  // Trailers from database
+  const [trailers, setTrailers] = useState<Trailer[]>([]);
+  const [loadingTrailers, setLoadingTrailers] = useState(true);
 
   // Customer Info
   const [customerName, setCustomerName] = useState("");
@@ -80,6 +94,42 @@ export default function FinanceComparePage() {
 
     // Return mapped tax rate or default to 6%
     return zipTaxMap[cleanZip] || 6.0;
+  };
+
+  // Fetch trailers on mount
+  useEffect(() => {
+    const fetchTrailers = async () => {
+      try {
+        setLoadingTrailers(true);
+        const res = await fetch("/api/inventory?status=available");
+        const data = await res.json();
+        setTrailers(data.trailers || []);
+      } catch (error) {
+        console.error("Failed to fetch trailers:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load trailers from inventory",
+          variant: "destructive",
+        });
+      } finally {
+        setLoadingTrailers(false);
+      }
+    };
+    fetchTrailers();
+  }, []);
+
+  // Handle trailer selection and auto-update price
+  const handleTrailerSelect = (trailerId: string) => {
+    setSelectedUnit(trailerId);
+    const trailer = trailers.find(t => t.id === trailerId);
+    if (trailer) {
+      setPrice(trailer.salePrice);
+      toast({
+        title: "Trailer Selected",
+        description: `${trailer.year} ${trailer.manufacturer} ${trailer.model} - $${trailer.salePrice.toLocaleString()}`,
+        variant: "default",
+      });
+    }
   };
 
   // Handle zipcode change and auto-update tax
@@ -257,6 +307,12 @@ export default function FinanceComparePage() {
         ? `${session.user.role}#${session.user.id?.slice(0, 6).toUpperCase()}`
         : session?.user?.name || session?.user?.email || "MJ Cargo Rep";
 
+    // Get selected trailer details for PDF
+    const selectedTrailer = trailers.find(t => t.id === selectedUnit);
+    const unitDescription = selectedTrailer
+      ? `${selectedTrailer.year} ${selectedTrailer.manufacturer} ${selectedTrailer.model} (${selectedTrailer.stockNumber})`
+      : "Cargo Trailer";
+
     generateQuotePDF({
       customerName,
       customerPhone,
@@ -264,7 +320,7 @@ export default function FinanceComparePage() {
       repId,
       repName: session?.user?.name || "MJ Cargo Rep",
       repEmail: session?.user?.email || "",
-      unitDescription: selectedUnit || "Cargo Trailer",
+      unitDescription,
       unitPrice: price,
       taxPercent: taxPct,
       fees,
@@ -283,11 +339,19 @@ export default function FinanceComparePage() {
     });
   };
 
+  // Get unit description helper
+  const getUnitDescription = () => {
+    const selectedTrailer = trailers.find(t => t.id === selectedUnit);
+    return selectedTrailer
+      ? `${selectedTrailer.year} ${selectedTrailer.manufacturer} ${selectedTrailer.model}`
+      : "Cargo Trailer";
+  };
+
   // SMS Copy Handlers
   const handleCopyCashSMS = async () => {
     const snippet = generateCashSnippet({
       customerName,
-      unitDescription: selectedUnit || "Cargo Trailer",
+      unitDescription: getUnitDescription(),
       unitPrice: price,
       taxPercent: taxPct,
       fees,
@@ -330,7 +394,7 @@ export default function FinanceComparePage() {
 
     const snippet = generateFinanceSnippet({
       customerName,
-      unitDescription: selectedUnit || "Cargo Trailer",
+      unitDescription: getUnitDescription(),
       unitPrice: price,
       taxPercent: taxPct,
       fees,
@@ -375,7 +439,7 @@ export default function FinanceComparePage() {
 
     const snippet = generateRTOSnippet({
       customerName,
-      unitDescription: selectedUnit || "Cargo Trailer",
+      unitDescription: getUnitDescription(),
       unitPrice: price,
       taxPercent: taxPct,
       fees,
@@ -600,56 +664,34 @@ export default function FinanceComparePage() {
                 </div>
               </div>
 
-              {/* Unit Selector - ALL 37 TRAILER SIZES */}
+              {/* Unit Selector - REAL 172 TRAILERS FROM DATABASE */}
               <div className="space-y-2">
                 <Label htmlFor="unit" className="text-foreground">
-                  Select Unit
+                  Select Unit from Inventory
                 </Label>
-                <Select value={selectedUnit} onValueChange={setSelectedUnit}>
+                <Select value={selectedUnit} onValueChange={handleTrailerSelect} disabled={loadingTrailers}>
                   <SelectTrigger id="unit">
-                    <SelectValue placeholder="Choose trailer..." />
+                    <SelectValue placeholder={loadingTrailers ? "Loading inventory..." : "Choose from 172 trailers..."} />
                   </SelectTrigger>
-                  <SelectContent>
-                    {/* Single Axle (SA) Options */}
-                    <SelectItem value="4x6-sa">4x6 SA</SelectItem>
-                    <SelectItem value="5x8-sa">5x8 SA</SelectItem>
-                    <SelectItem value="5x10-sa">5x10 SA</SelectItem>
-                    <SelectItem value="6x10-sa">6x10 SA</SelectItem>
-                    <SelectItem value="6x12-sa">6x12 SA</SelectItem>
-                    <SelectItem value="6x14-sa">6x14 SA</SelectItem>
-                    <SelectItem value="7x12-sa">7x12 SA</SelectItem>
-                    <SelectItem value="7x14-sa">7x14 SA</SelectItem>
-                    <SelectItem value="7x16-sa">7x16 SA</SelectItem>
-
-                    {/* Tandem Axle (TA) Options */}
-                    <SelectItem value="6x10-ta">6x10 TA</SelectItem>
-                    <SelectItem value="6x12-ta">6x12 TA</SelectItem>
-                    <SelectItem value="6x14-ta">6x14 TA</SelectItem>
-                    <SelectItem value="6x16-ta">6x16 TA</SelectItem>
-                    <SelectItem value="7x12-ta">7x12 TA</SelectItem>
-                    <SelectItem value="7x14-ta">7x14 TA</SelectItem>
-                    <SelectItem value="7x16-ta">7x16 TA</SelectItem>
-                    <SelectItem value="7x18-ta">7x18 TA</SelectItem>
-                    <SelectItem value="7x20-ta">7x20 TA</SelectItem>
-                    <SelectItem value="8.5x14-ta">8.5x14 TA</SelectItem>
-                    <SelectItem value="8.5x16-ta">8.5x16 TA</SelectItem>
-                    <SelectItem value="8.5x18-ta">8.5x18 TA</SelectItem>
-                    <SelectItem value="8.5x20-ta">8.5x20 TA</SelectItem>
-                    <SelectItem value="8.5x22-ta">8.5x22 TA</SelectItem>
-                    <SelectItem value="8.5x24-ta">8.5x24 TA</SelectItem>
-                    <SelectItem value="8.5x26-ta">8.5x26 TA</SelectItem>
-                    <SelectItem value="8.5x28-ta">8.5x28 TA</SelectItem>
-                    <SelectItem value="8.5x30-ta">8.5x30 TA</SelectItem>
-                    <SelectItem value="8.5x32-ta">8.5x32 TA</SelectItem>
-
-                    {/* Gooseneck (GN) Options */}
-                    <SelectItem value="8.5x28-gn">8.5x28 GN (Gooseneck)</SelectItem>
-                    <SelectItem value="8.5x30-gn">8.5x30 GN (Gooseneck)</SelectItem>
-                    <SelectItem value="8.5x32-gn">8.5x32 GN (Gooseneck)</SelectItem>
-                    <SelectItem value="8.5x34-gn">8.5x34 GN (Gooseneck)</SelectItem>
-                    <SelectItem value="8.5x36-gn">8.5x36 GN (Gooseneck)</SelectItem>
+                  <SelectContent className="max-h-[300px]">
+                    {loadingTrailers ? (
+                      <SelectItem value="loading" disabled>Loading...</SelectItem>
+                    ) : trailers.length === 0 ? (
+                      <SelectItem value="none" disabled>No trailers available</SelectItem>
+                    ) : (
+                      trailers.map((trailer) => (
+                        <SelectItem key={trailer.id} value={trailer.id}>
+                          {trailer.stockNumber} - {trailer.year} {trailer.manufacturer} {trailer.model} - ${trailer.salePrice.toLocaleString()}
+                        </SelectItem>
+                      ))
+                    )}
                   </SelectContent>
                 </Select>
+                {!loadingTrailers && trailers.length > 0 && (
+                  <p className="text-xs text-muted-foreground">
+                    {trailers.length} trailers available in inventory
+                  </p>
+                )}
               </div>
             </div>
           </CardContent>
