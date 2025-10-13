@@ -14,38 +14,8 @@ const Socials = () => {
     image: StaticImageData;
     link: string;
   }
-  const socials: socialItem[] = [
-    {
-      id: 1,
-      name: "Github",
-      image: githubImage,
-      link: "https://github.com/sakilanwar12"
-    },
-    {
-      id: 2,
-      name: "Dribble",
-      image: dribble,
-      link: "www.dribble.com/prantikuxui"
-    },
-    {
-      id: 3,
-      name: "Behance",
-      image: behance,
-      link: "https://www.behance.net/prantikuxui"
-    },
-    {
-      id: 4,
-      name: "Pinterest",
-      image: pinterest,
-      link: "https://www.pinterest.com/prantikuxui"
-    },
-    {
-      id: 5,
-      name: "Web",
-      image: web,
-      link: "https://prantikuxui.com"
-    }
-  ]
+  // Empty socials - users can add their own portfolio links
+  const socials: socialItem[] = []
   return (
     <Card>
       <CardHeader className="border-none mb-0">
@@ -53,7 +23,12 @@ const Socials = () => {
       </CardHeader>
       <CardContent>
         <div className="space-y-3 overflow-auto">
-          {
+          {socials.length === 0 ? (
+            <div className="text-center py-8 text-default-500">
+              <p className="text-sm">No portfolio links added yet</p>
+              <p className="text-xs mt-1">Add your social media and portfolio URLs here</p>
+            </div>
+          ) : (
             socials.map((item, index) => (
               <div className="flex items-center gap-4" key={`social-item-${index}`}>
                 <Image src={item.image} alt={item.name} width={36} height={36} className="flex-none" priority={true} />
@@ -63,7 +38,7 @@ const Socials = () => {
                 </div>
               </div>
             ))
-          }
+          )}
         </div>
       </CardContent>
     </Card>
