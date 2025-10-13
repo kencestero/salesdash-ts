@@ -24,7 +24,7 @@ const LoginPage = () => {
               playsInline
               className="absolute top-0 left-0 w-full h-full object-cover"
             >
-              <source src="/images/login video.mp4" type="video/mp4" />
+              <source src="/images/login-background.mp4" type="video/mp4" />
             </video>
           </div>
 
