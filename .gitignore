@@ -80,3 +80,7 @@ update-vercel-secrets.md
 *.test.env
 scripts/verify-user.js
 scripts/*-verify*.js
+
+# User uploads
+public/uploads/avatars/*
+!public/uploads/avatars/.gitkeep
