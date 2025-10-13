@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import OpenAI from 'openai';
-import pdf from 'pdf-parse/lib/pdf-parse';
+import pdf from 'pdf-parse';
 
 // Initialize OpenAI client
 const openai = new OpenAI({
