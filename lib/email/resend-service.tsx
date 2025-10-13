@@ -10,7 +10,7 @@
  */
 
 import { Resend } from 'resend';
-import { render } from '@react-email/components';
+import { render } from '@react-email/render';
 
 // Initialize Resend client
 const resend = new Resend(process.env.RESEND_API_KEY);
