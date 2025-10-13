@@ -35,9 +35,28 @@ const ForgotForm = () => {
 
   const onSubmit = (data: any) => {
     startTransition(async () => {
-      toast.success("Password Reset code has been sent to your email");
-      reset();
-      router.push("/auth/create-password");
+      try {
+        const response = await fetch('/api/auth/forgot-password', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email: data.email }),
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(result.error || 'Failed to send reset email');
+        }
+
+        toast.success("If an account exists with that email, a password reset link has been sent.");
+        reset();
+        // Don't redirect - let user check their email
+      } catch (error: any) {
+        console.error('Forgot password error:', error);
+        toast.error(error.message || "Failed to send reset email. Please try again.");
+      }
     });
   };
   return (

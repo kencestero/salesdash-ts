@@ -45,14 +45,16 @@ model Session {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime?
-  password      String?   // For email/password authentication
-  image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id               String    @id @default(cuid())
+  name             String?
+  email            String?   @unique
+  emailVerified    DateTime?
+  password         String?   // For email/password authentication
+  image            String?
+  resetToken       String?   @unique // Password reset token
+  resetTokenExpiry DateTime? // Token expiration time
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 
   accounts Account[]
   sessions Session[]
