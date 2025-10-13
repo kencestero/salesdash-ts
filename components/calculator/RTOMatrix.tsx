@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { calculateRTO } from "@/lib/finance/rto-calc";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -35,6 +36,14 @@ export function RTOMatrix({
   onSaveQuote,
   onCopySMS,
 }: RTOMatrixProps) {
+  // Editable down payments (start with defaults)
+  const [downPayments, setDownPayments] = useState<number[]>(downPaymentOptions);
+  const [editingDownIndex, setEditingDownIndex] = useState<number | null>(null);
+  const [editDownValue, setEditDownValue] = useState("");
+
+  // Maximum down payment (70% of price)
+  const maxDownPayment = Math.floor(price * 0.70);
+
   // Term visibility state (all checked by default)
   const [visibleTerms, setVisibleTerms] = useState<Record<number, boolean>>({
     24: true,
@@ -47,11 +56,44 @@ export function RTOMatrix({
     setVisibleTerms((prev) => ({ ...prev, [term]: !prev[term] }));
   };
 
+  // Handle down payment edit
+  const startEditingDown = (index: number, value: number) => {
+    setEditingDownIndex(index);
+    setEditDownValue(value.toString());
+  };
+
+  const saveEditingDown = (index: number) => {
+    const newValue = parseInt(editDownValue);
+    if (isNaN(newValue) || newValue < 0) {
+      setEditingDownIndex(null);
+      return;
+    }
+
+    // Check 70% maximum
+    if (newValue > maxDownPayment) {
+      alert(`Maximum down payment is $${maxDownPayment.toLocaleString()} (70% of unit price)`);
+      setEditingDownIndex(null);
+      return;
+    }
+
+    setDownPayments((prev) => {
+      const updated = [...prev];
+      updated[index] = newValue;
+      return updated.sort((a, b) => a - b); // Keep sorted
+    });
+    setEditingDownIndex(null);
+  };
+
+  const cancelEditingDown = () => {
+    setEditingDownIndex(null);
+    setEditDownValue("");
+  };
+
   // Calculate matrix data
   const matrixData = useMemo(() => {
     return RTO_TERMS.filter((term) => visibleTerms[term]).map((term) => ({
       term,
-      payments: downPaymentOptions.map((down) => {
+      payments: downPayments.map((down) => {
         const result = calculateRTO({
           price,
           down,
@@ -70,7 +112,7 @@ export function RTOMatrix({
         };
       }),
     }));
-  }, [visibleTerms, downPaymentOptions, price, taxPct, baseMarkup, monthlyFactor]);
+  }, [visibleTerms, downPayments, price, taxPct, baseMarkup, monthlyFactor]);
 
   return (
     <div className="space-y-4">
@@ -91,12 +133,36 @@ export function RTOMatrix({
               <th className="p-3 text-left text-sm font-medium text-muted-foreground">
                 Term ↓
               </th>
-              {downPaymentOptions.map((down) => (
+              {downPayments.map((down, index) => (
                 <th
-                  key={down}
+                  key={`down-${index}-${down}`}
                   className="p-3 text-right text-sm font-medium text-muted-foreground"
                 >
-                  ${down.toLocaleString()}
+                  {editingDownIndex === index ? (
+                    <div className="flex items-center justify-end gap-1">
+                      <span className="text-xs">$</span>
+                      <Input
+                        type="number"
+                        value={editDownValue}
+                        onChange={(e) => setEditDownValue(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") saveEditingDown(index);
+                          if (e.key === "Escape") cancelEditingDown();
+                        }}
+                        onBlur={() => saveEditingDown(index)}
+                        className="h-7 w-24 text-right text-sm"
+                        autoFocus
+                      />
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => startEditingDown(index, down)}
+                      className="hover:text-primary transition-colors cursor-pointer"
+                      title="Click to edit (max 70% of price)"
+                    >
+                      ${down.toLocaleString()} ✏️
+                    </button>
+                  )}
                 </th>
               ))}
               <th className="w-12 p-3"></th>
@@ -184,8 +250,8 @@ export function RTOMatrix({
 
       {/* Helper text */}
       <p className="text-xs text-muted-foreground">
-        💡 Tip: Uncheck a term to remove it from the display. Click any payment
-        amount to save as a quote.
+        💡 Tip: Click down payment headers ✏️ to edit (max ${maxDownPayment.toLocaleString()} = 70% of price).
+        Uncheck terms to hide. Click any payment to save as quote.
       </p>
 
       {/* Action Buttons */}
