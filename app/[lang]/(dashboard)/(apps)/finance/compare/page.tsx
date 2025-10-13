@@ -310,7 +310,7 @@ export default function FinanceComparePage() {
 
   const handleCopyFinanceSMS = async () => {
     // Calculate all finance payments for the matrix
-    const terms = [36, 48, 60, 72, 84];
+    const terms = [24, 36, 48, 60];
     const payments: Record<number, Record<number, number>> = {};
 
     terms.forEach(term => {
@@ -432,52 +432,20 @@ export default function FinanceComparePage() {
           )}
         </div>
 
-        {/* MJ Cargo Trailers Finance Center Logo Badge - Overlapping with Cursor */}
-        <div className="relative -mb-12 z-10 flex justify-center">
-          <div className="relative">
-            {/* Large Cursor/Pointer Outline */}
-            <svg
-              className="absolute -left-48 -top-32 w-[500px] h-[500px] pointer-events-none opacity-90"
-              viewBox="0 0 200 200"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              {/* Cursor Arrow */}
-              <path
-                d="M 40 40 L 40 140 L 100 100 L 140 140 L 150 130 L 110 90 L 150 90 Z"
-                stroke="white"
-                strokeWidth="4"
-                fill="none"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              {/* Target Circle */}
-              <circle
-                cx="160"
-                cy="60"
-                r="25"
-                stroke="white"
-                strokeWidth="3"
-                fill="none"
-              />
-            </svg>
-
-            {/* Logo positioned in the target area */}
-            <div className="relative z-20">
-              <Image
-                src="/images/mjctfc.webp"
-                alt="MJ Cargo Trailers Finance Center"
-                width={400}
-                height={120}
-                className="h-32 w-auto object-contain drop-shadow-2xl"
-                priority
-              />
-            </div>
-          </div>
+        {/* MJ Cargo Trailers Finance Center Logo */}
+        <div className="relative z-10 flex justify-center mb-6">
+          <Image
+            src="/images/mjctfc.webp"
+            alt="MJ Cargo Trailers Finance Center"
+            width={400}
+            height={120}
+            className="h-32 w-auto object-contain drop-shadow-2xl"
+            priority
+          />
         </div>
 
         {/* Customer Information Card */}
-        <Card className="border-border bg-card pt-16">
+        <Card className="border-border bg-card">
           <CardHeader>
             <CardTitle className="text-foreground flex items-center gap-2">
               <User className="h-5 w-5" />

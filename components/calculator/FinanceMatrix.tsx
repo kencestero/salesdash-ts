@@ -30,7 +30,7 @@ export type FinanceMatrixProps = {
 };
 
 const DEFAULT_DOWN_PAYMENTS = [0, 1000, 2000, 3000];
-const DEFAULT_TERMS = [36, 48, 60, 72, 84]; // Bank-approved terms only
+const DEFAULT_TERMS = [24, 36, 48, 60]; // Standard bank terms
 
 export function FinanceMatrix({
   price,
@@ -44,11 +44,10 @@ export function FinanceMatrix({
 }: FinanceMatrixProps) {
   // Term visibility state (all checked by default)
   const [visibleTerms, setVisibleTerms] = useState<Record<number, boolean>>({
+    24: true,
     36: true,
     48: true,
     60: true,
-    72: true,
-    84: true,
   });
 
   // APR visibility state
