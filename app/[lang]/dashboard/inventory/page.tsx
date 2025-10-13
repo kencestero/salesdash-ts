@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Plus, Search, Filter, Eye, Edit, Trash2, FileText, Upload, X } from "lucide-react";
+import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -52,6 +53,10 @@ interface Trailer {
 }
 
 export default function InventoryPage() {
+  const { data: session } = useSession();
+  const userRole = (session?.user as any)?.role;
+  const canUploadPDF = userRole === 'owner' || userRole === 'director';
+
   const [trailers, setTrailers] = useState<Trailer[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -290,13 +295,15 @@ export default function InventoryPage() {
               {generatingPDF ? "Generating..." : `Generate PDF (${selectedTrailers.length})`}
             </Button>
           )}
-          <Button
-            onClick={() => setShowUploadModal(true)}
-            className="bg-blue-500 hover:bg-blue-600 text-white"
-          >
-            <Upload className="mr-2 h-4 w-4" />
-            Upload PDF
-          </Button>
+          {canUploadPDF && (
+            <Button
+              onClick={() => setShowUploadModal(true)}
+              className="bg-blue-500 hover:bg-blue-600 text-white"
+            >
+              <Upload className="mr-2 h-4 w-4" />
+              Upload PDF
+            </Button>
+          )}
           <Button className="bg-[#f5a623] hover:bg-[#e09612] text-white">
             <Plus className="mr-2 h-4 w-4" />
             Add Trailer

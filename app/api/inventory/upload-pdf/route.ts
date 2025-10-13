@@ -28,7 +28,16 @@ export async function POST(req: Request) {
       );
     }
 
-    console.log('📄 PDF Upload Request from user:', session.user.email);
+    // 2. Check user role - only owners and directors can upload PDFs
+    const userRole = (session.user as any).role;
+    if (userRole !== 'owner' && userRole !== 'director') {
+      return NextResponse.json(
+        { error: 'Forbidden - Only owners and directors can upload inventory PDFs' },
+        { status: 403 }
+      );
+    }
+
+    console.log('📄 PDF Upload Request from user:', session.user.email, `(${userRole})`);
 
     // 2. Parse the multipart form data
     const formData = await req.formData();
