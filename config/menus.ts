@@ -819,9 +819,14 @@ export const menusConfig = {
         icon: Cart,
         child: [
           {
+            title: "Quick Quote Builder",
+            icon: Calculator,
+            href: "/quotes/new",
+          },
+          {
             title: "Inventory",
             icon: Stacks2,
-            href: "/inventory",
+            href: "/dashboard/inventory",
           },
           {
             title: "Finance Calculator",
@@ -1660,9 +1665,14 @@ export const menusConfig = {
         title: "Sales Tools",
       },
       {
+        title: "Quick Quote Builder",
+        icon: Calculator,
+        href: "/quotes/new",
+      },
+      {
         title: "Inventory",
         icon: Stacks2,
-        href: "/inventory",
+        href: "/dashboard/inventory",
       },
       {
         title: "Finance Calculator",
