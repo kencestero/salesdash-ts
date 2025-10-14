@@ -4,11 +4,11 @@
 export const siteConfig = {
   name: "MJ Cargo Sales Dashboard",
   description: "Sales training platform for MJ Cargo trailer reps",
-  theme: "violet",
+  theme: "orange",
   layout: "vertical",
   // semi-box, horizontal, vertical
   hideSideBar: false,
-  sidebarType: "module",
+  sidebarType: "popover",
   // popover, classic, module
   sidebarColor: null,
   navbarType: "sticky",
@@ -16,5 +16,5 @@ export const siteConfig = {
   footerType: "static",
   // sticky,  static, hidden
   sidebarBg: "/images/mjsidebar.webp", // Default MJ Cargo sidebar background
-  radius: 0.5,
+  radius: 0.75,
 };
