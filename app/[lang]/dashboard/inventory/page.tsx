@@ -657,13 +657,16 @@ export default function InventoryPage() {
 
       {/* Scroll to Top Button */}
       {showScrollTop && (
-        <Button
+        <button
           onClick={scrollToTop}
-          className="fixed bottom-8 right-8 bg-[#f5a623] hover:bg-[#e09612] text-white rounded-full p-4 shadow-lg z-50"
-          size="icon"
+          className="fixed bottom-8 right-8 shadow-lg z-50 hover:scale-110 transition-transform cursor-pointer"
         >
-          <ArrowUp className="h-6 w-6" />
-        </Button>
+          <img
+            src="/images/goup.webp"
+            alt="Go to top"
+            className="w-16 h-16 object-contain"
+          />
+        </button>
       )}
 
       {/* PDF Upload Modal */}
