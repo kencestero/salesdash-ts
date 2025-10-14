@@ -118,6 +118,7 @@ model Trailer {
   msrp            Float    // Manufacturer's Suggested Retail Price
   salePrice       Float    // Current sale price
   cost            Float    // Dealer cost (sensitive!)
+  makeOffer       Boolean  @default(false) // If true, display "MAKE OFFER" instead of sale price
 
   // Status
   status          String   @default("available") // "available", "sold", "reserved", "pending"
@@ -578,4 +579,36 @@ model PricingPolicy {
   quoteExpirationDays   Int      @default(90)
 
   updatedAt             DateTime @updatedAt
+}
+
+// Inventory Upload Report System
+model UploadReport {
+  id                String   @id @default(cuid())
+
+  // Upload Info
+  fileName          String
+  manufacturer      String   // "Diamond Cargo", "Quality Cargo", etc.
+  uploadedBy        String   // User ID who uploaded
+
+  // Summary Stats
+  totalInUpload     Int      // Total trailers in the uploaded file
+  newTrailers       Int      // Newly added trailers (VINs not in DB before)
+  updatedTrailers   Int      // Existing trailers that were updated
+  removedTrailers   Int      // Trailers that were in DB but not in upload (potentially sold)
+
+  // Detailed Lists (stored as JSON for flexibility)
+  newVins           String[] // Array of newly added VIN numbers
+  updatedVins       String[] // Array of updated VIN numbers
+  removedVins       String[] // Array of removed VIN numbers (potentially sold)
+
+  // Additional metadata
+  processingTime    Int?     // Time taken to process in milliseconds
+  errors            Json?    // Any errors encountered during processing
+
+  // Timestamps
+  createdAt         DateTime @default(now())
+
+  @@index([manufacturer])
+  @@index([uploadedBy])
+  @@index([createdAt])
 }
