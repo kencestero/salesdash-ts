@@ -79,11 +79,18 @@ function classifyTrailer(trailer: Trailer): string {
   return 'Enclosed';
 }
 
-// Calculate sale price with $1,400 markup formula
-function calculateSalePrice(cost: number): number {
-  const markup = cost * 1.25;
-  const minMarkup = cost + 1400;
-  return Math.max(markup, minMarkup);
+// Calculate desired selling price with $1,500 MINIMUM PROFIT rule
+// Logic: Always multiply cost × 1.25, but if profit < $1,500, enforce cost + $1,500
+function calculateDesiredPrice(cost: number): number {
+  const standardPrice = cost * 1.25;
+  const profit = standardPrice - cost; // This is 25% of cost (0.25 × cost)
+
+  // If profit from 1.25× is less than $1,500, enforce minimum profit cap
+  if (profit < 1500) {
+    return cost + 1500; // Minimum $1,500 profit
+  } else {
+    return standardPrice; // Profit is good, use 1.25× multiplier
+  }
 }
 
 export default function InventoryPage() {
@@ -516,7 +523,7 @@ export default function InventoryPage() {
                 </TableHeader>
                 <TableBody>
                   {filteredTrailers.map((trailer) => {
-                    const calculatedPrice = calculateSalePrice(trailer.cost);
+                    const calculatedPrice = calculateDesiredPrice(trailer.cost);
                     const trailerCategory = classifyTrailer(trailer);
 
                     return (
