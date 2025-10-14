@@ -643,14 +643,27 @@ export default function InventoryPage() {
 
                         {/* Actions */}
                         <TableCell>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-blue-400 hover:text-blue-300"
-                            onClick={() => window.open(`/dashboard/inventory/${trailer.id}`, '_blank')}
-                          >
-                            <Eye className="h-5 w-5" />
-                          </Button>
+                          <div className="flex gap-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-blue-400 hover:text-blue-300"
+                              onClick={() => window.open(`/dashboard/inventory/${trailer.id}`, '_blank')}
+                            >
+                              <Eye className="h-5 w-5" />
+                            </Button>
+                            {mounted && canUploadPDF && (
+                              <Link href={`/dashboard/inventory/${trailer.id}/edit`}>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="text-green-400 hover:text-green-300"
+                                >
+                                  Edit
+                                </Button>
+                              </Link>
+                            )}
+                          </div>
                         </TableCell>
                       </TableRow>
                     );
