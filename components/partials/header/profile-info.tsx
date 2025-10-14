@@ -74,9 +74,9 @@ const ProfileInfo = () => {
               href:"/dashboard"
             },
             {
-              name: "Keyboard shortcuts",
-              icon: "heroicons:language",
-              href:"/dashboard"
+              name: "Live Trailers Upload Section",
+              icon: "heroicons:arrow-up-tray",
+              href:"/file-uploader"
             },
           ].map((item, index) => (
             <Link
