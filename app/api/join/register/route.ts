@@ -4,6 +4,9 @@ import { prisma } from "@/lib/prisma";
 import { generateUniqueSalespersonCode } from "@/lib/salespersonCode";
 import bcrypt from "bcryptjs";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export async function POST(req: Request) {
   try {
     const body = await req.json();

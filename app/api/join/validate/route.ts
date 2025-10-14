@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { validateCodeAndGetRole } from "@/lib/joinCode";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export async function POST(req: Request) {
   const { code } = await req.json().catch(() => ({}));
   if (!code) return NextResponse.json({ message: "Missing code" }, { status: 400 });
