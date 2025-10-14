@@ -8,6 +8,9 @@ import {
   isEmailServiceConfigured,
 } from "@/lib/email/resend-service";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 /**
  * POST /api/email/send
  *

@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/generated/prisma";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 // GET /api/crm/customers - List customers with filtering
 export async function GET(req: NextRequest) {
