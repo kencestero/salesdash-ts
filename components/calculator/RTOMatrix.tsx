@@ -99,8 +99,7 @@ export function RTOMatrix({
           down,
           taxPct,
           termMonths: term,
-          baseMarkupUsd: baseMarkup,
-          monthlyFactor,
+          // No legacy parameters - use new RTO factor formula
         });
         return {
           down,
@@ -112,7 +111,7 @@ export function RTOMatrix({
         };
       }),
     }));
-  }, [visibleTerms, downPayments, price, taxPct, baseMarkup, monthlyFactor]);
+  }, [visibleTerms, downPayments, price, taxPct]);
 
   return (
     <div className="space-y-4">

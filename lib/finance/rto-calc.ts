@@ -34,18 +34,19 @@ export type RTOOutput = {
 };
 
 /**
- * Calculate Rent-To-Own pricing using Matt's ACTUAL formula from ownyourtrailer.com
+ * Calculate Rent-To-Own pricing using the correct RTO formula
  *
- * MATT'S REAL RTO FORMULA (from ownyourtrailer.com):
- * - Monthly Payment Factors by term:
- *   - 24 months: 0.065789
- *   - 36 months: 0.049020
- *   - 48 months: 0.044945
- * - Principal = price - capCostReduction (down payment)
- * - Base Monthly = principal × factor[term]
+ * CORRECT RTO FORMULA:
+ * - RTO Factors by term (total cost multiplier):
+ *   - 24 months: 1.75
+ *   - 36 months: 2.10
+ *   - 48 months: 2.45
+ * - Amount to Finance = price - downPayment
+ * - Total RTO Price = amountToFinance × rtoFactor[term]
+ * - Base Monthly = totalRTOPrice / termMonths
  * - Monthly LDW = $19.99
- * - Sales Tax = (baseMonthly + monthlyLDW) × taxRate
- * - Total Monthly = baseMonthly + monthlyLDW + salesTax
+ * - Monthly Tax = baseMonthly × taxRate
+ * - Total Monthly = baseMonthly + monthlyLDW + monthlyTax
  *
  * Fees: Title/Tag ($200), Registration ($75), GPS ($350), Doc ($195)
  */
@@ -72,30 +73,31 @@ export function calculateRTO(input: RTOInput): RTOOutput {
   const useNewFormula = !monthlyFactor && !baseMarkupUsd;
 
   if (useNewFormula) {
-    // MATT'S ACTUAL RTO FORMULA FROM OWNYOURTRAILER.COM
-    // Monthly payment factors by term
-    const paymentFactors: Record<number, number> = {
-      24: 0.065789,
-      30: 0.054348,
-      36: 0.049020,
-      42: 0.046620,
-      48: 0.044945,
+    // CORRECT RTO FORMULA
+    // RTO factors by term (total cost multiplier)
+    const rtoFactors: Record<number, number> = {
+      24: 1.75,
+      36: 2.10,
+      48: 2.45,
     };
 
-    const factor = paymentFactors[termMonths] || 0.044945; // Default to 48 month factor
+    const rtoFactor = rtoFactors[termMonths] || 2.10; // Default to 36 month factor
 
-    // Principal = price minus cap cost reduction (down payment)
-    const principal = price - downInput;
+    // Amount to finance = price minus down payment
+    const amountToFinance = price - downInput;
 
-    // Base monthly payment
-    const baseMonthly = principal * factor;
+    // Total RTO price = amount financed × RTO factor
+    const totalRTOPrice = amountToFinance * rtoFactor;
+
+    // Base monthly payment (before tax and fees)
+    const baseMonthly = totalRTOPrice / termMonths;
 
     // Monthly LDW (Loss Damage Waiver)
     const monthlyLDW = 19.99;
 
-    // Sales tax on (base + LDW)
+    // Sales tax on base monthly payment
     const taxRate = taxPct / 100;
-    const monthlyTax = (baseMonthly + monthlyLDW) * taxRate;
+    const monthlyTax = baseMonthly * taxRate;
 
     // Total monthly payment
     const totalMonthly = baseMonthly + monthlyLDW + monthlyTax;
@@ -120,7 +122,7 @@ export function calculateRTO(input: RTOInput): RTOOutput {
     const totalPaid = totalUpFront + (totalMonthly * termMonths);
 
     return {
-      rtoPrice: principal, // Principal being financed
+      rtoPrice: totalRTOPrice, // Total RTO price (amount financed × factor)
       down: downInput,
       monthlyRent: baseMonthly,
       monthlyTax: monthlyTax,
@@ -129,7 +131,7 @@ export function calculateRTO(input: RTOInput): RTOOutput {
       buyoutFee: buyoutFeeUsd,
       totalPaid: totalPaid,
       docFee: titleTag + registration + gpsFee + docFee,
-      financedCost: principal,
+      financedCost: totalRTOPrice,
     };
   } else {
     // LEGACY FORMULA (for backwards compatibility)
