@@ -8,6 +8,7 @@ import Image from "next/image";
 import { useSession } from "next-auth/react";
 import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
+import { RoleBadge } from "@/components/ui/role-badge";
 
 const UserMeta = () => {
   const { data: session, update } = useSession();
@@ -93,12 +94,7 @@ const UserMeta = () => {
 
   const avatarUrl = previewUrl || session?.user?.image || '/images/avatar/avatar-3.jpg';
   const userName = session?.user?.name || "User";
-  const userRole = session?.user?.role ?
-    session.user.role === "REP" ? "Sales Representative" :
-    session.user.role === "SMA" ? "Sales Manager" :
-    session.user.role === "DIR" ? "Director" :
-    session.user.role === "VIP" ? "Owner" :
-    "Team Member" : "Team Member";
+  const userRole = (session?.user as any)?.role || "salesperson";
 
   return (
     <Card>
@@ -138,7 +134,11 @@ const UserMeta = () => {
           />
         </div>
         <div className="mt-4 text-xl font-semibold text-default-900">{userName}</div>
-        <div className="mt-1.5 text-sm font-medium text-default-500">{userRole}</div>
+
+        {/* Beautiful Role Badge */}
+        <div className="mt-4">
+          <RoleBadge role={userRole} size="lg" showTooltip={true} />
+        </div>
       </CardContent>
     </Card>
   );

@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/components/ui/use-toast";
 import { Badge } from "@/components/ui/badge";
+import { RoleBadge } from "@/components/ui/role-badge";
 import Link from "next/link";
 
 interface Trailer {
@@ -194,9 +195,8 @@ export default function EditTrailerPage() {
             </p>
           </div>
         </div>
-        <Badge className="bg-[#E96114] text-white text-sm px-3 py-1">
-          {userRole?.toUpperCase()}
-        </Badge>
+        {/* Beautiful Role Badge */}
+        <RoleBadge role={userRole || "salesperson"} size="md" showTooltip={true} />
       </div>
 
       {/* Trailer Info Card */}
