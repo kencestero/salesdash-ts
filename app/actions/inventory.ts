@@ -91,15 +91,15 @@ export async function getAvailableTrailers() {
  * Validate if a price is within allowed range (+100% / -30% of listed price)
  * Per PROJECT.md pricing guardrail rules
  */
-export function validatePriceRange(
+export async function validatePriceRange(
   sellingPrice: number,
   listedPrice: number
-): {
+): Promise<{
   valid: boolean;
   min: number;
   max: number;
   message?: string;
-} {
+}> {
   const min = listedPrice * 0.7;  // -30%
   const max = listedPrice * 2.0;  // +100%
 
