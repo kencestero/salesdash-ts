@@ -2,7 +2,11 @@
  * MJ Cargo Quote PDF/Image Generator V2
  * Matches Ken's exact design from the HTML template
  * Supports: PDF, JPEG, PNG export
+ *
+ * CLIENT-SIDE ONLY: Uses browser APIs (document, canvas)
  */
+
+"use client";
 
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
@@ -387,6 +391,11 @@ function generateQuoteHTML(data: QuoteData): string {
  * Generate quote in specified format (PDF, JPEG, or PNG)
  */
 export async function generateQuote(data: QuoteData, format: ExportFormat = 'pdf'): Promise<void> {
+  // Safety check: only run in browser
+  if (typeof window === 'undefined' || typeof document === 'undefined') {
+    throw new Error('generateQuote can only be called in a browser environment');
+  }
+
   const html = generateQuoteHTML(data);
   const fileName = `MJ_Quote_${data.customerName.replace(/\s+/g, '_')}_${Date.now()}`;
 

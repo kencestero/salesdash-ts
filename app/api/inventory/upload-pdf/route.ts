@@ -9,10 +9,17 @@ import * as XLSX from 'xlsx';
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-// Initialize OpenAI client
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+/**
+ * Get OpenAI client (lazy initialization to avoid build-time errors)
+ */
+function getOpenAIClient() {
+  if (!process.env.OPENAI_API_KEY) {
+    throw new Error('OPENAI_API_KEY environment variable is not set');
+  }
+  return new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+  });
+}
 
 /**
  * POST /api/inventory/upload-pdf
@@ -124,6 +131,7 @@ export async function POST(req: Request) {
     // 6. Use OpenAI to extract structured inventory data
     console.log('🤖 Sending to OpenAI for structured extraction...');
 
+    const openai = getOpenAIClient();
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o', // Using GPT-4o for better accuracy
       messages: [
