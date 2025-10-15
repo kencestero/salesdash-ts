@@ -18,7 +18,7 @@ import { RTOMatrix } from "@/components/calculator/RTOMatrix";
 import { CashSummary } from "@/components/calculator/CashSummary";
 import { toast } from "@/components/ui/use-toast";
 import { useSession } from "next-auth/react";
-import { generateQuotePDF, SelectedPaymentOption } from "@/lib/finance/pdf-generator";
+import { generateQuote, type SelectedPaymentOption, type ExportFormat } from "@/lib/finance/pdf-generator-v2";
 import { Button } from "@/components/ui/button";
 import { FileDown, Check } from "lucide-react";
 import { generateCashSnippet, generateFinanceSnippet, generateRTOSnippet, copyToClipboard } from "@/lib/finance/sms-snippets";
@@ -119,6 +119,9 @@ export default function FinanceComparePage() {
 
   // Selected payment options for PDF
   const [selectedOptions, setSelectedOptions] = useState<SelectedPaymentOption[]>([]);
+
+  // Export format selector
+  const [exportFormat, setExportFormat] = useState<ExportFormat>("pdf");
 
   // Handle payment selection
   const handleSelectPayment = (payment: {
@@ -248,12 +251,12 @@ export default function FinanceComparePage() {
     }
   };
 
-  // Generate PDF Quote
-  const handleGeneratePDF = () => {
+  // Generate Quote (PDF/JPEG/PNG)
+  const handleGeneratePDF = async () => {
     if (!customerName.trim()) {
       toast({
         title: "Customer Name Required",
-        description: "Please enter customer name before generating PDF",
+        description: "Please enter customer name before generating quote",
         variant: "destructive",
       });
       return;
@@ -273,36 +276,45 @@ export default function FinanceComparePage() {
         ? `${session.user.role}#${session.user.id?.slice(0, 6).toUpperCase()}`
         : session?.user?.name || session?.user?.email || "MJ Cargo Rep";
 
-    // Get selected trailer details for PDF
+    // Get selected trailer details for quote
     const selectedTrailer = trailers.find(t => t.id === selectedUnit);
     const unitDescription = selectedTrailer
       ? `${selectedTrailer.year} ${selectedTrailer.manufacturer} ${selectedTrailer.model} (${selectedTrailer.stockNumber})`
       : "Cargo Trailer";
 
-    generateQuotePDF({
-      customerName,
-      customerPhone,
-      customerEmail,
-      repId,
-      repName: session?.user?.name || "MJ Cargo Rep",
-      repEmail: session?.user?.email || "",
-      unitDescription,
-      unitPrice: price,
-      taxPercent: taxPct,
-      fees,
-      selectedOptions,
-      quoteDate: new Date().toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      }),
-    });
+    try {
+      await generateQuote({
+        customerName,
+        customerPhone,
+        customerEmail,
+        repId,
+        repName: session?.user?.name || "MJ Cargo Rep",
+        repEmail: session?.user?.email || "",
+        unitDescription,
+        unitPrice: price,
+        taxPercent: taxPct,
+        fees,
+        selectedOptions,
+        quoteDate: new Date().toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+        }),
+      }, exportFormat);
 
-    toast({
-      title: "PDF Generated!",
-      description: `Quote for ${customerName} has been downloaded`,
-      variant: "default",
-    });
+      toast({
+        title: `${exportFormat.toUpperCase()} Generated!`,
+        description: `Quote for ${customerName} has been downloaded`,
+        variant: "default",
+      });
+    } catch (error) {
+      console.error("Error generating quote:", error);
+      toast({
+        title: "Generation Failed",
+        description: "There was an error generating the quote. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   // Get unit description helper
@@ -706,24 +718,63 @@ export default function FinanceComparePage() {
           </CardContent>
         </Card>
 
-        {/* Selected Options & PDF Generation */}
+        {/* Selected Options & Quote Generation */}
         {selectedOptions.length > 0 && (
           <Card className="border-primary/30 bg-primary/5">
             <CardHeader>
-              <CardTitle className="flex items-center justify-between text-foreground">
-                <span className="flex items-center gap-2">
-                  <Check className="h-5 w-5 text-primary" />
-                  Selected Payment Options ({selectedOptions.length}/3)
-                </span>
-                <Button
-                  onClick={handleGeneratePDF}
-                  disabled={!customerName.trim()}
-                  className="gap-2"
-                  size="lg"
-                >
-                  <FileDown className="h-5 w-5" />
-                  Generate PDF Quote
-                </Button>
+              <CardTitle className="space-y-4 text-foreground">
+                <div className="flex items-center justify-between">
+                  <span className="flex items-center gap-2">
+                    <Check className="h-5 w-5 text-primary" />
+                    Selected Payment Options ({selectedOptions.length}/3)
+                  </span>
+                </div>
+
+                {/* Export Format Selector & Generate Button */}
+                <div className="flex items-center gap-4 flex-wrap">
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setExportFormat("pdf")}
+                      className={`px-4 py-2 rounded-lg font-medium transition-all text-sm ${
+                        exportFormat === "pdf"
+                          ? "bg-primary text-primary-foreground shadow-md scale-105"
+                          : "bg-muted hover:bg-muted/80 text-muted-foreground"
+                      }`}
+                    >
+                      📄 PDF
+                    </button>
+                    <button
+                      onClick={() => setExportFormat("jpeg")}
+                      className={`px-4 py-2 rounded-lg font-medium transition-all text-sm ${
+                        exportFormat === "jpeg"
+                          ? "bg-primary text-primary-foreground shadow-md scale-105"
+                          : "bg-muted hover:bg-muted/80 text-muted-foreground"
+                      }`}
+                    >
+                      🖼️ JPEG
+                    </button>
+                    <button
+                      onClick={() => setExportFormat("png")}
+                      className={`px-4 py-2 rounded-lg font-medium transition-all text-sm ${
+                        exportFormat === "png"
+                          ? "bg-primary text-primary-foreground shadow-md scale-105"
+                          : "bg-muted hover:bg-muted/80 text-muted-foreground"
+                      }`}
+                    >
+                      🎨 PNG
+                    </button>
+                  </div>
+
+                  <Button
+                    onClick={handleGeneratePDF}
+                    disabled={!customerName.trim()}
+                    className="gap-2 flex-1 min-w-[200px]"
+                    size="lg"
+                  >
+                    <FileDown className="h-5 w-5" />
+                    Generate {exportFormat.toUpperCase()} Quote
+                  </Button>
+                </div>
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -769,7 +820,7 @@ export default function FinanceComparePage() {
               </div>
               {!customerName.trim() && (
                 <p className="mt-4 text-sm text-destructive">
-                  ⚠️ Please enter customer name above to generate PDF
+                  ⚠️ Please enter customer name above to generate quote
                 </p>
               )}
             </CardContent>
