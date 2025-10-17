@@ -67,6 +67,7 @@ paths = [
   '''FIREBASE_SETUP\.md$''',
   '''WALKTHROUGH\.md$''',
   '''README\.md$''',
+  '''README-.*\.md$''',  # Documentation files like README-IMPORT.md
 ]
 
 # Allow example/placeholder values

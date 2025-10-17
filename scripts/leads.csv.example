@@ -1,0 +1,6 @@
+Timestamp,Rep Name,Customer Name,Customer Phone Number,Trailer Size,Assigned Manager,Stock Number (If in stock) or Factory Order,Applied,Date of Submission,Cash/Finance/Rent to Own,Manager Notes,Rep Notes,Email,Address,Zip Code,State
+2024-01-15 10:30:00,John Smith,Sarah Johnson,555-123-4567,16ft,Mike Anderson,STK12345,Yes,2024-01-15,Finance,Approved for $25000,Customer very interested,sarah.johnson@email.com,123 Main St,12345,TX
+2024-01-16 14:20:00,Jane Doe,Robert Williams,555-987-6543,20ft,Mike Anderson,Factory Order,No,,Cash,Pending review,Called twice this week,robert.w@email.com,456 Oak Ave,67890,CA
+2024-01-17 09:15:00,John Smith,Emily Davis,555-456-7890,18ft,Sarah Thompson,STK67890,Yes,2024-01-17,RTO,Declined - poor credit,Follow up in 3 months,emily.davis@email.com,789 Pine Rd,54321,FL
+2024-01-18 16:45:00,Jane Doe,Michael Brown,555-321-0987,22ft,Mike Anderson,Factory Order,Yes,2024-01-18,Finance,Approved - awaiting delivery,Customer requested blue color,michael.brown@email.com,321 Elm St,11111,NY
+2024-01-19 11:00:00,John Smith,Jennifer Garcia,555-555-1234,16ft,Sarah Thompson,STK22222,No,,Finance,Dead deal - went with competitor,Price was too high,jennifer.g@email.com,654 Maple Dr,22222,AZ
