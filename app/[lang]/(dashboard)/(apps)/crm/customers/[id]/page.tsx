@@ -162,6 +162,18 @@ export default function CustomerProfilePage() {
         throw new Error("Failed to update notes");
       }
 
+      // Log activity for notes update
+      await fetch('/api/crm/activities', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customerId: customer.id,
+          type: 'note',
+          subject: 'Notes Updated',
+          description: 'Customer notes were updated',
+        }),
+      });
+
       toast({
         title: "Success",
         description: "Notes updated successfully",
@@ -390,10 +402,10 @@ export default function CustomerProfilePage() {
         </Card>
       </div>
 
-      {/* 3-Column Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column - Customer Details */}
-        <Card>
+      {/* 2-Column Layout: Customer Details + Actions */}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        {/* Left Column - Customer Details (takes 3 columns) */}
+        <Card className="lg:col-span-3">
           <CardHeader>
             <CardTitle>Customer Details</CardTitle>
           </CardHeader>
@@ -415,18 +427,20 @@ export default function CustomerProfilePage() {
                 </div>
               )}
 
-              <div className="flex items-start gap-3">
-                <Phone className="w-4 h-4 text-muted-foreground mt-1" />
-                <div className="flex-1">
-                  <p className="text-sm text-muted-foreground">Phone</p>
-                  <a
-                    href={`tel:${customer.phone}`}
-                    className="text-sm font-medium hover:text-primary"
-                  >
-                    {customer.phone}
-                  </a>
+              {!customer.phone.includes('@placeholder.com') && (
+                <div className="flex items-start gap-3">
+                  <Phone className="w-4 h-4 text-muted-foreground mt-1" />
+                  <div className="flex-1">
+                    <p className="text-sm text-muted-foreground">Phone</p>
+                    <a
+                      href={`tel:${customer.phone}`}
+                      className="text-sm font-medium hover:text-primary"
+                    >
+                      {customer.phone}
+                    </a>
+                  </div>
                 </div>
-              </div>
+              )}
 
               {(customer.street || customer.city || customer.state) && (
                 <div className="flex items-start gap-3">
@@ -510,6 +524,13 @@ export default function CustomerProfilePage() {
                 </span>
               </div>
 
+              {leadAge && (
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">Lead Age</span>
+                  <span className="text-sm font-medium">{leadAge} old</span>
+                </div>
+              )}
+
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">Last Contacted</span>
                 <span className="text-sm font-medium">
@@ -534,94 +555,193 @@ export default function CustomerProfilePage() {
           </CardContent>
         </Card>
 
-        {/* Middle Column - Notes */}
-        <Card>
+        {/* Right Column - Actions (takes 1 column) */}
+        <Card className="lg:col-span-1">
           <CardHeader>
-            <CardTitle>Notes</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Textarea
-              placeholder="Add notes about this customer..."
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              rows={15}
-              className="mb-4"
-            />
-            <Button onClick={handleSaveNotes} className="w-full">
-              Save Notes
-            </Button>
-          </CardContent>
-        </Card>
-
-        {/* Right Column - Quick Actions */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Quick Actions</CardTitle>
+            <CardTitle>Actions</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <Button className="w-full justify-start" variant="outline">
+            <Button
+              className="w-full justify-start"
+              variant="outline"
+              onClick={async () => {
+                // Log call activity
+                try {
+                  await fetch('/api/crm/activities', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      customerId: customer.id,
+                      type: 'call',
+                      subject: 'Phone Call',
+                      description: `Called ${customer.firstName} ${customer.lastName} at ${customer.phone}`,
+                    }),
+                  });
+                  toast({
+                    title: "Call Logged",
+                    description: `Call with ${customer.firstName} ${customer.lastName} has been logged`,
+                  });
+                  fetchCustomer();
+                } catch (error) {
+                  toast({
+                    title: "Error",
+                    description: "Failed to log call activity",
+                    variant: "destructive",
+                  });
+                }
+              }}
+            >
+              <Phone className="w-4 h-4 mr-2" />
+              Call Customer
+            </Button>
+            <Button
+              className="w-full justify-start"
+              variant="outline"
+              onClick={async () => {
+                // Log email activity
+                try {
+                  await fetch('/api/crm/activities', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      customerId: customer.id,
+                      type: 'email',
+                      subject: 'Email Sent',
+                      description: `Email sent to ${customer.email}`,
+                    }),
+                  });
+                  toast({
+                    title: "Email Sent",
+                    description: `Email sent to ${customer.firstName} ${customer.lastName}`,
+                  });
+                  fetchCustomer();
+                } catch (error) {
+                  toast({
+                    title: "Error",
+                    description: "Failed to log email activity",
+                    variant: "destructive",
+                  });
+                }
+              }}
+            >
               <Mail className="w-4 h-4 mr-2" />
               Send Email
             </Button>
             <Button
               className="w-full justify-start"
               variant="outline"
-              onClick={() => setShowLogCallDialog(true)}
+              onClick={() => router.push("/en/finance-calculator")}
             >
-              <Phone className="w-4 h-4 mr-2" />
-              Log Call
-            </Button>
-            <Button className="w-full justify-start" variant="outline">
-              <Calendar className="w-4 h-4 mr-2" />
-              Schedule Meeting
-            </Button>
-            <Button className="w-full justify-start" variant="outline">
-              <FileText className="w-4 h-4 mr-2" />
+              <DollarSign className="w-4 h-4 mr-2" />
               Create Quote
             </Button>
-            <Button className="w-full justify-start" variant="outline">
-              <DollarSign className="w-4 h-4 mr-2" />
-              Create Deal
-            </Button>
-            <Button className="w-full justify-start" variant="outline">
+            <Button
+              className="w-full justify-start"
+              variant="outline"
+              onClick={() => router.push("/en/credit-applications")}
+            >
               <FileText className="w-4 h-4 mr-2" />
-              Credit Application
+              View Applications
             </Button>
           </CardContent>
         </Card>
       </div>
 
-      {/* Recent Activity */}
+      {/* Activity Timeline - Full History (Non-Erasable) */}
       <Card>
         <CardHeader>
-          <CardTitle>Recent Activity</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <Activity className="w-5 h-5 text-purple-600" />
+            Activity Timeline
+            <Badge variant="outline" className="ml-auto">
+              {customer._count.activities} Total
+            </Badge>
+          </CardTitle>
         </CardHeader>
         <CardContent>
           {customer.activities && customer.activities.length > 0 ? (
             <div className="space-y-4">
-              {customer.activities.slice(0, 5).map((activity: any) => (
-                <div key={activity.id} className="flex items-start gap-3 pb-3 border-b last:border-0">
-                  <div className="p-2 bg-muted rounded-lg">
-                    <Activity className="w-4 h-4" />
+              {customer.activities.map((activity: any) => {
+                // Dynamic icon based on activity type
+                const getActivityIcon = (type: string) => {
+                  switch (type.toLowerCase()) {
+                    case 'call':
+                      return { icon: Phone, bg: 'bg-blue-100', color: 'text-blue-600' };
+                    case 'email':
+                      return { icon: Mail, bg: 'bg-green-100', color: 'text-green-600' };
+                    case 'meeting':
+                      return { icon: Calendar, bg: 'bg-purple-100', color: 'text-purple-600' };
+                    case 'note':
+                      return { icon: FileText, bg: 'bg-yellow-100', color: 'text-yellow-600' };
+                    default:
+                      return { icon: Activity, bg: 'bg-gray-100', color: 'text-gray-600' };
+                  }
+                };
+
+                const { icon: Icon, bg, color } = getActivityIcon(activity.type);
+
+                return (
+                  <div key={activity.id} className="flex items-start gap-4 pb-4 border-b last:border-0">
+                    <div className={`p-3 ${bg} rounded-lg`}>
+                      <Icon className={`w-5 h-5 ${color}`} />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-semibold">{activity.subject}</p>
+                        <Badge variant="outline" className="text-xs capitalize">
+                          {activity.type}
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {activity.description}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
+                        <Clock className="w-3 h-3" />
+                        {formatDate(activity.createdAt)}
+                      </p>
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">{activity.subject}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {activity.description}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {formatDate(activity.createdAt)}
-                    </p>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           ) : (
-            <div className="text-center py-8">
-              <Activity className="w-12 h-12 text-muted-foreground mx-auto mb-2" />
-              <p className="text-sm text-muted-foreground">No activity yet</p>
+            <div className="text-center py-12">
+              <Activity className="w-16 h-16 text-muted-foreground mx-auto mb-4 opacity-50" />
+              <p className="text-lg font-medium">No activity yet</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                Start logging calls, emails, and notes to build a complete history
+              </p>
             </div>
           )}
+        </CardContent>
+      </Card>
+
+      {/* Notes Section - Full Width */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FileText className="w-5 h-5 text-orange-600" />
+            Customer Notes
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Textarea
+            placeholder="Add notes about this customer... (e.g., preferences, special requests, follow-up actions)"
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            rows={8}
+            className="mb-3"
+          />
+          {customer.notes && customer.updatedAt && (
+            <p className="text-xs text-muted-foreground mb-3 flex items-center gap-1">
+              <Clock className="w-3 h-3" />
+              Last saved: {formatDate(customer.updatedAt)}
+            </p>
+          )}
+          <Button onClick={handleSaveNotes} className="bg-orange-500 hover:bg-orange-600">
+            <FileText className="w-4 h-4 mr-2" />
+            Save Notes
+          </Button>
         </CardContent>
       </Card>
 
