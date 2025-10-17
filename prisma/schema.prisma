@@ -719,19 +719,24 @@ model CalendarEvent {
 
 // Lead Notes - Separate from general notes for better tracking
 model LeadNote {
-  id          String   @id @default(cuid())
-  customerId  String
-  userId      String   // Rep who created the note
-  content     String   @db.Text
-  noteType    String   @default("general") // "general", "follow-up", "important", "credit"
+  id              String   @id @default(cuid())
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  customerId      String
+  customer        Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
 
-  customer    Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  authorId        String   // Who wrote the note
+  authorName      String   // Display name of author
+  authorRole      String   // "salesperson", "manager", "director", "owner"
+
+  content         String   @db.Text
+  noteType        String   @default("general") // "general", "follow_up", "manager_review", "status_change"
+
+  isPrivate       Boolean  @default(false) // For sensitive notes
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   @@index([customerId])
-  @@index([userId])
-  @@index([noteType])
+  @@index([authorId])
   @@index([createdAt])
 }
