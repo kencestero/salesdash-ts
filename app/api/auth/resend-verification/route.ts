@@ -50,16 +50,52 @@ export async function POST(req: Request) {
       },
     });
 
-    // Generate verification URL
-    const verificationUrl = `${process.env.NEXTAUTH_URL}/api/auth/verify?token=${verificationToken}`;
-
-    // TODO: Send actual email here
-    console.log("📧 Resend Verification URL:", verificationUrl);
-
-    return NextResponse.json({
-      ok: true,
-      message: "Verification email sent! Check your inbox.",
+    // Get user profile for name
+    const userProfile = await prisma.userProfile.findUnique({
+      where: { userId: user.id },
     });
+
+    const userName = userProfile
+      ? `${userProfile.firstName} ${userProfile.lastName}`
+      : user.name || 'User';
+
+    // Generate verification URL
+    const verificationUrl = `${process.env.NEXTAUTH_URL}/en/auth/verify-email?token=${verificationToken}`;
+
+    // Send verification email using Resend
+    console.log('🔍 Checking RESEND_API_KEY:', process.env.RESEND_API_KEY ? 'EXISTS' : 'MISSING');
+
+    try {
+      if (!process.env.RESEND_API_KEY) {
+        console.error('❌ RESEND_API_KEY is not configured!');
+        return NextResponse.json(
+          { message: "Email service is not configured. Please contact support." },
+          { status: 500 }
+        );
+      }
+
+      const { sendVerificationEmail } = await import('@/lib/email/resend-service');
+
+      const result = await sendVerificationEmail(
+        email,
+        userName,
+        verificationUrl,
+        24 // 24 hours expiry
+      );
+
+      console.log('✅ Verification email resent successfully!', result);
+
+      return NextResponse.json({
+        ok: true,
+        message: "Verification email sent! Check your inbox.",
+      });
+    } catch (emailError: any) {
+      console.error('❌ Failed to send verification email:', emailError);
+      return NextResponse.json(
+        { message: "Failed to send email. Please try again or contact support." },
+        { status: 500 }
+      );
+    }
   } catch (error) {
     console.error("❌ Resend verification error:", error);
     return NextResponse.json(

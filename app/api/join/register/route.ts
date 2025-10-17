@@ -112,21 +112,30 @@ export async function POST(req: Request) {
 
     try {
       console.log('📤 Attempting to send verification email...');
-      const { sendVerificationEmail } = await import('@/lib/email/resend-service');
 
-      const result = await sendVerificationEmail(
-        email,
-        `${firstName} ${lastName}`,
-        verificationUrl,
-        24 // 24 hours expiry
-      );
+      // Check if email service is configured
+      if (!process.env.RESEND_API_KEY) {
+        console.error('❌ RESEND_API_KEY is not configured in environment variables!');
+        console.error('⚠️ Email will NOT be sent. User will need to use "Resend Verification" later.');
+        // Continue with registration but warn about email failure
+      } else {
+        const { sendVerificationEmail } = await import('@/lib/email/resend-service');
 
-      console.log('✅ Verification email sent successfully!', result);
+        const result = await sendVerificationEmail(
+          email,
+          `${firstName} ${lastName}`,
+          verificationUrl,
+          24 // 24 hours expiry
+        );
+
+        console.log('✅ Verification email sent successfully!', result);
+      }
     } catch (emailError: any) {
       console.error('❌ Failed to send verification email:');
       console.error('Error message:', emailError?.message);
       console.error('Error stack:', emailError?.stack);
       console.error('Full error:', JSON.stringify(emailError, null, 2));
+      console.error('⚠️ User will need to use "Resend Verification" to receive email.');
       // Don't fail registration if email fails - user can request resend
     }
 
