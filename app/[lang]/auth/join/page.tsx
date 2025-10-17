@@ -33,6 +33,19 @@ export default function RegisterPage() {
   const [passwordType, setPasswordType] = useState("password");
   const [confirmPasswordType, setConfirmPasswordType] = useState("password");
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [managerId, setManagerId] = useState("");
+  const [isFreelancer, setIsFreelancer] = useState(false);
+
+  // Manager list - these are the 7 managers + Freelancer option
+  const managers = [
+    { id: "manager1", name: "Alex Johnson" },
+    { id: "manager2", name: "Sarah Martinez" },
+    { id: "manager3", name: "Michael Chen" },
+    { id: "manager4", name: "Emily Davis" },
+    { id: "manager5", name: "David Wilson" },
+    { id: "manager6", name: "Jessica Brown" },
+    { id: "manager7", name: "Chris Anderson" },
+  ];
 
   async function validateCode() {
     if (!code.trim()) {
@@ -81,6 +94,12 @@ export default function RegisterPage() {
       return;
     }
 
+    // Validate manager selection for non-freelancers
+    if (!isFreelancer && !managerId) {
+      setErr("Please select your manager or check the Freelancer option");
+      return;
+    }
+
     // Validate password match
     if (password !== confirmPassword) {
       setErr("Passwords do not match");
@@ -110,6 +129,8 @@ export default function RegisterPage() {
         zipcode,
         email,
         password,
+        managerId: isFreelancer ? null : managerId,
+        status: isFreelancer ? "freelancer" : "employee",
       }),
     });
 
@@ -439,6 +460,46 @@ export default function RegisterPage() {
                 />
               </div>
             </div>
+
+            {/* Freelancer Checkbox */}
+            <div className="flex items-start gap-3 p-4 bg-white/5 backdrop-blur-sm rounded-xl border border-white/20">
+              <input
+                type="checkbox"
+                id="freelancer-check"
+                checked={isFreelancer}
+                onChange={(e) => {
+                  setIsFreelancer(e.target.checked);
+                  if (e.target.checked) setManagerId("");
+                }}
+                className="mt-1 w-5 h-5 rounded border-white/30 text-primary focus:ring-2 focus:ring-primary cursor-pointer"
+              />
+              <label htmlFor="freelancer-check" className="text-sm text-white/90 cursor-pointer">
+                I am a <strong>Freelancer</strong> (independent contractor, not assigned to a manager)
+              </label>
+            </div>
+
+            {/* Manager Selection - Only show if not freelancer */}
+            {!isFreelancer && (
+              <div>
+                <Label className="text-white font-semibold mb-2 block">Select Your Manager *</Label>
+                <select
+                  value={managerId}
+                  onChange={(e) => setManagerId(e.target.value)}
+                  className="w-full bg-white/90 backdrop-blur-sm border-0 rounded-lg px-4 py-3 text-gray-900 focus:ring-2 focus:ring-primary focus:outline-none"
+                  required={!isFreelancer}
+                >
+                  <option value="">-- Select a Manager --</option>
+                  {managers.map((manager) => (
+                    <option key={manager.id} value={manager.id}>
+                      {manager.name}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-xs text-white/60 mt-1">
+                  Your assigned manager will oversee your sales and provide support
+                </p>
+              </div>
+            )}
 
             {/* Email */}
             <div>

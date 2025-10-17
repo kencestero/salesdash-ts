@@ -155,6 +155,22 @@ export async function POST(req: Request) {
     const ipAddress = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown";
     const userAgent = req.headers.get("user-agent") || "unknown";
 
+    // Look up the rep by repCode (passed as shareToken from public form)
+    let createdByUserId: string | undefined;
+    if (shareToken && isPublicSubmission) {
+      try {
+        const userProfile = await prisma.userProfile.findUnique({
+          where: { repCode: shareToken },
+          select: { userId: true },
+        });
+        if (userProfile) {
+          createdByUserId = userProfile.userId;
+        }
+      } catch (err) {
+        console.error("Error looking up rep code:", err);
+      }
+    }
+
     const application = await prisma.creditApplication.create({
       data: {
         appNumber,
@@ -202,7 +218,7 @@ export async function POST(req: Request) {
         customerId: customerId || undefined,
         trailerId: trailerId || undefined,
         notes,
-        createdBy: session?.user?.id || undefined,
+        createdBy: session?.user?.id || createdByUserId,
       },
       include: {
         customer: true,

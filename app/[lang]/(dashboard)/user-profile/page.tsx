@@ -3,6 +3,7 @@ import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import ProfileProgress from './overview/profile-progress';
 import UserInfo from './overview/user-info';
+import RepCodeInfo from './overview/rep-code-info';
 import Portfolio from './overview/portfolio';
 import Skills from './overview/skills';
 import Connections from "./overview/connections"
@@ -36,6 +37,7 @@ const Overview = () => {
       <div className="col-span-12 lg:col-span-4 space-y-6">
         <ProfileProgress />
         <UserInfo session={session} userProfile={userProfile} />
+        <RepCodeInfo userProfile={userProfile} />
         <Portfolio />
         <Skills />
         <Connections />

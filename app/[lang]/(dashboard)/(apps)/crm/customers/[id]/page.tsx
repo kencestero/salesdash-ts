@@ -34,6 +34,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { toast } from "@/components/ui/use-toast";
 import Link from "next/link";
 
@@ -57,6 +65,13 @@ interface Customer {
   createdAt: string;
   updatedAt: string;
   lastContactedAt?: string;
+  // New fields
+  trailerSize?: string;
+  financingType?: string;
+  stockNumber?: string;
+  isFactoryOrder?: boolean;
+  appliedDate?: string;
+  assignedManager?: string;
   _count: {
     deals: number;
     activities: number;
@@ -97,6 +112,9 @@ export default function CustomerProfilePage() {
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [notes, setNotes] = useState("");
+  const [leadAge, setLeadAge] = useState("");
+  const [showLogCallDialog, setShowLogCallDialog] = useState(false);
+  const [callNotes, setCallNotes] = useState("");
 
   // Fetch customer data
   useEffect(() => {
@@ -169,6 +187,76 @@ export default function CustomerProfilePage() {
     });
   };
 
+  const calculateLeadAge = () => {
+    if (!customer?.createdAt) return;
+
+    const created = new Date(customer.createdAt);
+    const now = new Date();
+    const diffMs = now.getTime() - created.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffDays > 0) {
+      setLeadAge(`${diffDays} day${diffDays > 1 ? 's' : ''}`);
+    } else if (diffHours > 0) {
+      setLeadAge(`${diffHours} hour${diffHours > 1 ? 's' : ''}`);
+    } else {
+      setLeadAge(`${diffMins} minute${diffMins > 1 ? 's' : ''}`);
+    }
+  };
+
+  // Update lead age every minute
+  useEffect(() => {
+    if (customer) {
+      calculateLeadAge();
+      const interval = setInterval(calculateLeadAge, 60000);
+      return () => clearInterval(interval);
+    }
+  }, [customer]);
+
+  const handleLogCall = async () => {
+    if (!customer || !callNotes.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter call notes",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/crm/activities', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customerId: customer.id,
+          type: 'call',
+          subject: 'Phone Call',
+          description: callNotes,
+        }),
+      });
+
+      if (!response.ok) throw new Error('Failed to log call');
+
+      toast({
+        title: "Success",
+        description: "Call logged successfully",
+      });
+
+      setShowLogCallDialog(false);
+      setCallNotes("");
+      fetchCustomer(); // Refresh to show new activity
+    } catch (error) {
+      console.error('Error logging call:', error);
+      toast({
+        title: "Error",
+        description: "Failed to log call",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -213,6 +301,12 @@ export default function CustomerProfilePage() {
                 <StatusIcon className="w-3 h-3 mr-1" />
                 {customer.status}
               </Badge>
+              {leadAge && (
+                <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                  <Clock className="w-3 h-3 mr-1" />
+                  Lead Age: {leadAge}
+                </Badge>
+              )}
             </div>
             {customer.companyName && (
               <p className="text-default-600 mt-1 flex items-center gap-2">
@@ -306,18 +400,20 @@ export default function CustomerProfilePage() {
           <CardContent className="space-y-4">
             {/* Contact Information */}
             <div className="space-y-3">
-              <div className="flex items-start gap-3">
-                <Mail className="w-4 h-4 text-muted-foreground mt-1" />
-                <div className="flex-1">
-                  <p className="text-sm text-muted-foreground">Email</p>
-                  <a
-                    href={`mailto:${customer.email}`}
-                    className="text-sm font-medium hover:text-primary"
-                  >
-                    {customer.email}
-                  </a>
+              {!customer.email.includes('@placeholder.com') && (
+                <div className="flex items-start gap-3">
+                  <Mail className="w-4 h-4 text-muted-foreground mt-1" />
+                  <div className="flex-1">
+                    <p className="text-sm text-muted-foreground">Email</p>
+                    <a
+                      href={`mailto:${customer.email}`}
+                      className="text-sm font-medium hover:text-primary"
+                    >
+                      {customer.email}
+                    </a>
+                  </div>
                 </div>
-              </div>
+              )}
 
               <div className="flex items-start gap-3">
                 <Phone className="w-4 h-4 text-muted-foreground mt-1" />
@@ -362,6 +458,50 @@ export default function CustomerProfilePage() {
                   {customer.source || "Unknown"}
                 </span>
               </div>
+
+              {customer.trailerSize && (
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">Trailer Size</span>
+                  <span className="text-sm font-medium">{customer.trailerSize}</span>
+                </div>
+              )}
+
+              {customer.financingType && (
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">Financing Type</span>
+                  <span className="text-sm font-medium capitalize">{customer.financingType}</span>
+                </div>
+              )}
+
+              {customer.stockNumber && (
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">Stock Number</span>
+                  <span className="text-sm font-medium">{customer.stockNumber}</span>
+                </div>
+              )}
+
+              {customer.isFactoryOrder && (
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">Order Type</span>
+                  <Badge variant="outline" className="bg-purple-50 text-purple-700">
+                    Factory Order
+                  </Badge>
+                </div>
+              )}
+
+              {customer.appliedDate && (
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">Applied Date</span>
+                  <span className="text-sm font-medium">{formatDate(customer.appliedDate)}</span>
+                </div>
+              )}
+
+              {customer.assignedManager && (
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">Assigned Manager</span>
+                  <span className="text-sm font-medium">{customer.assignedManager}</span>
+                </div>
+              )}
 
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">Created</span>
@@ -423,7 +563,11 @@ export default function CustomerProfilePage() {
               <Mail className="w-4 h-4 mr-2" />
               Send Email
             </Button>
-            <Button className="w-full justify-start" variant="outline">
+            <Button
+              className="w-full justify-start"
+              variant="outline"
+              onClick={() => setShowLogCallDialog(true)}
+            >
               <Phone className="w-4 h-4 mr-2" />
               Log Call
             </Button>
@@ -480,6 +624,35 @@ export default function CustomerProfilePage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Log Call Dialog */}
+      <Dialog open={showLogCallDialog} onOpenChange={setShowLogCallDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Log Phone Call</DialogTitle>
+            <DialogDescription>
+              Record details about your call with {customer.firstName} {customer.lastName}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <Textarea
+              placeholder="What did you discuss? Any follow-up needed?"
+              value={callNotes}
+              onChange={(e) => setCallNotes(e.target.value)}
+              rows={6}
+              className="w-full"
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowLogCallDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleLogCall}>
+              Log Call
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

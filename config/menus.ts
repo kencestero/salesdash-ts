@@ -855,6 +855,11 @@ export const menusConfig = {
             href: "/manager",
           },
           {
+            title: "User Management",
+            icon: Users,
+            href: "/user-management",
+          },
+          {
             title: "chat",
             icon: Messages,
             href: "/chat",
@@ -1692,6 +1697,11 @@ export const menusConfig = {
       {
         isHeader: true,
         title: "Application",
+      },
+      {
+        title: "User Management",
+        icon: Users,
+        href: "/user-management",
       },
       {
         title: "chat",

@@ -22,20 +22,45 @@ export async function GET() {
       },
     });
 
-    if (!user || !user.profile) {
+    if (!user) {
       return NextResponse.json({
-        phone: null,
-        city: null,
-        zip: null,
-        role: "salesperson",
+        user: null,
+        profile: null,
+      });
+    }
+
+    if (!user.profile) {
+      return NextResponse.json({
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+        },
+        profile: null,
       });
     }
 
     return NextResponse.json({
-      phone: user.profile.phone,
-      city: user.profile.city,
-      zip: user.profile.zip,
-      role: user.profile.role,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+      },
+      profile: {
+        id: user.profile.id,
+        firstName: user.profile.firstName,
+        lastName: user.profile.lastName,
+        phone: user.profile.phone,
+        city: user.profile.city,
+        zip: user.profile.zip,
+        zipcode: user.profile.zipcode,
+        role: user.profile.role,
+        repCode: user.profile.repCode,
+        managerId: user.profile.managerId,
+        status: user.profile.status,
+        salespersonCode: user.profile.salespersonCode,
+        member: user.profile.member,
+      },
     });
   } catch (error) {
     console.error("Error fetching user profile:", error);

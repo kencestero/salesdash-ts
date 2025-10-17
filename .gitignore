@@ -84,3 +84,8 @@ scripts/*-verify*.js
 # User uploads
 public/uploads/avatars/*
 !public/uploads/avatars/.gitkeep
+
+# Google Credentials
+google-credentials.json
+google-credentials.json.json
+scripts/import-from-sheet.ts

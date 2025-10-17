@@ -20,11 +20,13 @@ export const revalidate = 0;
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { firstName, lastName, phone, zipcode, email, password } = body;
+    const { firstName, lastName, phone, zipcode, email, password, managerId, status } = body;
 
     console.log('=== Registration Request (NEW FLOW) ===');
     console.log('Email:', email);
     console.log('Name:', firstName, lastName);
+    console.log('Manager ID:', managerId || 'None');
+    console.log('Status:', status || 'employee');
 
     // 1. Validate required fields
     if (!firstName || !lastName || !email || !password) {
@@ -91,6 +93,8 @@ export async function POST(req: Request) {
         phone: phone || null,
         zipcode: zipcode || null,
         role: joinRole || "salesperson",
+        managerId: managerId || null,
+        status: status || "employee",
         token,
         expiresAt,
       },

@@ -79,6 +79,8 @@ model PendingUser {
   phone          String?
   zipcode        String?
   role           String   @default("salesperson") // "owner", "manager", "salesperson"
+  managerId      String?  // Selected manager's User ID during signup
+  status         String   @default("employee") // "employee" or "freelancer"
   token          String   @unique
   expiresAt      DateTime
   createdAt      DateTime @default(now())
@@ -101,8 +103,14 @@ model UserProfile {
   city            String?
   zip             String?  // Legacy field, use zipcode instead
   salespersonCode String?  @unique // REP12345, SMR12345, or VIP12345
-  role            String   @default("salesperson") // "owner", "manager", "salesperson"
+  role            String   @default("salesperson") // "owner", "manager", "salesperson", "director"
   member          Boolean  @default(false) // Join code verified
+
+  // Rep Tracking & Organization
+  repCode         String?  @unique // Format: "REP" + 6 digits (e.g., "REP482756"), "REP000000" for freelancers
+  managerId       String?  // Links to another User's id (their manager)
+  status          String   @default("employee") // "employee" or "freelancer"
+
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
@@ -112,6 +120,8 @@ model UserProfile {
   @@index([role])
   @@index([member])
   @@index([salespersonCode])
+  @@index([repCode])
+  @@index([managerId])
 }
 
 // Inventory Management
@@ -190,7 +200,15 @@ model Customer {
   // Lead Info
   source          String?  // "website", "referral", "walk-in", "phone"
   assignedTo      String?  // Salesperson ID
-  status          String   @default("lead") // "lead", "contacted", "qualified", "negotiating", "won", "lost"
+  status          String   @default("lead") // "lead", "contacted", "qualified", "negotiating", "won", "lost", "applied"
+
+  // Trailer & Financing Info
+  trailerSize     String?  // e.g., "16x6.5", "20x8.5"
+  financingType   String?  // "cash", "finance", "rto"
+  stockNumber     String?  // Stock # or null if factory order
+  isFactoryOrder  Boolean  @default(false)
+  appliedDate     DateTime? // Date customer applied
+  assignedManager String?  // Manager name
 
   // Tags for segmentation
   tags            String[]
@@ -213,6 +231,7 @@ model Customer {
   @@index([email])
   @@index([status])
   @@index([assignedTo])
+  @@index([assignedManager])
 }
 
 // Deal/Opportunity Tracking
@@ -631,4 +650,41 @@ model UploadReport {
   @@index([manufacturer])
   @@index([uploadedBy])
   @@index([createdAt])
+}
+
+// Calendar & Events System
+model CalendarEvent {
+  id              String   @id @default(cuid())
+
+  // Event Details
+  title           String
+  description     String?  @db.Text
+  start           DateTime
+  end             DateTime
+  allDay          Boolean  @default(false)
+
+  // Event Type & Category
+  eventType       String   // "personal" or "company"
+  category        String   // "business", "personal", "holiday", "family", "meeting", "etc"
+
+  // Ownership & Permissions
+  userId          String?  // User who owns it (null for company-wide events)
+  createdBy       String   // User ID who created it
+  createdByRole   String?  // Role of creator ("owner", "manager", "salesperson")
+
+  // Company Announcement specific fields
+  isAnnouncement  Boolean  @default(false)
+  visibleToRoles  String[] // Empty array = visible to all roles
+
+  // Metadata
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Indexes
+  @@index([userId])
+  @@index([eventType])
+  @@index([category])
+  @@index([start])
+  @@index([end])
+  @@index([isAnnouncement])
 }

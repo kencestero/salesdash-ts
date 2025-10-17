@@ -11,6 +11,7 @@ import DashboardSelect from "@/components/dasboard-select";
 import TopTen from "./components/top-ten";
 import TopPage from "./components/top-page";
 import DatePickerWithRange from "@/components/date-picker-with-range";
+import RepCodeCard from "./components/rep-code-card";
 
 interface DashboardPageViewProps {
   trans: {
@@ -26,6 +27,10 @@ const DashboardPageView = ({ trans }: DashboardPageViewProps) => {
         </div>
         <DatePickerWithRange />
       </div>
+
+      {/* Rep Code Card */}
+      <RepCodeCard />
+
       {/* reports area */}
       <div className="grid grid-cols-12  gap-6 ">
         <div className="col-span-12 lg:col-span-8">

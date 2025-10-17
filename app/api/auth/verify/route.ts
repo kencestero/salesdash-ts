@@ -82,13 +82,36 @@ export async function GET(req: Request) {
       );
     }
 
-    // 4. Generate unique salesperson code
+    // 4. Generate unique salesperson code and rep code
     console.log('🔢 Generating salesperson code...');
     const salespersonCode = await generateUniqueSalespersonCode(
       pendingUser.role,
       prisma
     );
     console.log('✅ Salesperson code:', salespersonCode);
+
+    // Generate rep code: "REP" + 6 random digits or "REP000000" for freelancers
+    let repCode: string;
+    if (pendingUser.status === "freelancer") {
+      repCode = "REP000000";
+    } else {
+      // Generate unique 6-digit code
+      let isUnique = false;
+      repCode = "";
+      while (!isUnique) {
+        const randomDigits = Math.floor(100000 + Math.random() * 900000).toString();
+        repCode = `REP${randomDigits}`;
+
+        // Check if this code already exists
+        const existing = await prisma.userProfile.findUnique({
+          where: { repCode },
+        });
+        if (!existing) {
+          isUnique = true;
+        }
+      }
+    }
+    console.log('✅ Rep code:', repCode);
 
     // 5. Create User account and UserProfile in a transaction
     console.log('📝 Creating User account and profile...');
@@ -117,6 +140,9 @@ export async function GET(req: Request) {
           salespersonCode: salespersonCode,
           role: pendingUser.role,
           member: true, // They're a verified member now
+          repCode: repCode,
+          managerId: pendingUser.managerId,
+          status: pendingUser.status,
         },
       });
 
