@@ -208,22 +208,32 @@ model Customer {
   state           String?
   zipcode         String?
 
-  // Business Info (for commercial customers)
+  // Business Info
   companyName     String?
-  businessType    String?  // "individual", "business", "contractor"
+  businessType    String?
+
+  // Lead Management - NEW FIELDS
+  assignedTo      String?  // KEEP FOR NOW - will migrate to assignedToId
+  assignedToId    String?  // Primary salesperson ID
+  assignedToName  String?  // Primary salesperson name
+  backupRepId     String?  // Secondary rep if needed
+  lastContactDate DateTime?
+  nextFollowUpDate DateTime?
 
   // Lead Info
-  source          String?  // "website", "referral", "walk-in", "phone"
-  assignedTo      String?  // Salesperson ID
-  status          String   @default("lead") // "lead", "contacted", "qualified", "negotiating", "won", "lost", "applied"
+  source          String?
+  status          String   @default("new") // "new", "contacted", "qualified", "applied", "approved", "dead", "won"
 
-  // Trailer & Financing Info
-  trailerSize     String?  // e.g., "16x6.5", "20x8.5"
+  // Trailer Requirements - NEW FIELDS
+  trailerSize     String?
+  trailerType     String?
+  stockNumber     String?
   financingType   String?  // "cash", "finance", "rto"
-  stockNumber     String?  // Stock # or null if factory order
-  isFactoryOrder  Boolean  @default(false)
-  appliedDate     DateTime? // Date customer applied
-  assignedManager String?  // Manager name
+  isFactoryOrder  Boolean  @default(false) // KEEPING for backward compatibility
+
+  // Credit Application Status - NEW FIELDS
+  hasAppliedCredit Boolean @default(false)
+  creditAppStatus String?  // "not_applied", "applied", "approved", "declined"
 
   // Tags for segmentation
   tags            String[]
@@ -242,11 +252,14 @@ model Customer {
   activities      Activity[]
   emails          Email[]
   quotes          Quote[]
+  leadNotes       LeadNote[]  // NEW RELATION
 
   @@index([email])
   @@index([status])
   @@index([assignedTo])
-  @@index([assignedManager])
+  @@index([assignedToId])
+  @@index([nextFollowUpDate])
+  @@index([hasAppliedCredit])
 }
 
 // Deal/Opportunity Tracking
@@ -702,4 +715,23 @@ model CalendarEvent {
   @@index([start])
   @@index([end])
   @@index([isAnnouncement])
+}
+
+// Lead Notes - Separate from general notes for better tracking
+model LeadNote {
+  id          String   @id @default(cuid())
+  customerId  String
+  userId      String   // Rep who created the note
+  content     String   @db.Text
+  noteType    String   @default("general") // "general", "follow-up", "important", "credit"
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  customer    Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@index([customerId])
+  @@index([userId])
+  @@index([noteType])
+  @@index([createdAt])
 }
