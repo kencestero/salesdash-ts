@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { Calculator, User, Phone, Mail } from "lucide-react";
+import { DollarSign, User, Phone, Mail } from "lucide-react";
 import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -448,7 +448,7 @@ export default function FinanceComparePage() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
-              <Calculator className="h-6 w-6 text-primary" />
+              <DollarSign className="h-6 w-6 text-primary" />
             </div>
             <div>
               <h1 className="text-3xl font-bold text-foreground">
@@ -560,8 +560,18 @@ export default function FinanceComparePage() {
                   <Input
                     id="price"
                     type="number"
-                    value={price}
-                    onChange={(e) => setPrice(parseFloat(e.target.value) || 0)}
+                    value={price || ""}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (val === "" || val === "-") {
+                        setPrice(0);
+                      } else {
+                        const parsed = parseFloat(val);
+                        if (!isNaN(parsed)) {
+                          setPrice(parsed);
+                        }
+                      }
+                    }}
                     className="pl-7"
                   />
                 </div>

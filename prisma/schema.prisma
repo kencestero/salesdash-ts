@@ -69,6 +69,26 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
+// Pending User - For "Verify First, Then Create Account" flow
+model PendingUser {
+  id             String   @id @default(cuid())
+  email          String   @unique
+  hashedPassword String
+  firstName      String
+  lastName       String
+  phone          String?
+  zipcode        String?
+  role           String   @default("salesperson") // "owner", "manager", "salesperson"
+  token          String   @unique
+  expiresAt      DateTime
+  createdAt      DateTime @default(now())
+
+  @@index([token])
+  @@index([email])
+  @@index([expiresAt])
+  @@map("pending_users")
+}
+
 // MJ Cargo SalesDash Models
 
 model UserProfile {

@@ -1,18 +1,28 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
-import { generateUniqueSalespersonCode } from "@/lib/salespersonCode";
 import bcrypt from "bcryptjs";
+import crypto from "crypto";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
+/**
+ * NEW FLOW: "Verify First, Then Create Account"
+ *
+ * 1. Validate inputs
+ * 2. Check if email already exists in User table
+ * 3. Create PendingUser record (NOT User yet!)
+ * 4. Send verification email
+ * 5. If email fails → delete PendingUser and return error
+ * 6. User account only created when they click verification link
+ */
 export async function POST(req: Request) {
   try {
     const body = await req.json();
     const { firstName, lastName, phone, zipcode, email, password } = body;
 
-    console.log('=== Registration Request ===');
+    console.log('=== Registration Request (NEW FLOW) ===');
     console.log('Email:', email);
     console.log('Name:', firstName, lastName);
 
@@ -38,7 +48,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // 3. Check if user already exists
+    // 3. Check if user already exists in User table
     const existingUser = await prisma.user.findUnique({
       where: { email },
     });
@@ -50,110 +60,122 @@ export async function POST(req: Request) {
       );
     }
 
-    // 4. Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // 5. Generate verification token
-    const verificationToken = `${Math.random().toString(36).substring(2)}${Date.now().toString(36)}`;
-    const tokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
-
-    // 6. Create user and profile in a transaction
-    const user = await prisma.user.create({
-      data: {
-        email,
-        name: `${firstName} ${lastName}`,
-        password: hashedPassword, // Store hashed password
-        emailVerified: null, // NOT verified yet
-      },
+    // 4. Check if there's an existing pending registration for this email
+    // If yes, delete it and create a new one (allows re-signup if email failed)
+    const existingPendingUser = await prisma.pendingUser.findUnique({
+      where: { email },
     });
 
-    console.log('✅ User created:', user.id);
-
-    // Generate unique salesperson code based on role
-    const salespersonCode = await generateUniqueSalespersonCode(
-      joinRole || "salesperson",
-      prisma
-    );
-
-    await prisma.userProfile.create({
-      data: {
-        userId: user.id,
-        firstName: firstName,
-        lastName: lastName,
-        phone: phone || null,
-        zipcode: zipcode || null,
-        salespersonCode: salespersonCode,
-        role: joinRole || "salesperson",
-        member: false, // Not a member until email verified
-      },
-    });
-
-    console.log('✅ UserProfile created');
-
-    // 7. Create verification token
-    await prisma.verificationToken.create({
-      data: {
-        identifier: email,
-        token: verificationToken,
-        expires: tokenExpiry,
-      },
-    });
-
-    console.log('✅ Verification token created');
-
-    // 8. Send verification email
-    const verificationUrl = `${process.env.NEXTAUTH_URL}/en/auth/verify-email?token=${verificationToken}`;
-
-    console.log('📧 Verification URL:', verificationUrl);
-
-    // Send verification email using Resend
-    console.log('🔍 Checking RESEND_API_KEY:', process.env.RESEND_API_KEY ? 'EXISTS' : 'MISSING');
-    console.log('🔍 Checking RESEND_FROM_EMAIL:', process.env.RESEND_FROM_EMAIL || 'NOT SET');
-
-    try {
-      console.log('📤 Attempting to send verification email...');
-
-      // Check if email service is configured
-      if (!process.env.RESEND_API_KEY) {
-        console.error('❌ RESEND_API_KEY is not configured in environment variables!');
-        console.error('⚠️ Email will NOT be sent. User will need to use "Resend Verification" later.');
-        // Continue with registration but warn about email failure
-      } else {
-        const { sendVerificationEmail } = await import('@/lib/email/resend-service');
-
-        const result = await sendVerificationEmail(
-          email,
-          `${firstName} ${lastName}`,
-          verificationUrl,
-          24 // 24 hours expiry
-        );
-
-        console.log('✅ Verification email sent successfully!', result);
-      }
-    } catch (emailError: any) {
-      console.error('❌ Failed to send verification email:');
-      console.error('Error message:', emailError?.message);
-      console.error('Error stack:', emailError?.stack);
-      console.error('Full error:', JSON.stringify(emailError, null, 2));
-      console.error('⚠️ User will need to use "Resend Verification" to receive email.');
-      // Don't fail registration if email fails - user can request resend
+    if (existingPendingUser) {
+      console.log('🔄 Deleting old pending registration for:', email);
+      await prisma.pendingUser.delete({
+        where: { email },
+      });
     }
 
-    // 9. Clear validation cookies
+    // 5. Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // 6. Generate secure verification token
+    const token = crypto.randomBytes(32).toString('hex');
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
+    // 7. Create PendingUser record (NOT User account yet!)
+    console.log('📝 Creating PendingUser record...');
+    const pendingUser = await prisma.pendingUser.create({
+      data: {
+        email,
+        hashedPassword,
+        firstName,
+        lastName,
+        phone: phone || null,
+        zipcode: zipcode || null,
+        role: joinRole || "salesperson",
+        token,
+        expiresAt,
+      },
+    });
+
+    console.log('✅ PendingUser created:', pendingUser.id);
+    console.log('⏰ Expires at:', expiresAt);
+
+    // 8. Generate verification URL
+    const verificationUrl = `${process.env.NEXTAUTH_URL}/api/auth/verify?token=${token}`;
+    console.log('🔗 Verification URL:', verificationUrl);
+
+    // 9. Send verification email - THIS IS CRITICAL
+    console.log('📧 Attempting to send verification email...');
+    console.log('🔍 RESEND_API_KEY:', process.env.RESEND_API_KEY ? 'EXISTS' : 'MISSING');
+
+    if (!process.env.RESEND_API_KEY) {
+      // Email service not configured - FAIL THE REGISTRATION
+      console.error('❌ RESEND_API_KEY is not configured!');
+
+      // Delete the pending user since we can't send email
+      await prisma.pendingUser.delete({
+        where: { id: pendingUser.id },
+      });
+
+      return NextResponse.json(
+        {
+          message: "Email service is not configured. Please contact support.",
+          error: "EMAIL_SERVICE_NOT_CONFIGURED"
+        },
+        { status: 500 }
+      );
+    }
+
+    try {
+      const { sendVerificationEmail } = await import('@/lib/email/resend-service');
+
+      const result = await sendVerificationEmail(
+        email,
+        `${firstName} ${lastName}`,
+        verificationUrl,
+        24 // 24 hours expiry
+      );
+
+      console.log('✅ Verification email sent successfully!', result);
+
+    } catch (emailError: any) {
+      // Email sending failed - DELETE the pending user and return error
+      console.error('❌ Failed to send verification email:', emailError.message);
+      console.error('🗑️ Deleting PendingUser since email failed...');
+
+      await prisma.pendingUser.delete({
+        where: { id: pendingUser.id },
+      });
+
+      return NextResponse.json(
+        {
+          message: "Failed to send verification email. Please try again.",
+          error: "EMAIL_SEND_FAILED",
+          details: emailError.message
+        },
+        { status: 500 }
+      );
+    }
+
+    // 10. Clear validation cookies
     cookieStore.delete("join_ok");
     cookieStore.delete("join_role");
 
+    // 11. Success! Tell user to check email
     return NextResponse.json({
       ok: true,
-      message: "Account created! Check your email to verify.",
-      userId: user.id,
-      verificationUrl, // Remove this in production
+      message: "Please check your email to verify your account. The verification link will expire in 24 hours.",
+      email,
+      // DO NOT expose token in production
+      ...(process.env.NODE_ENV === 'development' && { verificationUrl }),
     });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error("❌ Registration error:", error);
     return NextResponse.json(
-      { message: "Failed to create account. Please try again." },
+      {
+        message: "Failed to create account. Please try again.",
+        error: error.message
+      },
       { status: 500 }
     );
   }

@@ -1,6 +1,6 @@
 "use client";
 import {
-  Calculator,
+  DollarSign,
   Calendar,
   CreditCard,
   Settings,
@@ -35,7 +35,7 @@ const BasicCommand = () => {
             <span>Search Emoji</span>
           </CommandItem>
           <CommandItem>
-            <Calculator className="ltr:mr-2 rtl:ml-2 h-4 w-4" />
+            <DollarSign className="ltr:mr-2 rtl:ml-2 h-4 w-4" />
             <span>Calculator</span>
           </CommandItem>
         </CommandGroup>

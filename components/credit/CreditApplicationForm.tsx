@@ -10,8 +10,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { SignaturePad, SignaturePadRef } from "./SignaturePad";
-import { Loader2, CheckCircle2, AlertCircle } from "lucide-react";
+import { Loader2, CheckCircle2, AlertCircle, User, Briefcase, Home, DollarSign, FileText, PenTool } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 
 interface CreditApplicationFormData {
   // Personal Info
@@ -154,30 +155,84 @@ export function CreditApplicationForm({ shareToken, onSubmitSuccess }: CreditApp
     setCurrentStep((prev) => Math.max(prev - 1, 1));
   };
 
+  const stepIcons = [
+    { icon: User, label: "Personal" },
+    { icon: Briefcase, label: "Employment" },
+    { icon: DollarSign, label: "Equipment" },
+    { icon: PenTool, label: "Sign" },
+  ];
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="max-w-4xl mx-auto space-y-6">
-      {/* Progress Indicator */}
-      <div className="flex justify-between mb-8">
-        {[1, 2, 3, 4].map((step) => (
-          <div key={step} className="flex items-center flex-1">
-            <div
-              className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-colors ${
-                currentStep >= step
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-gray-200 text-gray-500"
-              }`}
-            >
-              {step}
-            </div>
-            {step < 4 && (
-              <div
-                className={`flex-1 h-1 mx-2 transition-colors ${
-                  currentStep > step ? "bg-primary" : "bg-gray-200"
-                }`}
-              />
-            )}
+    <form onSubmit={handleSubmit(onSubmit)} className="max-w-5xl mx-auto space-y-8">
+      {/* MJ Cargo Logo Header */}
+      <div className="text-center mb-8">
+        <div className="inline-block relative">
+          <div className="absolute inset-0 bg-gradient-to-r from-[#E96114]/20 to-[#09213C]/20 blur-3xl"></div>
+          <div className="relative bg-white rounded-2xl shadow-2xl p-6 border-2 border-[#E96114]/30">
+            <Image
+              src="/images/mjctfc.webp"
+              alt="MJ Cargo Trailers Finance Center"
+              width={400}
+              height={120}
+              className="h-24 w-auto object-contain"
+              priority
+            />
           </div>
-        ))}
+        </div>
+        <h2 className="text-3xl font-bold mt-6 bg-gradient-to-r from-[#E96114] to-[#09213C] bg-clip-text text-transparent">
+          Equipment Financing Application
+        </h2>
+        <p className="text-muted-foreground mt-2">Get approved in minutes • Fast & Easy Process</p>
+      </div>
+
+      {/* Modern Progress Indicator with Icons */}
+      <div className="relative mb-12">
+        <div className="absolute top-5 left-0 right-0 h-1 bg-gradient-to-r from-gray-200 via-gray-200 to-gray-200">
+          <div
+            className="h-full bg-gradient-to-r from-[#E96114] to-[#09213C] transition-all duration-500 ease-out"
+            style={{ width: `${((currentStep - 1) / 3) * 100}%` }}
+          />
+        </div>
+        <div className="relative flex justify-between">
+          {stepIcons.map((step, index) => {
+            const stepNum = index + 1;
+            const isActive = currentStep === stepNum;
+            const isCompleted = currentStep > stepNum;
+            const StepIcon = step.icon;
+
+            return (
+              <div key={stepNum} className="flex flex-col items-center">
+                <motion.div
+                  animate={{
+                    scale: isActive ? 1.1 : 1,
+                    rotate: isActive ? [0, -5, 5, 0] : 0,
+                  }}
+                  transition={{ duration: 0.3 }}
+                  className={`w-12 h-12 rounded-full flex items-center justify-center font-bold shadow-lg border-4 transition-all ${
+                    isCompleted
+                      ? "bg-gradient-to-br from-green-400 to-green-600 text-white border-green-300"
+                      : isActive
+                      ? "bg-gradient-to-br from-[#E96114] to-[#09213C] text-white border-[#E96114]/50 shadow-xl shadow-[#E96114]/50"
+                      : "bg-white text-gray-400 border-gray-200"
+                  }`}
+                >
+                  {isCompleted ? (
+                    <CheckCircle2 className="w-6 h-6" />
+                  ) : (
+                    <StepIcon className="w-5 h-5" />
+                  )}
+                </motion.div>
+                <span
+                  className={`mt-2 text-xs font-medium ${
+                    isActive ? "text-[#E96114]" : "text-gray-500"
+                  }`}
+                >
+                  {step.label}
+                </span>
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       <AnimatePresence mode="wait">
@@ -189,10 +244,17 @@ export function CreditApplicationForm({ shareToken, onSubmitSuccess }: CreditApp
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
           >
-            <Card>
-              <CardHeader>
-                <CardTitle>Personal Information</CardTitle>
-                <CardDescription>Tell us about yourself</CardDescription>
+            <Card className="border-2 border-[#E96114]/30 shadow-2xl overflow-hidden">
+              <CardHeader className="bg-gradient-to-r from-[#E96114]/10 via-[#E96114]/5 to-[#09213C]/10 border-b-2 border-[#E96114]/20">
+                <div className="flex items-center gap-3">
+                  <div className="p-3 bg-gradient-to-br from-[#E96114] to-[#09213C] rounded-xl shadow-lg">
+                    <User className="h-6 w-6 text-white" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-2xl text-[#09213C]">Personal Information</CardTitle>
+                    <CardDescription className="text-base">Tell us about yourself</CardDescription>
+                  </div>
+                </div>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -372,10 +434,17 @@ export function CreditApplicationForm({ shareToken, onSubmitSuccess }: CreditApp
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
           >
-            <Card>
-              <CardHeader>
-                <CardTitle>Employment & Housing</CardTitle>
-                <CardDescription>Your financial information</CardDescription>
+            <Card className="border-2 border-[#E96114]/30 shadow-2xl overflow-hidden">
+              <CardHeader className="bg-gradient-to-r from-[#E96114]/10 via-[#E96114]/5 to-[#09213C]/10 border-b-2 border-[#E96114]/20">
+                <div className="flex items-center gap-3">
+                  <div className="p-3 bg-gradient-to-br from-[#E96114] to-[#09213C] rounded-xl shadow-lg">
+                    <Briefcase className="h-6 w-6 text-white" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-2xl text-[#09213C]">Employment & Housing</CardTitle>
+                    <CardDescription className="text-base">Your financial information</CardDescription>
+                  </div>
+                </div>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="space-y-4">
@@ -522,10 +591,17 @@ export function CreditApplicationForm({ shareToken, onSubmitSuccess }: CreditApp
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
           >
-            <Card>
-              <CardHeader>
-                <CardTitle>Equipment & References</CardTitle>
-                <CardDescription>What you're looking to finance</CardDescription>
+            <Card className="border-2 border-[#E96114]/30 shadow-2xl overflow-hidden">
+              <CardHeader className="bg-gradient-to-r from-[#E96114]/10 via-[#E96114]/5 to-[#09213C]/10 border-b-2 border-[#E96114]/20">
+                <div className="flex items-center gap-3">
+                  <div className="p-3 bg-gradient-to-br from-[#E96114] to-[#09213C] rounded-xl shadow-lg">
+                    <DollarSign className="h-6 w-6 text-white" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-2xl text-[#09213C]">Equipment & References</CardTitle>
+                    <CardDescription className="text-base">What you're looking to finance</CardDescription>
+                  </div>
+                </div>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="space-y-4">
@@ -684,10 +760,17 @@ export function CreditApplicationForm({ shareToken, onSubmitSuccess }: CreditApp
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
           >
-            <Card>
-              <CardHeader>
-                <CardTitle>Legal Authorization & Signature</CardTitle>
-                <CardDescription>Review and sign to submit your application</CardDescription>
+            <Card className="border-2 border-[#E96114]/30 shadow-2xl overflow-hidden">
+              <CardHeader className="bg-gradient-to-r from-[#E96114]/10 via-[#E96114]/5 to-[#09213C]/10 border-b-2 border-[#E96114]/20">
+                <div className="flex items-center gap-3">
+                  <div className="p-3 bg-gradient-to-br from-[#E96114] to-[#09213C] rounded-xl shadow-lg">
+                    <PenTool className="h-6 w-6 text-white" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-2xl text-[#09213C]">Legal Authorization & Signature</CardTitle>
+                    <CardDescription className="text-base">Review and sign to submit your application</CardDescription>
+                  </div>
+                </div>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 max-h-64 overflow-y-auto">
@@ -729,35 +812,77 @@ export function CreditApplicationForm({ shareToken, onSubmitSuccess }: CreditApp
       </AnimatePresence>
 
       {/* Navigation Buttons */}
-      <div className="flex justify-between pt-4">
+      <div className="flex justify-between pt-8">
         <Button
           type="button"
           variant="outline"
           onClick={prevStep}
           disabled={currentStep === 1 || isSubmitting}
+          className="px-8 h-12 text-base border-2 border-[#09213C] hover:bg-[#09213C] hover:text-white transition-all"
         >
-          Previous
+          ← Previous
         </Button>
 
         {currentStep < 4 ? (
-          <Button type="button" onClick={nextStep}>
-            Next Step
+          <Button
+            type="button"
+            onClick={nextStep}
+            className="px-8 h-12 text-base bg-gradient-to-r from-[#E96114] to-[#09213C] hover:shadow-xl hover:shadow-[#E96114]/50 transition-all"
+          >
+            Next Step →
           </Button>
         ) : (
-          <Button type="submit" disabled={isSubmitting || !legalConsent}>
+          <Button
+            type="submit"
+            disabled={isSubmitting || !legalConsent}
+            className="px-8 h-12 text-base bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 hover:shadow-xl hover:shadow-green-500/50 transition-all disabled:opacity-50"
+          >
             {isSubmitting ? (
               <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Submitting...
+                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                Submitting Application...
               </>
             ) : (
               <>
-                <CheckCircle2 className="w-4 h-4 mr-2" />
+                <CheckCircle2 className="w-5 h-5 mr-2" />
                 Submit Application
               </>
             )}
           </Button>
         )}
+      </div>
+
+      {/* Trust Badges */}
+      <div className="mt-8 p-6 bg-gradient-to-r from-[#E96114]/5 to-[#09213C]/5 rounded-xl border border-[#E96114]/20">
+        <div className="flex items-center justify-center gap-8 flex-wrap">
+          <div className="flex items-center gap-2">
+            <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+              <CheckCircle2 className="w-6 h-6 text-green-600" />
+            </div>
+            <div>
+              <p className="font-semibold text-sm">Secure Application</p>
+              <p className="text-xs text-muted-foreground">Bank-Level Encryption</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+              <Loader2 className="w-6 h-6 text-blue-600" />
+            </div>
+            <div>
+              <p className="font-semibold text-sm">Fast Approval</p>
+              <p className="text-xs text-muted-foreground">Same-Day Response</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-10 h-10 bg-[#E96114]/10 rounded-full flex items-center justify-center">
+              <User className="w-6 h-6 text-[#E96114]" />
+            </div>
+            <div>
+              <p className="font-semibold text-sm">No Hidden Fees</p>
+              <p className="text-xs text-muted-foreground">Transparent Pricing</p>
+            </div>
+          </div>
+        </div>
       </div>
     </form>
   );

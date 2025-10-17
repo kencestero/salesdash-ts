@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { Calculator, User, MapPin, DollarSign, FileText, Loader2 } from "lucide-react";
+import { User, MapPin, DollarSign, FileText, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -253,7 +253,7 @@ export default function QuoteBuilderPage() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#E96114]/10">
-              <Calculator className="h-6 w-6 text-[#E96114]" />
+              <DollarSign className="h-6 w-6 text-[#E96114]" />
             </div>
             <div>
               <h1 className="text-2xl md:text-3xl font-bold text-foreground">

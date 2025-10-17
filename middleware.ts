@@ -23,7 +23,9 @@ const PUBLIC_PAGES = [
   "/fire-demo",
   "/fire-badge-demo",
   "/playground",
-  "/apply", // Job application page
+  "/apply", // Credit application pages - fully public
+  "/test-pdf", // PDF test page
+  "/test/firebase-check", // Firebase check page
 ];
 
 // Optional: Block marketing pages once logged in
@@ -46,8 +48,8 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  // 3. Add /en prefix if missing
-  if (!pathname.startsWith(`/${DEFAULT_LANG}`)) {
+  // 3. Add /en prefix if missing (EXCEPT for /apply routes - they're at root)
+  if (!pathname.startsWith(`/${DEFAULT_LANG}`) && !pathname.startsWith("/apply")) {
     const url = req.nextUrl.clone();
     url.pathname = `/${DEFAULT_LANG}${pathname}`;
     return NextResponse.redirect(url);

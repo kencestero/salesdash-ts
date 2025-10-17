@@ -2,6 +2,13 @@
 
 
 const nextConfig = {
+  // Bundle @react-email packages for serverless functions
+  experimental: {
+    serverComponentsExternalPackages: [],
+  },
+  // Ensure react-email dependencies are bundled
+  transpilePackages: ['@react-email/components', '@react-email/render', '@react-email/tailwind'],
+
   webpack(config) {
     // Grab the existing rule that handles SVG imports
     const fileLoaderRule = config.module.rules.find((rule) =>

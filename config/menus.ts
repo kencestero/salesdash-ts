@@ -1,4 +1,4 @@
-
+import { DollarSign } from "lucide-react";
 import {
   Application,
   Chart,
@@ -820,7 +820,7 @@ export const menusConfig = {
         child: [
           {
             title: "Quick Quote Builder",
-            icon: Calculator,
+            icon: DollarSign,
             href: "/quotes/new",
           },
           {
@@ -1666,7 +1666,7 @@ export const menusConfig = {
       },
       {
         title: "Quick Quote Builder",
-        icon: Calculator,
+        icon: DollarSign,
         href: "/quotes/new",
       },
       {
