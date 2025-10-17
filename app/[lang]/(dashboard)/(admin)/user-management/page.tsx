@@ -20,8 +20,20 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/components/ui/use-toast";
+import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Users,
   UserCheck,
@@ -30,6 +42,12 @@ import {
   Shield,
   Search,
   Edit,
+  Trash2,
+  Ban,
+  Clock,
+  VolumeX,
+  Unlock,
+  Settings,
 } from "lucide-react";
 
 interface UserProfile {
@@ -45,6 +63,16 @@ interface UserProfile {
   status: string;
   salespersonCode: string;
   member: boolean;
+  accountStatus?: string;
+  banReason?: string;
+  timeoutUntil?: string | null;
+  mutedUntil?: string | null;
+  canAccessCRM?: boolean;
+  canAccessInventory?: boolean;
+  canAccessConfigurator?: boolean;
+  canAccessCalendar?: boolean;
+  canAccessReports?: boolean;
+  canManageUsers?: boolean;
 }
 
 interface User {
@@ -62,6 +90,8 @@ interface Stats {
   freelancers: number;
   owners: number;
   directors: number;
+  banned?: number;
+  timeout?: number;
 }
 
 const roleColors: Record<string, string> = {
@@ -76,6 +106,13 @@ const statusColors: Record<string, string> = {
   freelancer: "bg-yellow-100 text-yellow-800 hover:bg-yellow-100",
 };
 
+const accountStatusColors: Record<string, string> = {
+  active: "bg-green-100 text-green-800 hover:bg-green-100",
+  banned: "bg-red-100 text-red-800 hover:bg-red-100",
+  timeout: "bg-orange-100 text-orange-800 hover:bg-orange-100",
+  muted: "bg-gray-100 text-gray-800 hover:bg-gray-100",
+};
+
 export default function UserManagementPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [stats, setStats] = useState<Stats | null>(null);
@@ -85,10 +122,27 @@ export default function UserManagementPage() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showPermissionsDialog, setShowPermissionsDialog] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<User | null>(null);
+  const [updating, setUpdating] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  // Edit form states
   const [editManagerId, setEditManagerId] = useState("");
   const [editRole, setEditRole] = useState("");
   const [editStatus, setEditStatus] = useState("");
-  const [updating, setUpdating] = useState(false);
+  const [editAccountStatus, setEditAccountStatus] = useState("");
+  const [editBanReason, setEditBanReason] = useState("");
+  const [editTimeoutDays, setEditTimeoutDays] = useState("");
+
+  // Permission states
+  const [permCanAccessCRM, setPermCanAccessCRM] = useState(true);
+  const [permCanAccessInventory, setPermCanAccessInventory] = useState(true);
+  const [permCanAccessConfigurator, setPermCanAccessConfigurator] = useState(true);
+  const [permCanAccessCalendar, setPermCanAccessCalendar] = useState(true);
+  const [permCanAccessReports, setPermCanAccessReports] = useState(false);
+  const [permCanManageUsers, setPermCanManageUsers] = useState(false);
 
   useEffect(() => {
     fetchUsers();
@@ -124,10 +178,78 @@ export default function UserManagementPage() {
     setEditManagerId(user.profile?.managerId || "");
     setEditRole(user.profile?.role || "salesperson");
     setEditStatus(user.profile?.status || "employee");
+    setEditAccountStatus(user.profile?.accountStatus || "active");
+    setEditBanReason(user.profile?.banReason || "");
+    setEditTimeoutDays("");
     setShowEditDialog(true);
   };
 
+  const handleEditPermissions = (user: User) => {
+    setSelectedUser(user);
+    setPermCanAccessCRM(user.profile?.canAccessCRM ?? true);
+    setPermCanAccessInventory(user.profile?.canAccessInventory ?? true);
+    setPermCanAccessConfigurator(user.profile?.canAccessConfigurator ?? true);
+    setPermCanAccessCalendar(user.profile?.canAccessCalendar ?? true);
+    setPermCanAccessReports(user.profile?.canAccessReports ?? false);
+    setPermCanManageUsers(user.profile?.canManageUsers ?? false);
+    setShowPermissionsDialog(true);
+  };
+
   const handleUpdateUser = async () => {
+    if (!selectedUser) return;
+
+    try {
+      setUpdating(true);
+
+      // Calculate timeoutUntil if timeout days are provided
+      let timeoutUntil = null;
+      if (editAccountStatus === "timeout" && editTimeoutDays) {
+        const days = parseInt(editTimeoutDays);
+        if (days > 0) {
+          timeoutUntil = new Date();
+          timeoutUntil.setDate(timeoutUntil.getDate() + days);
+        }
+      }
+
+      const response = await fetch("/api/admin/users", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: selectedUser.id,
+          managerId: editManagerId || null,
+          role: editRole,
+          status: editStatus,
+          accountStatus: editAccountStatus,
+          banReason: editAccountStatus === "banned" || editAccountStatus === "timeout" ? editBanReason : null,
+          timeoutUntil,
+        }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || "Failed to update user");
+      }
+
+      toast({
+        title: "Success",
+        description: "User updated successfully",
+      });
+
+      setShowEditDialog(false);
+      fetchUsers();
+    } catch (error: any) {
+      console.error("Error updating user:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update user",
+        variant: "destructive",
+      });
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const handleUpdatePermissions = async () => {
     if (!selectedUser) return;
 
     try {
@@ -137,33 +259,76 @@ export default function UserManagementPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           userId: selectedUser.id,
-          managerId: editManagerId || null,
-          role: editRole,
-          status: editStatus,
+          canAccessCRM: permCanAccessCRM,
+          canAccessInventory: permCanAccessInventory,
+          canAccessConfigurator: permCanAccessConfigurator,
+          canAccessCalendar: permCanAccessCalendar,
+          canAccessReports: permCanAccessReports,
+          canManageUsers: permCanManageUsers,
         }),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to update user");
+        const data = await response.json();
+        throw new Error(data.error || "Failed to update permissions");
       }
 
       toast({
         title: "Success",
-        description: "User updated successfully",
+        description: "Permissions updated successfully",
       });
 
-      setShowEditDialog(false);
-      fetchUsers(); // Refresh the list
-    } catch (error) {
-      console.error("Error updating user:", error);
+      setShowPermissionsDialog(false);
+      fetchUsers();
+    } catch (error: any) {
+      console.error("Error updating permissions:", error);
       toast({
         title: "Error",
-        description: "Failed to update user",
+        description: error.message || "Failed to update permissions",
         variant: "destructive",
       });
     } finally {
       setUpdating(false);
     }
+  };
+
+  const handleDeleteUser = async () => {
+    if (!userToDelete) return;
+
+    try {
+      setDeleting(true);
+      const response = await fetch(`/api/admin/users?userId=${userToDelete.id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || "Failed to delete user");
+      }
+
+      toast({
+        title: "Success",
+        description: "User deleted successfully",
+      });
+
+      setShowDeleteDialog(false);
+      setUserToDelete(null);
+      fetchUsers();
+    } catch (error: any) {
+      console.error("Error deleting user:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete user",
+        variant: "destructive",
+      });
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const confirmDeleteUser = (user: User) => {
+    setUserToDelete(user);
+    setShowDeleteDialog(true);
   };
 
   // Filter users
@@ -200,7 +365,7 @@ export default function UserManagementPage() {
         <div>
           <h1 className="text-3xl font-bold text-default-900">User Management</h1>
           <p className="text-default-600 mt-1">
-            Manage team members, assign managers, and update roles
+            Manage team members, assign managers, control permissions, and update roles
           </p>
         </div>
       </div>
@@ -315,7 +480,7 @@ export default function UserManagementPage() {
               <SelectTrigger>
                 <SelectValue placeholder="Filter by role" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="z-[9999]">
                 <SelectItem value="all">All Roles</SelectItem>
                 <SelectItem value="owner">Owner</SelectItem>
                 <SelectItem value="director">Director</SelectItem>
@@ -328,7 +493,7 @@ export default function UserManagementPage() {
               <SelectTrigger>
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="z-[9999]">
                 <SelectItem value="all">All Status</SelectItem>
                 <SelectItem value="employee">Employee</SelectItem>
                 <SelectItem value="freelancer">Freelancer</SelectItem>
@@ -355,6 +520,7 @@ export default function UserManagementPage() {
                   <th className="text-left py-3 px-4 font-semibold text-sm">Rep Code</th>
                   <th className="text-left py-3 px-4 font-semibold text-sm">Role</th>
                   <th className="text-left py-3 px-4 font-semibold text-sm">Status</th>
+                  <th className="text-left py-3 px-4 font-semibold text-sm">Account</th>
                   <th className="text-left py-3 px-4 font-semibold text-sm">Manager</th>
                   <th className="text-left py-3 px-4 font-semibold text-sm">Actions</th>
                 </tr>
@@ -390,18 +556,39 @@ export default function UserManagementPage() {
                         </Badge>
                       )}
                     </td>
+                    <td className="py-3 px-4">
+                      <Badge className={accountStatusColors[user.profile?.accountStatus || "active"]}>
+                        {user.profile?.accountStatus || "active"}
+                      </Badge>
+                    </td>
                     <td className="py-3 px-4 text-sm">
                       {user.profile?.managerName || "—"}
                     </td>
                     <td className="py-3 px-4">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleEditUser(user)}
-                      >
-                        <Edit className="w-4 h-4 mr-2" />
-                        Edit
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleEditUser(user)}
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleEditPermissions(user)}
+                        >
+                          <Settings className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-red-600 hover:text-red-700"
+                          onClick={() => confirmDeleteUser(user)}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -420,74 +607,143 @@ export default function UserManagementPage() {
 
       {/* Edit User Dialog */}
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Edit User</DialogTitle>
             <DialogDescription>
-              Update user's manager, role, or status
+              Update user's manager, role, employment status, and account status
             </DialogDescription>
           </DialogHeader>
 
           {selectedUser && (
-            <div className="space-y-4 py-4">
-              <div>
-                <Label className="font-semibold mb-2 block">User</Label>
-                <p className="text-sm">
-                  {selectedUser.profile?.firstName} {selectedUser.profile?.lastName} ({selectedUser.email})
-                </p>
-              </div>
+            <Tabs defaultValue="basic" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="basic">Basic Info</TabsTrigger>
+                <TabsTrigger value="status">Account Status</TabsTrigger>
+              </TabsList>
 
-              <div>
-                <Label htmlFor="manager" className="mb-2 block">
-                  Assign Manager
-                </Label>
-                <Select value={editManagerId} onValueChange={setEditManagerId}>
-                  <SelectTrigger id="manager">
-                    <SelectValue placeholder="Select manager" />
-                  </SelectTrigger>
-                  <SelectContent className="z-[9999]">
-                    <SelectItem value="">No Manager (Freelancer)</SelectItem>
-                    {managers.map((manager) => (
-                      <SelectItem key={manager.id} value={manager.id}>
-                        {manager.profile?.firstName} {manager.profile?.lastName}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              <TabsContent value="basic" className="space-y-4">
+                <div>
+                  <Label className="font-semibold mb-2 block">User</Label>
+                  <p className="text-sm">
+                    {selectedUser.profile?.firstName} {selectedUser.profile?.lastName} ({selectedUser.email})
+                  </p>
+                  <p className="text-xs text-muted-foreground font-mono mt-1">
+                    Rep Code: {selectedUser.profile?.repCode || "N/A"}
+                  </p>
+                </div>
 
-              <div>
-                <Label htmlFor="role" className="mb-2 block">
-                  Role
-                </Label>
-                <Select value={editRole} onValueChange={setEditRole}>
-                  <SelectTrigger id="role">
-                    <SelectValue placeholder="Select role" />
-                  </SelectTrigger>
-                  <SelectContent className="z-[9999]">
-                    <SelectItem value="salesperson">Salesperson</SelectItem>
-                    <SelectItem value="manager">Manager</SelectItem>
-                    <SelectItem value="director">Director</SelectItem>
-                    <SelectItem value="owner">Owner</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+                <div>
+                  <Label htmlFor="manager" className="mb-2 block">
+                    Assign Manager
+                  </Label>
+                  <Select value={editManagerId} onValueChange={setEditManagerId}>
+                    <SelectTrigger id="manager">
+                      <SelectValue placeholder="Select manager" />
+                    </SelectTrigger>
+                    <SelectContent className="z-[9999]">
+                      <SelectItem value="">No Manager (Freelancer)</SelectItem>
+                      {managers.map((manager) => (
+                        <SelectItem key={manager.id} value={manager.id}>
+                          {manager.profile?.firstName} {manager.profile?.lastName} ({manager.profile?.repCode})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-              <div>
-                <Label htmlFor="status" className="mb-2 block">
-                  Status
-                </Label>
-                <Select value={editStatus} onValueChange={setEditStatus}>
-                  <SelectTrigger id="status">
-                    <SelectValue placeholder="Select status" />
-                  </SelectTrigger>
-                  <SelectContent className="z-[9999]">
-                    <SelectItem value="employee">Employee</SelectItem>
-                    <SelectItem value="freelancer">Freelancer</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
+                <div>
+                  <Label htmlFor="role" className="mb-2 block">
+                    Role
+                  </Label>
+                  <Select value={editRole} onValueChange={setEditRole}>
+                    <SelectTrigger id="role">
+                      <SelectValue placeholder="Select role" />
+                    </SelectTrigger>
+                    <SelectContent className="z-[9999]">
+                      <SelectItem value="salesperson">Salesperson</SelectItem>
+                      <SelectItem value="manager">Manager</SelectItem>
+                      <SelectItem value="director">Director</SelectItem>
+                      <SelectItem value="owner">Owner</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label htmlFor="status" className="mb-2 block">
+                    Employment Status
+                  </Label>
+                  <Select value={editStatus} onValueChange={setEditStatus}>
+                    <SelectTrigger id="status">
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent className="z-[9999]">
+                      <SelectItem value="employee">Employee</SelectItem>
+                      <SelectItem value="freelancer">Freelancer</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="status" className="space-y-4">
+                <div>
+                  <Label htmlFor="accountStatus" className="mb-2 block">
+                    Account Status
+                  </Label>
+                  <Select value={editAccountStatus} onValueChange={setEditAccountStatus}>
+                    <SelectTrigger id="accountStatus">
+                      <SelectValue placeholder="Select account status" />
+                    </SelectTrigger>
+                    <SelectContent className="z-[9999]">
+                      <SelectItem value="active">Active - Full Access</SelectItem>
+                      <SelectItem value="timeout">Timeout - Temporary Ban</SelectItem>
+                      <SelectItem value="banned">Banned - Permanent</SelectItem>
+                      <SelectItem value="muted">Muted - View Only</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {(editAccountStatus === "banned" || editAccountStatus === "timeout") && (
+                  <div>
+                    <Label htmlFor="banReason" className="mb-2 block">
+                      Reason for {editAccountStatus === "banned" ? "Ban" : "Timeout"}
+                    </Label>
+                    <Input
+                      id="banReason"
+                      placeholder="Enter reason..."
+                      value={editBanReason}
+                      onChange={(e) => setEditBanReason(e.target.value)}
+                    />
+                  </div>
+                )}
+
+                {editAccountStatus === "timeout" && (
+                  <div>
+                    <Label htmlFor="timeoutDays" className="mb-2 block">
+                      Timeout Duration (days)
+                    </Label>
+                    <Input
+                      id="timeoutDays"
+                      type="number"
+                      min="1"
+                      placeholder="e.g., 7"
+                      value={editTimeoutDays}
+                      onChange={(e) => setEditTimeoutDays(e.target.value)}
+                    />
+                  </div>
+                )}
+
+                <div className="bg-muted p-4 rounded-lg space-y-2">
+                  <h4 className="font-semibold text-sm">Account Status Info:</h4>
+                  <ul className="text-xs space-y-1 text-muted-foreground">
+                    <li><Ban className="w-3 h-3 inline mr-2" /><strong>Banned:</strong> User cannot login</li>
+                    <li><Clock className="w-3 h-3 inline mr-2" /><strong>Timeout:</strong> Temporary ban with expiration</li>
+                    <li><VolumeX className="w-3 h-3 inline mr-2" /><strong>Muted:</strong> Read-only access, cannot modify data</li>
+                    <li><Unlock className="w-3 h-3 inline mr-2" /><strong>Active:</strong> Full access based on permissions</li>
+                  </ul>
+                </div>
+              </TabsContent>
+            </Tabs>
           )}
 
           <DialogFooter>
@@ -503,6 +759,133 @@ export default function UserManagementPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Permissions Dialog */}
+      <Dialog open={showPermissionsDialog} onOpenChange={setShowPermissionsDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Manage Permissions</DialogTitle>
+            <DialogDescription>
+              Control what {selectedUser?.profile?.firstName} can access in the dashboard
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedUser && (
+            <div className="space-y-4 py-4">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="crm">CRM Access</Label>
+                  <p className="text-xs text-muted-foreground">View and manage customers</p>
+                </div>
+                <Switch
+                  id="crm"
+                  checked={permCanAccessCRM}
+                  onCheckedChange={setPermCanAccessCRM}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="inventory">Inventory Access</Label>
+                  <p className="text-xs text-muted-foreground">View trailer inventory</p>
+                </div>
+                <Switch
+                  id="inventory"
+                  checked={permCanAccessInventory}
+                  onCheckedChange={setPermCanAccessInventory}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="configurator">Finance Calculator</Label>
+                  <p className="text-xs text-muted-foreground">Use pricing configurator</p>
+                </div>
+                <Switch
+                  id="configurator"
+                  checked={permCanAccessConfigurator}
+                  onCheckedChange={setPermCanAccessConfigurator}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="calendar">Calendar Access</Label>
+                  <p className="text-xs text-muted-foreground">View and create events</p>
+                </div>
+                <Switch
+                  id="calendar"
+                  checked={permCanAccessCalendar}
+                  onCheckedChange={setPermCanAccessCalendar}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="reports">Advanced Reports</Label>
+                  <p className="text-xs text-muted-foreground">View analytics and reports</p>
+                </div>
+                <Switch
+                  id="reports"
+                  checked={permCanAccessReports}
+                  onCheckedChange={setPermCanAccessReports}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="manage">User Management</Label>
+                  <p className="text-xs text-muted-foreground">Manage other users</p>
+                </div>
+                <Switch
+                  id="manage"
+                  checked={permCanManageUsers}
+                  onCheckedChange={setPermCanManageUsers}
+                />
+              </div>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowPermissionsDialog(false)}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleUpdatePermissions} disabled={updating}>
+              {updating ? "Saving..." : "Save Permissions"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete{" "}
+              <strong>
+                {userToDelete?.profile?.firstName} {userToDelete?.profile?.lastName}
+              </strong>{" "}
+              ({userToDelete?.email}). This action cannot be undone. All associated data
+              (sessions, activities, etc.) will be removed.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteUser}
+              disabled={deleting}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {deleting ? "Deleting..." : "Yes, Delete User"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

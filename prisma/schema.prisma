@@ -111,6 +111,20 @@ model UserProfile {
   managerId       String?  // Links to another User's id (their manager)
   status          String   @default("employee") // "employee" or "freelancer"
 
+  // User Status Controls
+  accountStatus   String   @default("active") // "active", "banned", "timeout", "muted"
+  banReason       String?  // Reason for ban/timeout
+  timeoutUntil    DateTime? // When timeout expires (null if not on timeout)
+  mutedUntil      DateTime? // When mute expires (null if not muted)
+
+  // Granular Permissions
+  canAccessCRM        Boolean @default(true)
+  canAccessInventory  Boolean @default(true)
+  canAccessConfigurator Boolean @default(true) // Finance Calculator
+  canAccessCalendar   Boolean @default(true)
+  canAccessReports    Boolean @default(false) // Advanced reports
+  canManageUsers      Boolean @default(false) // Only for owners/directors
+
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
@@ -122,6 +136,7 @@ model UserProfile {
   @@index([salespersonCode])
   @@index([repCode])
   @@index([managerId])
+  @@index([accountStatus])
 }
 
 // Inventory Management
