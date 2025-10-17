@@ -445,7 +445,7 @@ export default function UserManagementPage() {
                   <SelectTrigger id="manager">
                     <SelectValue placeholder="Select manager" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="z-[9999]">
                     <SelectItem value="">No Manager (Freelancer)</SelectItem>
                     {managers.map((manager) => (
                       <SelectItem key={manager.id} value={manager.id}>
@@ -464,7 +464,7 @@ export default function UserManagementPage() {
                   <SelectTrigger id="role">
                     <SelectValue placeholder="Select role" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="z-[9999]">
                     <SelectItem value="salesperson">Salesperson</SelectItem>
                     <SelectItem value="manager">Manager</SelectItem>
                     <SelectItem value="director">Director</SelectItem>
@@ -481,7 +481,7 @@ export default function UserManagementPage() {
                   <SelectTrigger id="status">
                     <SelectValue placeholder="Select status" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="z-[9999]">
                     <SelectItem value="employee">Employee</SelectItem>
                     <SelectItem value="freelancer">Freelancer</SelectItem>
                   </SelectContent>
