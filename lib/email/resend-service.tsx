@@ -13,7 +13,9 @@ import { Resend } from 'resend';
 import { render } from '@react-email/render';
 
 // Initialize Resend client
-const resend = new Resend(process.env.RESEND_API_KEY);
+const apiKey = process.env.RESEND_API_KEY;
+console.log('🔍 RESEND_API_KEY loaded:', apiKey ? `${apiKey.substring(0, 8)}...` : 'MISSING');
+const resend = new Resend(apiKey);
 
 // Default sender email (use your verified domain)
 const DEFAULT_FROM = process.env.RESEND_FROM_EMAIL || 'MJ Cargo <onboarding@resend.dev>';
