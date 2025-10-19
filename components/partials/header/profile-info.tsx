@@ -64,6 +64,11 @@ const ProfileInfo = () => {
               href:"/user-profile"
             },
             {
+              name: "Page Access",
+              icon: "heroicons:shield-check",
+              href:"/user-management"
+            },
+            {
               name: "Secret Code Instructions",
               icon: "heroicons:key",
               href:"/secret-code-instructions"
