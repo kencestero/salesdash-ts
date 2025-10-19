@@ -18,7 +18,9 @@ console.log('🔍 RESEND_API_KEY loaded:', apiKey ? `${apiKey.substring(0, 8)}..
 const resend = new Resend(apiKey);
 
 // Default sender email (use your verified domain)
-const DEFAULT_FROM = process.env.RESEND_FROM_EMAIL || 'MJ Cargo <onboarding@resend.dev>';
+// Strip quotes if they exist in the environment variable
+const rawFromEmail = process.env.RESEND_FROM_EMAIL || 'MJ Cargo <onboarding@resend.dev>';
+const DEFAULT_FROM = rawFromEmail.replace(/^["']|["']$/g, '').trim();
 
 export interface SendEmailOptions {
   to: string | string[];
