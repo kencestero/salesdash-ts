@@ -461,7 +461,7 @@ export default function RegisterPage() {
               </div>
             </div>
 
-            {/* Freelancer Checkbox */}
+            {/* Manager Selection - REQUIRED */}
             <div className="flex items-start gap-3 p-4 bg-white/5 backdrop-blur-sm rounded-xl border border-white/20">
               <input
                 type="checkbox"
@@ -469,12 +469,22 @@ export default function RegisterPage() {
                 checked={isFreelancer}
                 onChange={(e) => {
                   setIsFreelancer(e.target.checked);
-                  if (e.target.checked) setManagerId("");
+                  if (e.target.checked) setManagerId("Kenneth Cestero");
                 }}
                 className="mt-1 w-5 h-5 rounded border-white/30 text-primary focus:ring-2 focus:ring-primary cursor-pointer"
               />
-              <label htmlFor="freelancer-check" className="text-sm text-white/90 cursor-pointer">
-                I am a <strong>Freelancer</strong> (independent contractor, not assigned to a manager)
+              <label htmlFor="freelancer-check" className="text-sm text-white/90 cursor-pointer flex items-center gap-2">
+                <span className="font-black text-lg animate-pulse" style={{
+                  background: 'linear-gradient(90deg, #ef4444 0%, #f59e0b 20%, #10b981 40%, #3b82f6 60%, #8b5cf6 80%, #ef4444 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                  backgroundSize: '200% auto',
+                  animation: 'rainbow 3s linear infinite'
+                }}>
+                  I DON'T KNOW YET
+                </span>
+                <span className="text-white/70 text-xs">(We'll help you find the right manager)</span>
               </label>
             </div>
 
