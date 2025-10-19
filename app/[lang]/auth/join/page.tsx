@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Icon } from "@iconify/react";
 import { Button } from "@/components/ui/button";
@@ -35,17 +35,32 @@ export default function RegisterPage() {
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [managerId, setManagerId] = useState("");
   const [isFreelancer, setIsFreelancer] = useState(false);
+  const [managers, setManagers] = useState<Array<{ id: string; name: string; role: string }>>([]);
+  const [loadingManagers, setLoadingManagers] = useState(false);
 
-  // Manager list - these are the 7 managers + Freelancer option
-  const managers = [
-    { id: "manager1", name: "Alex Johnson" },
-    { id: "manager2", name: "Sarah Martinez" },
-    { id: "manager3", name: "Michael Chen" },
-    { id: "manager4", name: "Emily Davis" },
-    { id: "manager5", name: "David Wilson" },
-    { id: "manager6", name: "Jessica Brown" },
-    { id: "manager7", name: "Chris Anderson" },
-  ];
+  // Fetch available managers dynamically
+  useEffect(() => {
+    async function fetchManagers() {
+      setLoadingManagers(true);
+      try {
+        const res = await fetch("/api/managers/available");
+        if (res.ok) {
+          const data = await res.json();
+          setManagers(data.managers || []);
+        } else {
+          console.error("Failed to fetch managers");
+          setManagers([]);
+        }
+      } catch (error) {
+        console.error("Error fetching managers:", error);
+        setManagers([]);
+      } finally {
+        setLoadingManagers(false);
+      }
+    }
+
+    fetchManagers();
+  }, []);
 
   async function validateCode() {
     if (!code.trim()) {
@@ -495,15 +510,24 @@ export default function RegisterPage() {
                 <select
                   value={managerId}
                   onChange={(e) => setManagerId(e.target.value)}
-                  className="w-full bg-white/90 backdrop-blur-sm border-0 rounded-lg px-4 py-3 text-gray-900 focus:ring-2 focus:ring-primary focus:outline-none"
+                  className="w-full bg-white/90 backdrop-blur-sm border-0 rounded-lg px-4 py-3 text-gray-900 focus:ring-2 focus:ring-primary focus:outline-none disabled:opacity-50"
                   required={!isFreelancer}
+                  disabled={loadingManagers}
                 >
-                  <option value="">-- Select a Manager --</option>
-                  {managers.map((manager) => (
-                    <option key={manager.id} value={manager.id}>
-                      {manager.name}
-                    </option>
-                  ))}
+                  {loadingManagers ? (
+                    <option value="">Loading managers...</option>
+                  ) : managers.length === 0 ? (
+                    <option value="">No managers available</option>
+                  ) : (
+                    <>
+                      <option value="">-- Select a Manager --</option>
+                      {managers.map((manager) => (
+                        <option key={manager.id} value={manager.id}>
+                          {manager.name} ({manager.role})
+                        </option>
+                      ))}
+                    </>
+                  )}
                 </select>
                 <p className="text-xs text-white/60 mt-1">
                   Your assigned manager will oversee your sales and provide support

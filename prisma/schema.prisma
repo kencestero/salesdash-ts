@@ -125,6 +125,10 @@ model UserProfile {
   canAccessReports    Boolean @default(false) // Advanced reports
   canManageUsers      Boolean @default(false) // Only for owners/directors
 
+  // Manager System Controls
+  isAvailableAsManager Boolean @default(false) // Can appear in manager dropdown during signup
+  isActive            Boolean @default(true)   // Account active status (for soft-delete/suspension)
+
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
