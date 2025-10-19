@@ -73,6 +73,8 @@ interface UserProfile {
   canAccessCalendar?: boolean;
   canAccessReports?: boolean;
   canManageUsers?: boolean;
+  isAvailableAsManager?: boolean;
+  isActive?: boolean;
 }
 
 interface User {
@@ -350,6 +352,41 @@ export default function UserManagementPage() {
   // Get list of managers for dropdown
   const managers = users.filter((u) => u.profile?.role === "manager");
 
+  // Get list of potential managers (owner, director, manager roles)
+  const potentialManagers = users.filter((u) =>
+    u.profile?.role && ["owner", "director", "manager"].includes(u.profile.role)
+  );
+
+  // Handler to toggle manager availability
+  const handleToggleManagerAvailability = async (userId: string, currentStatus: boolean) => {
+    try {
+      const res = await fetch(`/api/admin/users/${userId}/toggle-manager`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isAvailableAsManager: !currentStatus }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Failed to update manager availability");
+      }
+
+      // Refresh users list
+      await fetchUsers();
+
+      toast({
+        title: "Success",
+        description: `Manager availability ${!currentStatus ? "enabled" : "disabled"}`,
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update manager availability",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -458,6 +495,77 @@ export default function UserManagementPage() {
           </Card>
         </div>
       )}
+
+      {/* Manager Settings Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Settings className="w-5 h-5" />
+            Manager Availability Settings
+          </CardTitle>
+          <p className="text-sm text-muted-foreground mt-1">
+            Control which managers appear in the signup dropdown when new reps register
+          </p>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {potentialManagers.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No managers found</p>
+            ) : (
+              potentialManagers.map((user) => {
+                const isAvailable = user.profile?.isAvailableAsManager || false;
+                const repCount = users.filter(u => u.profile?.managerId === user.id).length;
+
+                return (
+                  <div
+                    key={user.id}
+                    className="flex items-center justify-between p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-2">
+                        {isAvailable ? (
+                          <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                        ) : (
+                          <div className="w-3 h-3 rounded-full bg-gray-300"></div>
+                        )}
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <p className="font-semibold">
+                            {user.profile?.firstName} {user.profile?.lastName}
+                          </p>
+                          <Badge className={roleColors[user.profile?.role || "salesperson"]}>
+                            {user.profile?.role || "Unknown"}
+                          </Badge>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          {user.email} • Rep Code: {user.profile?.repCode || "N/A"}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {repCount} {repCount === 1 ? "rep" : "reps"} assigned
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="text-right">
+                        <p className="text-xs text-muted-foreground">
+                          {isAvailable ? "Visible in signup" : "Hidden from signup"}
+                        </p>
+                      </div>
+                      <Switch
+                        checked={isAvailable}
+                        onCheckedChange={() =>
+                          handleToggleManagerAvailability(user.id, isAvailable)
+                        }
+                      />
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Filters */}
       <Card>
