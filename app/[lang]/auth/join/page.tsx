@@ -38,7 +38,18 @@ export default function RegisterPage() {
   const [managers, setManagers] = useState<Array<{ id: string; name: string; role: string }>>([]);
   const [loadingManagers, setLoadingManagers] = useState(false);
 
-  // Fetch available managers dynamically
+  // Hardcoded fallback manager list (until real managers sign up)
+  const fallbackManagers = [
+    { id: "manager1", name: "Alex Johnson", role: "manager" },
+    { id: "manager2", name: "Sarah Martinez", role: "manager" },
+    { id: "manager3", name: "Michael Chen", role: "manager" },
+    { id: "manager4", name: "Emily Davis", role: "manager" },
+    { id: "manager5", name: "David Wilson", role: "manager" },
+    { id: "manager6", name: "Jessica Brown", role: "manager" },
+    { id: "manager7", name: "Chris Anderson", role: "manager" },
+  ];
+
+  // Fetch available managers dynamically with fallback
   useEffect(() => {
     async function fetchManagers() {
       setLoadingManagers(true);
@@ -46,14 +57,16 @@ export default function RegisterPage() {
         const res = await fetch("/api/managers/available");
         if (res.ok) {
           const data = await res.json();
-          setManagers(data.managers || []);
+          // Use dynamic managers if available, otherwise use fallback
+          const dynamicManagers = data.managers || [];
+          setManagers(dynamicManagers.length > 0 ? dynamicManagers : fallbackManagers);
         } else {
-          console.error("Failed to fetch managers");
-          setManagers([]);
+          console.error("Failed to fetch managers, using fallback");
+          setManagers(fallbackManagers);
         }
       } catch (error) {
-        console.error("Error fetching managers:", error);
-        setManagers([]);
+        console.error("Error fetching managers, using fallback:", error);
+        setManagers(fallbackManagers);
       } finally {
         setLoadingManagers(false);
       }
@@ -345,6 +358,65 @@ export default function RegisterPage() {
                 />
               </div>
             </div>
+
+            {/* Manager Selection - Same as email signup */}
+            <div className="flex items-start gap-3 p-4 bg-white/5 backdrop-blur-sm rounded-xl border border-white/20">
+              <input
+                type="checkbox"
+                id="freelancer-check-social"
+                checked={isFreelancer}
+                onChange={(e) => {
+                  setIsFreelancer(e.target.checked);
+                  if (e.target.checked) setManagerId("Kenneth Cestero");
+                }}
+                className="mt-1 w-5 h-5 rounded border-white/30 text-primary focus:ring-2 focus:ring-primary cursor-pointer"
+              />
+              <label htmlFor="freelancer-check-social" className="text-sm text-white/90 cursor-pointer flex items-center gap-2">
+                <span className="font-black text-lg animate-pulse" style={{
+                  background: 'linear-gradient(90deg, #ef4444 0%, #f59e0b 20%, #10b981 40%, #3b82f6 60%, #8b5cf6 80%, #ef4444 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                  backgroundSize: '200% auto',
+                  animation: 'rainbow 3s linear infinite'
+                }}>
+                  I DON'T KNOW YET
+                </span>
+                <span className="text-white/70 text-xs">(We'll help you find the right manager)</span>
+              </label>
+            </div>
+
+            {/* Manager Selection - Only show if not freelancer */}
+            {!isFreelancer && (
+              <div>
+                <Label className="text-[#f5a623] font-bold mb-2 block text-sm uppercase tracking-wide">Select Your Manager *</Label>
+                <select
+                  value={managerId}
+                  onChange={(e) => setManagerId(e.target.value)}
+                  className="w-full bg-white border-2 border-[#f5a623]/30 focus:border-[#f5a623] rounded-lg px-4 py-3 text-gray-900 focus:ring-2 focus:ring-primary focus:outline-none disabled:opacity-50"
+                  required={!isFreelancer}
+                  disabled={loadingManagers}
+                >
+                  {loadingManagers ? (
+                    <option value="">Loading managers...</option>
+                  ) : managers.length === 0 ? (
+                    <option value="">No managers available</option>
+                  ) : (
+                    <>
+                      <option value="">-- Select a Manager --</option>
+                      {managers.map((manager) => (
+                        <option key={manager.id} value={manager.id}>
+                          {manager.name} ({manager.role})
+                        </option>
+                      ))}
+                    </>
+                  )}
+                </select>
+                <p className="text-xs text-white/60 mt-1">
+                  Your assigned manager will oversee your sales and provide support
+                </p>
+              </div>
+            )}
 
             {/* Terms */}
             <div className="flex items-start gap-3 p-4 bg-white/5 backdrop-blur-sm rounded-xl border border-white/20">
