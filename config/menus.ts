@@ -826,7 +826,7 @@ export const menusConfig = {
           {
             title: "Inventory",
             icon: Stacks2,
-            href: "/dashboard/inventory",
+            href: "/inventory",
           },
           {
             title: "Finance Calculator",
@@ -1677,7 +1677,7 @@ export const menusConfig = {
       {
         title: "Inventory",
         icon: Stacks2,
-        href: "/dashboard/inventory",
+        href: "/inventory",
       },
       {
         title: "Finance Calculator",
