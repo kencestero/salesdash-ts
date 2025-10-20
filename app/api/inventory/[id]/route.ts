@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { prisma } from '@/lib/generated/prisma';
+import { prisma } from '@/lib/prisma';
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -26,7 +26,17 @@ export async function GET(
       );
     }
 
-    return NextResponse.json(trailer);
+    // Calculate days old
+    const createdDate = new Date(trailer.createdAt);
+    const now = new Date();
+    const daysOld = Math.floor((now.getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24));
+
+    const trailerWithAge = {
+      ...trailer,
+      daysOld,
+    };
+
+    return NextResponse.json({ trailer: trailerWithAge });
   } catch (error) {
     console.error('[GET /api/inventory/[id]] Error:', error);
     return NextResponse.json(

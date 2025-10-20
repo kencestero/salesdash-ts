@@ -523,7 +523,6 @@ export default function InventoryPage() {
                 </TableHeader>
                 <TableBody>
                   {filteredTrailers.map((trailer) => {
-                    const calculatedPrice = calculateDesiredPrice(trailer.cost);
                     const trailerCategory = classifyTrailer(trailer);
 
                     return (
@@ -589,7 +588,7 @@ export default function InventoryPage() {
                           <div className="text-sm text-gray-400">{trailerCategory}</div>
                         </TableCell>
 
-                        {/* Price - SHOW MAKE OFFER OR CALCULATED PRICE */}
+                        {/* Price - SHOW MAKE OFFER OR SALE PRICE */}
                         <TableCell className="text-white">
                           {trailer.makeOffer ? (
                             <div>
@@ -597,17 +596,19 @@ export default function InventoryPage() {
                                 MAKE OFFER
                               </div>
                               <div className="text-xs text-gray-500">
-                                Cost: ${trailer.cost.toLocaleString()}
+                                Cost: {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(trailer.cost)}
                               </div>
                             </div>
                           ) : (
                             <div>
                               <div className="text-xl font-bold text-green-400">
-                                ${calculatedPrice.toLocaleString()}
+                                {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(trailer.salePrice)}
                               </div>
-                              <div className="text-xs text-gray-500">
-                                Cost: ${trailer.cost.toLocaleString()}
-                              </div>
+                              {trailer.msrp > trailer.salePrice && (
+                                <div className="text-xs text-gray-500 line-through">
+                                  MSRP: {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(trailer.msrp)}
+                                </div>
+                              )}
                             </div>
                           )}
                         </TableCell>

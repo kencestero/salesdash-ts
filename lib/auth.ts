@@ -40,10 +40,10 @@ export const authOptions = {
           throw new Error("Invalid email or password");
         }
 
-        // Check if email is verified
-        if (!user.emailVerified) {
-          throw new Error("Please verify your email before logging in");
-        }
+        // Email verification temporarily disabled
+        // if (!user.emailVerified) {
+        //   throw new Error("Please verify your email before logging in");
+        // }
 
         return {
           id: user.id,
@@ -90,11 +90,11 @@ export const authOptions = {
           console.log("✅ Verified OAuth user email");
         }
 
-        // Block access if email not verified for credentials login
-        if (!account?.provider && !existingUser.emailVerified) {
-          console.log("❌ Email not verified - blocking login");
-          return `/en/auth/verify-email?email=${encodeURIComponent(user.email)}&error=not_verified`;
-        }
+        // Email verification temporarily disabled
+        // if (!account?.provider && !existingUser.emailVerified) {
+        //   console.log("❌ Email not verified - blocking login");
+        //   return `/en/auth/verify-email?email=${encodeURIComponent(user.email)}&error=not_verified`;
+        // }
 
         console.log("✅ Existing user - login allowed");
         return true;

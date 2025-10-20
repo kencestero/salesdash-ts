@@ -219,7 +219,8 @@ model Customer {
   // Lead Management - NEW FIELDS
   assignedTo      String?  // KEEP FOR NOW - will migrate to assignedToId
   assignedToId    String?  // Primary salesperson ID
-  assignedToName  String?  // Primary salesperson name
+  assignedToName  String?  // Primary salesperson name (Assigned Manager - Column F)
+  salesRepName    String?  // Sales Rep name (Column B)
   backupRepId     String?  // Secondary rep if needed
   lastContactDate DateTime?
   nextFollowUpDate DateTime?
@@ -238,12 +239,16 @@ model Customer {
   // Credit Application Status - NEW FIELDS
   hasAppliedCredit Boolean @default(false)
   creditAppStatus String?  // "not_applied", "applied", "approved", "declined"
+  applied         Boolean @default(false) // Google Sheets Column H - Applied status
+  dateApplied     DateTime? // Google Sheets Column I - Date Applied
 
   // Tags for segmentation
   tags            String[]
 
   // Notes
   notes           String?  @db.Text
+  managerNotes    String?  @db.Text // Google Sheets Column K - Manager Notes
+  repNotes        String?  @db.Text // Google Sheets Column L - Rep Notes
 
   // Metadata
   createdAt       DateTime @default(now())

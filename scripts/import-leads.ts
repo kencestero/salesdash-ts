@@ -138,30 +138,32 @@ async function importLeads(): Promise<ImportResult> {
         state: row['State']?.trim() || null,
         zipcode: row['Zip Code']?.trim() || null,
 
-        // Lead management fields
-        assignedToName: row['Rep Name']?.trim() || null,
+        // Lead management fields (Column B - Sales Rep, Column F - Assigned Manager)
+        salesRepName: row['Rep Name']?.trim() || null, // Column B
+        assignedToName: row['Assigned Manager']?.trim() || null, // Column F
         trailerSize: row['Trailer Size']?.trim() || null,
         trailerType: null, // Can be derived from trailer size if needed
         stockNumber: stockNumberField.trim() || null,
-        financingType,
+        financingType, // Column J - Cash/Finance/RTO
+
         isFactoryOrder,
 
         // Status and tracking
         status,
         hasAppliedCredit: row['Applied'] ? true : false,
+        applied: row['Applied'] ? true : false, // Column H - Applied
+        dateApplied: appliedDate, // Column I - Date Applied
         lastContactDate: appliedDate,
 
-        // Notes
-        notes: [
-          row['Manager Notes'] && `Manager Notes: ${row['Manager Notes']}`,
-          row['Rep Notes'] && `Rep Notes: ${row['Rep Notes']}`,
-          appliedDate && `Applied: ${appliedDate.toLocaleDateString()}`,
-        ].filter(Boolean).join('\n') || null,
+        // Notes - Now separated (Column K - Manager Notes, Column L - Rep Notes)
+        managerNotes: row['Manager Notes']?.trim() || null, // Column K
+        repNotes: row['Rep Notes']?.trim() || null, // Column L
+        notes: null, // Keep general notes field empty for now
 
         // Metadata
         source: 'csv_import',
         tags: ['csv_import', row['Assigned Manager']].filter(Boolean),
-        createdAt,
+        createdAt, // Column A - Timestamp
       };
 
       batch.push(customerData);

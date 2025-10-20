@@ -115,6 +115,8 @@ export default function CustomerProfilePage() {
   const [leadAge, setLeadAge] = useState("");
   const [showLogCallDialog, setShowLogCallDialog] = useState(false);
   const [callNotes, setCallNotes] = useState("");
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Fetch customer data
   useEffect(() => {
@@ -269,6 +271,38 @@ export default function CustomerProfilePage() {
     }
   };
 
+  const handleDeleteCustomer = async () => {
+    if (!customer) return;
+
+    try {
+      setIsDeleting(true);
+      const response = await fetch(`/api/crm/customers/${customer.id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete customer");
+      }
+
+      toast({
+        title: "Success",
+        description: "Customer deleted successfully",
+      });
+
+      router.push("/en/crm/customers");
+    } catch (error) {
+      console.error("Error deleting customer:", error);
+      toast({
+        title: "Error",
+        description: "Failed to delete customer",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteDialog(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -336,7 +370,11 @@ export default function CustomerProfilePage() {
             <Edit className="w-4 h-4 mr-2" />
             Edit
           </Button>
-          <Button variant="outline" className="text-destructive">
+          <Button
+            variant="outline"
+            className="text-destructive"
+            onClick={() => setShowDeleteDialog(true)}
+          >
             <Trash2 className="w-4 h-4 mr-2" />
             Delete
           </Button>
@@ -769,6 +807,34 @@ export default function CustomerProfilePage() {
             </Button>
             <Button onClick={handleLogCall}>
               Log Call
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Customer</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete {customer.firstName} {customer.lastName}? This action cannot be undone and will remove all associated data.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowDeleteDialog(false)}
+              disabled={isDeleting}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDeleteCustomer}
+              disabled={isDeleting}
+            >
+              {isDeleting ? "Deleting..." : "Delete Customer"}
             </Button>
           </DialogFooter>
         </DialogContent>

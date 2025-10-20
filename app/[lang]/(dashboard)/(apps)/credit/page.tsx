@@ -1,17 +1,58 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Copy, ExternalLink, Plus, Search } from "lucide-react";
+import { Copy, ExternalLink, Plus, Search, FileText } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
+
+interface CreditApplication {
+  id: string;
+  appNumber: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  requestedAmount?: number;
+  status: string;
+  createdAt: string;
+  customer?: {
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
+}
 
 export default function CreditApplicationsPage() {
   const [shareToken, setShareToken] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [applications, setApplications] = useState<CreditApplication[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchApplications();
+  }, []);
+
+  const fetchApplications = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch("/api/credit-applications");
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch applications");
+      }
+
+      const data = await response.json();
+      setApplications(data.applications || []);
+    } catch (error) {
+      console.error("Error fetching applications:", error);
+      toast.error("Failed to load credit applications");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleCreateNewLink = async () => {
     // Generate a unique share token
@@ -27,44 +68,16 @@ export default function CreditApplicationsPage() {
     toast.success("Link copied to clipboard!");
   };
 
-  const applications = [
-    {
-      id: "1",
-      appNumber: "APP-2025-001",
-      customerName: "John Smith",
-      email: "john@example.com",
-      status: "pending",
-      requestedAmount: 25000,
-      createdAt: new Date("2025-01-10"),
-    },
-    {
-      id: "2",
-      appNumber: "APP-2025-002",
-      customerName: "Sarah Johnson",
-      email: "sarah@example.com",
-      status: "approved",
-      requestedAmount: 18500,
-      createdAt: new Date("2025-01-09"),
-    },
-    {
-      id: "3",
-      appNumber: "APP-2025-003",
-      customerName: "Mike Davis",
-      email: "mike@example.com",
-      status: "needs_review",
-      requestedAmount: 32000,
-      createdAt: new Date("2025-01-08"),
-    },
-  ];
-
   const getStatusColor = (status: string) => {
-    switch (status) {
+    switch (status.toLowerCase()) {
       case "approved":
         return "bg-green-500/10 text-green-600 dark:text-green-400";
       case "declined":
         return "bg-red-500/10 text-red-600 dark:text-red-400";
       case "needs_review":
         return "bg-yellow-500/10 text-yellow-600 dark:text-yellow-400";
+      case "submitted":
+        return "bg-purple-500/10 text-purple-600 dark:text-purple-400";
       default:
         return "bg-blue-500/10 text-blue-600 dark:text-blue-400";
     }
@@ -72,9 +85,10 @@ export default function CreditApplicationsPage() {
 
   const filteredApplications = applications.filter(
     (app) =>
-      app.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      app.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      app.appNumber.toLowerCase().includes(searchQuery.toLowerCase())
+      app.firstName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      app.lastName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      app.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      app.appNumber?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -155,37 +169,57 @@ export default function CreditApplicationsPage() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {filteredApplications.length === 0 ? (
-              <p className="text-center text-muted-foreground py-8">
-                No applications found matching your search.
-              </p>
-            ) : (
-              filteredApplications.map((app) => (
-                <div
-                  key={app.id}
-                  className="flex items-center justify-between rounded-lg border border-border bg-card p-4 transition-colors hover:bg-muted/50"
-                >
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-3">
-                      <p className="font-semibold">{app.customerName}</p>
-                      <Badge className={getStatusColor(app.status)}>
-                        {app.status.replace("_", " ")}
-                      </Badge>
-                    </div>
-                    <p className="text-sm text-muted-foreground">{app.email}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {app.appNumber} • ${app.requestedAmount.toLocaleString()} •{" "}
-                      {app.createdAt.toLocaleDateString()}
-                    </p>
-                  </div>
-                  <Button variant="outline" size="sm">
-                    View Details
-                  </Button>
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"></div>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {filteredApplications.length === 0 ? (
+                <div className="text-center py-12">
+                  <FileText className="h-16 w-16 text-muted-foreground mx-auto mb-4 opacity-50" />
+                  <p className="text-lg font-medium text-muted-foreground">
+                    {searchQuery ? "No applications found matching your search" : "No credit applications yet"}
+                  </p>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    {searchQuery ? "Try a different search term" : "Applications will appear here when customers submit forms"}
+                  </p>
                 </div>
-              ))
-            )}
-          </div>
+              ) : (
+                filteredApplications.map((app) => (
+                  <div
+                    key={app.id}
+                    className="flex items-center justify-between rounded-lg border border-border bg-card p-4 transition-colors hover:bg-muted/50"
+                  >
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-3">
+                        <p className="font-semibold">
+                          {app.firstName} {app.lastName}
+                        </p>
+                        <Badge className={getStatusColor(app.status)}>
+                          {app.status.replace("_", " ")}
+                        </Badge>
+                      </div>
+                      {!app.email.includes('@placeholder.com') && (
+                        <p className="text-sm text-muted-foreground">{app.email}</p>
+                      )}
+                      <p className="text-xs text-muted-foreground">
+                        {app.appNumber}
+                        {app.requestedAmount && ` • $${app.requestedAmount.toLocaleString()}`}
+                        {" • "}
+                        {new Date(app.createdAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <Button variant="outline" size="sm" asChild>
+                      <Link href={`/en/credit-applications/${app.id}`}>
+                        View Details
+                      </Link>
+                    </Button>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

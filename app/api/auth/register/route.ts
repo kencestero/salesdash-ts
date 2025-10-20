@@ -58,12 +58,12 @@ export async function POST(req: NextRequest) {
       prisma
     );
 
-    // Create user (but not verified yet)
+    // Create user (auto-verified - email verification temporarily disabled)
     const user = await prisma.user.create({
       data: {
         name: `${firstName} ${lastName}`,
         email,
-        emailVerified: null, // Not verified yet
+        emailVerified: new Date(), // Auto-verify for now (email sending disabled)
         password: hashedPassword,
       },
     });
@@ -96,7 +96,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(
       {
-        message: "Account created! Please verify your email.",
+        message: "Account created! You can now login.",
         salespersonCode, // Return the code so user knows their tracking code
         verificationToken, // Remove this in production
       },
