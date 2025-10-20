@@ -1,10 +1,20 @@
 /**
  * Bulk Inventory Import API
  *
- * Accepts trailer data from Python automation scripts
+ * Accepts trailer data from supplier emails and Python automation scripts
  * Protected with API key authentication
  *
+ * PRICING FORMULA (Kenneth's Formula):
+ * - Base: Cost × 1.0125 (1.25% markup)
+ * - If profit < $1,400, use: Cost + $1,400
+ * - This ensures minimum $1,400 profit on every trailer
+ *
  * POST /api/inventory/bulk-import
+ *
+ * Supplier Sources:
+ * - Lee DCFW (Diamond Cargo)
+ * - Quality Cargo
+ * - Panther Cargo (Dump Trailers - separate category)
  *
  * Example Python usage:
  *   import requests
@@ -17,6 +27,24 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+
+/**
+ * Calculate sale price using Kenneth's pricing formula
+ * @param cost - Cost of the trailer
+ * @returns Sale price with minimum $1,400 profit
+ */
+function calculateSalePrice(cost: number): number {
+  const markup = cost * 0.0125; // 1.25%
+  const priceWithMarkup = cost + markup;
+  const profit = priceWithMarkup - cost;
+
+  if (profit < 1400) {
+    // Minimum $1,400 profit
+    return cost + 1400;
+  }
+
+  return priceWithMarkup;
+}
 
 interface BulkImportTrailer {
   vin: string;
@@ -142,14 +170,19 @@ export async function POST(req: NextRequest) {
             trailer.status !== existing.status ||
             trailer.location !== existing.location;
 
-          if (shouldUpdate) {
+          if (shouldUpdate || trailer.cost) {
+            // Recalculate price if cost is provided
+            const newCost = trailer.cost || existing.cost || trailer.salePrice * 0.8;
+            const calculatedPrice = calculateSalePrice(newCost);
+            const profit = calculatedPrice - newCost;
+
             await prisma.trailer.update({
               where: { id: existing.id },
               data: {
-                // Update price if changed
-                salePrice: trailer.salePrice,
-                msrp: trailer.msrp,
-                cost: trailer.cost || existing.cost,
+                // Update cost and recalculate price using formula
+                cost: newCost,
+                salePrice: calculatedPrice,
+                msrp: calculatedPrice,
 
                 // Update status/location
                 status: trailer.status || existing.status,
@@ -163,12 +196,16 @@ export async function POST(req: NextRequest) {
               },
             });
             stats.updated++;
-            console.log(`✏️  Updated: ${trailer.vin} - ${trailer.manufacturer} ${trailer.model}`);
+            console.log(`✏️  Updated: ${trailer.vin} - ${trailer.manufacturer} ${trailer.model} | Cost: $${newCost} → Price: $${calculatedPrice} (Profit: $${profit})`);
           } else {
             stats.skipped++;
           }
         } else {
-          // New trailer - create it
+          // New trailer - calculate price using formula
+          const cost = trailer.cost || trailer.salePrice * 0.8; // Use provided cost or estimate from sale price
+          const calculatedPrice = calculateSalePrice(cost);
+          const profit = calculatedPrice - cost;
+
           await prisma.trailer.create({
             data: {
               vin: trailer.vin,
@@ -188,10 +225,10 @@ export async function POST(req: NextRequest) {
               capacity: trailer.capacity,
               axles: trailer.axles,
 
-              // Pricing
-              msrp: trailer.msrp,
-              salePrice: trailer.salePrice,
-              cost: trailer.cost || trailer.salePrice * 0.8,
+              // Pricing - Use calculated price from Kenneth's formula
+              cost: cost,
+              salePrice: calculatedPrice,
+              msrp: calculatedPrice,
               makeOffer: trailer.makeOffer || false,
 
               // Status & location
@@ -204,11 +241,11 @@ export async function POST(req: NextRequest) {
               images: trailer.images || [],
 
               // Metadata
-              createdBy: trailer.importedBy || 'python_script',
+              createdBy: trailer.importedBy || 'bulk_import',
             },
           });
           stats.created++;
-          console.log(`✅ Created: ${trailer.vin} - ${trailer.manufacturer} ${trailer.model}`);
+          console.log(`✅ Created: ${trailer.vin} - ${trailer.manufacturer} ${trailer.model} | Cost: $${cost} → Price: $${calculatedPrice} (Profit: $${profit})`);
         }
       } catch (error) {
         stats.errors++;

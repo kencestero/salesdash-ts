@@ -40,9 +40,27 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // Get current user to filter by their applications
+    const user = await prisma.user.findUnique({
+      where: { email: session.user?.email || "" },
+      include: { profile: true },
+    });
+
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    // Owners/Directors see ALL applications, regular reps see only theirs
+    const isAdmin = ["owner", "director"].includes(user.profile?.role || "");
+
     const status = searchParams.get("status");
     const where: any = {};
     if (status) where.status = status;
+
+    // Filter by createdBy for non-admin users
+    if (!isAdmin) {
+      where.createdBy = user.id;
+    }
 
     const applications = await prisma.creditApplication.findMany({
       where,

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
+import { useSearchParams } from "next/navigation";
 import {
   Users,
   Phone,
@@ -78,11 +79,20 @@ const statusIcons: Record<string, any> = {
 
 export default function CustomersPage() {
   const { data: session } = useSession();
+  const searchParams = useSearchParams();
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [showAddDialog, setShowAddDialog] = useState(false);
+
+  // Check if we should auto-open the add dialog
+  useEffect(() => {
+    const action = searchParams.get('action');
+    if (action === 'add') {
+      setShowAddDialog(true);
+    }
+  }, [searchParams]);
 
   // Fetch customers
   const fetchCustomers = async () => {

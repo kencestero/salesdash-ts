@@ -38,18 +38,17 @@ export default function RegisterPage() {
   const [managers, setManagers] = useState<Array<{ id: string; name: string; role: string }>>([]);
   const [loadingManagers, setLoadingManagers] = useState(false);
 
-  // Hardcoded fallback manager list (until real managers sign up)
+  // Hardcoded fallback manager list (shown alongside dynamic managers)
   const fallbackManagers = [
-    { id: "manager1", name: "Alex Johnson", role: "manager" },
-    { id: "manager2", name: "Sarah Martinez", role: "manager" },
-    { id: "manager3", name: "Michael Chen", role: "manager" },
-    { id: "manager4", name: "Emily Davis", role: "manager" },
-    { id: "manager5", name: "David Wilson", role: "manager" },
-    { id: "manager6", name: "Jessica Brown", role: "manager" },
-    { id: "manager7", name: "Chris Anderson", role: "manager" },
+    { id: "fallback-1", name: "Brian Jonczy", role: "manager" },
+    { id: "fallback-2", name: "Nathan Wiese", role: "manager" },
+    { id: "fallback-3", name: "Conrad Centeno", role: "manager" },
+    { id: "fallback-4", name: "Calvin M", role: "manager" },
+    { id: "fallback-5", name: "Max Butler", role: "manager" },
+    { id: "fallback-6", name: "Tony Ross", role: "manager" },
   ];
 
-  // Fetch available managers dynamically with fallback
+  // Fetch available managers dynamically and combine with fallback
   useEffect(() => {
     async function fetchManagers() {
       setLoadingManagers(true);
@@ -57,15 +56,25 @@ export default function RegisterPage() {
         const res = await fetch("/api/managers/available");
         if (res.ok) {
           const data = await res.json();
-          // Use dynamic managers if available, otherwise use fallback
           const dynamicManagers = data.managers || [];
-          setManagers(dynamicManagers.length > 0 ? dynamicManagers : fallbackManagers);
+
+          // ALWAYS combine dynamic + fallback managers
+          const combined = [...dynamicManagers, ...fallbackManagers];
+
+          // Remove duplicates by name (case-insensitive)
+          const unique = combined.filter((manager, index, self) =>
+            index === self.findIndex(m =>
+              m.name.toLowerCase().trim() === manager.name.toLowerCase().trim()
+            )
+          );
+
+          setManagers(unique);
         } else {
-          console.error("Failed to fetch managers, using fallback");
+          console.error("Failed to fetch managers, using fallback only");
           setManagers(fallbackManagers);
         }
       } catch (error) {
-        console.error("Error fetching managers, using fallback:", error);
+        console.error("Error fetching managers, using fallback only:", error);
         setManagers(fallbackManagers);
       } finally {
         setLoadingManagers(false);
@@ -406,7 +415,7 @@ export default function RegisterPage() {
                       <option value="">-- Select a Manager --</option>
                       {managers.map((manager) => (
                         <option key={manager.id} value={manager.id}>
-                          {manager.name} ({manager.role})
+                          {manager.name}
                         </option>
                       ))}
                     </>
@@ -595,7 +604,7 @@ export default function RegisterPage() {
                       <option value="">-- Select a Manager --</option>
                       {managers.map((manager) => (
                         <option key={manager.id} value={manager.id}>
-                          {manager.name} ({manager.role})
+                          {manager.name}
                         </option>
                       ))}
                     </>

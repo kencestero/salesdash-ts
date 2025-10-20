@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Copy, Link as LinkIcon, ExternalLink } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
+import { CopyLinkCelebration } from "@/components/sales/CopyLinkCelebration";
 
 interface RepCodeInfoProps {
   userProfile: any;
@@ -12,6 +13,7 @@ interface RepCodeInfoProps {
 
 export default function RepCodeInfo({ userProfile }: RepCodeInfoProps) {
   const repCode = userProfile?.profile?.repCode;
+  const [showCelebration, setShowCelebration] = useState(false);
 
   if (!repCode) {
     return null; // Don't show if no rep code
@@ -29,10 +31,17 @@ export default function RepCodeInfo({ userProfile }: RepCodeInfoProps) {
 
   const copyRepLink = () => {
     navigator.clipboard.writeText(repLink);
+
+    // Show success toast
     toast({
-      title: "Copied!",
-      description: "Rep link copied to clipboard",
+      title: "✅ Link Copied!",
+      description: "Credit application link copied to clipboard",
     });
+
+    // Trigger celebration modal after short delay
+    setTimeout(() => {
+      setShowCelebration(true);
+    }, 500);
   };
 
   const openRepLink = () => {
@@ -112,6 +121,13 @@ export default function RepCodeInfo({ userProfile }: RepCodeInfoProps) {
           </p>
         </div>
       </CardContent>
+
+      {/* Celebration Modal */}
+      <CopyLinkCelebration
+        open={showCelebration}
+        onOpenChange={setShowCelebration}
+        repCode={repCode}
+      />
     </Card>
   );
 }

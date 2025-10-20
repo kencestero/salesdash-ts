@@ -1,11 +1,11 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { DEFAULT_LANG } from "@/lib/i18n";
 
-export default function VerifyEmailPage() {
+function VerifyEmailContent() {
   const searchParams = useSearchParams();
   const email = searchParams.get("email");
   const [countdown, setCountdown] = useState(120); // 2 minutes in seconds
@@ -128,5 +128,28 @@ export default function VerifyEmailPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function VerifyEmailPage() {
+  return (
+    <Suspense fallback={
+      <main className="min-h-screen flex items-center justify-center p-6 bg-gradient-to-br from-primary/20 to-primary/5">
+        <div className="max-w-md w-full">
+          <div className="bg-gradient-to-b from-[#1a3a52] to-[#0d1f2d] rounded-3xl shadow-2xl overflow-hidden border-4 border-[#1a3a52]">
+            <div className="bg-[#1a3a52] text-[#f5a623] px-8 py-6 text-center">
+              <h1 className="text-3xl font-bold">MJ SalesDash</h1>
+            </div>
+            <div className="bg-[#f5a623] px-8 py-10 text-center">
+              <h2 className="text-4xl font-bold text-[#0d1f2d] mb-4">
+                Loading...
+              </h2>
+            </div>
+          </div>
+        </div>
+      </main>
+    }>
+      <VerifyEmailContent />
+    </Suspense>
   );
 }

@@ -5,9 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Copy, ExternalLink, Plus, Search, FileText } from "lucide-react";
+import { Copy, ExternalLink, Search, FileText } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
+import { CopyLinkCelebration } from "@/components/sales/CopyLinkCelebration";
 
 interface CreditApplication {
   id: string;
@@ -26,14 +27,33 @@ interface CreditApplication {
 }
 
 export default function CreditApplicationsPage() {
-  const [shareToken, setShareToken] = useState<string | null>(null);
+  const [repCode, setRepCode] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [applications, setApplications] = useState<CreditApplication[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showCelebration, setShowCelebration] = useState(false);
 
   useEffect(() => {
     fetchApplications();
+    fetchUserProfile();
   }, []);
+
+  const fetchUserProfile = async () => {
+    try {
+      const response = await fetch("/api/user/profile");
+      if (response.ok) {
+        const data = await response.json();
+        console.log("User profile data:", data);
+        setRepCode(data.profile?.repCode || null);
+      } else {
+        console.error("Failed to fetch profile:", response.status);
+        toast.error("Failed to load rep code");
+      }
+    } catch (error) {
+      console.error("Error fetching user profile:", error);
+      toast.error("Failed to load rep code");
+    }
+  };
 
   const fetchApplications = async () => {
     try {
@@ -54,18 +74,23 @@ export default function CreditApplicationsPage() {
     }
   };
 
-  const handleCreateNewLink = async () => {
-    // Generate a unique share token
-    const token = `${Math.random().toString(36).substring(2)}${Date.now().toString(36)}`;
-    setShareToken(token);
-
-    toast.success("Application link created!");
-  };
-
   const handleCopyLink = () => {
-    const url = `${window.location.origin}/en/apply/${shareToken}`;
+    if (!repCode) {
+      toast.error("Rep code not found. Please refresh the page.");
+      return;
+    }
+
+    const url = `https://mjcargotrailers.com/credit-application/${repCode}`;
     navigator.clipboard.writeText(url);
-    toast.success("Link copied to clipboard!");
+
+    toast.success("✅ Link Copied!", {
+      description: "Credit application link copied to clipboard",
+    });
+
+    // Show celebration modal after a short delay
+    setTimeout(() => {
+      setShowCelebration(true);
+    }, 500);
   };
 
   const getStatusColor = (status: string) => {
@@ -105,48 +130,36 @@ export default function CreditApplicationsPage() {
       <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Plus className="h-5 w-5" />
-            Create Application Link
+            <Copy className="h-5 w-5" />
+            Your Credit Application Link
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {!shareToken ? (
-            <div>
-              <p className="text-sm text-muted-foreground mb-4">
-                Generate a unique link to share with customers. They can fill out the credit
-                application without needing to log in.
-              </p>
-              <Button onClick={handleCreateNewLink} size="lg" className="w-full sm:w-auto">
-                <Plus className="mr-2 h-4 w-4" />
-                Create New Link
-              </Button>
-            </div>
-          ) : (
+          {repCode ? (
             <div className="space-y-3">
-              <p className="text-sm font-medium">Your shareable link:</p>
+              <p className="text-sm text-muted-foreground">
+                Share this link with customers. All applications submitted through this link will be automatically assigned to you.
+              </p>
               <div className="flex gap-2">
                 <Input
                   readOnly
-                  value={`${window.location.origin}/en/apply/${shareToken}`}
+                  value={`https://mjcargotrailers.com/credit-application/${repCode}`}
                   className="flex-1 font-mono text-sm"
                 />
-                <Button onClick={handleCopyLink} variant="outline">
+                <Button onClick={handleCopyLink} size="lg" className="gap-2">
                   <Copy className="h-4 w-4" />
+                  Copy Link
                 </Button>
                 <Button variant="outline" asChild>
-                  <Link href={`/en/apply/${shareToken}`} target="_blank">
+                  <Link href={`https://mjcargotrailers.com/credit-application/${repCode}`} target="_blank">
                     <ExternalLink className="h-4 w-4" />
                   </Link>
                 </Button>
               </div>
-              <Button
-                onClick={handleCreateNewLink}
-                variant="ghost"
-                size="sm"
-                className="text-xs"
-              >
-                Generate Another Link
-              </Button>
+            </div>
+          ) : (
+            <div className="text-center py-4">
+              <p className="text-sm text-muted-foreground">Loading your rep code...</p>
             </div>
           )}
         </CardContent>
@@ -222,6 +235,13 @@ export default function CreditApplicationsPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Celebration Modal */}
+      <CopyLinkCelebration
+        open={showCelebration}
+        onOpenChange={setShowCelebration}
+        repCode={repCode || ""}
+      />
     </div>
   );
 }
