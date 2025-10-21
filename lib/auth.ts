@@ -88,31 +88,11 @@ export const authOptions = {
         const joinCodeValid = cookies().get("join_ok")?.value;
         const joinRole = cookies().get("join_role")?.value || "salesperson";
 
-        // NEW USER WITHOUT JOIN CODE - Create but mark incomplete
+        // NEW USER WITHOUT JOIN CODE - Block signup
         if (!joinCodeValid) {
-          console.log("⚠️ New user without join code - creating with pending status");
-
-          const newUser = await prisma.user.create({
-            data: {
-              email: user.email,
-              name: user.name,
-              image: user.image,
-              emailVerified: account?.provider ? new Date() : null,
-            }
-          });
-
-          await prisma.userProfile.create({
-            data: {
-              userId: newUser.id,
-              role: "salesperson",
-              member: false,
-              needsJoinCode: true,
-              salespersonCode: await generateUniqueSalespersonCode("salesperson", prisma),
-            }
-          });
-
-          console.log("✅ Created user with pending status");
-          return true; // ✅ KEY FIX - Return true, not redirect
+          console.log("❌ New user without join code - blocking signup");
+          // Block OAuth - redirect to join page
+          return false; // ✅ PROPER FIX - Block unauthorized signups
         }
 
     // NEW USER WITH VALID JOIN CODE
