@@ -82,6 +82,31 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
+  // 4b. Check if authenticated user needs to complete signup
+  const completeSignupPath = `/${DEFAULT_LANG}/auth/complete-signup`;
+  if (sessionToken && pathname !== completeSignupPath && !isAuthRoute) {
+    try {
+      // Check if user profile has needsJoinCode flag
+      const checkResponse = await fetch(`${req.nextUrl.origin}/api/auth/check-status`, {
+        headers: {
+          'Cookie': req.headers.get('cookie') || ''
+        }
+      });
+
+      if (checkResponse.ok) {
+        const { needsJoinCode } = await checkResponse.json();
+        if (needsJoinCode) {
+          const url = req.nextUrl.clone();
+          url.pathname = completeSignupPath;
+          return NextResponse.redirect(url);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to check user status:', error);
+      // Continue on error to avoid blocking legitimate users
+    }
+  }
+
   // 5. Authenticated users can't access marketing pages
   if (MARKETING.has(pathname)) {
     const url = req.nextUrl.clone();

@@ -63,148 +63,102 @@ export const authOptions = {
       console.log("=== SignIn Callback ===");
       console.log("User:", user.email);
       console.log("Account:", account?.provider);
-      console.log("Profile:", profile?.email);
 
-      // Check if user already exists in database
-      const existingUser = await prisma.user.findUnique({
-        where: { email: user.email },
-        include: { profile: true },
-      });
-
-      // If existing user, check if email is verified
-      if (existingUser) {
-        // For OAuth users, if they're signing in again and email wasn't verified, verify it now
-        if (account?.provider && !existingUser.emailVerified) {
-          await prisma.user.update({
-            where: { id: existingUser.id },
-            data: { emailVerified: new Date() },
-          });
-
-          // Mark as member if not already
-          if (existingUser.profile && !existingUser.profile.member) {
-            await prisma.userProfile.update({
-              where: { userId: existingUser.id },
-              data: { member: true },
-            });
-          }
-          console.log("✅ Verified OAuth user email");
-        }
-
-        // Email verification temporarily disabled
-        // if (!account?.provider && !existingUser.emailVerified) {
-        //   console.log("❌ Email not verified - blocking login");
-        //   return `/en/auth/verify-email?email=${encodeURIComponent(user.email)}&error=not_verified`;
-        // }
-
-        console.log("✅ Existing user - login allowed");
-        return true;
-      }
-
-      // New user: Check for join code validation ONLY if truly new
-      // Note: existingUser already checked above, so we're here if user doesn't exist
-      // Only check join code for brand new users
-      const { cookies } = await import("next/headers");
-      const joinCodeValid = cookies().get("join_ok")?.value;
-
-      if (!joinCodeValid) {
-        console.log("❌ New user without join code - blocking signup");
-        // Redirect to join page by returning a URL string
-        return `/en/auth/join?error=join_code_required`;
-      }
-
-      console.log("✅ New user with valid join code - allowing signup");
-
-      // Create or update UserProfile with role from join code
-      if (user?.id) {
-        const { cookies } = await import("next/headers");
-        const joinRole = cookies().get("join_role")?.value || "salesperson";
-
-        // Check if profile exists
-        const existing = await prisma.userProfile.findUnique({
-          where: { userId: user.id },
+      try {
+        // Check if user exists
+        const existingUser = await prisma.user.findUnique({
+          where: { email: user.email },
+          include: { profile: true },
         });
 
-        if (!existing) {
-          try {
-            // Get signup data from cookies (set before OAuth redirect)
-            const firstName = cookies().get("signup_firstName")?.value;
-            const lastName = cookies().get("signup_lastName")?.value;
-            const phone = cookies().get("signup_phone")?.value;
-            const zipcode = cookies().get("signup_zipcode")?.value;
-
-            // Generate unique salesperson code based on role
-            const salespersonCode = await generateUniqueSalespersonCode(
-              joinRole,
-              prisma
-            );
-
-            // Create new profile with role from join code AND signup data
-            await prisma.userProfile.create({
-              data: {
-                userId: user.id,
-                firstName: firstName ? decodeURIComponent(firstName) : undefined,
-                lastName: lastName ? decodeURIComponent(lastName) : undefined,
-                phone: phone ? decodeURIComponent(phone) : undefined,
-                zipcode: zipcode ? decodeURIComponent(zipcode) : undefined,
-                salespersonCode,
-                role: joinRole as "owner" | "manager" | "salesperson",
-                member: false, // Not a member until email verified
-              },
+        // EXISTING USER - Just let them in
+        if (existingUser) {
+          if (account?.provider && !existingUser.emailVerified) {
+            await prisma.user.update({
+              where: { id: existingUser.id },
+              data: { emailVerified: new Date() },
             });
-
-            // Clear signup cookies
-            cookies().delete("signup_firstName");
-            cookies().delete("signup_lastName");
-            cookies().delete("signup_phone");
-            cookies().delete("signup_zipcode");
-
-            console.log(
-              `✅ Created UserProfile with role: ${joinRole}, code: ${salespersonCode}`
-            );
-          } catch (error) {
-            console.error("❌ Failed to create UserProfile during OAuth:", error);
-            // Allow sign-in to proceed even if profile creation fails
-            // User can complete profile setup later
           }
-        } else if (!existing.member) {
-          // Update existing profile to mark as member
-          await prisma.userProfile.update({
-            where: { userId: user.id },
-            data: { member: true },
-          });
-          console.log(`✅ Updated UserProfile - marked as member`);
+          console.log("✅ Existing user - login allowed");
+          return true;
         }
 
-        // Clear the join cookies
-        cookies().delete("join_ok");
-        cookies().delete("join_role");
+        // NEW USER - Check join code
+        const { cookies } = await import("next/headers");
+        const joinCodeValid = cookies().get("join_ok")?.value;
+        const joinRole = cookies().get("join_role")?.value || "salesperson";
 
-        // For new OAuth signups, create verification token and redirect to verification page
-        if (account?.provider) {
-          console.log("🔄 Creating verification token for new OAuth user");
+        // NEW USER WITHOUT JOIN CODE - Create but mark incomplete
+        if (!joinCodeValid) {
+          console.log("⚠️ New user without join code - creating with pending status");
 
-          // Generate verification token
-          const verificationToken = `${Math.random().toString(36).substring(2)}${Date.now().toString(36)}`;
-          const tokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
-
-          await prisma.verificationToken.create({
+          const newUser = await prisma.user.create({
             data: {
-              identifier: user.email,
-              token: verificationToken,
-              expires: tokenExpiry,
-            },
+              email: user.email,
+              name: user.name,
+              image: user.image,
+              emailVerified: account?.provider ? new Date() : null,
+            }
           });
 
-          const verificationUrl = `${process.env.NEXTAUTH_URL}/api/auth/verify?token=${verificationToken}`;
-          console.log("📧 Verification URL:", verificationUrl);
+          await prisma.userProfile.create({
+            data: {
+              userId: newUser.id,
+              role: "salesperson",
+              member: false,
+              needsJoinCode: true,
+              salespersonCode: await generateUniqueSalespersonCode("salesperson", prisma),
+            }
+          });
 
-          console.log("🔄 Redirecting new OAuth user to verification page");
-          return `/en/auth/verify-email?email=${encodeURIComponent(user.email)}`;
+          console.log("✅ Created user with pending status");
+          return true; // ✅ KEY FIX - Return true, not redirect
         }
-      }
 
-      return true;
-    },
+    // NEW USER WITH VALID JOIN CODE
+    const firstName = cookies().get("signup_firstName")?.value;
+    const lastName = cookies().get("signup_lastName")?.value;
+    const phone = cookies().get("signup_phone")?.value;
+    const zipcode = cookies().get("signup_zipcode")?.value;
+
+    const newUser = await prisma.user.create({
+      data: {
+        email: user.email,
+        name: user.name,
+        image: user.image,
+        emailVerified: account?.provider ? new Date() : null,
+      }
+    });
+
+    await prisma.userProfile.create({
+      data: {
+        userId: newUser.id,
+        firstName: firstName ? decodeURIComponent(firstName) : undefined,
+        lastName: lastName ? decodeURIComponent(lastName) : undefined,
+        phone: phone ? decodeURIComponent(phone) : undefined,
+        zipcode: zipcode ? decodeURIComponent(zipcode) : undefined,
+        salespersonCode: await generateUniqueSalespersonCode(joinRole, prisma),
+        role: joinRole as "owner" | "manager" | "salesperson",
+        member: true,
+        needsJoinCode: false,
+      },
+    });
+
+    cookies().delete("join_ok");
+    cookies().delete("join_role");
+    cookies().delete("signup_firstName");
+    cookies().delete("signup_lastName");
+    cookies().delete("signup_phone");
+    cookies().delete("signup_zipcode");
+
+    console.log("✅ User created successfully");
+    return true;
+
+  } catch (error) {
+    console.error("❌ SignIn callback error:", error);
+    return true; // ✅ Even on error, return true to avoid loop
+  }
+},
     async jwt({ token, user }: any) {
       // Add user ID to token on sign in
       if (user) {

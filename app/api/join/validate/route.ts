@@ -29,21 +29,20 @@ export async function POST(req: Request) {
   }
 
   // Store the role in a cookie so we can assign it after Google OAuth
-  // Using sameSite: "none" to ensure cookies persist through OAuth redirects
   cookies().set("join_ok", "1", {
     httpOnly: true,
-    sameSite: "none", // Changed from "lax" to work with cross-site OAuth redirects
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
     path: "/",
-    maxAge: 60 * 15, // 15 min
-    secure: true, // Required when sameSite="none"
+    maxAge: 60 * 15,
+    secure: process.env.NODE_ENV === 'production',
   });
 
   cookies().set("join_role", role, {
     httpOnly: true,
-    sameSite: "none", // Changed from "lax" to work with cross-site OAuth redirects
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
     path: "/",
-    maxAge: 60 * 15, // 15 min
-    secure: true, // Required when sameSite="none"
+    maxAge: 60 * 15,
+    secure: process.env.NODE_ENV === 'production',
   });
 
   return NextResponse.json({ ok: true, role });

@@ -1,5 +1,7 @@
 "use client";
 import React from "react";
+import { useEffect } from "react";
+import { signOut, useSession } from "next-auth/react";
 import Header from "@/components/partials/header";
 import Sidebar from "@/components/partials/sidebar";
 import { cn } from "@/lib/utils";
@@ -13,6 +15,36 @@ import MobileSidebar from "@/components/partials/sidebar/mobile-sidebar";
 import HeaderSearch from "@/components/header-search";
 import { useMounted } from "@/hooks/use-mounted";
 import LayoutLoader from "@/components/layout-loader";
+
+function SessionTimeout() {
+  const { data: session } = useSession();
+
+  useEffect(() => {
+    if (!session) return;
+
+    let timeout: NodeJS.Timeout;
+
+    const resetTimer = () => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => {
+        signOut({ callbackUrl: '/auth/login' });
+      }, 30 * 60 * 1000); // 30 minutes
+    };
+
+    const events = ['mousedown', 'keydown', 'scroll', 'touchstart'];
+    events.forEach(event => document.addEventListener(event, resetTimer));
+
+    resetTimer();
+
+    return () => {
+      clearTimeout(timeout);
+      events.forEach(event => document.removeEventListener(event, resetTimer));
+    };
+  }, [session]);
+
+  return null;
+}
+
 const DashBoardLayoutProvider = ({ children, trans }: { children: React.ReactNode, trans: any }) => {
   const { collapsed, sidebarType, setCollapsed, subMenu } = useSidebar();
   const [open, setOpen] = React.useState(false);
@@ -26,6 +58,7 @@ const DashBoardLayoutProvider = ({ children, trans }: { children: React.ReactNod
   if (layout === "semibox") {
     return (
       <>
+        <SessionTimeout />
         <Header handleOpenSearch={() => setOpen(true)} trans={trans} />
         <Sidebar trans={trans} />
 
@@ -62,6 +95,7 @@ const DashBoardLayoutProvider = ({ children, trans }: { children: React.ReactNod
   if (layout === "horizontal") {
     return (
       <>
+        <SessionTimeout />
         <Header handleOpenSearch={() => setOpen(true)} trans={trans} />
 
         <div className={cn("content-wrapper transition-all duration-150 ")}>
@@ -91,6 +125,7 @@ const DashBoardLayoutProvider = ({ children, trans }: { children: React.ReactNod
   if (sidebarType !== "module") {
     return (
       <>
+        <SessionTimeout />
         <Header handleOpenSearch={() => setOpen(true)} trans={trans} />
         <Sidebar trans={trans} />
 
@@ -124,6 +159,7 @@ const DashBoardLayoutProvider = ({ children, trans }: { children: React.ReactNod
   }
   return (
     <>
+      <SessionTimeout />
       <Header handleOpenSearch={() => setOpen(true)} trans={trans} />
       <Sidebar trans={trans} />
 
