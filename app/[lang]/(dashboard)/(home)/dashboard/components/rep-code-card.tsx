@@ -43,7 +43,7 @@ export default function RepCodeCard() {
 
   const copyRepLink = () => {
     if (!repCode) return;
-    const link = `https://mjcargotrailers.com/credit-application/${repCode}`;
+    const link = `https://mjsalesdash.com/credit-application/${repCode}`;
     navigator.clipboard.writeText(link);
 
     // Show success toast
@@ -68,61 +68,52 @@ export default function RepCodeCard() {
 
   return (
     <>
-      <Card className="bg-gradient-to-br from-purple-600 to-blue-600 text-white border-0">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-white flex items-center gap-2">
-            <User className="w-5 h-5" />
+      <Card className="bg-primary text-primary-foreground border-0 max-w-sm">
+        <CardHeader className="pb-2 pt-3">
+          <CardTitle className="flex items-center gap-2 text-sm">
+            <User className="w-4 h-4" />
             Your Rep Code
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <p className="text-sm text-purple-100 mb-2">
-              Welcome back, {firstName}!
-            </p>
-            <div className="flex items-center justify-between bg-white/10 backdrop-blur-sm rounded-lg p-3">
-              <div>
-                <p className="text-xs text-purple-100 mb-1">Your Code</p>
-                <p className="text-2xl font-bold tracking-wider">{repCode}</p>
-              </div>
-              <Button
-                size="sm"
-                variant="ghost"
-                className="text-white hover:bg-white/20"
-                onClick={copyRepCode}
-              >
-                <Copy className="w-4 h-4" />
-              </Button>
+        <CardContent className="space-y-2">
+          <div className="flex items-center justify-between bg-primary-foreground/10 backdrop-blur-sm rounded-lg p-2">
+            <div>
+              <p className="text-xs opacity-80">Your Code</p>
+              <p className="text-lg font-bold tracking-wider">{repCode}</p>
             </div>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="hover:bg-primary-foreground/20 h-8 w-8 p-0"
+              onClick={copyRepCode}
+            >
+              <Copy className="w-3 h-3" />
+            </Button>
           </div>
 
           <div className="flex gap-2">
             <Button
               size="sm"
               variant="outline"
-              className="flex-1 bg-white/10 border-white/20 text-white hover:bg-white/20"
+              className="flex-1 bg-primary-foreground/10 border-primary-foreground/20 hover:bg-primary-foreground/20 h-8 text-xs"
               onClick={copyRepCode}
             >
-              <Copy className="w-4 h-4 mr-2" />
+              <Copy className="w-3 h-3 mr-1" />
               Copy Code
             </Button>
             <Button
               size="sm"
               variant="outline"
-              className="flex-1 bg-white/10 border-white/20 text-white hover:bg-white/20"
+              className="flex-1 bg-primary-foreground/10 border-primary-foreground/20 hover:bg-primary-foreground/20 h-8 text-xs"
               onClick={copyRepLink}
             >
-              <LinkIcon className="w-4 h-4 mr-2" />
+              <LinkIcon className="w-3 h-3 mr-1" />
               Copy Link
             </Button>
           </div>
 
-          <p className="text-xs text-purple-100">
-            Share this link with customers to track leads:
-            <br />
-            <span className="text-white font-medium break-all">
-              mjcargotrailers.com/credit-application/{repCode}
-            </span>
+          <p className="text-xs opacity-80 leading-tight">
+            mjsalesdash.com/credit-application/{repCode}
           </p>
         </CardContent>
       </Card>
