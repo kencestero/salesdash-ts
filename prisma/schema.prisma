@@ -105,6 +105,7 @@ model UserProfile {
   salespersonCode String?  @unique // REP12345, SMR12345, or VIP12345
   role            String   @default("salesperson") // "owner", "manager", "salesperson", "director"
   member          Boolean  @default(false) // Join code verified
+  needsJoinCode   Boolean  @default(false) // OAuth users who signed up without join code
 
   // Rep Tracking & Organization
   repCode         String?  @unique // Format: "REP" + 6 digits (e.g., "REP482756"), "REP000000" for freelancers
