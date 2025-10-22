@@ -8,6 +8,8 @@ export const authOptions = {
   // Note: No adapter needed - we're using JWT sessions and handling user creation in signIn callback
   session: {
     strategy: "jwt" as const, // JWT for credentials support
+    maxAge: 24 * 60 * 60, // 24 hours - session expires after 1 day
+    updateAge: 15 * 60, // 15 minutes - update session every 15 min
   },
   providers: [
     CredentialsProvider({
@@ -100,6 +102,23 @@ export const authOptions = {
     const lastName = cookies().get("signup_lastName")?.value;
     const phone = cookies().get("signup_phone")?.value;
     const zipcode = cookies().get("signup_zipcode")?.value;
+    const managerId = cookies().get("signup_managerId")?.value;
+    const status = cookies().get("signup_status")?.value || "employee";
+
+    // Generate rep code
+    let repCode: string;
+    if (status === "freelancer") {
+      repCode = "REP000000";
+    } else {
+      let isUnique = false;
+      repCode = "";
+      while (!isUnique) {
+        const randomDigits = Math.floor(100000 + Math.random() * 900000).toString();
+        repCode = `REP${randomDigits}`;
+        const existing = await prisma.userProfile.findUnique({ where: { repCode } });
+        if (!existing) isUnique = true;
+      }
+    }
 
     const newUser = await prisma.user.create({
       data: {
@@ -118,6 +137,9 @@ export const authOptions = {
         phone: phone ? decodeURIComponent(phone) : undefined,
         zipcode: zipcode ? decodeURIComponent(zipcode) : undefined,
         salespersonCode: await generateUniqueSalespersonCode(joinRole, prisma),
+        repCode: repCode,
+        managerId: managerId ? decodeURIComponent(managerId) : null,
+        status: status,
         role: joinRole as "owner" | "manager" | "salesperson",
         member: true,
         needsJoinCode: false,
@@ -130,6 +152,8 @@ export const authOptions = {
     cookies().delete("signup_lastName");
     cookies().delete("signup_phone");
     cookies().delete("signup_zipcode");
+    cookies().delete("signup_managerId");
+    cookies().delete("signup_status");
 
     console.log("✅ User created successfully");
     return true;
