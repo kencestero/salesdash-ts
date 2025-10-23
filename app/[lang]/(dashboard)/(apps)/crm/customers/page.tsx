@@ -319,7 +319,7 @@ export default function CustomersPage() {
               </p>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-4 max-h-[calc(100vh-32rem)] overflow-y-auto pr-2">
               {customers.map((customer) => {
                 const StatusIcon = statusIcons[customer.status] || AlertCircle;
                 return (
