@@ -13,40 +13,52 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Icon } from "@iconify/react";
-import Image from "next/image";
 import Link from "next/link";
 
 const ProfileInfo = () => {
   const { data: session } = useSession();
+  
+  // Get initials from name (first 2 letters)
+  const getInitials = (name?: string | null) => {
+    if (!name) return "U";
+    return name
+      .split(" ")
+      .map(word => word[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild className=" cursor-pointer">
-        <div className=" flex items-center  ">
-          {session?.user?.image && (
-            <Image
-              src={session?.user?.image}
-              alt={session?.user?.name ?? ""}
-              width={36}
-              height={36}
-              className="rounded-full"
+      <DropdownMenuTrigger asChild className="cursor-pointer">
+        <div className="flex items-center">
+          <Avatar className="h-9 w-9">
+            <AvatarImage 
+              src={session?.user?.image || undefined} 
+              alt={session?.user?.name ?? "User"} 
             />
-          )}
+            <AvatarFallback className="bg-[#E96114] text-white font-semibold">
+              {getInitials(session?.user?.name)}
+            </AvatarFallback>
+          </Avatar>
         </div>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56 p-0" align="end">
         <DropdownMenuLabel className="flex gap-2 items-center mb-1 p-3">
-          {session?.user?.image && (
-            <Image
-              src={session?.user?.image}
-              alt={session?.user?.name ?? ""}
-              width={36}
-              height={36}
-              className="rounded-full"
+          <Avatar className="h-9 w-9">
+            <AvatarImage 
+              src={session?.user?.image || undefined} 
+              alt={session?.user?.name ?? "User"} 
             />
-          )}
+            <AvatarFallback className="bg-[#E96114] text-white font-semibold">
+              {getInitials(session?.user?.name)}
+            </AvatarFallback>
+          </Avatar>
           <div>
-            <div className="text-sm font-medium text-default-800 capitalize ">
+            <div className="text-sm font-medium text-default-800 capitalize">
               {session?.user?.name ?? "User"}
             </div>
             {session?.user?.email && (
