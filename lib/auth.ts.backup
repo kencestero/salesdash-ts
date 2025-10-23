@@ -42,10 +42,10 @@ export const authOptions = {
           throw new Error("Invalid email or password");
         }
 
-        // ✅ RE-ENABLED: Email verification check
-        if (!user.emailVerified) {
-          throw new Error("Please verify your email before logging in. Check your inbox!");
-        }
+        // Email verification temporarily disabled
+        // if (!user.emailVerified) {
+        //   throw new Error("Please verify your email before logging in");
+        // }
 
         return {
           id: user.id,
@@ -54,12 +54,10 @@ export const authOptions = {
         };
       },
     }),
-    // 🔒 OAUTH DISABLED FOR SECURITY - Email-only signup for now
-    // Uncomment when ready to re-enable:
-    // GoogleProvider({
-    //   clientId: process.env.AUTH_GOOGLE_ID as string,
-    //   clientSecret: process.env.AUTH_GOOGLE_SECRET as string,
-    // }),
+    GoogleProvider({
+      clientId: process.env.AUTH_GOOGLE_ID as string,
+      clientSecret: process.env.AUTH_GOOGLE_SECRET as string,
+    }),
   ],
 
   callbacks: {

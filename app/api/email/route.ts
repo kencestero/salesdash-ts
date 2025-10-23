@@ -1,13 +1,14 @@
 import { NextResponse } from "next/server";
 import { NextRequest } from "next/server";
-import { mails } from "./data";
+// Mock data removed - ready for real email integration
 
 export async function GET(request: NextRequest, response: NextResponse) {
   try {
+    // TODO: Query real emails from database when email system is implemented
     return NextResponse.json({
       status: "success",
-      message: "successfully",
-      data: mails,
+      message: "Email inbox (empty - awaiting integration)",
+      data: [], // Empty array instead of mock data
     });
   } catch (error) {
     return NextResponse.json({

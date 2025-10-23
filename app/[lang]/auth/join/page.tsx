@@ -18,7 +18,7 @@ export default function RegisterPage() {
   const [code, setCode] = useState("");
   const [codeValidated, setCodeValidated] = useState(false);
   const [validatingCode, setValidatingCode] = useState(false);
-  const [signupPath, setSignupPath] = useState<SignupPath>(null);
+  const [signupPath, setSignupPath] = useState<SignupPath>("email"); // 🔒 OAUTH DISABLED - Email only
   const [err, setErr] = useState("");
   const [showArrow, setShowArrow] = useState(false);
 
@@ -193,6 +193,12 @@ export default function RegisterPage() {
       return;
     }
 
+    // Validate manager selection for non-freelancers
+    if (!isFreelancer && !managerId) {
+      setErr("Please select your manager or check the Freelancer option");
+      return;
+    }
+
     // Validate terms acceptance
     if (!acceptedTerms) {
       setErr("You must accept the Terms and Conditions to continue");
@@ -204,6 +210,9 @@ export default function RegisterPage() {
     document.cookie = `signup_lastName=${encodeURIComponent(lastName)}; path=/; max-age=900`;
     document.cookie = `signup_phone=${encodeURIComponent(phone)}; path=/; max-age=900`;
     document.cookie = `signup_zipcode=${encodeURIComponent(zipcode)}; path=/; max-age=900`;
+    // ✅ NEW: Store manager ID and status
+    document.cookie = `signup_managerId=${encodeURIComponent(managerId || "")}; path=/; max-age=900`;
+    document.cookie = `signup_status=${encodeURIComponent(isFreelancer ? "freelancer" : "employee")}; path=/; max-age=900`;
 
     // Also store in sessionStorage as backup
     sessionStorage.setItem("signup_data", JSON.stringify({ firstName, lastName, phone, zipcode }));
