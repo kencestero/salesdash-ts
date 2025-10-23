@@ -1,2 +1,0 @@
-prisma+postgres://accelerate.prisma-data.net/?api_key=
-prisma+postgres://accelerate.prisma-data.net/?api_key=REDACTED_
