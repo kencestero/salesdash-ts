@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
-import { Upload } from "lucide-react";
+import { Upload, CheckCircle, AlertCircle } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 
 interface UploadPageViewProps {
@@ -20,7 +20,7 @@ export default function UploadPageView({ session }: UploadPageViewProps) {
       formData.append("file", file);
       formData.append("manufacturer", manufacturer);
 
-      const response = await fetch("/api/inventory/bulk-import", {
+      const response = await fetch("/api/inventory/upload-excel", {
         method: "POST",
         body: formData,
       });
@@ -29,19 +29,19 @@ export default function UploadPageView({ session }: UploadPageViewProps) {
 
       if (response.ok) {
         toast({
-          title: "Upload Successful!",
-          description: `Imported ${result.imported || 0} trailers from ${manufacturer}`,
+          title: "✅ Upload Successful!",
+          description: `Imported ${result.summary?.total || 0} trailers from ${manufacturer} (${result.summary?.new || 0} new, ${result.summary?.updated || 0} updated)`,
         });
       } else {
         toast({
-          title: "Upload Failed",
+          title: "❌ Upload Failed",
           description: result.error || "Something went wrong",
           variant: "destructive",
         });
       }
     } catch (error) {
       toast({
-        title: "Upload Failed",
+        title: "❌ Upload Failed",
         description: "Failed to upload file",
         variant: "destructive",
       });
@@ -68,27 +68,23 @@ export default function UploadPageView({ session }: UploadPageViewProps) {
   const manufacturers = [
     {
       name: "Diamond Cargo",
-      color: "bg-[#F62A00]", // Candy Apple Red
+      color: "bg-blue-600",
       textColor: "text-white",
-      hoverColor: "hover:bg-[#D02400]",
+      hoverColor: "hover:bg-blue-700",
+      logo: "/images/dctranslogo.png",
     },
     {
       name: "Quality Cargo",
-      color: "bg-[#F1F3CE]", // Ivory
-      textColor: "text-gray-900",
-      hoverColor: "hover:bg-[#E8EBBE]",
+      color: "bg-red-600",
+      textColor: "text-white",
+      hoverColor: "hover:bg-red-700",
+      logo: "/images/qualitycargologo.webp",
     },
     {
-      name: "Cargo Craft",
-      color: "bg-[#2D7A3E]", // Forest Green
+      name: "Panther Cargo",
+      color: "bg-purple-600",
       textColor: "text-white",
-      hoverColor: "hover:bg-[#256831]",
-    },
-    {
-      name: "Panther Trailers",
-      color: "bg-[#1E656D]", // Peacock Blue
-      textColor: "text-white",
-      hoverColor: "hover:bg-[#16545B]",
+      hoverColor: "hover:bg-purple-700",
     },
   ];
 
@@ -98,21 +94,21 @@ export default function UploadPageView({ session }: UploadPageViewProps) {
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-5xl font-bold text-white mb-4">
-            Upload Cargo
+            Upload Inventory
           </h1>
           <p className="text-slate-300 text-lg">
-            Drop or upload your inventory files
+            Import your daily inventory files from suppliers
           </p>
         </div>
 
         {/* Upload Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {manufacturers.map((manufacturer) => (
             <div key={manufacturer.name}>
               <input
                 type="file"
                 id={`file-${manufacturer.name}`}
-                accept=".xlsx,.xls,.csv,.pdf"
+                accept=".xlsx,.xls"
                 onChange={handleFileSelect(manufacturer.name)}
                 className="hidden"
               />
@@ -125,9 +121,9 @@ export default function UploadPageView({ session }: UploadPageViewProps) {
                   ${manufacturer.color}
                   ${manufacturer.textColor}
                   ${manufacturer.hoverColor}
-                  border-4 border-white/20
-                  rounded-2xl
-                  p-12
+                  border-2 border-white/20
+                  rounded-xl
+                  p-8
                   cursor-pointer
                   transition-all
                   duration-300
@@ -138,34 +134,34 @@ export default function UploadPageView({ session }: UploadPageViewProps) {
                   flex-col
                   items-center
                   justify-center
-                  min-h-[300px]
+                  min-h-[280px]
                   ${uploading === manufacturer.name ? "opacity-50 cursor-wait" : ""}
                 `}
               >
                 {/* Upload Icon */}
-                <Upload className="w-16 h-16 mb-6" strokeWidth={2.5} />
+                <Upload className="w-12 h-12 mb-4" strokeWidth={2} />
 
                 {/* Manufacturer Name */}
-                <h2 className="text-3xl font-bold mb-4 text-center">
+                <h2 className="text-2xl font-bold mb-2 text-center">
                   {manufacturer.name}
                 </h2>
 
                 {/* Instructions */}
                 <div className="text-center space-y-2">
                   {uploading === manufacturer.name ? (
-                    <p className="text-xl font-semibold animate-pulse">
+                    <p className="text-lg font-semibold animate-pulse">
                       Uploading...
                     </p>
                   ) : (
                     <>
-                      <p className="text-xl font-semibold">
+                      <p className="font-semibold">
                         Drop file here
                       </p>
                       <p className="text-sm opacity-90">
                         or click to browse
                       </p>
-                      <p className="text-xs opacity-75 mt-4">
-                        Accepts: Excel, CSV, PDF
+                      <p className="text-xs opacity-75 mt-3">
+                        Excel format only (.xlsx)
                       </p>
                     </>
                   )}
@@ -175,15 +171,63 @@ export default function UploadPageView({ session }: UploadPageViewProps) {
           ))}
         </div>
 
-        {/* Quick Instructions */}
+        {/* Features */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
+          <Card className="bg-slate-800/50 border-slate-700 p-6">
+            <div className="flex items-start gap-3">
+              <CheckCircle className="w-6 h-6 text-green-400 flex-shrink-0 mt-1" />
+              <div>
+                <h3 className="font-bold text-white mb-1">Auto-Detection</h3>
+                <p className="text-slate-300 text-sm">Automatically detects file format and supplier</p>
+              </div>
+            </div>
+          </Card>
+
+          <Card className="bg-slate-800/50 border-slate-700 p-6">
+            <div className="flex items-start gap-3">
+              <CheckCircle className="w-6 h-6 text-green-400 flex-shrink-0 mt-1" />
+              <div>
+                <h3 className="font-bold text-white mb-1">Smart Matching</h3>
+                <p className="text-slate-300 text-sm">Matches VINs to images and updates pricing</p>
+              </div>
+            </div>
+          </Card>
+
+          <Card className="bg-slate-800/50 border-slate-700 p-6">
+            <div className="flex items-start gap-3">
+              <CheckCircle className="w-6 h-6 text-green-400 flex-shrink-0 mt-1" />
+              <div>
+                <h3 className="font-bold text-white mb-1">Instant Updates</h3>
+                <p className="text-slate-300 text-sm">Live inventory updates within seconds</p>
+              </div>
+            </div>
+          </Card>
+        </div>
+
+        {/* Instructions */}
         <Card className="mt-12 bg-slate-800/50 border-slate-700 p-6">
-          <h3 className="text-xl font-bold text-white mb-4">Quick Instructions</h3>
-          <ul className="space-y-2 text-slate-300">
-            <li>✅ Click any box to select a file from your computer</li>
-            <li>✅ Or drag and drop your file directly onto the box</li>
-            <li>✅ Accepted formats: Excel (.xlsx, .xls), CSV (.csv), PDF (.pdf)</li>
-            <li>✅ Files will be automatically processed and added to your inventory</li>
-            <li>✅ Duplicate VINs will be updated with new pricing</li>
+          <h3 className="text-xl font-bold text-white mb-4">📋 How It Works</h3>
+          <ul className="space-y-3 text-slate-300">
+            <li className="flex gap-3">
+              <span className="text-blue-400 font-bold">1.</span>
+              <span>Download the latest inventory file from your supplier (Diamond Cargo, Quality Cargo, or Panther Cargo)</span>
+            </li>
+            <li className="flex gap-3">
+              <span className="text-blue-400 font-bold">2.</span>
+              <span>Click the corresponding box or drag & drop the file</span>
+            </li>
+            <li className="flex gap-3">
+              <span className="text-blue-400 font-bold">3.</span>
+              <span>System automatically parses Excel and extracts VINs, pricing, and specifications</span>
+            </li>
+            <li className="flex gap-3">
+              <span className="text-blue-400 font-bold">4.</span>
+              <span>New trailers are added, existing ones are updated with latest prices</span>
+            </li>
+            <li className="flex gap-3">
+              <span className="text-blue-400 font-bold">5.</span>
+              <span>Images are automatically matched to trailers by VIN from the database</span>
+            </li>
           </ul>
         </Card>
       </div>
