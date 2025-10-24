@@ -60,8 +60,11 @@ interface Customer {
 // Status badge colors
 const statusColors: Record<string, string> = {
   lead: "bg-blue-100 text-blue-800 hover:bg-blue-100",
-  contacted: "bg-yellow-100 text-yellow-800 hover:bg-yellow-100",
-  qualified: "bg-purple-100 text-purple-800 hover:bg-purple-100",
+  Applied: "bg-yellow-100 text-yellow-800 hover:bg-yellow-100",
+  Approved: "bg-green-100 text-green-800 hover:bg-green-100",
+  "Dead Deal": "bg-red-100 text-red-800 hover:bg-red-100",
+  contacted: "bg-purple-100 text-purple-800 hover:bg-purple-100",
+  qualified: "bg-orange-100 text-orange-800 hover:bg-orange-100",
   negotiating: "bg-orange-100 text-orange-800 hover:bg-orange-100",
   won: "bg-green-100 text-green-800 hover:bg-green-100",
   lost: "bg-red-100 text-red-800 hover:bg-red-100",
@@ -70,6 +73,9 @@ const statusColors: Record<string, string> = {
 // Status icons
 const statusIcons: Record<string, any> = {
   lead: AlertCircle,
+  Applied: Clock,
+  Approved: CheckCircle2,
+  "Dead Deal": XCircle,
   contacted: Clock,
   qualified: CheckCircle2,
   negotiating: TrendingUp,
@@ -146,9 +152,9 @@ export default function CustomersPage() {
   const stats = {
     total: customers.length,
     leads: customers.filter((c) => c.status === "lead").length,
-    contacted: customers.filter((c) => c.status === "contacted").length,
-    qualified: customers.filter((c) => c.status === "qualified").length,
-    won: customers.filter((c) => c.status === "won").length,
+    applied: customers.filter((c) => c.status === "Applied").length,
+    approved: customers.filter((c) => c.status === "Approved").length,
+    deadDeals: customers.filter((c) => c.status === "Dead Deal").length,
   };
 
   // Format date
@@ -219,26 +225,12 @@ export default function CustomersPage() {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-purple-100 rounded-lg">
-                <Clock className="w-5 h-5 text-purple-600" />
+              <div className="p-2 bg-yellow-100 rounded-lg">
+                <Clock className="w-5 h-5 text-yellow-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Contacted</p>
-                <p className="text-2xl font-bold">{stats.contacted}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-orange-100 rounded-lg">
-                <TrendingUp className="w-5 h-5 text-orange-600" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Qualified</p>
-                <p className="text-2xl font-bold">{stats.qualified}</p>
+                <p className="text-sm text-muted-foreground">Applied</p>
+                <p className="text-2xl font-bold">{stats.applied}</p>
               </div>
             </div>
           </CardContent>
@@ -251,8 +243,22 @@ export default function CustomersPage() {
                 <CheckCircle2 className="w-5 h-5 text-green-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Won</p>
-                <p className="text-2xl font-bold">{stats.won}</p>
+                <p className="text-sm text-muted-foreground">Approved</p>
+                <p className="text-2xl font-bold">{stats.approved}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-red-100 rounded-lg">
+                <XCircle className="w-5 h-5 text-red-600" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Dead Deals</p>
+                <p className="text-2xl font-bold">{stats.deadDeals}</p>
               </div>
             </div>
           </CardContent>
@@ -283,11 +289,9 @@ export default function CustomersPage() {
               <SelectContent>
                 <SelectItem value="all">All Status</SelectItem>
                 <SelectItem value="lead">New Leads</SelectItem>
-                <SelectItem value="contacted">Contacted</SelectItem>
-                <SelectItem value="qualified">Qualified</SelectItem>
-                <SelectItem value="negotiating">Negotiating</SelectItem>
-                <SelectItem value="won">Won</SelectItem>
-                <SelectItem value="lost">Lost</SelectItem>
+                <SelectItem value="Applied">Applied</SelectItem>
+                <SelectItem value="Approved">Approved</SelectItem>
+                <SelectItem value="Dead Deal">Dead Deals</SelectItem>
               </SelectContent>
             </Select>
           </div>
