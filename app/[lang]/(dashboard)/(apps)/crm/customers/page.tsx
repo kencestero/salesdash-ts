@@ -340,9 +340,11 @@ export default function CustomersPage() {
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
-                              <h3 className="text-lg font-semibold">
-                                {customer.firstName} {customer.lastName}
-                              </h3>
+                              <Link href={`/en/crm/customers/${customer.id}`} className="hover:underline">
+                                <h3 className="text-lg font-semibold cursor-pointer text-orange-600 hover:text-orange-700">
+                                  {customer.firstName} {customer.lastName}
+                                </h3>
+                              </Link>
                               <Badge className={statusColors[customer.status]}>
                                 <StatusIcon className="w-3 h-3 mr-1" />
                                 {customer.status}

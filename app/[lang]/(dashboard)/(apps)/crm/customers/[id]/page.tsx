@@ -603,27 +603,45 @@ export default function CustomerProfilePage() {
               className="w-full justify-start"
               variant="outline"
               onClick={async () => {
-                // Log call activity
+                // Actually call the customer!
                 try {
-                  await fetch('/api/crm/activities', {
+                  const response = await fetch('/api/crm/call', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                      customerId: customer.id,
-                      type: 'call',
-                      subject: 'Phone Call',
-                      description: `Called ${customer.firstName} ${customer.lastName} at ${customer.phone}`,
+                      phone: customer.phone,
+                      customerName: `${customer.firstName} ${customer.lastName}`
                     }),
                   });
-                  toast({
-                    title: "Call Logged",
-                    description: `Call with ${customer.firstName} ${customer.lastName} has been logged`,
-                  });
-                  fetchCustomer();
+                  
+                  if (response.ok) {
+                    toast({
+                      title: "📞 Call Initiated",
+                      description: `Calling ${customer.firstName} ${customer.lastName} at ${customer.phone}`,
+                    });
+                    
+                    // Open phone dialer on mobile
+                    if (typeof window !== 'undefined' && customer.phone) {
+                      window.open(`tel:${customer.phone}`, '_self');
+                    }
+                    
+                    // Also log the activity
+                    await fetch('/api/crm/activities', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        customerId: customer.id,
+                        type: 'call',
+                        subject: 'Phone Call',
+                        description: `Called ${customer.firstName} ${customer.lastName}`,
+                      }),
+                    });
+                    fetchCustomer();
+                  }
                 } catch (error) {
                   toast({
-                    title: "Error",
-                    description: "Failed to log call activity",
+                    title: "❌ Call Failed",
+                    description: "Failed to initiate call",
                     variant: "destructive",
                   });
                 }
@@ -636,27 +654,41 @@ export default function CustomerProfilePage() {
               className="w-full justify-start"
               variant="outline"
               onClick={async () => {
-                // Log email activity
+                // Actually send the email!
                 try {
-                  await fetch('/api/crm/activities', {
+                  const response = await fetch('/api/crm/email', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                      customerId: customer.id,
-                      type: 'email',
-                      subject: 'Email Sent',
-                      description: `Email sent to ${customer.email}`,
+                      to: customer.email,
+                      customerName: customer.firstName,
+                      subject: `Follow up from MJ Cargo Trailer Sales`
                     }),
                   });
-                  toast({
-                    title: "Email Sent",
-                    description: `Email sent to ${customer.firstName} ${customer.lastName}`,
-                  });
-                  fetchCustomer();
+                  
+                  if (response.ok) {
+                    toast({
+                      title: "✉️ Email Sent Successfully",
+                      description: `Email delivered to ${customer.email}`,
+                    });
+                    
+                    // Also log the activity
+                    await fetch('/api/crm/activities', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        customerId: customer.id,
+                        type: 'email',
+                        subject: 'Email Sent',
+                        description: `Follow-up email sent to ${customer.email}`,
+                      }),
+                    });
+                    fetchCustomer();
+                  }
                 } catch (error) {
                   toast({
-                    title: "Error",
-                    description: "Failed to log email activity",
+                    title: "❌ Email Failed",
+                    description: "Failed to send email",
                     variant: "destructive",
                   });
                 }
@@ -668,9 +700,51 @@ export default function CustomerProfilePage() {
             <Button
               className="w-full justify-start"
               variant="outline"
-              onClick={() => router.push("/en/finance-calculator")}
+              onClick={async () => {
+                // Actually create a quote!
+                try {
+                  const response = await fetch('/api/crm/quote', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      customerId: customer.id,
+                      trailerType: customer.trailerType || 'Standard Enclosed',
+                      trailerSize: customer.trailerSize || '6x12',
+                      price: 5000,
+                      notes: `Quote for ${customer.firstName} ${customer.lastName}`
+                    }),
+                  });
+                  
+                  if (response.ok) {
+                    const data = await response.json();
+                    toast({
+                      title: "📋 Quote Created",
+                      description: `Quote #${data.quoteNumber} created successfully`,
+                    });
+                    
+                    // Also log the activity
+                    await fetch('/api/crm/activities', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        customerId: customer.id,
+                        type: 'quote',
+                        subject: 'Quote Created',
+                        description: `Quote #${data.quoteNumber} created`,
+                      }),
+                    });
+                    fetchCustomer();
+                  }
+                } catch (error) {
+                  toast({
+                    title: "❌ Quote Failed",
+                    description: "Failed to create quote",
+                    variant: "destructive",
+                  });
+                }
+              }}
             >
-              <DollarSign className="w-4 h-4 mr-2" />
+              <FileText className="w-4 h-4 mr-2" />
               Create Quote
             </Button>
             <Button

@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MJ Cargo Trailers - Complete Finance Quote #Q-2025-001</title>
+    <style>
+        /* MJ Cargo Official Colors */
+        :root {
+            --mj-orange: #E6840D;
+            --mj-navy: #203F55;
+            --mj-midnight: #0B151E;
+            --mj-burnt: #A84E03;
+            --mj-gray: #5C524A;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        /* HEADER SECTION */
+        .header {
+            background: linear-gradient(135deg, var(--mj-orange), var(--mj-burnt));
+            color: white;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            position: relative;
+            z-index: 1;
+        }
+
+        .header .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.95;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* QUOTE INFO BAR */
+        .quote-info-bar {
+            background: var(--mj-navy);
+            color: white;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .quote-info-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .quote-info-item label {
+            font-size: 0.85rem;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+
+        .quote-info-item span {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        /* CONTENT SECTION */
+        .content {
+            padding: 40px;
+        }
+
+        /* CUSTOMER & TRAILER INFO */
+        .info-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .info-box {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            padding: 25px;
+            border-radius: 10px;
+            border-left: 5px solid var(--mj-orange);
+        }
+
+        .info-box h3 {
+            color: var(--mj-navy);
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            color: var(--mj-gray);
+            font-weight: 500;
+        }
+
+        .info-value {
+            color: var(--mj-midnight);
+            font-weight: 600;
+        }
+
+        /* PAYMENT OPTIONS SECTION */
+        .payment-section {
+            margin-top: 40px;
+        }
+
+        .payment-section h2 {
+            color: var(--mj-navy);
+            font-size: 2rem;
+            margin-bottom: 30px;
+            text-align: center;
+            padding-bottom: 15px;
+            border-bottom: 3px solid var(--mj-orange);
+        }
+
+        /* PAYMENT CARDS GRID */
+        .payment-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .payment-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+            border-top: 5px solid;
+        }
+
+        .payment-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+
+        .payment-card.finance {
+            border-top-color: #3B82F6;
+        }
+
+        .payment-card.rto {
+            border-top-color: #8B5CF6;
+        }
+
+        .payment-card.cash {
+            border-top-color: #10B981;
+        }
+
+        .payment-card-header {
+            padding: 20px;
+            color: white;
+            text-align: center;
+        }
+
+        .payment-card.finance .payment-card-header {
+            background: linear-gradient(135deg, #3B82F6, #2563EB);
+        }
+
+        .payment-card.rto .payment-card-header {
+            background: linear-gradient(135deg, #8B5CF6, #7C3AED);
+        }
+
+        .payment-card.cash .payment-card-header {
+            background: linear-gradient(135deg, #10B981, #059669);
+        }
+
+        .payment-type-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            background: rgba(255,255,255,0.2);
+        }
+
+        .payment-card-header h3 {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        .payment-card-header .term {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .payment-card-body {
+            padding: 25px;
+        }
+
+        .payment-detail {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .payment-detail:last-child {
+            border-bottom: none;
+            padding-top: 15px;
+            margin-top: 10px;
+            border-top: 2px solid var(--mj-orange);
+        }
+
+        .payment-label {
+            color: var(--mj-gray);
+            font-weight: 500;
+        }
+
+        .payment-value {
+            color: var(--mj-midnight);
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .payment-detail:last-child .payment-value {
+            color: var(--mj-orange);
+            font-size: 1.3rem;
+        }
+
+        /* DISCLAIMER */
+        .disclaimer {
+            background: #FEF3C7;
+            border-left: 5px solid #F59E0B;
+            padding: 20px;
+            margin: 30px 0;
+            border-radius: 8px;
+        }
+
+        .disclaimer h4 {
+            color: #92400E;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .disclaimer p {
+            color: #78350F;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        /* FOOTER */
+        .footer {
+            background: var(--mj-navy);
+            color: white;
+            padding: 30px 40px;
+            text-align: center;
+        }
+
+        .footer h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+        }
+
+        .footer p {
+            margin: 8px 0;
+            opacity: 0.9;
+        }
+
+        .footer .contact-info {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.2);
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .info-section {
+                grid-template-columns: 1fr;
+            }
+
+            .payment-cards {
+                grid-template-columns: 1fr;
+            }
+
+            .quote-info-bar {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .header h1 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- HEADER -->
+        <div class="header">
+            <h1>🚚 MJ CARGO TRAILERS</h1>
+            <div class="subtitle">Complete Finance Quote</div>
+        </div>
+
+        <!-- QUOTE INFO BAR -->
+        <div class="quote-info-bar">
+            <div class="quote-info-item">
+                <label>Quote Number</label>
+                <span>#Q-2025-001</span>
+            </div>
+            <div class="quote-info-item">
+                <label>Date</label>
+                <span>January 25, 2025</span>
+            </div>
+            <div class="quote-info-item">
+                <label>Sales Representative</label>
+                <span>Kenneth Cestero</span>
+            </div>
+        </div>
+
+        <!-- CONTENT -->
+        <div class="content">
+            <!-- CUSTOMER & TRAILER INFO -->
+            <div class="info-section">
+                <div class="info-box">
+                    <h3>📋 Customer Information</h3>
+                    <div class="info-row">
+                        <span class="info-label">Name</span>
+                        <span class="info-value">John Smith</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Phone</span>
+                        <span class="info-value">(555) 123-4567</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Email</span>
+                        <span class="info-value">john.smith@email.com</span>
+                    </div>
+                </div>
+
+                <div class="info-box">
+                    <h3>🚛 Trailer Information</h3>
+                    <div class="info-row">
+                        <span class="info-label">Manufacturer</span>
+                        <span class="info-value">Diamond Cargo</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Model/Year</span>
+                        <span class="info-value">Enclosed 2025</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Size</span>
+                        <span class="info-value">8.5' x 20'</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Stock #</span>
+                        <span class="info-value">DC85200123</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PRICE BREAKDOWN -->
+            <div class="info-box" style="margin-bottom: 40px;">
+                <h3>💰 Price Breakdown</h3>
+                <div class="info-row">
+                    <span class="info-label">Base Price</span>
+                    <span class="info-value">$12,500.00</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Tax (7.5%)</span>
+                    <span class="info-value">$937.50</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Fees</span>
+                    <span class="info-value">$350.00</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Title & Registration</span>
+                    <span class="info-value">$150.00</span>
+                </div>
+                <div class="info-row" style="border-top: 2px solid var(--mj-orange); padding-top: 15px; margin-top: 10px;">
+                    <span class="info-label" style="font-size: 1.2rem; font-weight: 700;">Total Price</span>
+                    <span class="info-value" style="font-size: 1.4rem; color: var(--mj-orange);">$13,937.50</span>
+                </div>
+            </div>
+
+            <!-- PAYMENT OPTIONS -->
+            <div class="payment-section">
+                <h2>💳 Your Payment Options</h2>
+
+                <!-- FINANCE OPTIONS -->
+                <div class="payment-cards">
+                    <div class="payment-card finance">
+                        <div class="payment-card-header">
+                            <div class="payment-type-badge">FINANCE</div>
+                            <h3>36 Months</h3>
+                            <div class="term">3 Year Plan</div>
+                        </div>
+                        <div class="payment-card-body">
+                            <div class="payment-detail">
+                                <span class="payment-label">Down Payment</span>
+                                <span class="payment-value">$2,500.00</span>
+                            </div>
+                            <div class="payment-detail">
+                                <span class="payment-label">APR</span>
+                                <span class="payment-value">8.99%</span>
+                            </div>
+                            <div class="payment-detail">
+                                <span class="payment-label">Total of Payments</span>
+                                <span class="payment-value">$14,850.00</span>
+                            </div>
+                            <div class="payment-detail">
+                                <span class="payment-label">Monthly Payment</span>
+                                <span class="payment-value">$342.00</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="payment-card finance">
+                        <div class="payment-card-header">
+                            <div class="payment-type-badge">FINANCE</div>
+                            <h3>48 Months</h3>
+                            <div class="term">4 Year Plan</div>
+                        </div>
+                        <div class="payment-card-body">
+                            <div class="payment-detail">
+                                <span class="payment-label">Down Payment</span>
+                                <span class="payment-value">$2,500.00</span>
+                            </div>
+                            <div class="payment-detail">
+                                <span class="payment-label">APR</span>
+                                <span class="payment-value">9.49%</span>
+                            </div>
+                            <div class="payment-detail">
+                                <span class="payment-label">Total of Payments</span>
+                                <span class="payment-value">$15,280.00</span>
+                            </div>
+                            <div class="payment-detail">
+                                <span class="payment-label">Monthly Payment</span>
+                                <span class="payment-value">$267.00</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="payment-card finance">
+                        <div class="payment-card-header">
+                            <div class="payment-type-badge">FINANCE</div>
+                            <h3>60 Months</h3>
+                            <div class="term">5 Year Plan</div>
+                        </div>
+                        <div class="payment-card-body">
+                            <div class="payment-detail">
+                                <span class="payment-label">Down Payment</span>
+                                <span class="payment-value">$2,500.00</span>
+                            </div>
+                            <div class="payment-detail">
+                                <span class="payment-label">APR</span>
+                                <span class="payment-value">9.99%</span>
+                            </div>
+                            <div class="payment-detail">
+                                <span class="payment-label">Total of Payments</span>
+                                <span class="payment-value">$15,725.00</span>
+                            </div>
+                            <div class="payment-detail">
+                                <span class="payment-label">Monthly Payment</span>
+                                <span class="payment-value">$220.00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RTO OPTIONS -->
+                <div class="payment-cards">
+                    <div class="payment-card rto">
+                        <div class="payment-card-header">
+                            <div class="payment-type-badge">RENT-TO-OWN</div>
+                            <h3>24 Months</h3>
+                            <div class="term">2 Year Plan</div>
+                        </div>
+                        <div class="payment-card-body">
+                            <div class="payment-detail">
+                                <span class="payment-label">Down Payment</span>
+                                <span class="payment-value">$1,500.00</span>
+                            </div>
+                            <div class="payment-detail">
+                                <span class="payment-label">Total Rent</span>
+                                <span class="payment-value">$16,800.00</span>
+                            </div>
+                            <div class="payment-detail">
+                                <span class="payment-label">Monthly Payment</span>
+                                <span class="payment-value">$638.00</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="payment-card rto">
+                        <div class="payment-card-header">
+                            <div class="payment-type-badge">RENT-TO-OWN</div>
+                            <h3>36 Months</h3>
+                            <div class="term">3 Year Plan</div>
+                        </div>
+                        <div class="payment-card-body">
+                            <div class="payment-detail">
+                                <span class="payment-label">Down Payment</span>
+                                <span class="payment-value">$1,500.00</span>
+                            </div>
+                            <div class="payment-detail">
+                                <span class="payment-label">Total Rent</span>
+                                <span class="payment-value">$17,500.00</span>
+                            </div>
+                            <div class="payment-detail">
+                                <span class="payment-label">Monthly Payment</span>
+                                <span class="payment-value">$444.00</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="payment-card rto">
+                        <div class="payment-card-header">
+                            <div class="payment-type-badge">RENT-TO-OWN</div>
+                            <h3>48 Months</h3>
+                            <div class="term">4 Year Plan</div>
+                        </div>
+                        <div class="payment-card-body">
+                            <div class="payment-detail">
+                                <span class="payment-label">Down Payment</span>
+                                <span class="payment-value">$1,500.00</span>
+                            </div>
+                            <div class="payment-detail">
+                                <span class="payment-label">Total Rent</span>
+                                <span class="payment-value">$18,200.00</span>
+                            </div>
+                            <div class="payment-detail">
+                                <span class="payment-label">Monthly Payment</span>
+                                <span class="payment-value">$347.00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CASH OPTION -->
+                <div class="payment-cards">
+                    <div class="payment-card cash">
+                        <div class="payment-card-header">
+                            <div class="payment-type-badge">CASH DEAL</div>
+                            <h3>Pay in Full</h3>
+                            <div class="term">Best Price Available</div>
+                        </div>
+                        <div class="payment-card-body">
+                            <div class="payment-detail">
+                                <span class="payment-label">Total Price</span>
+                                <span class="payment-value">$13,937.50</span>
+                            </div>
+                            <div class="payment-detail">
+                                <span class="payment-label">Down Payment</span>
+                                <span class="payment-value">$13,937.50</span>
+                            </div>
+                            <div class="payment-detail">
+                                <span class="payment-label">Amount Due Today</span>
+                                <span class="payment-value">$13,937.50</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DISCLAIMER -->
+            <div class="disclaimer">
+                <h4>⚠️ Important Notice</h4>
+                <p>
+                    This quote is valid for 30 days from the date above. All payments are estimates based on approved credit.
+                    Final terms may vary based on creditworthiness, down payment amount, and lender approval. Taxes, fees,
+                    and additional charges may apply. RTO payments include rental fees and do not build equity until purchase
+                    option is exercised. Contact your sales representative for complete terms and conditions.
+                </p>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <div class="footer">
+            <h3>MJ CARGO TRAILERS</h3>
+            <p>Your Trusted Trailer Dealership</p>
+            <div class="contact-info">
+                <p><strong>Sales Representative:</strong> Kenneth Cestero</p>
+                <p><strong>Email:</strong> kenneth@mjcargo.com</p>
+                <p><strong>Phone:</strong> (555) 482-7560</p>
+                <p style="margin-top: 15px; opacity: 0.7;">
+                    © 2025 MJ Cargo Trailers. All rights reserved.
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
