@@ -819,12 +819,7 @@ export const menusConfig = {
         icon: Cart,
         child: [
           {
-            title: "Quick Quote Builder",
-            icon: DollarSign,
-            href: "/quotes/new",
-          },
-          {
-            title: "Inventory",
+            title: "Live Inventory",
             icon: Stacks2,
             href: "/inventory",
           },
@@ -1670,12 +1665,7 @@ export const menusConfig = {
         title: "Sales Tools",
       },
       {
-        title: "Quick Quote Builder",
-        icon: DollarSign,
-        href: "/quotes/new",
-      },
-      {
-        title: "Inventory",
+        title: "Live Inventory",
         icon: Stacks2,
         href: "/inventory",
       },

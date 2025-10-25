@@ -12,18 +12,22 @@ const LoginPage = () => {
   const [openVideo, setOpenVideo] = useState<boolean>(false);
   return (
     <Fragment>
-      <div className="min-h-screen bg-background  flex items-center  overflow-hidden w-full">
-        <div className="min-h-screen basis-full flex flex-wrap w-full  justify-center overflow-y-auto">
-          <div className="basis-1/2 bg-gradient-to-br from-blue-600 via-blue-700 to-blue-900 w-full relative hidden xl:flex justify-center items-center overflow-hidden">
+      <div className="min-h-screen bg-background flex overflow-hidden w-full">
+        <div className="min-h-screen basis-full flex w-full">
+          <div className="basis-1/2 bg-gradient-to-br from-blue-600 via-blue-700 to-blue-900 w-full relative hidden xl:flex overflow-hidden">
             <div className="absolute inset-0 bg-[url('/images/auth/line.png')] opacity-10"></div>
-            <div className="relative z-10 text-white text-center px-8">
-              <h1 className="text-5xl font-bold mb-4">MJ Cargo</h1>
-              <p className="text-xl opacity-90">SalesDash CRM</p>
-            </div>
+            <Image
+              src="/images/mjenterprises.webp"
+              alt="MJ Enterprises"
+              width={1200}
+              height={1200}
+              className="w-full h-full object-cover"
+              priority
+            />
           </div>
 
-          <div className=" min-h-screen basis-full md:basis-1/2 w-full px-4 py-5 flex justify-center items-center">
-            <div className="lg:w-[480px] ">
+          <div className="min-h-screen basis-full md:basis-1/2 w-full px-4 py-5 flex justify-center items-center overflow-y-auto">
+            <div className="lg:w-[480px]">
               <LogInForm />
             </div>
           </div>
