@@ -1,0 +1,53 @@
+HOW TO GET GITHUB TOKEN FOR MCP
+================================
+
+STEP 1: Go to GitHub Settings
+------------------------------
+Click this link: https://github.com/settings/tokens
+
+
+STEP 2: Click "Generate new token"
+-----------------------------------
+Click the button that says "Generate new token (classic)"
+
+
+STEP 3: Fill out the form
+--------------------------
+Note (name): Claude MCP
+Expiration: No expiration (or 90 days)
+
+
+STEP 4: Select permissions (CHECK THESE BOXES)
+-----------------------------------------------
+Scroll down and check:
+☑ repo (this checks all repo sub-items)
+☑ read:org
+☑ read:user
+
+
+STEP 5: Generate
+----------------
+Scroll to bottom, click "Generate token"
+
+
+STEP 6: COPY THE TOKEN NOW
+---------------------------
+You'll see: ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+COPY IT RIGHT NOW - you can't see it again!
+
+
+STEP 7: Paste into config
+--------------------------
+Open: C:\Users\kence\AppData\Roaming\Claude\claude_desktop_config.json
+
+Find this line:
+"GITHUB_PERSONAL_ACCESS_TOKEN": "YOUR_GITHUB_TOKEN_HERE"
+
+Replace YOUR_GITHUB_TOKEN_HERE with your token:
+"GITHUB_PERSONAL_ACCESS_TOKEN": "ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+
+Save the file.
+
+
+DONE! Restart Claude Desktop.
