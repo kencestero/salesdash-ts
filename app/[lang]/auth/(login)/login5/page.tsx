@@ -27,7 +27,7 @@ const LoginPage = () => {
           </div>
 
           <div className="min-h-screen basis-full md:basis-1/2 w-full px-4 py-5 flex justify-center items-center overflow-y-auto">
-            <div className="lg:w-[480px]">
+            <div className="w-full max-w-[480px] mx-auto">
               <LogInForm />
             </div>
           </div>
