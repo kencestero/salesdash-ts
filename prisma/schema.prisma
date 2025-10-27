@@ -101,9 +101,11 @@ model UserProfile {
   userId          String   @unique
   firstName       String?
   lastName        String?
+  preferredName   String?  // Preferred name / nickname
   phone           String?
   zipcode         String?
   city            String?
+  about           String?  @db.Text // Professional bio / about section
   zip             String?  // Legacy field, use zipcode instead
   salespersonCode String?  @unique // REP12345, SMR12345, or VIP12345
   role            String   @default("salesperson") // "owner", "manager", "salesperson", "director"
