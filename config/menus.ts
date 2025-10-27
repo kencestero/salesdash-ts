@@ -875,6 +875,11 @@ export const menusConfig = {
             href: "/user-management",
           },
           {
+            title: "Profile",
+            icon: Users,
+            href: "/profile",
+          },
+          {
             title: "chat",
             icon: Messages,
             href: "/chat",
