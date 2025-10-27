@@ -56,9 +56,12 @@ model User {
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
-  accounts Account[]
-  sessions Session[]
-  profile  UserProfile?
+  accounts          Account[]
+  sessions          Session[]
+  profile           UserProfile?
+  trailerRequests   TrailerRequest[]
+  chatParticipants  ChatParticipant[]
+  chatMessages      ChatMessage[]
 }
 
 model VerificationToken {
@@ -749,4 +752,133 @@ model LeadNote {
   @@index([customerId])
   @@index([authorId])
   @@index([createdAt])
+}
+
+model TrailerRequest {
+  id           String   @id @default(cuid())
+  userId       String
+  manufacturer String
+  purpose      String
+  vin          String?
+  message      String   @db.Text
+  status       String   @default("pending")
+  assignedTo   String?
+  response     String?  @db.Text
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         User     @relation(fields: [userId], references: [id])
+  @@index([status])
+}
+
+// Request Tool - Public request submissions
+enum RequestStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
+model RequestLog {
+  id                String        @id @default(cuid())
+  createdAt         DateTime      @default(now())
+  email             String
+  fullName          String
+  zip               String?
+  manufacturer      String
+  purpose           String
+  message           String        @db.Text
+  lang              String        @default("en")
+  ip                String?
+  userAgent         String?
+  status            RequestStatus @default(PENDING)
+  error             String?
+
+  // Rep tracking fields
+  submittedByUserId String?       // Salesperson who submitted
+  submittedByName   String?       // Salesperson full name
+  submittedByEmail  String?       // Salesperson email
+  repCode           String?       // REP482756
+  managerId         String?       // Manager's User ID
+  managerNotified   Boolean       @default(false) // Was manager notified?
+
+  @@index([createdAt])
+  @@index([email])
+  @@index([manufacturer])
+  @@index([purpose])
+  @@index([submittedByUserId])
+  @@index([repCode])
+  @@index([managerId])
+}
+
+// Help Center System
+model HelpArticle {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  content     String   @db.Text
+  excerpt     String?  @db.Text
+  category    String   // "request-tool", "crm", "inventory", "finance", "general", etc.
+  keywords    String[] // For search optimization
+  isPinned    Boolean  @default(false) // Show at top of search results
+  isPublished Boolean  @default(true)
+  viewCount   Int      @default(0)
+  
+  // Metadata
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   String   // User ID who created
+  
+  @@index([category])
+  @@index([isPublished])
+  @@index([isPinned])
+  @@index([slug])
+}
+
+// Real-Time Chat System
+model ChatThread {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  subject   String?
+
+  participants ChatParticipant[]
+  messages     ChatMessage[]
+}
+
+model ChatParticipant {
+  id       String     @id @default(cuid())
+  thread   ChatThread @relation(fields: [threadId], references: [id])
+  threadId String
+  userId   String // maps to User.id
+  user     User       @relation(fields: [userId], references: [id])
+
+  @@unique([threadId, userId])
+  @@index([threadId])
+  @@index([userId])
+}
+
+model ChatMessage {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  body      String   @db.Text
+  senderId  String   // maps to User.id
+  sender    User     @relation(fields: [senderId], references: [id])
+
+  thread   ChatThread @relation(fields: [threadId], references: [id])
+  threadId String
+
+  attachments ChatAttachment[]
+
+  @@index([threadId])
+  @@index([senderId])
+}
+
+model ChatAttachment {
+  id        String      @id @default(cuid())
+  fileUrl   String
+  fileName  String
+  mimeType  String
+  message   ChatMessage @relation(fields: [messageId], references: [id])
+  messageId String
+
+  @@index([messageId])
 }

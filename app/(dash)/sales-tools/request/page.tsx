@@ -1,81 +1,63 @@
-import { submitRequest } from "./actions";
+"use client";
 
-export default function Page() {
+import { Suspense, useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
+import RequestForm from "@/components/sales-tools/RequestForm";
+import { useToast } from "@/components/ui/use-toast";
+
+export default function RequestPage() {
+  const { toast } = useToast();
+  const { data: session } = useSession();
+  const [userProfile, setUserProfile] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch user profile with rep code and manager info
+  useEffect(() => {
+    if (!session?.user?.email) {
+      setLoading(false);
+      return;
+    }
+
+    fetch("/api/user/profile")
+      .then((res) => res.json())
+      .then((data) => {
+        setUserProfile(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Failed to fetch user profile:", err);
+        setLoading(false);
+      });
+  }, [session]);
+
+  // Listen for form-level browser events (optional safety for unexpected errors)
+  useEffect(() => {
+    const handler = (e: ErrorEvent) => {
+      toast({
+        title: "Unexpected error",
+        description: e.message || "Something went wrong.",
+        variant: "destructive",
+      });
+    };
+    window.addEventListener("error", handler);
+    return () => window.removeEventListener("error", handler);
+  }, [toast]);
+
+  if (loading) {
+    return <div className="text-sm text-neutral-400">Loading…</div>;
+  }
+
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">Request Form</h1>
-
-      <form action={submitRequest} className="max-w-2xl space-y-4">
-        <div>
-          <label htmlFor="manufacturer" className="block text-sm font-medium mb-2">
-            Manufacturer
-          </label>
-          <select
-            id="manufacturer"
-            name="manufacturer"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md"
-            required
-          >
-            <option value="">Select Manufacturer</option>
-            <option value="diamond">Diamond Cargo</option>
-            <option value="quality">Quality Cargo</option>
-            <option value="cargo-craft">Cargo Craft</option>
-            <option value="panther">Panther Trailers</option>
-          </select>
-        </div>
-
-        <div>
-          <label htmlFor="purpose" className="block text-sm font-medium mb-2">
-            Purpose
-          </label>
-          <select
-            id="purpose"
-            name="purpose"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md"
-            required
-          >
-            <option value="">Select Purpose</option>
-            <option value="quote">Get Quote</option>
-            <option value="availability">Check Availability</option>
-            <option value="specs">Request Specs</option>
-            <option value="other">Other</option>
-          </select>
-        </div>
-
-        <div>
-          <label htmlFor="vin" className="block text-sm font-medium mb-2">
-            VIN / Order Number (Optional)
-          </label>
-          <input
-            type="text"
-            id="vin"
-            name="vin"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md"
-            placeholder="Enter VIN or Order #"
-          />
-        </div>
-
-        <div>
-          <label htmlFor="message" className="block text-sm font-medium mb-2">
-            Message
-          </label>
-          <textarea
-            id="message"
-            name="message"
-            rows={5}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md"
-            placeholder="Enter your message..."
-            required
-          />
-        </div>
-
-        <button
-          type="submit"
-          className="px-6 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700"
-        >
-          Submit Request
-        </button>
-      </form>
-    </div>
+    <Suspense fallback={<div className="text-sm text-neutral-400">Loading…</div>}>
+      <div className="mx-auto w-full max-w-2xl">
+        <h1 className="mb-2 text-2xl font-semibold tracking-tight">
+          Request Tool
+        </h1>
+        <p className="mb-6 text-sm text-neutral-400">
+          Submit a quick request. We'll email the details and log it.
+        </p>
+        <RequestForm userProfile={userProfile} />
+      </div>
+    </Suspense>
   );
 }

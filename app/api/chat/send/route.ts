@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 
-export async function GET(req: NextRequest) {
+export async function POST(req: NextRequest) {
   try {
     // 1) Auth check
     const session = await getServerSession(authOptions);
@@ -11,13 +11,13 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // 2) Get threadId from query params
-    const { searchParams } = new URL(req.url);
-    const threadId = searchParams.get("threadId");
+    // 2) Parse request body
+    const body = await req.json();
+    const { threadId, body: messageBody } = body;
 
-    if (!threadId) {
+    if (!threadId || !messageBody?.trim()) {
       return NextResponse.json(
-        { error: "threadId is required" },
+        { error: "threadId and body are required" },
         { status: 400 }
       );
     }
@@ -47,13 +47,12 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // 5) Fetch messages for this thread
-    const messages = await prisma.chatMessage.findMany({
-      where: {
+    // 5) Create the message
+    const message = await prisma.chatMessage.create({
+      data: {
+        body: messageBody.trim(),
+        senderId: currentUser.id,
         threadId,
-      },
-      orderBy: {
-        createdAt: "asc",
       },
       include: {
         sender: {
@@ -63,14 +62,23 @@ export async function GET(req: NextRequest) {
             email: true,
           },
         },
-        attachments: true,
       },
     });
 
-    return NextResponse.json(messages);
+    // 6) Update thread's updatedAt timestamp
+    await prisma.chatThread.update({
+      where: { id: threadId },
+      data: { updatedAt: new Date() },
+    });
+
+    return NextResponse.json({
+      ok: true,
+      message: "Message sent successfully",
+      data: message,
+    });
   } catch (err: unknown) {
-    console.error("Error fetching chat messages:", err);
-    const msg = err instanceof Error ? err.message : "Failed to fetch messages";
+    console.error("Error sending message:", err);
+    const msg = err instanceof Error ? err.message : "Failed to send message";
     return NextResponse.json({ error: msg }, { status: 500 });
   }
 }
