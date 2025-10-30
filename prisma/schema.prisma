@@ -106,6 +106,8 @@ model UserProfile {
   zipcode         String?
   city            String?
   about           String?  @db.Text // Professional bio / about section
+  avatarUrl       String?  @db.Text // Profile avatar/photo URL
+  coverUrl        String?  @db.Text // Profile cover/banner image URL
   zip             String?  // Legacy field, use zipcode instead
   salespersonCode String?  @unique // REP12345, SMR12345, or VIP12345
   role            String   @default("salesperson") // "owner", "manager", "salesperson", "director"

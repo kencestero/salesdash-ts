@@ -875,9 +875,9 @@ export const menusConfig = {
             href: "/user-management",
           },
           {
-            title: "Profile",
-            icon: Users,
-            href: "/profile",
+            title: "Photo Request",
+            icon: Mail,
+            href: "/request-photos",
           },
           {
             title: "chat",
