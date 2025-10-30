@@ -2,12 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { Resend } from "resend";
-import PasswordChangedEmail from "@/lib/email/templates/password-changed";
-import { render } from "@react-email/render";
 
 export async function POST(req: NextRequest) {
-  // Initialize Resend inside the function for serverless compatibility
-  const resend = new Resend(process.env.RESEND_API_KEY);
   try {
     const { token, password } = await req.json();
 
@@ -71,19 +67,59 @@ export async function POST(req: NextRequest) {
         timeZoneName: "short",
       });
 
-      const emailHtml = render(
-        PasswordChangedEmail({
-          userName: user.name || "there",
-          changeTime,
-          loginLink: `${process.env.NEXTAUTH_URL}/en/auth/login`,
-        })
-      );
+      const resend = new Resend(process.env.RESEND_API_KEY);
 
       await resend.emails.send({
         from: process.env.RESEND_FROM_EMAIL?.replace(/^["']|["']$/g, '') || 'MJ Cargo Sales <noreply@mjsalesdash.com>',
         to: user.email!,
         subject: "Your MJ SalesDash Password Has Been Changed",
-        html: emailHtml,
+        html: `
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <meta charset="utf-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            </head>
+            <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f6f9fc;">
+              <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f6f9fc; padding: 40px 0;">
+                <tr>
+                  <td align="center">
+                    <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border: 1px solid #e6ebf1; border-radius: 8px;">
+                      <tr>
+                        <td style="background-color: #E96114; padding: 30px; text-align: center;">
+                          <h1 style="color: #ffffff; margin: 0; font-size: 24px;">MJ CARGO TRAILERS</h1>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 40px 30px;">
+                          <h2 style="color: #1a1a1a; font-size: 24px; margin: 0 0 16px 0;">Hi ${user.name || 'there'}! 🔐</h2>
+                          <p style="color: #525252; font-size: 16px; line-height: 24px;">Your password for MJ SalesDash has been successfully changed.</p>
+                          <p style="color: #666; font-size: 14px; margin-top: 16px;"><strong>Time:</strong> ${changeTime}</p>
+                          <p style="color: #666; font-size: 14px;">If you made this change, you can safely ignore this email.</p>
+                          <div style="background-color: #fef2f2; border-left: 4px solid #dc2626; padding: 16px; margin-top: 24px;">
+                            <p style="color: #dc2626; font-size: 14px; margin: 0;"><strong>⚠️ Didn't change your password?</strong><br/>If you did NOT make this change, contact your system administrator immediately.</p>
+                          </div>
+                          <table width="100%" cellpadding="0" cellspacing="0" style="margin-top: 30px;">
+                            <tr>
+                              <td align="center">
+                                <a href="${process.env.NEXTAUTH_URL}/en/auth/login" style="background-color: #E96114; color: #ffffff; text-decoration: none; padding: 12px 32px; border-radius: 6px; font-size: 16px; font-weight: bold; display: inline-block;">Login to SalesDash</a>
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="background-color: #f9fafb; padding: 24px; text-align: center; border-top: 1px solid #e6ebf1;">
+                          <p style="color: #8b8b8b; font-size: 12px; margin: 0;">This is an automated security notification.</p>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </body>
+          </html>
+        `,
       });
     } catch (emailError) {
       // Log email error but don't fail the password reset
