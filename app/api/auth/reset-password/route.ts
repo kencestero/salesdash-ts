@@ -5,9 +5,9 @@ import { Resend } from "resend";
 import PasswordChangedEmail from "@/lib/email/templates/password-changed";
 import { render } from "@react-email/render";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 export async function POST(req: NextRequest) {
+  // Initialize Resend inside the function for serverless compatibility
+  const resend = new Resend(process.env.RESEND_API_KEY);
   try {
     const { token, password } = await req.json();
 
