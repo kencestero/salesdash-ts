@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
+import { Resend } from "resend";
+import PasswordChangedEmail from "@/lib/email/templates/password-changed";
+import { render } from "@react-email/render";
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(req: NextRequest) {
   try {
@@ -53,6 +58,37 @@ export async function POST(req: NextRequest) {
         resetTokenExpiry: null,
       },
     });
+
+    // Send confirmation email
+    try {
+      const changeTime = new Date().toLocaleString("en-US", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "numeric",
+        minute: "numeric",
+        timeZoneName: "short",
+      });
+
+      const emailHtml = render(
+        PasswordChangedEmail({
+          userName: user.name || "there",
+          changeTime,
+          loginLink: `${process.env.NEXTAUTH_URL}/en/auth/login`,
+        })
+      );
+
+      await resend.emails.send({
+        from: process.env.RESEND_FROM_EMAIL?.replace(/^["']|["']$/g, '') || 'MJ Cargo Sales <noreply@mjsalesdash.com>',
+        to: user.email!,
+        subject: "Your MJ SalesDash Password Has Been Changed",
+        html: emailHtml,
+      });
+    } catch (emailError) {
+      // Log email error but don't fail the password reset
+      console.error("Failed to send password change confirmation email:", emailError);
+    }
 
     return NextResponse.json({
       message: "Password reset successfully",
