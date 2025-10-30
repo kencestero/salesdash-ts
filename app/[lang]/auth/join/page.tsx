@@ -106,7 +106,16 @@ export default function RegisterPage() {
       setErr("");
     } else {
       const j = await r.json().catch(() => ({}));
-      setErr(j?.message || "Invalid or expired code.");
+
+      // Show attempts remaining if provided
+      if (j?.attemptsRemaining !== undefined && j.attemptsRemaining > 0) {
+        setErr(`${j?.message || "Invalid or expired code."} (${j.attemptsRemaining} attempts remaining)`);
+      } else if (r.status === 429) {
+        // Rate limited
+        setErr(j?.message || "Too many failed attempts. Please try again later.");
+      } else {
+        setErr(j?.message || "Invalid or expired code.");
+      }
     }
   }
 
