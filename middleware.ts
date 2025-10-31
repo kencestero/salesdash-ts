@@ -61,13 +61,6 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  // 3c. Redirect shortcut routes to full dashboard paths
-  if (pathname === `/${DEFAULT_LANG}/inventory`) {
-    const url = req.nextUrl.clone();
-    url.pathname = `/${DEFAULT_LANG}/dashboard/inventory`;
-    return NextResponse.redirect(url);
-  }
-
   // 4. Auth check - Check for session cookie (database strategy)
   const sessionToken = req.cookies.get("next-auth.session-token") ||
                        req.cookies.get("__Secure-next-auth.session-token");
