@@ -14,8 +14,8 @@ export interface ColumnConfig {
 
 const DEFAULT_COLUMNS: ColumnConfig[] = [
   { id: 'select', label: 'Select', visible: true, order: 0, width: 'w-12' },
-  { id: 'vin', label: 'VIN', visible: true, order: 1, width: 'w-40' },
-  { id: 'stockNumber', label: 'Stock #', visible: true, order: 2, width: 'w-32' },
+  { id: 'stockVin', label: 'Stock/VIN', visible: true, order: 1, width: 'w-40' },
+  { id: 'manufacturer', label: 'Manufacturer', visible: true, order: 2, width: 'w-48' },
   { id: 'image', label: 'Image', visible: true, order: 3, width: 'w-24' },
   { id: 'size', label: 'Size', visible: true, order: 4, width: 'w-32' },
   { id: 'details', label: 'Details', visible: true, order: 5, width: 'w-48' },

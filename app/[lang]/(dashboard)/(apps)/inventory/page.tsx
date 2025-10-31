@@ -4,6 +4,8 @@ import { useState, useEffect, useRef } from "react";
 import { Search, Eye, FileText, Upload, X, ArrowUp, Info, History } from "lucide-react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
+import { useDraggableColumns } from '@/hooks/use-draggable-columns';
+import { ColumnManager } from '@/components/inventory/column-manager';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -106,6 +108,20 @@ export default function InventoryPage() {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Draggable columns hook
+  const {
+    columns,
+    allColumns,
+    handleDragStart,
+    handleDragOver,
+    handleDragEnd,
+    handleDrop,
+    toggleColumnVisibility,
+    moveColumn,
+    resetColumns
+  } = useDraggableColumns();
+
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
@@ -347,6 +363,16 @@ export default function InventoryPage() {
           <p className="text-lg text-gray-400 mt-1">Manage your trailer inventory</p>
         </div>
         <div className="flex gap-3">
+          <ColumnManager
+            columns={allColumns}
+            onToggleVisibility={toggleColumnVisibility}
+            onMoveColumn={moveColumn}
+            onReset={resetColumns}
+            onDragStart={handleDragStart}
+            onDragOver={handleDragOver}
+            onDragEnd={handleDragEnd}
+            onDrop={handleDrop}
+          />
           {mounted && canUploadPDF && (
             <Link href="/dashboard/inventory/history">
               <Button
@@ -503,22 +529,27 @@ export default function InventoryPage() {
               <Table>
                 <TableHeader>
                   <TableRow className="border-gray-700">
-                    <TableHead className="text-gray-400 w-12 text-base">
-                      <Checkbox
-                        checked={allSelected}
-                        onCheckedChange={handleSelectAll}
-                        aria-label="Select all"
-                      />
-                    </TableHead>
-                    <TableHead className="text-gray-400 text-base font-bold">Stock/VIN</TableHead>
-                    <TableHead className="text-gray-400 text-base font-bold">Manufacturer</TableHead>
-                    <TableHead className="text-gray-400 text-base font-bold">Image</TableHead>
-                    <TableHead className="text-gray-400 text-base font-bold">Size</TableHead>
-                    <TableHead className="text-gray-400 text-base font-bold">Details</TableHead>
-                    <TableHead className="text-gray-400 text-base font-bold">Price</TableHead>
-                    <TableHead className="text-gray-400 text-base font-bold">Status</TableHead>
-                    <TableHead className="text-gray-400 text-base font-bold">Notes</TableHead>
-                    <TableHead className="text-gray-400 text-base font-bold">Actions</TableHead>
+                    {columns.map((column) => (
+                      <TableHead
+                        key={column.id}
+                        draggable
+                        onDragStart={() => handleDragStart(column.id)}
+                        onDragOver={(e) => handleDragOver(e, column.id)}
+                        onDragEnd={handleDragEnd}
+                        onDrop={(e) => handleDrop(e, column.id)}
+                        className={`text-gray-400 text-base font-bold cursor-move ${column.width || ''}`}
+                      >
+                        {column.id === 'select' ? (
+                          <Checkbox
+                            checked={allSelected}
+                            onCheckedChange={handleSelectAll}
+                            aria-label="Select all"
+                          />
+                        ) : (
+                          column.label
+                        )}
+                      </TableHead>
+                    ))}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -527,177 +558,205 @@ export default function InventoryPage() {
 
                     return (
                       <TableRow key={trailer.id} className="border-gray-700 hover:bg-[#0f1117]">
-                        <TableCell>
-                          <Checkbox
-                            checked={selectedTrailers.includes(trailer.id)}
-                            onCheckedChange={(checked) =>
-                              handleSelectTrailer(trailer.id, checked as boolean)
-                            }
-                            aria-label={`Select ${trailer.stockNumber}`}
-                          />
-                        </TableCell>
+                        {columns.map((column) => {
+                          switch(column.id) {
+                            case 'select':
+                              return (
+                                <TableCell key={column.id}>
+                                  <Checkbox
+                                    checked={selectedTrailers.includes(trailer.id)}
+                                    onCheckedChange={(checked) =>
+                                      handleSelectTrailer(trailer.id, checked as boolean)
+                                    }
+                                    aria-label={`Select ${trailer.stockNumber}`}
+                                  />
+                                </TableCell>
+                              );
 
-                        {/* Stock/VIN Stacked */}
-                        <TableCell>
-                          <div className="space-y-1">
-                            <div className="font-bold text-white text-base flex items-center gap-2">
-                              {trailer.stockNumber}
-                              {trailer.daysOld !== undefined && trailer.daysOld <= 2 && (
-                                <FireBadge daysOld={trailer.daysOld} size="sm" />
-                              )}
-                            </div>
-                            <div className="font-mono text-[#f5a623] text-sm">
-                              {trailer.vin}
-                            </div>
-                          </div>
-                        </TableCell>
+                            case 'stockVin':
+                              return (
+                                <TableCell key={column.id}>
+                                  <div className="space-y-1">
+                                    <div className="font-bold text-white text-base flex items-center gap-2">
+                                      {trailer.stockNumber}
+                                      {trailer.daysOld !== undefined && trailer.daysOld <= 2 && (
+                                        <FireBadge daysOld={trailer.daysOld} size="sm" />
+                                      )}
+                                    </div>
+                                    <div className="font-mono text-[#f5a623] text-sm">
+                                      {trailer.vin}
+                                    </div>
+                                  </div>
+                                </TableCell>
+                              );
 
-                        {/* Manufacturer Logo + Name */}
-                        <TableCell>
-                          <div className="flex items-center gap-3">
-                            {trailer.manufacturer.toLowerCase().includes('diamond') ? (
-                              <img
-                                src="/images/logo/dctranslogo.png"
-                                alt="Diamond Cargo"
-                                className="w-12 h-12 object-contain"
-                              />
-                            ) : trailer.manufacturer.toLowerCase().includes('quality') ? (
-                              <img
-                                src="/images/logo/qualitycargologo.webp"
-                                alt="Quality Cargo"
-                                className="w-12 h-12 object-contain"
-                              />
-                            ) : (
-                              <div className="w-12 h-12 bg-gray-700 rounded flex items-center justify-center text-xs text-gray-400">
-                                MJ
-                              </div>
-                            )}
-                            <div className={`text-base font-bold ${
-                              trailer.manufacturer.toLowerCase().includes('diamond')
-                                ? 'text-blue-400'
-                                : trailer.manufacturer.toLowerCase().includes('quality')
-                                ? 'text-red-400'
-                                : 'text-white'
-                            }`}>
-                              {trailer.manufacturer}
-                            </div>
-                          </div>
-                        </TableCell>
+                            case 'manufacturer':
+                              return (
+                                <TableCell key={column.id}>
+                                  <div className="flex items-center gap-3">
+                                    {trailer.manufacturer.toLowerCase().includes('diamond') ? (
+                                      <img
+                                        src="/images/logo/dctranslogo.png"
+                                        alt="Diamond Cargo"
+                                        className="w-12 h-12 object-contain"
+                                      />
+                                    ) : trailer.manufacturer.toLowerCase().includes('quality') ? (
+                                      <img
+                                        src="/images/logo/qualitycargologo.webp"
+                                        alt="Quality Cargo"
+                                        className="w-12 h-12 object-contain"
+                                      />
+                                    ) : (
+                                      <div className="w-12 h-12 bg-gray-700 rounded flex items-center justify-center text-xs text-gray-400">
+                                        MJ
+                                      </div>
+                                    )}
+                                    <div className={`text-base font-bold ${
+                                      trailer.manufacturer.toLowerCase().includes('diamond')
+                                        ? 'text-blue-400'
+                                        : trailer.manufacturer.toLowerCase().includes('quality')
+                                        ? 'text-red-400'
+                                        : 'text-white'
+                                    }`}>
+                                      {trailer.manufacturer}
+                                    </div>
+                                  </div>
+                                </TableCell>
+                              );
 
-                        {/* Image */}
-                        <TableCell>
-                          {trailer.images && trailer.images.length > 0 ? (
-                            <img
-                              src={trailer.images[0]}
-                              alt={trailer.model}
-                              className="w-20 h-20 object-cover rounded"
-                            />
-                          ) : (
-                            <div className="w-20 h-20 bg-gray-700 rounded flex items-center justify-center text-gray-400 text-sm">
-                              No Image
-                            </div>
-                          )}
-                        </TableCell>
+                            case 'image':
+                              return (
+                                <TableCell key={column.id}>
+                                  {trailer.images && trailer.images.length > 0 ? (
+                                    <img
+                                      src={trailer.images[0]}
+                                      alt={trailer.model}
+                                      className="w-20 h-20 object-cover rounded"
+                                    />
+                                  ) : (
+                                    <div className="w-20 h-20 bg-gray-700 rounded flex items-center justify-center text-gray-400 text-sm">
+                                      No Image
+                                    </div>
+                                  )}
+                                </TableCell>
+                              );
 
-                        {/* Size - 2.5x LARGER */}
-                        <TableCell className="text-white font-bold text-3xl">
-                          {trailer.length}' × {trailer.width}'
-                          {trailer.height && <div className="text-sm text-gray-400 font-normal">H: {trailer.height}'</div>}
-                        </TableCell>
+                            case 'size':
+                              return (
+                                <TableCell key={column.id} className="text-white font-bold text-3xl">
+                                  {trailer.length}' × {trailer.width}'
+                                  {trailer.height && <div className="text-sm text-gray-400 font-normal">H: {trailer.height}'</div>}
+                                </TableCell>
+                              );
 
-                        {/* Details - REMOVED YEAR, COLOR CODED MANUFACTURER */}
-                        <TableCell className="text-white">
-                          <div className={`text-lg font-semibold ${
-                            trailer.manufacturer.toLowerCase().includes('diamond')
-                              ? 'text-blue-400'
-                              : trailer.manufacturer.toLowerCase().includes('quality')
-                              ? 'text-red-400'
-                              : 'text-white'
-                          }`}>
-                            {trailer.manufacturer}
-                          </div>
-                          <div className="text-base text-gray-300">{trailer.model}</div>
-                          <div className="text-sm text-gray-400">{trailerCategory}</div>
-                        </TableCell>
+                            case 'details':
+                              return (
+                                <TableCell key={column.id} className="text-white">
+                                  <div className={`text-lg font-semibold ${
+                                    trailer.manufacturer.toLowerCase().includes('diamond')
+                                      ? 'text-blue-400'
+                                      : trailer.manufacturer.toLowerCase().includes('quality')
+                                      ? 'text-red-400'
+                                      : 'text-white'
+                                  }`}>
+                                    {trailer.manufacturer}
+                                  </div>
+                                  <div className="text-base text-gray-300">{trailer.model}</div>
+                                  <div className="text-sm text-gray-400">{trailerCategory}</div>
+                                </TableCell>
+                              );
 
-                        {/* Price - SHOW MAKE OFFER OR SALE PRICE */}
-                        <TableCell className="text-white">
-                          {trailer.makeOffer ? (
-                            <div>
-                              <div className="text-xl font-black text-red-600 animate-pulse">
-                                MAKE OFFER
-                              </div>
-                              <div className="text-xs text-gray-500">
-                                Cost: {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(trailer.cost)}
-                              </div>
-                            </div>
-                          ) : (
-                            <div>
-                              <div className="text-xl font-bold text-green-400">
-                                {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(trailer.salePrice)}
-                              </div>
-                              {trailer.msrp > trailer.salePrice && (
-                                <div className="text-xs text-gray-500 line-through">
-                                  MSRP: {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(trailer.msrp)}
-                                </div>
-                              )}
-                            </div>
-                          )}
-                        </TableCell>
+                            case 'price':
+                              return (
+                                <TableCell key={column.id} className="text-white">
+                                  {trailer.makeOffer ? (
+                                    <div>
+                                      <div className="text-xl font-black text-red-600 animate-pulse">
+                                        MAKE OFFER
+                                      </div>
+                                      <div className="text-xs text-gray-500">
+                                        Cost: {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(trailer.cost)}
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <div>
+                                      <div className="text-xl font-bold text-green-400">
+                                        {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(trailer.salePrice)}
+                                      </div>
+                                      {trailer.msrp > trailer.salePrice && (
+                                        <div className="text-xs text-gray-500 line-through">
+                                          MSRP: {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(trailer.msrp)}
+                                        </div>
+                                      )}
+                                    </div>
+                                  )}
+                                </TableCell>
+                              );
 
-                        {/* Status */}
-                        <TableCell>
-                          <Badge className={`${getStatusColor(trailer.status)} text-white text-sm px-3 py-1`}>
-                            {trailer.status}
-                          </Badge>
-                        </TableCell>
+                            case 'status':
+                              return (
+                                <TableCell key={column.id}>
+                                  <Badge className={`${getStatusColor(trailer.status)} text-white text-sm px-3 py-1`}>
+                                    {trailer.status}
+                                  </Badge>
+                                </TableCell>
+                              );
 
-                        {/* Notes/Options with Tooltip */}
-                        <TableCell>
-                          {trailer.description && (
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="text-blue-400 hover:text-blue-300"
-                                  >
-                                    <Info className="h-5 w-5" />
-                                  </Button>
-                                </TooltipTrigger>
-                                <TooltipContent className="max-w-md bg-[#1a1d29] border-gray-700 text-white">
-                                  <p className="text-sm whitespace-pre-wrap">{trailer.description}</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                          )}
-                        </TableCell>
+                            case 'notes':
+                              return (
+                                <TableCell key={column.id}>
+                                  {trailer.description && (
+                                    <TooltipProvider>
+                                      <Tooltip>
+                                        <TooltipTrigger asChild>
+                                          <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className="text-blue-400 hover:text-blue-300"
+                                          >
+                                            <Info className="h-5 w-5" />
+                                          </Button>
+                                        </TooltipTrigger>
+                                        <TooltipContent className="max-w-md bg-[#1a1d29] border-gray-700 text-white">
+                                          <p className="text-sm whitespace-pre-wrap">{trailer.description}</p>
+                                        </TooltipContent>
+                                      </Tooltip>
+                                    </TooltipProvider>
+                                  )}
+                                </TableCell>
+                              );
 
-                        {/* Actions */}
-                        <TableCell>
-                          <div className="flex gap-2">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="text-blue-400 hover:text-blue-300"
-                              onClick={() => window.open(`/dashboard/inventory/${trailer.id}`, '_blank')}
-                            >
-                              <Eye className="h-5 w-5" />
-                            </Button>
-                            {mounted && canUploadPDF && (
-                              <Link href={`/dashboard/inventory/${trailer.id}/edit`}>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="text-green-400 hover:text-green-300"
-                                >
-                                  Edit
-                                </Button>
-                              </Link>
-                            )}
-                          </div>
-                        </TableCell>
+                            case 'actions':
+                              return (
+                                <TableCell key={column.id}>
+                                  <div className="flex gap-2">
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="text-blue-400 hover:text-blue-300"
+                                      onClick={() => window.open(`/dashboard/inventory/${trailer.id}`, '_blank')}
+                                    >
+                                      <Eye className="h-5 w-5" />
+                                    </Button>
+                                    {mounted && canUploadPDF && (
+                                      <Link href={`/dashboard/inventory/${trailer.id}/edit`}>
+                                        <Button
+                                          variant="ghost"
+                                          size="sm"
+                                          className="text-green-400 hover:text-green-300"
+                                        >
+                                          Edit
+                                        </Button>
+                                      </Link>
+                                    )}
+                                  </div>
+                                </TableCell>
+                              );
+
+                            default:
+                              return <TableCell key={column.id}>-</TableCell>;
+                          }
+                        })}
                       </TableRow>
                     );
                   })}
