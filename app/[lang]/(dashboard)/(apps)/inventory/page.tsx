@@ -510,8 +510,8 @@ export default function InventoryPage() {
                         aria-label="Select all"
                       />
                     </TableHead>
-                    <TableHead className="text-gray-400 text-base font-bold">VIN</TableHead>
-                    <TableHead className="text-gray-400 text-base font-bold">Stock #</TableHead>
+                    <TableHead className="text-gray-400 text-base font-bold">Stock/VIN</TableHead>
+                    <TableHead className="text-gray-400 text-base font-bold">Manufacturer</TableHead>
                     <TableHead className="text-gray-400 text-base font-bold">Image</TableHead>
                     <TableHead className="text-gray-400 text-base font-bold">Size</TableHead>
                     <TableHead className="text-gray-400 text-base font-bold">Details</TableHead>
@@ -537,18 +537,50 @@ export default function InventoryPage() {
                           />
                         </TableCell>
 
-                        {/* VIN - BRIGHT ORANGE AND BOLD */}
-                        <TableCell className="font-black text-[#f5a623] text-lg">
-                          {trailer.vin}
+                        {/* Stock/VIN Stacked */}
+                        <TableCell>
+                          <div className="space-y-1">
+                            <div className="font-bold text-white text-base flex items-center gap-2">
+                              {trailer.stockNumber}
+                              {trailer.daysOld !== undefined && trailer.daysOld <= 2 && (
+                                <FireBadge daysOld={trailer.daysOld} size="sm" />
+                              )}
+                            </div>
+                            <div className="font-mono text-[#f5a623] text-sm">
+                              {trailer.vin}
+                            </div>
+                          </div>
                         </TableCell>
 
-                        {/* Stock Number */}
-                        <TableCell className="font-medium text-white text-base">
-                          <div className="flex items-center gap-2">
-                            {trailer.stockNumber}
-                            {trailer.daysOld !== undefined && trailer.daysOld <= 2 && (
-                              <FireBadge daysOld={trailer.daysOld} size="sm" />
+                        {/* Manufacturer Logo + Name */}
+                        <TableCell>
+                          <div className="flex items-center gap-3">
+                            {trailer.manufacturer.toLowerCase().includes('diamond') ? (
+                              <img
+                                src="/images/logo/dctranslogo.png"
+                                alt="Diamond Cargo"
+                                className="w-12 h-12 object-contain"
+                              />
+                            ) : trailer.manufacturer.toLowerCase().includes('quality') ? (
+                              <img
+                                src="/images/logo/qualitycargologo.webp"
+                                alt="Quality Cargo"
+                                className="w-12 h-12 object-contain"
+                              />
+                            ) : (
+                              <div className="w-12 h-12 bg-gray-700 rounded flex items-center justify-center text-xs text-gray-400">
+                                MJ
+                              </div>
                             )}
+                            <div className={`text-base font-bold ${
+                              trailer.manufacturer.toLowerCase().includes('diamond')
+                                ? 'text-blue-400'
+                                : trailer.manufacturer.toLowerCase().includes('quality')
+                                ? 'text-red-400'
+                                : 'text-white'
+                            }`}>
+                              {trailer.manufacturer}
+                            </div>
                           </div>
                         </TableCell>
 
