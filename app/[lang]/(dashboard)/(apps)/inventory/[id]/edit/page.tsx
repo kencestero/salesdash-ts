@@ -90,17 +90,17 @@ export default function EditTrailerPage() {
       if (!res.ok) throw new Error("Failed to fetch trailer");
 
       const data = await res.json();
-      setTrailer(data);
+      setTrailer(data.trailer);
 
       // Pre-fill form
-      const autoPrice = calculateDesiredPrice(data.cost);
-      const isAutoPrice = Math.abs(data.salePrice - autoPrice) < 1; // Check if using auto-calculated price
+      const autoPrice = calculateDesiredPrice(data.trailer.cost);
+      const isAutoPrice = Math.abs(data.trailer.salePrice - autoPrice) < 1; // Check if using auto-calculated price
 
-      setSalePrice(data.salePrice);
-      setMakeOffer(data.makeOffer);
-      setStatus(data.status);
-      setLocation(data.location || "");
-      setDescription(data.description || "");
+      setSalePrice(data.trailer.salePrice);
+      setMakeOffer(data.trailer.makeOffer);
+      setStatus(data.trailer.status);
+      setLocation(data.trailer.location || "");
+      setDescription(data.trailer.description || "");
       setUseAutoPrice(isAutoPrice);
     } catch (error) {
       console.error("Failed to fetch trailer:", error);
