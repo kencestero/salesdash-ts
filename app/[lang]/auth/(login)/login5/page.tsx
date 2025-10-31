@@ -19,9 +19,6 @@ export default function LoginPage() {
   const [isPending, startTransition] = useTransition();
   const logoRef = useRef<HTMLDivElement>(null);
 
-  const targetPos = useRef({ x: 0, y: 0 });
-  const currentPos = useRef({ x: 0, y: 0 });
-
   const starPositions = useMemo(() => {
     return [...Array(45)].map(() => ({
       top: `${Math.random() * 100}%`,
@@ -46,11 +43,6 @@ export default function LoginPage() {
     setTimeout(() => setShowForm(true), 200);
 
     const handleMouseMove = (e: MouseEvent) => {
-      targetPos.current = {
-        x: (e.clientX - window.innerWidth / 2) * 0.05,
-        y: (e.clientY - 150) * 0.05
-      };
-
       if (logoRef.current) {
         const rect = logoRef.current.getBoundingClientRect();
         const centerX = rect.left + rect.width / 2;
@@ -77,24 +69,11 @@ export default function LoginPage() {
       }
     };
 
-    let animationId: number;
-    const animate = () => {
-      currentPos.current.x += (targetPos.current.x - currentPos.current.x) * 0.1;
-      currentPos.current.y += (targetPos.current.y - currentPos.current.y) * 0.1;
-
-      if (logoRef.current) {
-        logoRef.current.style.transform = `translate(calc(-50% + ${currentPos.current.x}px), ${currentPos.current.y}px)`;
-      }
-
-      animationId = requestAnimationFrame(animate);
-    };
-
-    animate();
+    // Logo stays fixed - no mouse tracking movement
     window.addEventListener('mousemove', handleMouseMove);
 
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
-      cancelAnimationFrame(animationId);
     };
   }, []);
 
