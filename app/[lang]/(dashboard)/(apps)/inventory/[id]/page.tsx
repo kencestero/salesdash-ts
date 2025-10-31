@@ -96,7 +96,7 @@ export default function TrailerDetailPage() {
         description: "Failed to load trailer details",
         variant: "destructive",
       });
-      router.push("/dashboard/inventory");
+      router.push("/inventory");
     } finally {
       setLoading(false);
     }
@@ -130,7 +130,7 @@ export default function TrailerDetailPage() {
       <div className="flex items-center justify-center min-h-screen bg-[#0f1117]">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-white">Trailer not found</h2>
-          <Button onClick={() => router.push("/dashboard/inventory")} className="mt-4">
+          <Button onClick={() => router.push("/inventory")} className="mt-4">
             Back to Inventory
           </Button>
         </div>
@@ -158,7 +158,7 @@ export default function TrailerDetailPage() {
           <Button
             variant="outline"
             size="icon"
-            onClick={() => router.push("/dashboard/inventory")}
+            onClick={() => router.push("/inventory")}
             className="border-gray-700 text-white hover:bg-[#1a1d29]"
           >
             <ArrowLeft className="h-4 w-4" />
@@ -181,7 +181,7 @@ export default function TrailerDetailPage() {
           </div>
         </div>
         {canEdit && (
-          <Link href={`/dashboard/inventory/${trailer.id}/edit`}>
+          <Link href={`/inventory/${trailer.id}/edit`}>
             <Button className="bg-green-500 hover:bg-green-600 text-white">
               <Edit className="w-4 h-4 mr-2" />
               Edit Trailer
