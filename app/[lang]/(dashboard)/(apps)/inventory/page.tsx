@@ -374,7 +374,7 @@ export default function InventoryPage() {
             onDrop={handleDrop}
           />
           {mounted && canUploadPDF && (
-            <Link href="/dashboard/inventory/history">
+            <Link href="/inventory/history">
               <Button
                 variant="outline"
                 className="border-gray-600 text-gray-300 hover:bg-[#1a1d29] hover:text-white text-base px-6"
@@ -734,12 +734,12 @@ export default function InventoryPage() {
                                       variant="ghost"
                                       size="sm"
                                       className="text-blue-400 hover:text-blue-300"
-                                      onClick={() => window.open(`/dashboard/inventory/${trailer.id}`, '_blank')}
+                                      onClick={() => window.open(`/inventory/${trailer.id}`, '_blank')}
                                     >
                                       <Eye className="h-5 w-5" />
                                     </Button>
                                     {mounted && canUploadPDF && (
-                                      <Link href={`/dashboard/inventory/${trailer.id}/edit`}>
+                                      <Link href={`/inventory/${trailer.id}/edit`}>
                                         <Button
                                           variant="ghost"
                                           size="sm"
@@ -915,7 +915,7 @@ export default function InventoryPage() {
                   )}
 
                   <div className="flex gap-2">
-                    <Link href="/dashboard/inventory/history" className="flex-1">
+                    <Link href="/inventory/history" className="flex-1">
                       <Button
                         variant="outline"
                         className="w-full border-gray-600 text-gray-300 hover:bg-[#0f1117]"

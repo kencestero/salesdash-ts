@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import OpenAI from 'openai';
-import * as pdf from 'pdf-parse';
+import pdf from 'pdf-parse';
 import * as XLSX from 'xlsx';
 
 export const dynamic = "force-dynamic";
@@ -89,7 +89,7 @@ export async function POST(req: Request) {
       if (file.type === 'application/pdf' || fileName.endsWith('.pdf')) {
         // PDF Processing
         console.log('📄 Processing as PDF...');
-        const pdfData = await pdf.default(buffer);
+        const pdfData = await pdf(buffer);
         extractedText = pdfData.text;
         console.log('✅ PDF text extracted:', extractedText.substring(0, 200) + '...');
       } else if (
