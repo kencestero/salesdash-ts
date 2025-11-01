@@ -50,9 +50,12 @@ export async function POST(req: Request) {
       );
     }
 
+    // Normalize email (lowercase and trim)
+    const normalizedEmail = email.toLowerCase().trim();
+
     // 3. Check if user already exists in User table
     const existingUser = await prisma.user.findUnique({
-      where: { email },
+      where: { email: normalizedEmail },
     });
 
     if (existingUser) {
@@ -65,7 +68,7 @@ export async function POST(req: Request) {
     // 4. Check if there's an existing pending registration for this email
     // If yes, delete it and create a new one (allows re-signup if email failed)
     const existingPendingUser = await prisma.pendingUser.findUnique({
-      where: { email },
+      where: { email: normalizedEmail },
     });
 
     if (existingPendingUser) {
@@ -86,7 +89,7 @@ export async function POST(req: Request) {
     console.log('📝 Creating PendingUser record...');
     const pendingUser = await prisma.pendingUser.create({
       data: {
-        email,
+        email: normalizedEmail,
         hashedPassword,
         firstName,
         lastName,
@@ -112,20 +115,24 @@ export async function POST(req: Request) {
     console.log('🔍 RESEND_API_KEY:', process.env.RESEND_API_KEY ? 'EXISTS' : 'MISSING');
 
     if (!process.env.RESEND_API_KEY) {
-      // Email service not configured - FAIL THE REGISTRATION
-      console.error('❌ RESEND_API_KEY is not configured!');
-
-      // Delete the pending user since we can't send email
-      await prisma.pendingUser.delete({
-        where: { id: pendingUser.id },
-      });
-
+      // Dev fallback: allow manual verify link instead of failing
+      console.warn('⚠️ RESEND_API_KEY missing – dev fallback enabled');
+      
+      // We already created PendingUser above; return the verification URL for manual click in non-prod.
+      if (process.env.NODE_ENV !== 'production') {
+        return NextResponse.json({
+          ok: true,
+          message: "Dev mode: copy the verification link and open it to complete signup.",
+          verificationUrl,
+          email,
+        });
+      }
+      
+      // Production: clean up and error (keeps current behavior)
+      await prisma.pendingUser.delete({ where: { id: pendingUser.id } });
       return NextResponse.json(
-        {
-          message: "Email service is not configured. Please contact support.",
-          error: "EMAIL_SERVICE_NOT_CONFIGURED"
-        },
-        { status: 500 }
+        { message: "Email service not configured.", error: "EMAIL_SERVICE_NOT_CONFIGURED" },
+        { status: 503 }
       );
     }
 
