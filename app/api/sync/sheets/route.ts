@@ -36,26 +36,35 @@ export async function GET(req: NextRequest) {
   const startTime = Date.now();
 
   try {
-    // Authentication check
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.email) {
-      return NextResponse.json(
-        { success: false, error: 'Unauthorized - Please login' },
-        { status: 401 }
-      );
-    }
+    // Check for token-based authentication (bypass session check)
+    const { searchParams } = new URL(req.url);
+    const token = searchParams.get('token');
+    const syncToken = process.env.SYNC_TOKEN;
 
-    // Role check - only owners/directors can sync
-    const currentUser = await prisma.user.findUnique({
-      where: { email: session.user.email },
-      include: { profile: true },
-    });
+    if (syncToken && token === syncToken) {
+      console.log('✅ Token authentication successful - bypassing role check');
+    } else {
+      // Session-based authentication
+      const session = await getServerSession(authOptions);
+      if (!session?.user?.email) {
+        return NextResponse.json(
+          { success: false, error: 'Unauthorized - Please login or provide valid token' },
+          { status: 401 }
+        );
+      }
 
-    if (!currentUser || !['owner', 'director'].includes(currentUser.profile?.role || '')) {
-      return NextResponse.json(
-        { success: false, error: 'Insufficient permissions - Only owners/directors can sync' },
-        { status: 403 }
-      );
+      // Role check - only owners/directors can sync
+      const currentUser = await prisma.user.findUnique({
+        where: { email: session.user.email },
+        include: { profile: true },
+      });
+
+      if (!currentUser || !['owner', 'director'].includes(currentUser.profile?.role || '')) {
+        return NextResponse.json(
+          { success: false, error: 'Insufficient permissions - Only owners/directors can sync' },
+          { status: 403 }
+        );
+      }
     }
 
     console.log('🔍 DRY RUN: Previewing Google Sheets sync...');
@@ -165,26 +174,35 @@ export async function POST(req: NextRequest) {
   const startTime = Date.now();
 
   try {
-    // Authentication check
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.email) {
-      return NextResponse.json(
-        { success: false, error: 'Unauthorized - Please login' },
-        { status: 401 }
-      );
-    }
+    // Check for token-based authentication (bypass session check)
+    const { searchParams } = new URL(req.url);
+    const token = searchParams.get('token');
+    const syncToken = process.env.SYNC_TOKEN;
 
-    // Role check - only owners/directors can sync
-    const currentUser = await prisma.user.findUnique({
-      where: { email: session.user.email },
-      include: { profile: true },
-    });
+    if (syncToken && token === syncToken) {
+      console.log('✅ Token authentication successful - bypassing role check');
+    } else {
+      // Session-based authentication
+      const session = await getServerSession(authOptions);
+      if (!session?.user?.email) {
+        return NextResponse.json(
+          { success: false, error: 'Unauthorized - Please login or provide valid token' },
+          { status: 401 }
+        );
+      }
 
-    if (!currentUser || !['owner', 'director'].includes(currentUser.profile?.role || '')) {
-      return NextResponse.json(
-        { success: false, error: 'Insufficient permissions - Only owners/directors can sync' },
-        { status: 403 }
-      );
+      // Role check - only owners/directors can sync
+      const currentUser = await prisma.user.findUnique({
+        where: { email: session.user.email },
+        include: { profile: true },
+      });
+
+      if (!currentUser || !['owner', 'director'].includes(currentUser.profile?.role || '')) {
+        return NextResponse.json(
+          { success: false, error: 'Insufficient permissions - Only owners/directors can sync' },
+          { status: 403 }
+        );
+      }
     }
 
     console.log('🚀 LIVE SYNC: Importing leads from Google Sheets...');
