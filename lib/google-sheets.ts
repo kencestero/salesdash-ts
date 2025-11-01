@@ -7,9 +7,9 @@
 
 import { google } from 'googleapis';
 
-// Google Sheets configuration
-const SHEET_ID = '1LDdEt-0OvJaIdZCoo1r1bF24yVwBP14fO9bPGfO_5jA';
-const SHEET_NAME = 'Form Responses 1';
+// Google Sheets configuration (from environment variables)
+const SHEET_ID = process.env.GOOGLE_SHEETS_ID || '1T9PRlXBS1LBlB5VL9nwn_m3AIcT6KIjqg5lk3Xy1le8';
+const SHEET_NAME = process.env.GOOGLE_SHEETS_TAB || 'Leads';
 const RANGE = `${SHEET_NAME}!A:T`; // Columns A through T (20 columns)
 
 /**
@@ -133,8 +133,14 @@ export async function fetchLeadsFromSheet(): Promise<GoogleSheetLead[]> {
 
 /**
  * Parse a lead from Google Sheets into database-ready format
+ * Defensive: handles missing/empty data gracefully
  */
 export function parseLeadForDatabase(lead: GoogleSheetLead) {
+  // Defensive checks for required fields
+  if (!lead || typeof lead !== 'object') {
+    throw new Error('Invalid lead data: not an object');
+  }
+
   // Parse timestamp
   let createdAt = new Date();
   if (lead.timestamp) {
@@ -153,26 +159,33 @@ export function parseLeadForDatabase(lead: GoogleSheetLead) {
     }
   }
 
-  // Clean phone number
-  const phone = lead.phone.replace(/[^\d+]/g, '') || 'Unknown';
+  // Clean phone number - REQUIRED
+  const phoneRaw = lead.phone?.toString().trim() || '';
+  const phone = phoneRaw.replace(/[^\d+]/g, '') || 'Unknown';
 
   // Use actual email from column Q, or generate from phone
-  const email = lead.email?.trim() || `${phone}@placeholder.com`;
+  const emailRaw = lead.email?.toString().trim() || '';
+  const email = emailRaw && emailRaw.includes('@') ? emailRaw : `${phone}@placeholder.com`;
+
+  // Validate we have at least phone OR valid email
+  if (phone === 'Unknown' && !emailRaw.includes('@')) {
+    throw new Error('Lead must have phone number or valid email');
+  }
 
   // Parse financing type
   let financingType: string | null = null;
-  const financing = lead.financingType.toLowerCase();
+  const financing = (lead.financingType || '').toLowerCase();
   if (financing.includes('cash')) financingType = 'cash';
   else if (financing.includes('finance')) financingType = 'finance';
   else if (financing.includes('rent') || financing.includes('rto')) financingType = 'rto';
 
   // Determine if factory order
-  const isFactoryOrder = lead.stockNumber.toLowerCase().includes('factory') ||
-                         lead.stockNumber.toLowerCase().includes('order');
+  const stockNum = (lead.stockNumber || '').toLowerCase();
+  const isFactoryOrder = stockNum.includes('factory') || stockNum.includes('order');
 
   // Determine status from notes and applied field
   let status = 'new';
-  const allNotes = `${lead.managerNotes} ${lead.repNotes}`.toLowerCase();
+  const allNotes = `${lead.managerNotes || ''} ${lead.repNotes || ''}`.toLowerCase();
 
   if (allNotes.includes('approved')) status = 'approved';
   else if (allNotes.includes('dead') || allNotes.includes('declined')) status = 'dead';
@@ -182,8 +195,8 @@ export function parseLeadForDatabase(lead: GoogleSheetLead) {
 
   return {
     // Names from separate columns (D and E)
-    firstName: lead.firstName.trim() || 'Unknown',
-    lastName: lead.lastName.trim() || '',
+    firstName: lead.firstName?.trim() || 'Unknown',
+    lastName: lead.lastName?.trim() || '',
     email,
     phone,
 
@@ -193,8 +206,8 @@ export function parseLeadForDatabase(lead: GoogleSheetLead) {
     zipcode: lead.zipCode?.trim() || null,
 
     // Lead management
-    salesRepName: lead.salesRep?.trim() || null,       // Column B
-    assignedToName: lead.assignedManager?.trim() || null, // Column H
+    salesRepName: lead.salesRep?.trim() || null,
+    assignedToName: lead.assignedManager?.trim() || null,
     trailerSize: lead.trailerSize?.trim() || null,
     stockNumber: lead.stockNumber?.trim() || null,
     financingType,
@@ -202,18 +215,18 @@ export function parseLeadForDatabase(lead: GoogleSheetLead) {
 
     // Status and tracking
     status,
-    applied: lead.applied ? true : false,              // Column J
-    dateApplied,                                        // Column K
-    hasAppliedCredit: lead.applied ? true : false,
+    applied: lead.applied === 'Yes' || lead.applied === 'true' || lead.applied === true,
+    dateApplied,
+    hasAppliedCredit: lead.applied === 'Yes' || lead.applied === 'true' || lead.applied === true,
 
     // Notes (separate fields)
-    managerNotes: lead.managerNotes?.trim() || null,   // Column M
-    repNotes: lead.repNotes?.trim() || null,           // Column N
+    managerNotes: lead.managerNotes?.trim() || null,
+    repNotes: lead.repNotes?.trim() || null,
     notes: null, // Keep general notes empty
 
     // Metadata
     source: 'google_sheets',
-    tags: ['google_sheets', lead.assignedManager].filter(Boolean),
+    tags: ['google_sheets', lead.assignedManager?.trim()].filter(Boolean),
     createdAt,
   };
 }
