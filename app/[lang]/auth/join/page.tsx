@@ -6,20 +6,13 @@ import { Icon } from "@iconify/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { signIn } from "next-auth/react";
 import { DEFAULT_LANG } from "@/lib/i18n";
-import googleIcon from "@/public/images/auth/google.png";
-import GithubIcon from "@/public/images/auth/github.png";
-import facebook from "@/public/images/auth/facebook.png";
-import twitter from "@/public/images/auth/twitter.png";
-
-type SignupPath = null | "social" | "email";
 
 export default function RegisterPage() {
   const [code, setCode] = useState("");
   const [codeValidated, setCodeValidated] = useState(false);
   const [validatingCode, setValidatingCode] = useState(false);
-  const [signupPath, setSignupPath] = useState<SignupPath>("email");
+  const [validatedRole, setValidatedRole] = useState<string>("");
   const [err, setErr] = useState("");
   const [showArrow, setShowArrow] = useState(false);
 
@@ -38,12 +31,6 @@ export default function RegisterPage() {
   const [isFreelancer, setIsFreelancer] = useState(false);
   const [managers, setManagers] = useState<Array<{ id: string; name: string; role: string }>>([]);
   const [loadingManagers, setLoadingManagers] = useState(false);
-
-  // AI Eyeball tracking
-  const [eyeDirection, setEyeDirection] = useState('center');
-  const logoRef = useRef<HTMLDivElement>(null);
-  const currentPos = useRef({ x: 0, y: 0 });
-  const targetPos = useRef({ x: 0, y: 0 });
 
   // Hardcoded fallback manager list
   const fallbackManagers = [
@@ -84,73 +71,6 @@ export default function RegisterPage() {
     fetchManagers();
   }, []);
 
-  // Spring physics for smooth eye movement
-  useEffect(() => {
-    let animationFrameId: number;
-    const animate = () => {
-      const spring = 0.15;
-      const friction = 0.75;
-
-      const dx = targetPos.current.x - currentPos.current.x;
-      const dy = targetPos.current.y - currentPos.current.y;
-
-      currentPos.current.x += dx * spring;
-      currentPos.current.y += dy * spring;
-
-      currentPos.current.x *= friction;
-      currentPos.current.y *= friction;
-
-      if (logoRef.current) {
-        logoRef.current.style.transform = `translate(${currentPos.current.x}px, ${currentPos.current.y}px)`;
-      }
-
-      animationFrameId = requestAnimationFrame(animate);
-    };
-
-    animationFrameId = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(animationFrameId);
-  }, []);
-
-  // Mouse tracking for eye direction
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      targetPos.current = {
-        x: (e.clientX - window.innerWidth / 2) * 0.05,
-        y: (e.clientY - 150) * 0.05
-      };
-
-      if (logoRef.current) {
-        const rect = logoRef.current.getBoundingClientRect();
-        const centerX = rect.left + rect.width / 2;
-        const centerY = rect.top + rect.height / 2;
-        const dx = e.clientX - centerX;
-        const dy = e.clientY - centerY;
-        const angle = Math.atan2(dy, dx) * 180 / Math.PI;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-
-        if (distance > 50) {
-          if (angle > -45 && angle <= 45) setEyeDirection('right');
-          else if (angle > 45 && angle <= 135) setEyeDirection('down');
-          else if (angle > 135 || angle <= -135) setEyeDirection('left');
-          else setEyeDirection('up');
-        } else {
-          setEyeDirection('center');
-        }
-      }
-    };
-
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
-
-  const eyeImages = {
-    center: '/images/DASH_LOGO_EYE_IN_THE_SKY.webp',
-    left: '/images/left_side_side.webp',
-    right: '/images/right side.webp',
-    up: '/images/looking_up.webp',
-    down: '/images/looking_down.webp'
-  };
-
   const stars = useMemo(() => {
     return Array.from({ length: 45 }, (_, i) => ({
       id: i,
@@ -179,7 +99,9 @@ export default function RegisterPage() {
     setValidatingCode(false);
 
     if (r.ok) {
+      const data = await r.json();
       setCodeValidated(true);
+      setValidatedRole(data.role || "salesperson");
       setErr("");
     } else {
       const j = await r.json().catch(() => ({}));
@@ -213,7 +135,10 @@ export default function RegisterPage() {
       return;
     }
 
-    if (!isFreelancer && !managerId) {
+    // Managers and owners don't need to select a manager
+    const isManagerOrOwner = validatedRole === "manager" || validatedRole === "owner";
+
+    if (!isManagerOrOwner && !isFreelancer && !managerId) {
       setErr("Please select your manager or check the Freelancer option");
       return;
     }
@@ -254,41 +179,6 @@ export default function RegisterPage() {
       const data = await res.json().catch(() => ({}));
       setErr(data?.message || "Failed to create account");
     }
-  }
-
-  async function handleSocialSignup(provider: "google" | "github") {
-    if (!codeValidated) {
-      handleFormClick();
-      return;
-    }
-
-    if (!firstName || !lastName || !phone || !zipcode) {
-      setErr("Please fill required fields (name, phone, zipcode) before continuing");
-      return;
-    }
-
-    if (!isFreelancer && !managerId) {
-      setErr("Please select your manager or check the Freelancer option");
-      return;
-    }
-
-    if (!acceptedTerms) {
-      setErr("You must accept the Terms and Conditions to continue");
-      return;
-    }
-
-    document.cookie = `signup_firstName=${encodeURIComponent(firstName)}; path=/; max-age=900`;
-    document.cookie = `signup_lastName=${encodeURIComponent(lastName)}; path=/; max-age=900`;
-    document.cookie = `signup_phone=${encodeURIComponent(phone)}; path=/; max-age=900`;
-    document.cookie = `signup_zipcode=${encodeURIComponent(zipcode)}; path=/; max-age=900`;
-    document.cookie = `signup_managerId=${encodeURIComponent(managerId || "")}; path=/; max-age=900`;
-    document.cookie = `signup_status=${encodeURIComponent(isFreelancer ? "freelancer" : "employee")}; path=/; max-age=900`;
-
-    sessionStorage.setItem("signup_data", JSON.stringify({ firstName, lastName, phone, zipcode }));
-
-    signIn(provider, {
-      callbackUrl: `/${DEFAULT_LANG}/auth/verify-email`,
-    });
   }
 
   const togglePasswordType = () => {
@@ -360,11 +250,11 @@ export default function RegisterPage() {
         ))}
       </div>
 
-      {/* AI Eyeball Logo */}
-      <div className="absolute top-12 left-1/2 -translate-x-1/2 z-30 pointer-events-none">
-        <div ref={logoRef} className="w-32 h-32 relative transition-transform duration-100 ease-out drop-shadow-2xl">
+      {/* MJ Logo - Fixed at top */}
+      <div className="fixed top-12 left-1/2 -translate-x-1/2 z-30 pointer-events-none">
+        <div className="w-32 h-32 relative drop-shadow-2xl">
           <Image
-            src={eyeImages[eyeDirection as keyof typeof eyeImages]}
+            src="/images/DASH_LOGO_EYE_IN_THE_SKY.webp"
             alt="MJ SalesDash Logo"
             fill
             className="object-contain"
@@ -536,8 +426,8 @@ export default function RegisterPage() {
                 </label>
               </div>
 
-              {/* Manager Selection */}
-              {!isFreelancer && (
+              {/* Manager Selection - Hidden for managers and owners */}
+              {!isFreelancer && validatedRole !== "manager" && validatedRole !== "owner" && (
                 <div>
                   <Label className="text-white font-semibold mb-2 block">Select Your Manager *</Label>
                   <select
@@ -590,48 +480,11 @@ export default function RegisterPage() {
                   </a>
                 </label>
               </div>
-
-              {/* Social Buttons */}
-              <div className="space-y-3">
-                <Button
-                  onClick={() => handleSocialSignup("google")}
-                  className="w-full bg-white hover:bg-gray-50 text-gray-900 font-semibold py-6 text-lg flex items-center justify-center gap-3 border-2 border-white/50 shadow-lg"
-                >
-                  <Image src={googleIcon} alt="Google" className="w-6 h-6" />
-                  Continue with Google
-                </Button>
-
-                <Button
-                  onClick={() => handleSocialSignup("github")}
-                  className="w-full bg-[#24292e] hover:bg-[#1b1f23] text-white font-semibold py-6 text-lg flex items-center justify-center gap-3 border-2 border-white/20 shadow-lg"
-                >
-                  <Image src={GithubIcon} alt="GitHub" className="w-6 h-6" />
-                  Continue with GitHub
-                </Button>
-
-                <Button
-                  type="button"
-                  onClick={() => alert('Facebook login coming soon!')}
-                  className="w-full bg-[#1877f2] hover:bg-[#166fe5] text-white font-semibold py-6 text-lg flex items-center justify-center gap-3 border-2 border-white/20 shadow-lg"
-                >
-                  <Image src={facebook} alt="Facebook" className="w-6 h-6" />
-                  Continue with Facebook
-                </Button>
-
-                <Button
-                  type="button"
-                  onClick={() => alert('Twitter login coming soon!')}
-                  className="w-full bg-[#1da1f2] hover:bg-[#1a91da] text-white font-semibold py-6 text-lg flex items-center justify-center gap-3 border-2 border-white/20 shadow-lg"
-                >
-                  <Image src={twitter} alt="Twitter" className="w-6 h-6" />
-                  Continue with Twitter
-                </Button>
-              </div>
             </div>
           )}
 
-          {/* Email/Password Path - Full Form */}
-          {codeValidated && signupPath === "email" && (
+          {/* Email/Password Signup Form */}
+          {codeValidated && (
             <form onSubmit={handleEmailPasswordSignup} className="space-y-5">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-semibold text-white">Create Account</h2>
@@ -725,8 +578,8 @@ export default function RegisterPage() {
                 </label>
               </div>
 
-              {/* Manager Selection */}
-              {!isFreelancer && (
+              {/* Manager Selection - Hidden for managers and owners */}
+              {!isFreelancer && validatedRole !== "manager" && validatedRole !== "owner" && (
                 <div>
                   <Label className="text-white font-semibold mb-2 block">Select Your Manager *</Label>
                   <select
