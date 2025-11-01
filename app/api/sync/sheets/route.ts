@@ -1,5 +1,5 @@
 /**
- * Google Sheets CRM Sync API
+ * Google Sheets CRM Sync API with Logging
  *
  * User-friendly endpoint for syncing leads from Google Sheets
  *
@@ -34,6 +34,7 @@ interface SyncStats {
 
 export async function GET(req: NextRequest) {
   const startTime = Date.now();
+  let actor = 'unknown';
 
   try {
     // Check for token-based authentication (bypass session check)
@@ -43,6 +44,7 @@ export async function GET(req: NextRequest) {
 
     if (syncToken && token === syncToken) {
       console.log('✅ Token authentication successful - bypassing role check');
+      actor = 'token';
     } else {
       // Session-based authentication
       const session = await getServerSession(authOptions);
@@ -52,6 +54,8 @@ export async function GET(req: NextRequest) {
           { status: 401 }
         );
       }
+
+      actor = session.user.email;
 
       // Role check - only owners/directors can sync
       const currentUser = await prisma.user.findUnique({
@@ -148,6 +152,17 @@ export async function GET(req: NextRequest) {
 
     const duration = Date.now() - startTime;
 
+    // Get last sync log for display (skip if table doesn't exist)
+    let lastSync = null;
+    try {
+      lastSync = await prisma.syncLog.findFirst({
+        where: { source: 'google_sheets' },
+        orderBy: { createdAt: 'desc' },
+      });
+    } catch (err) {
+      console.warn('⚠️ SyncLog table missing, skipping');
+    }
+
     return NextResponse.json({
       success: true,
       dryRun: true,
@@ -155,6 +170,14 @@ export async function GET(req: NextRequest) {
       stats,
       duration: `${duration}ms`,
       timestamp: new Date().toISOString(),
+      lastSync: lastSync ? {
+        timestamp: lastSync.createdAt.toISOString(),
+        scanned: lastSync.scanned,
+        inserted: lastSync.inserted,
+        updated: lastSync.updated,
+        errors: lastSync.errors,
+        actor: lastSync.actor,
+      } : null,
     });
   } catch (error: any) {
     console.error('❌ Dry run failed:', error);
@@ -172,6 +195,8 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   const startTime = Date.now();
+  const startedAt = new Date();
+  let actor = 'unknown';
 
   try {
     // Check for token-based authentication (bypass session check)
@@ -181,6 +206,7 @@ export async function POST(req: NextRequest) {
 
     if (syncToken && token === syncToken) {
       console.log('✅ Token authentication successful - bypassing role check');
+      actor = 'token';
     } else {
       // Session-based authentication
       const session = await getServerSession(authOptions);
@@ -190,6 +216,8 @@ export async function POST(req: NextRequest) {
           { status: 401 }
         );
       }
+
+      actor = session.user.email;
 
       // Role check - only owners/directors can sync
       const currentUser = await prisma.user.findUnique({
@@ -287,6 +315,26 @@ export async function POST(req: NextRequest) {
 
     const duration = Date.now() - startTime;
 
+    // Log the sync run (skip if table doesn't exist)
+    try {
+      await prisma.syncLog.create({
+        data: {
+          startedAt,
+          durationMs: duration,
+          scanned: stats.totalInSheet,
+          inserted: stats.newLeads,
+          updated: stats.updatedLeads,
+          skipped: stats.duplicatesSkipped,
+          errors: stats.errors,
+          errorDetails: stats.errorDetails.length > 0 ? stats.errorDetails : undefined,
+          actor,
+          source: 'google_sheets',
+        },
+      });
+    } catch (err) {
+      console.warn('⚠️ SyncLog table missing, skipping');
+    }
+
     console.log('✅ Sync complete!', stats);
 
     return NextResponse.json({
@@ -298,6 +346,28 @@ export async function POST(req: NextRequest) {
     });
   } catch (error: any) {
     console.error('❌ Sync failed:', error);
+
+    // Log failed sync (skip if table doesn't exist)
+    const duration = Date.now() - startTime;
+    try {
+      await prisma.syncLog.create({
+        data: {
+          startedAt,
+          durationMs: duration,
+          scanned: 0,
+          inserted: 0,
+          updated: 0,
+          skipped: 0,
+          errors: 1,
+          errorDetails: [{ error: error.message }],
+          actor,
+          source: 'google_sheets',
+        },
+      });
+    } catch (err) {
+      console.warn('⚠️ SyncLog table missing, skipping');
+    }
+
     return NextResponse.json(
       {
         success: false,
