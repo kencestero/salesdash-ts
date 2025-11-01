@@ -9,6 +9,9 @@ import { Label } from "@/components/ui/label";
 import { DEFAULT_LANG } from "@/lib/i18n";
 
 export default function RegisterPage() {
+  // Feature flags
+  const GOOGLE_ENABLED = process.env.NEXT_PUBLIC_GOOGLE_ENABLED === "true";
+
   const [code, setCode] = useState("");
   const [codeValidated, setCodeValidated] = useState(false);
   const [validatingCode, setValidatingCode] = useState(false);
@@ -314,13 +317,16 @@ export default function RegisterPage() {
             <div className="space-y-4">
               <p className="text-white/90 text-center mb-6">Choose how you'd like to sign up:</p>
 
-              <Button
-                onClick={() => setSignupPath("social")}
-                className="w-full bg-white/20 hover:bg-white/30 text-white border border-white/40 py-6 text-lg flex items-center justify-center gap-3"
-              >
-                <Icon icon="heroicons:user-group" className="w-6 h-6" />
-                Sign up with Social Account (Quick)
-              </Button>
+              {/* Google OAuth Button - Hidden when NEXT_PUBLIC_GOOGLE_ENABLED is false */}
+              {GOOGLE_ENABLED && (
+                <Button
+                  onClick={() => setSignupPath("social")}
+                  className="w-full bg-white/20 hover:bg-white/30 text-white border border-white/40 py-6 text-lg flex items-center justify-center gap-3"
+                >
+                  <Icon icon="heroicons:user-group" className="w-6 h-6" />
+                  Sign up with Social Account (Quick)
+                </Button>
+              )}
 
               <Button
                 onClick={() => setSignupPath("email")}

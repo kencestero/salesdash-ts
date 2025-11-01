@@ -1,4 +1,5 @@
 import CredentialsProvider from "next-auth/providers/credentials";
+import GoogleProvider from "next-auth/providers/google";
 import { prisma } from "./prisma";
 import { generateUniqueSalespersonCode } from "./salespersonCode";
 import bcrypt from "bcryptjs";
@@ -11,6 +12,12 @@ export const authOptions = {
     updateAge: 15 * 60, // 15 minutes - update session every 15 min
   },
   providers: [
+    // Google OAuth (hidden in UI via NEXT_PUBLIC_GOOGLE_ENABLED env var)
+    GoogleProvider({
+      clientId: process.env.AUTH_GOOGLE_ID!,
+      clientSecret: process.env.AUTH_GOOGLE_SECRET!,
+    }),
+
     CredentialsProvider({
       name: "credentials",
       credentials: {
