@@ -1,17 +1,18 @@
 /**
- * Google Sheets CRM Sync API with Logging
+ * Google Sheets CRM Sync API (Header-Mapped)
  *
- * User-friendly endpoint for syncing leads from Google Sheets
+ * Uses header-based column mapping, splits full names, allows no-contact leads
  *
- * GET  /api/sync/sheets?dryRun=1 - Preview what would be synced (no database changes)
- * POST /api/sync/sheets           - Actually sync the leads to database
+ * GET  /api/sync/sheets?token=XXX - Preview sync (dry run)
+ * POST /api/sync/sheets?token=XXX - Actually sync leads
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { fetchLeadsFromSheet, parseLeadForDatabase } from '@/lib/google-sheets';
+import { fetchRawRowsFromSheet } from '@/lib/google-sheets';
+import { parseSheet } from '@/lib/sync/fromSheet';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -22,12 +23,14 @@ interface SyncStats {
   updatedLeads: number;
   duplicatesSkipped: number;
   errors: number;
-  errorDetails: Array<{ phone: string; error: string }>;
+  noContactLeads: number;
+  errorDetails: Array<{ name: string; error: string }>;
   preview?: Array<{
     action: 'create' | 'update' | 'skip';
-    phone: string;
+    name: string;
     firstName: string;
     lastName: string;
+    status: string;
     reason?: string;
   }>;
 }
@@ -78,73 +81,76 @@ export async function GET(req: NextRequest) {
       newLeads: 0,
       updatedLeads: 0,
       duplicatesSkipped: 0,
+      noContactLeads: 0,
       errors: 0,
       errorDetails: [],
       preview: [],
     };
 
-    // Fetch leads from sheet
-    const sheetLeads = await fetchLeadsFromSheet();
-    stats.totalInSheet = sheetLeads.length;
+    // Fetch raw rows from sheet (includes header)
+    const rawRows = await fetchRawRowsFromSheet();
+    if (rawRows.length === 0) {
+      return NextResponse.json({
+        success: true,
+        dryRun: true,
+        message: 'Sheet is empty',
+        stats,
+        duration: `${Date.now() - startTime}ms`,
+        timestamp: new Date().toISOString(),
+      });
+    }
 
-    console.log(`📊 Found ${sheetLeads.length} leads in Google Sheet`);
+    // Parse rows using header-mapped logic
+    const parsedLeads = parseSheet(rawRows);
+    stats.totalInSheet = parsedLeads.length;
+
+    console.log(`📊 Found ${parsedLeads.length} leads in Google Sheet`);
 
     // Preview each lead (no database changes)
-    for (const sheetLead of sheetLeads) {
+    for (const { lead, status, makeTask } of parsedLeads) {
       try {
-        const leadData = parseLeadForDatabase(sheetLead);
+        const fullName = `${lead.firstName} ${lead.lastName}`.trim() || 'Unknown';
 
-        if (!leadData.phone || leadData.phone === 'Unknown') {
-          stats.errors++;
-          stats.preview?.push({
-            action: 'skip',
-            phone: leadData.phone || 'N/A',
-            firstName: leadData.firstName,
-            lastName: leadData.lastName,
-            reason: 'Missing phone number',
-          });
-          continue;
+        // Track no-contact leads
+        if (!lead.phone && !lead.email) {
+          stats.noContactLeads++;
         }
 
-        // Check if lead exists
+        // Check if lead exists by phone or email (simplified OR lookup)
         const existingCustomer = await prisma.customer.findFirst({
           where: {
             OR: [
-              { phone: leadData.phone },
-              {
-                AND: [
-                  { email: { not: null } },
-                  { email: { equals: leadData.email || '' } },
-                ],
-              },
-            ],
+              lead.phone ? { phone: lead.phone } : undefined,
+              lead.email ? { email: lead.email } : undefined,
+            ].filter(Boolean) as any,
           },
         });
 
         if (existingCustomer) {
-          // Would be updated
           stats.updatedLeads++;
           stats.preview?.push({
             action: 'update',
-            phone: leadData.phone,
-            firstName: leadData.firstName,
-            lastName: leadData.lastName,
+            name: fullName,
+            firstName: lead.firstName,
+            lastName: lead.lastName,
+            status,
             reason: 'Existing customer - would update notes/status',
           });
         } else {
-          // Would be created
           stats.newLeads++;
           stats.preview?.push({
             action: 'create',
-            phone: leadData.phone,
-            firstName: leadData.firstName,
-            lastName: leadData.lastName,
+            name: fullName,
+            firstName: lead.firstName,
+            lastName: lead.lastName,
+            status,
+            reason: makeTask ? 'No contact info - follow-up task needed' : undefined,
           });
         }
       } catch (error: any) {
         stats.errors++;
         stats.errorDetails.push({
-          phone: sheetLead.phone || 'Unknown',
+          name: `${lead.firstName} ${lead.lastName}`.trim() || 'Unknown',
           error: error.message,
         });
       }
@@ -240,52 +246,101 @@ export async function POST(req: NextRequest) {
       newLeads: 0,
       updatedLeads: 0,
       duplicatesSkipped: 0,
+      noContactLeads: 0,
       errors: 0,
       errorDetails: [],
     };
 
-    // Fetch leads from sheet
-    const sheetLeads = await fetchLeadsFromSheet();
-    stats.totalInSheet = sheetLeads.length;
+    // Fetch raw rows from sheet (includes header)
+    const rawRows = await fetchRawRowsFromSheet();
+    if (rawRows.length === 0) {
+      return NextResponse.json({
+        success: true,
+        message: 'Sheet is empty - nothing to sync',
+        stats,
+        duration: `${Date.now() - startTime}ms`,
+        timestamp: new Date().toISOString(),
+      });
+    }
 
-    console.log(`📊 Processing ${sheetLeads.length} leads...`);
+    // Parse rows using header-mapped logic
+    const parsedLeads = parseSheet(rawRows);
+    stats.totalInSheet = parsedLeads.length;
+
+    console.log(`📊 Processing ${parsedLeads.length} leads...`);
 
     // Process each lead
-    for (const sheetLead of sheetLeads) {
+    for (const { lead, status, makeTask } of parsedLeads) {
       try {
-        const leadData = parseLeadForDatabase(sheetLead);
+        const fullName = `${lead.firstName} ${lead.lastName}`.trim() || 'Unknown';
 
-        if (!leadData.phone || leadData.phone === 'Unknown') {
-          stats.errors++;
-          stats.errorDetails.push({
-            phone: leadData.phone || 'N/A',
-            error: 'Missing phone number',
-          });
-          continue;
+        // Track no-contact leads
+        if (!lead.phone && !lead.email) {
+          stats.noContactLeads++;
         }
 
-        // Check for existing customer
+        // Prepare database record
+        const dbLead: any = {
+          firstName: lead.firstName || 'Unknown',
+          lastName: lead.lastName || '',
+          phone: lead.phone || null,
+          email: lead.email || null,
+          street: lead.street || null,
+          state: lead.state || null,
+          zipcode: lead.zipcode || null,
+          salesRepName: lead.salesRepName || null,
+          assignedToName: lead.assignedToName || null,
+          trailerSize: lead.trailerSize || null,
+          stockNumber: lead.stockNumber || null,
+          managerNotes: lead.managerNotes || null,
+          repNotes: lead.repNotes || null,
+          status,
+          source: 'google_sheets',
+          tags: ['google_sheets'],
+        };
+
+        // Parse dates
+        if (lead.createdAt) {
+          const parsed = new Date(lead.createdAt);
+          if (!isNaN(parsed.getTime())) {
+            dbLead.createdAt = parsed;
+          }
+        }
+
+        if (lead.dateApplied) {
+          const parsed = new Date(lead.dateApplied);
+          if (!isNaN(parsed.getTime())) {
+            dbLead.dateApplied = parsed;
+            dbLead.applied = true;
+            dbLead.hasAppliedCredit = true;
+          }
+        }
+
+        // Parse financing type
+        if (lead.financingType) {
+          const financing = lead.financingType.toLowerCase();
+          if (financing.includes('cash')) dbLead.financingType = 'cash';
+          else if (financing.includes('finance')) dbLead.financingType = 'finance';
+          else if (financing.includes('rent') || financing.includes('rto')) dbLead.financingType = 'rto';
+        }
+
+        // Check for existing customer by phone or email (simplified OR lookup)
         const existingCustomer = await prisma.customer.findFirst({
           where: {
             OR: [
-              { phone: leadData.phone },
-              {
-                AND: [
-                  { email: { not: null } },
-                  { email: { equals: leadData.email || '' } },
-                ],
-              },
-            ],
+              lead.phone ? { phone: lead.phone } : undefined,
+              lead.email ? { email: lead.email } : undefined,
+            ].filter(Boolean) as any,
           },
         });
 
         if (existingCustomer) {
           // Update existing customer
           const updates: any = {};
-          if (leadData.managerNotes) updates.managerNotes = leadData.managerNotes;
-          if (leadData.repNotes) updates.repNotes = leadData.repNotes;
-          if (leadData.status) updates.status = leadData.status;
-          if (leadData.salesRepName) updates.salesRepName = leadData.salesRepName;
+          if (lead.managerNotes) updates.managerNotes = lead.managerNotes;
+          if (lead.repNotes) updates.repNotes = lead.repNotes;
+          if (status && status !== existingCustomer.status) updates.status = status;
+          if (lead.salesRepName) updates.salesRepName = lead.salesRepName;
 
           if (Object.keys(updates).length > 0) {
             await prisma.customer.update({
@@ -298,18 +353,36 @@ export async function POST(req: NextRequest) {
           }
         } else {
           // Create new customer
-          await prisma.customer.create({
-            data: leadData,
+          const newCustomer = await prisma.customer.create({
+            data: dbLead,
           });
           stats.newLeads++;
+
+          // Create follow-up task for no-contact leads
+          if (makeTask) {
+            try {
+              await prisma.activity.create({
+                data: {
+                  customerId: newCustomer.id,
+                  type: 'task',
+                  title: 'Find Contact Info',
+                  description: `Lead imported without phone/email. Full name: ${fullName}`,
+                  status: 'pending',
+                  dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
+                },
+              });
+            } catch (taskError) {
+              console.warn(`⚠️ Could not create task for ${fullName}:`, taskError);
+            }
+          }
         }
       } catch (error: any) {
         stats.errors++;
         stats.errorDetails.push({
-          phone: sheetLead.phone || 'Unknown',
+          name: `${lead.firstName} ${lead.lastName}`.trim() || 'Unknown',
           error: error.message,
         });
-        console.error(`❌ Error processing lead ${sheetLead.phone}:`, error);
+        console.error(`❌ Error processing lead:`, error);
       }
     }
 
