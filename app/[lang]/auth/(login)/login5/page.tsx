@@ -4,6 +4,8 @@ import React, { useState, useEffect, useMemo, useRef, useTransition } from 'reac
 import Image from 'next/image';
 import { signIn } from "next-auth/react";
 import { DEFAULT_LANG } from "@/lib/i18n";
+import { ShootingStars } from "@/components/ui/shooting-stars";
+import { AuroraBackground } from "@/components/ui/aurora-background";
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -18,7 +20,6 @@ export default function LoginPage() {
   const [loginError, setLoginError] = useState('');
   const [isPending, startTransition] = useTransition();
   const logoRef = useRef<HTMLDivElement>(null);
-  const [shootingStars, setShootingStars] = useState<Array<{ id: number; startX: string; startY: string; endX: string; endY: string }>>([]);
 
   const starPositions = useMemo(() => {
     return [...Array(52)].map(() => ({
@@ -78,48 +79,6 @@ export default function LoginPage() {
     };
   }, []);
 
-  // Shooting star effect - random stars every 5-7 seconds
-  useEffect(() => {
-    let starIdCounter = 0;
-
-    const createShootingStar = () => {
-      const fromLeft = Math.random() > 0.5;
-      const startX = fromLeft ? `${Math.random() * 30}%` : `${70 + Math.random() * 30}%`;
-      const startY = `${Math.random() * 20}%`;
-      const endX = fromLeft ? `${70 + Math.random() * 30}%` : `${Math.random() * 30}%`;
-      const endY = `${80 + Math.random() * 20}%`;
-
-      const newStar = {
-        id: starIdCounter++,
-        startX,
-        startY,
-        endX,
-        endY,
-      };
-
-      setShootingStars(prev => [...prev, newStar]);
-
-      // Remove star after animation completes (2s total)
-      setTimeout(() => {
-        setShootingStars(prev => prev.filter(s => s.id !== newStar.id));
-      }, 2000);
-    };
-
-    const scheduleNextStar = () => {
-      const delay = 5000 + Math.random() * 2000; // 5-7 seconds
-      return setTimeout(() => {
-        createShootingStar();
-        nextStarTimeout = scheduleNextStar();
-      }, delay);
-    };
-
-    let nextStarTimeout = scheduleNextStar();
-
-    return () => {
-      clearTimeout(nextStarTimeout);
-    };
-  }, []);
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setLoginError('');
@@ -173,13 +132,21 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-black">
-      <style jsx>{`
-        @keyframes aurora {
-          0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.3; }
-          50% { transform: translate(20px, -20px) scale(1.05); opacity: 0.5; }
-        }
+    <AuroraBackground className="min-h-screen relative overflow-hidden bg-black">
+      {/* Professional Shooting Stars */}
+      <ShootingStars
+        minSpeed={10}
+        maxSpeed={30}
+        minDelay={1200}
+        maxDelay={4200}
+        starColor="#E96114"
+        trailColor="#ff7f50"
+        starWidth={10}
+        starHeight={1}
+        className="z-[3]"
+      />
 
+      <style jsx>{`
         @keyframes rotate {
           from { transform: rotate(0deg); }
           to { transform: rotate(360deg); }
@@ -190,28 +157,10 @@ export default function LoginPage() {
           50% { opacity: 1; }
         }
 
-        @keyframes shootingStar {
-          0% {
-            transform: translate(0, 0);
-            opacity: 0;
-          }
-          15% {
-            opacity: 1;
-          }
-          85% {
-            opacity: 1;
-          }
-          100% {
-            transform: translate(var(--translate-x), var(--translate-y));
-            opacity: 0;
-          }
-        }
-
         .aurora {
           position: absolute;
           border-radius: 50%;
           mix-blend-mode: screen;
-          animation: aurora 15s ease-in-out infinite;
           filter: blur(80px);
         }
 
@@ -220,27 +169,6 @@ export default function LoginPage() {
           background: white;
           border-radius: 50%;
           animation: twinkle 4s ease-in-out infinite;
-        }
-
-        .shooting-star {
-          position: absolute;
-          width: 2px;
-          height: 2px;
-          background: white;
-          border-radius: 50%;
-          box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.8);
-          animation: shootingStar 2s ease-out forwards;
-        }
-
-        .shooting-star::after {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 60px;
-          height: 1px;
-          background: linear-gradient(90deg, white, transparent);
-          transform: translateX(-100%);
         }
 
         .rotating {
@@ -262,46 +190,11 @@ export default function LoginPage() {
 
       <div className="absolute inset-0 bg-black/30 z-[1]" />
 
-      {/* Aurora Effects */}
+      {/* Twinkling Stars */}
       <div className="absolute inset-0 z-[2] pointer-events-none">
-        <div className="aurora" style={{
-          width: '600px',
-          height: '400px',
-          background: 'radial-gradient(circle, rgba(251, 146, 60, 0.15) 0%, transparent 70%)',
-          top: '-10%',
-          left: '-10%'
-        }}></div>
-        <div className="aurora" style={{
-          width: '500px',
-          height: '500px',
-          background: 'radial-gradient(circle, rgba(253, 186, 116, 0.1) 0%, transparent 70%)',
-          bottom: '-10%',
-          right: '-10%',
-          animationDelay: '7s'
-        }}></div>
-
         {starPositions.map((star, i) => (
           <div key={i} className="star" style={star} />
         ))}
-
-        {shootingStars.map((star) => {
-          const translateX = `calc(${star.endX} - ${star.startX})`;
-          const translateY = `calc(${star.endY} - ${star.startY})`;
-
-          return (
-            <div
-              key={star.id}
-              className="shooting-star"
-              style={{
-                left: star.startX,
-                top: star.startY,
-                // @ts-ignore - CSS custom properties
-                '--translate-x': translateX,
-                '--translate-y': translateY,
-              }}
-            />
-          );
-        })}
       </div>
 
       {/* Floating AI Eyeball Logo */}
@@ -557,6 +450,6 @@ export default function LoginPage() {
           </div>
         </div>
       )}
-    </div>
+    </AuroraBackground>
   );
 }
