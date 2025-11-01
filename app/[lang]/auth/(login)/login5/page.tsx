@@ -18,9 +18,10 @@ export default function LoginPage() {
   const [loginError, setLoginError] = useState('');
   const [isPending, startTransition] = useTransition();
   const logoRef = useRef<HTMLDivElement>(null);
+  const [shootingStars, setShootingStars] = useState<Array<{ id: number; startX: string; startY: string; endX: string; endY: string }>>([]);
 
   const starPositions = useMemo(() => {
-    return [...Array(45)].map(() => ({
+    return [...Array(52)].map(() => ({
       top: `${Math.random() * 100}%`,
       left: `${Math.random() * 100}%`,
       width: `${Math.random() * 1.5 + 0.5}px`,
@@ -74,6 +75,48 @@ export default function LoginPage() {
 
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
+    };
+  }, []);
+
+  // Shooting star effect - random stars every 5-7 seconds
+  useEffect(() => {
+    let starIdCounter = 0;
+
+    const createShootingStar = () => {
+      const fromLeft = Math.random() > 0.5;
+      const startX = fromLeft ? `${Math.random() * 30}%` : `${70 + Math.random() * 30}%`;
+      const startY = `${Math.random() * 20}%`;
+      const endX = fromLeft ? `${70 + Math.random() * 30}%` : `${Math.random() * 30}%`;
+      const endY = `${80 + Math.random() * 20}%`;
+
+      const newStar = {
+        id: starIdCounter++,
+        startX,
+        startY,
+        endX,
+        endY,
+      };
+
+      setShootingStars(prev => [...prev, newStar]);
+
+      // Remove star after animation completes (2s total)
+      setTimeout(() => {
+        setShootingStars(prev => prev.filter(s => s.id !== newStar.id));
+      }, 2000);
+    };
+
+    const scheduleNextStar = () => {
+      const delay = 5000 + Math.random() * 2000; // 5-7 seconds
+      return setTimeout(() => {
+        createShootingStar();
+        nextStarTimeout = scheduleNextStar();
+      }, delay);
+    };
+
+    let nextStarTimeout = scheduleNextStar();
+
+    return () => {
+      clearTimeout(nextStarTimeout);
     };
   }, []);
 
@@ -147,6 +190,23 @@ export default function LoginPage() {
           50% { opacity: 1; }
         }
 
+        @keyframes shootingStar {
+          0% {
+            transform: translate(0, 0);
+            opacity: 0;
+          }
+          15% {
+            opacity: 1;
+          }
+          85% {
+            opacity: 1;
+          }
+          100% {
+            transform: translate(var(--translate-x), var(--translate-y));
+            opacity: 0;
+          }
+        }
+
         .aurora {
           position: absolute;
           border-radius: 50%;
@@ -160,6 +220,27 @@ export default function LoginPage() {
           background: white;
           border-radius: 50%;
           animation: twinkle 4s ease-in-out infinite;
+        }
+
+        .shooting-star {
+          position: absolute;
+          width: 2px;
+          height: 2px;
+          background: white;
+          border-radius: 50%;
+          box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.8);
+          animation: shootingStar 2s ease-out forwards;
+        }
+
+        .shooting-star::after {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 60px;
+          height: 1px;
+          background: linear-gradient(90deg, white, transparent);
+          transform: translateX(-100%);
         }
 
         .rotating {
@@ -202,12 +283,31 @@ export default function LoginPage() {
         {starPositions.map((star, i) => (
           <div key={i} className="star" style={star} />
         ))}
+
+        {shootingStars.map((star) => {
+          const translateX = `calc(${star.endX} - ${star.startX})`;
+          const translateY = `calc(${star.endY} - ${star.startY})`;
+
+          return (
+            <div
+              key={star.id}
+              className="shooting-star"
+              style={{
+                left: star.startX,
+                top: star.startY,
+                // @ts-ignore - CSS custom properties
+                '--translate-x': translateX,
+                '--translate-y': translateY,
+              }}
+            />
+          );
+        })}
       </div>
 
       {/* Floating AI Eyeball Logo */}
       <div
         ref={logoRef}
-        className="fixed top-8 left-1/2 -translate-x-1/2 z-50 will-change-transform"
+        className="absolute top-8 left-1/2 -translate-x-1/2 z-50 will-change-transform"
         style={{ transition: 'none' }}
       >
         <div className="relative w-[180px] h-[180px]">
