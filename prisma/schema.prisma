@@ -211,8 +211,8 @@ model Customer {
   // Personal Info
   firstName       String
   lastName        String
-  email           String   @unique
-  phone           String
+  email           String?  @unique
+  phone           String?
 
   // Address
   street          String?
@@ -885,4 +885,23 @@ model ChatAttachment {
   messageId String
 
   @@index([messageId])
+}
+
+// Sync Log for tracking Google Sheets import runs
+model SyncLog {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  startedAt DateTime
+  durationMs Int
+  scanned   Int
+  inserted  Int
+  updated   Int
+  skipped   Int
+  errors    Int
+  errorDetails Json?
+  actor     String   // email or 'token' if using token auth
+  source    String   @default("google_sheets") // for future extensibility
+  
+  @@index([createdAt])
+  @@index([source])
 }
