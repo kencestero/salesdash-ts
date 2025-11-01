@@ -38,8 +38,8 @@ interface Customer {
   id: string;
   firstName: string;
   lastName: string;
-  email: string;
-  phone: string;
+  email: string | null;
+  phone: string | null;
   status: string;
   source?: string;
   companyName?: string;

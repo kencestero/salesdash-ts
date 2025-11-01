@@ -49,8 +49,8 @@ interface Customer {
   id: string;
   firstName: string;
   lastName: string;
-  email: string;
-  phone: string;
+  email: string | null;
+  phone: string | null;
   street?: string;
   city?: string;
   state?: string;
@@ -450,7 +450,7 @@ export default function CustomerProfilePage() {
           <CardContent className="space-y-4">
             {/* Contact Information */}
             <div className="space-y-3">
-              {!customer.email.includes('@placeholder.com') && (
+              {customer.email && !customer.email.includes('@placeholder.com') && (
                 <div className="flex items-start gap-3">
                   <Mail className="w-4 h-4 text-muted-foreground mt-1" />
                   <div className="flex-1">
@@ -465,7 +465,7 @@ export default function CustomerProfilePage() {
                 </div>
               )}
 
-              {!customer.phone.includes('@placeholder.com') && (
+              {customer.phone && !customer.phone.includes('@placeholder.com') && (
                 <div className="flex items-start gap-3">
                   <Phone className="w-4 h-4 text-muted-foreground mt-1" />
                   <div className="flex-1">
@@ -602,8 +602,18 @@ export default function CustomerProfilePage() {
             <Button
               className="w-full justify-start"
               variant="outline"
+              disabled={!customer.phone}
               onClick={async () => {
                 // Actually call the customer!
+                if (!customer.phone) {
+                  toast({
+                    title: "❌ No Phone Number",
+                    description: "This customer doesn't have a phone number on file",
+                    variant: "destructive",
+                  });
+                  return;
+                }
+
                 try {
                   const response = await fetch('/api/crm/call', {
                     method: 'POST',
@@ -613,18 +623,18 @@ export default function CustomerProfilePage() {
                       customerName: `${customer.firstName} ${customer.lastName}`
                     }),
                   });
-                  
+
                   if (response.ok) {
                     toast({
                       title: "📞 Call Initiated",
                       description: `Calling ${customer.firstName} ${customer.lastName} at ${customer.phone}`,
                     });
-                    
+
                     // Open phone dialer on mobile
                     if (typeof window !== 'undefined' && customer.phone) {
                       window.open(`tel:${customer.phone}`, '_self');
                     }
-                    
+
                     // Also log the activity
                     await fetch('/api/crm/activities', {
                       method: 'POST',
@@ -653,8 +663,18 @@ export default function CustomerProfilePage() {
             <Button
               className="w-full justify-start"
               variant="outline"
+              disabled={!customer.email}
               onClick={async () => {
                 // Actually send the email!
+                if (!customer.email) {
+                  toast({
+                    title: "❌ No Email Address",
+                    description: "This customer doesn't have an email address on file",
+                    variant: "destructive",
+                  });
+                  return;
+                }
+
                 try {
                   const response = await fetch('/api/crm/email', {
                     method: 'POST',
@@ -665,13 +685,13 @@ export default function CustomerProfilePage() {
                       subject: `Follow up from MJ Cargo Trailer Sales`
                     }),
                   });
-                  
+
                   if (response.ok) {
                     toast({
                       title: "✉️ Email Sent Successfully",
                       description: `Email delivered to ${customer.email}`,
                     });
-                    
+
                     // Also log the activity
                     await fetch('/api/crm/activities', {
                       method: 'POST',
