@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import * as XLSX from 'xlsx';
 import { getFallbackImages } from '@/lib/images/fallback';
+import { computeSellingPrice } from '@/lib/pricing/compute';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -110,14 +111,18 @@ export async function POST(req: NextRequest) {
           },
         });
 
-        // Apply pricing formula: MAX(cost * 1.0125, cost + $1,400)
-        const cost = trailer.cost;
-        const formulaPrice = Math.max(cost * 1.0125, cost + 1400);
+        // Apply pricing formula: 25% markup OR $1,400 profit minimum
+        const pricingResult = computeSellingPrice(trailer.cost);
 
-        // If makeOffer=true OR salePrice not provided, use formula
-        const finalSalePrice = trailer.makeOffer || !trailer.salePrice
-          ? formulaPrice
-          : trailer.salePrice;
+        // Use computed price if ASK_FOR_PRICING status
+        // Otherwise use makeOffer logic or provided salePrice
+        const finalSalePrice = pricingResult.pricingStatus === 'ASK_FOR_PRICING'
+          ? null
+          : (trailer.makeOffer || !trailer.salePrice
+              ? pricingResult.price
+              : trailer.salePrice);
+
+        const finalPricingStatus = pricingResult.pricingStatus;
 
         // Use fallback images if no images provided
         const finalImages = trailer.images && trailer.images.length > 0
@@ -133,6 +138,7 @@ export async function POST(req: NextRequest) {
         const payload = {
           ...trailer,
           salePrice: finalSalePrice,
+          pricingStatus: finalPricingStatus,
           images: finalImages,
           status: 'available',
           manufacturer: vendor,

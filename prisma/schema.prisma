@@ -176,6 +176,7 @@ model Trailer {
   salePrice       Float    // Current sale price
   cost            Float    // Dealer cost (sensitive!)
   makeOffer       Boolean  @default(false) // If true, display "MAKE OFFER" instead of sale price
+  pricingStatus   String   @default("PRICED") // "PRICED" or "ASK_FOR_PRICING" (when cost is textual)
 
   // Status
   status          String   @default("available") // "available", "sold", "reserved", "pending"
