@@ -9,5 +9,11 @@
       "path": "/api/cron/import-email-inventory",
       "schedule": "0 12 * * *"
     }
-  ]
+  ],
+  "functions": {
+    "app/api/quotes/export/route.ts": {
+      "memory": 1024,
+      "maxDuration": 30
+    }
+  }
 }
