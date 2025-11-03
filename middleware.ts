@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 const DEFAULT_LANG = "en";
-const LOGIN = `/${DEFAULT_LANG}/login`;
+const LOGIN = `/${DEFAULT_LANG}/auth/login`;
 const AUTH_PREFIX = `/${DEFAULT_LANG}/auth`;
 const DASHBOARD = `/${DEFAULT_LANG}/dashboard`;
 
