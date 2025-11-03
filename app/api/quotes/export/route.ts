@@ -1,18 +1,43 @@
-import { NextRequest, NextResponse } from "next/server";
-import fs from "node:fs/promises";
-import path from "node:path";
-import puppeteer from "puppeteer-core";
-import chromium from "@sparticuz/chromium";
-
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 export const maxDuration = 60; // Allow up to 60 seconds for PDF/PNG generation
 
-/**
- * Helper to replace optional tokens (blank if not provided)
- */
-function replaceOptional(html: string, token: string, value?: string | null): string {
-  return html.replace(new RegExp(token, "g"), value ?? "");
+import { NextRequest, NextResponse } from 'next/server';
+import fs from 'node:fs/promises';
+
+const esc = (s: string) =>
+  s.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]!));
+
+async function buildFilledHtml(u: URL) {
+  const name  = (u.searchParams.get('name')  ?? '').trim();
+  const zip   = (u.searchParams.get('zip')   ?? '').trim();
+  const price = Number(u.searchParams.get('price') ?? 0);
+  const phone = (u.searchParams.get('phone') ?? '').trim();
+  const email = (u.searchParams.get('email') ?? '').trim();
+  const rep   = (u.searchParams.get('rep')   ?? 'MJ Sales Rep').trim();
+  if (!name || !zip || !price || !Number.isFinite(price) || price <= 0) {
+    throw new Error('Missing/invalid name|zip|price');
+  }
+
+  const qnum = crypto.randomUUID().slice(0, 8).toUpperCase();
+  const tpl = await fs.readFile(process.cwd() + '/templates/quote-luxury.html', 'utf8');
+  const priceStr = price.toLocaleString('en-US');
+
+  let html = tpl
+    .replace(/{{CUSTOMER_NAME}}/g, esc(name))
+    .replace(/{{CUSTOMER_PHONE}}/g, esc(phone))
+    .replace(/{{CUSTOMER_EMAIL}}/g, esc(email))
+    .replace(/{{ZIP}}/g, esc(zip))
+    .replace(/{{SELLING_PRICE}}/g, esc(priceStr))
+    .replace(/{{QUOTE_DATE}}/g, new Date().toLocaleDateString('en-US'))
+    .replace(/{{REP_NAME}}/g, esc(rep))
+    .replace(/{{QUOTE_NUMBER}}/g, esc(qnum));
+
+  // Replace optional tokens (payment tables and unit info)
+  html = html.replace(/{{UNIT_INFO}}/g, u.searchParams.get('unitInfo') ?? '');
+  html = html.replace(/{{PAYMENT_TABLES_HTML}}/g, u.searchParams.get('paymentTablesHtml') ?? '');
+
+  return { html, qnum };
 }
 
 /**
@@ -22,6 +47,7 @@ function replaceOptional(html: string, token: string, value?: string | null): st
  *
  * Query params:
  * - format (required): "pdf" or "png"
+ * - paper (optional): "letter" or "a4" (default: "letter")
  * - name (required)
  * - zip (required)
  * - price (required)
@@ -33,127 +59,57 @@ function replaceOptional(html: string, token: string, value?: string | null): st
  */
 export async function GET(req: NextRequest) {
   try {
-    const url = new URL(req.url);
+    const u = new URL(req.url);
+    const format = (u.searchParams.get('format') ?? 'pdf').toLowerCase(); // pdf|png
+    const paper  = (u.searchParams.get('paper')  ?? 'letter').toLowerCase(); // letter|a4
 
-    // Extract format parameter
-    const format = url.searchParams.get("format");
-    if (!format || !["pdf", "png"].includes(format)) {
-      return NextResponse.json(
-        { error: "Invalid format. Must be 'pdf' or 'png'" },
-        { status: 400 }
-      );
-    }
+    const { html, qnum } = await buildFilledHtml(u);
 
-    // Extract query params
-    const name = (url.searchParams.get("name") ?? "").trim();
-    const zip = (url.searchParams.get("zip") ?? "").trim();
-    const priceParam = url.searchParams.get("price");
-    const price = priceParam ? Number(priceParam) : 0;
-    const phone = (url.searchParams.get("phone") ?? "").trim();
-    const email = (url.searchParams.get("email") ?? "").trim();
-    const rep = (url.searchParams.get("rep") ?? "MJ Sales Rep").trim();
+    // Dynamic import so Next doesn't bundle these at build time
+    const chromium = (await import('@sparticuz/chromium')).default;
+    const puppeteer = await import('puppeteer-core');
 
-    // Validation
-    if (!name || !zip || !price) {
-      return NextResponse.json(
-        { error: "Missing required parameters: name, zip, and price" },
-        { status: 400 }
-      );
-    }
-
-    // Generate quote number
-    const quoteNumber = crypto.randomUUID().slice(0, 8).toUpperCase();
-
-    // Load template
-    const templatePath = path.join(process.cwd(), "templates", "quote-luxury.html");
-    let html = await fs.readFile(templatePath, "utf8");
-
-    // Format price with commas (no currency symbol - template controls styling)
-    const priceStr = Number.isFinite(price) ? price.toLocaleString("en-US") : "";
-
-    // Replace required tokens
-    html = html
-      .replace(/{{CUSTOMER_NAME}}/g, name)
-      .replace(/{{CUSTOMER_PHONE}}/g, phone)
-      .replace(/{{CUSTOMER_EMAIL}}/g, email)
-      .replace(/{{ZIP}}/g, zip)
-      .replace(/{{SELLING_PRICE}}/g, priceStr)
-      .replace(/{{QUOTE_DATE}}/g, new Date().toLocaleDateString("en-US"))
-      .replace(/{{REP_NAME}}/g, rep)
-      .replace(/{{QUOTE_NUMBER}}/g, quoteNumber);
-
-    // Replace optional unit info (blank if not supplied)
-    html = replaceOptional(
-      html,
-      "{{UNIT_INFO}}",
-      url.searchParams.get("unitInfo")
-    );
-
-    // Replace payment tables HTML (filled by dashboard)
-    html = replaceOptional(
-      html,
-      "{{PAYMENT_TABLES_HTML}}",
-      url.searchParams.get("paymentTablesHtml")
-    );
-
-    // Launch Puppeteer with Chromium
+    const exePath = await chromium.executablePath();
     const browser = await puppeteer.launch({
       args: chromium.args,
       defaultViewport: chromium.defaultViewport,
-      executablePath: await chromium.executablePath(),
+      executablePath: exePath,
       headless: chromium.headless,
     });
 
     const page = await browser.newPage();
+    await page.setContent(html, { waitUntil: 'networkidle0' });
 
-    // Set content and wait for network idle
-    await page.setContent(html, {
-      waitUntil: "networkidle0",
-    });
-
-    let output: Buffer;
-    let contentType: string;
-    let filename: string;
-
-    if (format === "pdf") {
-      // Generate PDF with print-optimized settings
-      output = await page.pdf({
-        format: "Letter",
-        printBackground: true,
-        margin: {
-          top: "0.5in",
-          right: "0.5in",
-          bottom: "0.5in",
-          left: "0.5in",
+    if (format === 'png') {
+      const buf = await page.screenshot({ fullPage: true, type: 'png' });
+      await browser.close();
+      return new NextResponse(buf, {
+        headers: {
+          'Content-Type': 'image/png',
+          'Content-Disposition': `attachment; filename="Quote-${qnum}.png"`,
+          'Cache-Control': 'no-store, no-cache, must-revalidate',
+          'X-Robots-Tag': 'noindex, nofollow',
         },
       });
-      contentType = "application/pdf";
-      filename = `Quote-${quoteNumber}.pdf`;
-    } else {
-      // Generate PNG screenshot
-      output = await page.screenshot({
-        fullPage: true,
-        type: "png",
-      });
-      contentType = "image/png";
-      filename = `Quote-${quoteNumber}.png`;
     }
 
-    await browser.close();
+    const buf = await page.pdf({
+      printBackground: true,
+      format: paper === 'a4' ? 'A4' : 'Letter',
+      margin: { top: '0.5in', right: '0.5in', bottom: '0.5in', left: '0.5in' },
+    });
 
-    // Return file as download
-    return new NextResponse(output, {
+    await browser.close();
+    return new NextResponse(buf, {
       headers: {
-        "Content-Type": contentType,
-        "Content-Disposition": `attachment; filename="${filename}"`,
-        "Cache-Control": "no-store, no-cache, must-revalidate",
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `attachment; filename="Quote-${qnum}.pdf"`,
+        'Cache-Control': 'no-store, no-cache, must-revalidate',
+        'X-Robots-Tag': 'noindex, nofollow',
       },
     });
-  } catch (error) {
-    console.error("Quote export error:", error);
-    return NextResponse.json(
-      { error: "Failed to export quote", details: error instanceof Error ? error.message : String(error) },
-      { status: 500 }
-    );
+  } catch (e: any) {
+    console.error('Quote export error:', e);
+    return new NextResponse(e?.message || 'Export error', { status: 400 });
   }
 }

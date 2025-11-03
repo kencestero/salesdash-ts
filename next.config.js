@@ -4,12 +4,20 @@
 const nextConfig = {
   // Bundle @react-email packages for serverless functions
   experimental: {
-    serverComponentsExternalPackages: [],
+    serverComponentsExternalPackages: ['@sparticuz/chromium', 'puppeteer-core'],
   },
   // Ensure react-email dependencies are bundled
   transpilePackages: ['@react-email/components', '@react-email/render', '@react-email/tailwind'],
 
-  webpack(config) {
+  webpack(config, { isServer }) {
+    if (isServer) {
+      const externals = config.externals || [];
+      config.externals = [
+        ...externals,
+        { 'puppeteer-core': 'commonjs puppeteer-core' },
+        { '@sparticuz/chromium': 'commonjs @sparticuz/chromium' },
+      ];
+    }
     // Grab the existing rule that handles SVG imports
     const fileLoaderRule = config.module.rules.find((rule) =>
       rule.test?.test?.(".svg")
