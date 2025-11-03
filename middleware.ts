@@ -48,6 +48,19 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
+  // 2.5. Redirect old auth pages to new login page
+  if (pathname === "/auth/login") {
+    const url = req.nextUrl.clone();
+    url.pathname = `/${DEFAULT_LANG}/auth/login`;
+    return NextResponse.redirect(url, 308);
+  }
+
+  if (pathname === "/auth/register") {
+    const url = req.nextUrl.clone();
+    url.pathname = `/${DEFAULT_LANG}/auth/register`;
+    return NextResponse.redirect(url, 308);
+  }
+
   // 3. Add /en prefix if missing (EXCEPT for /apply routes - they're at root)
   if (!pathname.startsWith(`/${DEFAULT_LANG}`) && !pathname.startsWith("/apply")) {
     const url = req.nextUrl.clone();
