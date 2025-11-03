@@ -852,6 +852,11 @@ export default function FinanceComparePage() {
           </p>
         </div>
       </div>
+
+      {/* Version Stamp */}
+      <div className="text-[10px] text-gray-500 mt-6 opacity-70">
+        FIN-COMPARE v2 • commit 39f1ca6 • env:{process.env.VERCEL_ENV ?? 'local'}
+      </div>
     </div>
   );
 }
