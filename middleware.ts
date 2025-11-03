@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 const DEFAULT_LANG = "en";
-const LOGIN = `/${DEFAULT_LANG}/login`;
+const LOGIN = `/${DEFAULT_LANG}/auth/login`;
 const AUTH_PREFIX = `/${DEFAULT_LANG}/auth`;
 const DASHBOARD = `/${DEFAULT_LANG}/dashboard`;
 
@@ -65,6 +65,13 @@ export async function middleware(req: NextRequest) {
   if (pathname === `/${DEFAULT_LANG}/inventory`) {
     const url = req.nextUrl.clone();
     url.pathname = `/${DEFAULT_LANG}/dashboard/inventory`;
+    return NextResponse.redirect(url);
+  }
+
+  // 3d. Redirect /[lang]/login to /[lang]/auth/login for any locale
+  if (/^\/[a-z]{2}\/login$/.test(pathname)) {
+    const url = req.nextUrl.clone();
+    url.pathname = pathname.replace(/\/login$/, '/auth/login');
     return NextResponse.redirect(url);
   }
 
