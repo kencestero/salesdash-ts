@@ -71,9 +71,9 @@ export default function FinanceComparePage() {
     const fetchTrailers = async () => {
       try {
         setLoadingTrailers(true);
-        const res = await fetch("/api/inventory?status=available");
+        const res = await fetch("/api/trailers");
         const data = await res.json();
-        setTrailers(data.trailers || []);
+        setTrailers(data.items || []);
       } catch (error) {
         console.error("Failed to fetch trailers:", error);
         toast({
@@ -87,6 +87,22 @@ export default function FinanceComparePage() {
     };
     fetchTrailers();
   }, []);
+
+  // Auto-update tax rate when ZIP changes
+  useEffect(() => {
+    const updateTaxRate = async () => {
+      if (zipcode && zipcode.length >= 5) {
+        try {
+          const res = await fetch(`/api/tax?zip=${zipcode.slice(0, 5)}`);
+          const data = await res.json();
+          setTaxPct(data.rate || 0);
+        } catch (error) {
+          console.error("Failed to fetch tax rate:", error);
+        }
+      }
+    };
+    updateTaxRate();
+  }, [zipcode]);
 
   // Handle trailer selection and auto-update price
   const handleTrailerSelect = (trailerId: string) => {
