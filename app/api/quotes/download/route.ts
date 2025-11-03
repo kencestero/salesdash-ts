@@ -13,9 +13,9 @@ function replaceOptional(html: string, token: string, value?: string | null): st
 }
 
 /**
- * Quote Renderer API
+ * Quote HTML Download API
  *
- * Renders the quote-luxury.html template with customer/quote data
+ * Returns filled HTML template as downloadable file
  *
  * Query params:
  * - name (required)
@@ -24,8 +24,8 @@ function replaceOptional(html: string, token: string, value?: string | null): st
  * - phone (optional)
  * - email (optional)
  * - rep (optional, defaults to "MJ Sales Rep")
- * - financeTableHtml (optional)
- * - rtoTableHtml (optional)
+ * - unitInfo (optional)
+ * - paymentTablesHtml (optional)
  */
 export async function GET(req: NextRequest) {
   try {
@@ -83,17 +83,18 @@ export async function GET(req: NextRequest) {
       url.searchParams.get("paymentTablesHtml")
     );
 
-    // Return rendered HTML
+    // Return HTML as downloadable file
     return new NextResponse(html, {
       headers: {
         "Content-Type": "text/html; charset=utf-8",
+        "Content-Disposition": `attachment; filename="Quote-${quoteNumber}.html"`,
         "Cache-Control": "no-store, no-cache, must-revalidate",
       },
     });
   } catch (error) {
-    console.error("Quote render error:", error);
+    console.error("Quote download error:", error);
     return NextResponse.json(
-      { error: "Failed to render quote template" },
+      { error: "Failed to generate quote download" },
       { status: 500 }
     );
   }

@@ -20,21 +20,48 @@ export default function ComparePage() {
 
   const missing = !name || !zip || !price;
 
-  function exportQuote() {
-    if (missing) {
-      alert("Name, ZIP, and Price required.");
-      return;
-    }
-    const p = new URLSearchParams({
+  function buildQuoteParams(): URLSearchParams {
+    return new URLSearchParams({
       name,
       zip,
       price: String(price),
       ...(phone ? { phone } : {}),
       ...(email ? { email } : {}),
       // If you render tables client-side, serialize & include them here:
-      // financeTableHtml, rtoTableHtml
+      // paymentTablesHtml
     });
-    window.open(`/api/quotes/render?${p.toString()}`, "_blank");
+  }
+
+  function previewQuote() {
+    if (missing) {
+      alert("Name, ZIP, and Price required.");
+      return;
+    }
+    window.open(`/api/quotes/render?${buildQuoteParams().toString()}`, "_blank");
+  }
+
+  function downloadHTML() {
+    if (missing) {
+      alert("Name, ZIP, and Price required.");
+      return;
+    }
+    window.open(`/api/quotes/download?${buildQuoteParams().toString()}`, "_blank");
+  }
+
+  function downloadPDF() {
+    if (missing) {
+      alert("Name, ZIP, and Price required.");
+      return;
+    }
+    window.open(`/api/quotes/export?format=pdf&${buildQuoteParams().toString()}`, "_blank");
+  }
+
+  function downloadPNG() {
+    if (missing) {
+      alert("Name, ZIP, and Price required.");
+      return;
+    }
+    window.open(`/api/quotes/export?format=png&${buildQuoteParams().toString()}`, "_blank");
   }
 
   return (
@@ -117,31 +144,77 @@ export default function ComparePage() {
         </CardContent>
       </Card>
 
-      {/* Export Button */}
+      {/* Export Options */}
       <Card>
         <CardHeader>
           <CardTitle>Export Quote</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3">
+          <div className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              Generate a printable HTML quote with customer information and payment options.
-              Use your browser&apos;s print function (Ctrl+P / Cmd+P) to save as PDF.
+              Generate professional quotes with customer information and payment options.
+              Choose from multiple export formats below.
             </p>
-            <Button
-              onClick={exportQuote}
-              disabled={missing}
-              className="w-full md:w-auto gap-2"
-              size="lg"
-            >
-              <FileDown className="w-4 h-4" />
-              Export Quote (HTML)
-            </Button>
+
+            {/* Export Buttons Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <Button
+                onClick={previewQuote}
+                disabled={missing}
+                variant="outline"
+                className="gap-2"
+                size="lg"
+              >
+                <FileDown className="w-4 h-4" />
+                Preview Quote (Browser)
+              </Button>
+
+              <Button
+                onClick={downloadHTML}
+                disabled={missing}
+                variant="outline"
+                className="gap-2"
+                size="lg"
+              >
+                <FileDown className="w-4 h-4" />
+                Download HTML
+              </Button>
+
+              <Button
+                onClick={downloadPDF}
+                disabled={missing}
+                className="gap-2"
+                size="lg"
+              >
+                <FileDown className="w-4 h-4" />
+                Download PDF
+              </Button>
+
+              <Button
+                onClick={downloadPNG}
+                disabled={missing}
+                variant="secondary"
+                className="gap-2"
+                size="lg"
+              >
+                <FileDown className="w-4 h-4" />
+                Download PNG
+              </Button>
+            </div>
+
             {missing && (
-              <p className="text-sm text-red-600">
+              <p className="text-sm text-red-600 font-medium">
                 ⚠️ Name, ZIP, and Price are required to export a quote.
               </p>
             )}
+
+            {/* Export Info */}
+            <div className="text-xs text-muted-foreground space-y-1 pt-2 border-t">
+              <p><strong>Preview:</strong> Opens quote in new tab for review</p>
+              <p><strong>HTML:</strong> Downloads editable HTML file</p>
+              <p><strong>PDF:</strong> Pixel-perfect PDF export (recommended for printing)</p>
+              <p><strong>PNG:</strong> High-quality image export (for sharing)</p>
+            </div>
           </div>
         </CardContent>
       </Card>
