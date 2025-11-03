@@ -26,6 +26,10 @@ import { calculateFinance } from "@/lib/finance/finance-calc";
 import { calculateRTO } from "@/lib/finance/rto-calc";
 import { getLocationByZip } from "@/lib/data/zip-tax-map";
 
+// Dynamic build info
+const COMMIT = (process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA ?? process.env.VERCEL_GIT_COMMIT_SHA ?? '').slice(0, 7);
+const ENV = process.env.NEXT_PUBLIC_VERCEL_ENV ?? process.env.VERCEL_ENV ?? 'local';
+
 interface Trailer {
   id: string;
   stockNumber: string;
@@ -855,7 +859,7 @@ export default function FinanceComparePage() {
 
       {/* Version Stamp */}
       <div className="text-[10px] text-gray-500 mt-6 opacity-70">
-        FIN-COMPARE v2 • commit 39f1ca6 • env:{process.env.VERCEL_ENV ?? 'local'}
+        FIN-COMPARE v2 • commit {COMMIT} • env:{ENV}
       </div>
     </div>
   );
