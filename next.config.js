@@ -11,12 +11,20 @@ const nextConfig = {
 
   webpack(config, { isServer }) {
     if (isServer) {
-      const externals = config.externals || [];
-      config.externals = [
-        ...externals,
-        { 'puppeteer-core': 'commonjs puppeteer-core' },
-        { '@sparticuz/chromium': 'commonjs @sparticuz/chromium' },
-      ];
+      // Properly externalize Puppeteer and Chromium for serverless
+      if (typeof config.externals === 'function') {
+        const origExternals = config.externals;
+        config.externals = async (context, request, callback) => {
+          if (request === 'puppeteer-core' || request === '@sparticuz/chromium') {
+            return callback(null, 'commonjs ' + request);
+          }
+          return origExternals(context, request, callback);
+        };
+      } else if (Array.isArray(config.externals)) {
+        config.externals.push('puppeteer-core', '@sparticuz/chromium');
+      } else {
+        config.externals = ['puppeteer-core', '@sparticuz/chromium'];
+      }
     }
     // Grab the existing rule that handles SVG imports
     const fileLoaderRule = config.module.rules.find((rule) =>
