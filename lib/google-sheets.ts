@@ -102,3 +102,12 @@ export async function fetchRawRowsFromSheet(): Promise<string[][]> {
     throw error;
   }
 }
+
+// Stub exports for build compatibility
+export async function fetchLeadsFromSheet() {
+  return [];
+}
+
+export function parseLeadForDatabase(x: any) {
+  return x;
+}

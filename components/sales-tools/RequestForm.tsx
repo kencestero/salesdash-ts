@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useActionState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { submitRequest } from "@/app/(dash)/sales-tools/request/actions";
@@ -50,11 +50,7 @@ export default function RequestForm({ userProfile }: { userProfile: any }) {
   const formRef = React.useRef<HTMLFormElement>(null);
   const { toast } = useToast();
 
-  const [state, formAction] = useActionState<ActionState, FormData>(
-    // @ts-expect-error server action type is injected by Next.js
-    submitRequest,
-    initialState
-  );
+  const [state, setState] = useState<ActionState>(initialState);
 
   useEffect(() => {
     if (!state) return;
@@ -79,10 +75,18 @@ export default function RequestForm({ userProfile }: { userProfile: any }) {
   const defaultFullName = userProfile ? `${userProfile.profile?.firstName || ""} ${userProfile.profile?.lastName || ""}`.trim() : "";
   const defaultEmail = userProfile?.email || "";
 
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    // @ts-expect-error server action type
+    const result = await submitRequest(initialState, formData);
+    setState(result);
+  };
+
   return (
     <form
       ref={formRef}
-      action={formAction}
+      onSubmit={handleSubmit}
       className="grid gap-4 rounded-2xl border border-neutral-800 bg-neutral-900/50 p-4"
     >
       {/* Hidden fields for rep tracking */}
