@@ -96,7 +96,7 @@ export async function submitRequest(
     await resend.emails.send({
       from: `MJ SalesDash <${process.env.RESEND_FROM_EMAIL}>`,
       to: [parsed.data.email],
-      reply_to: `request+${logId}@mjsalesdash.com`, // thread replies map to this log
+      replyTo: `request+${logId}@mjsalesdash.com`, // thread replies map to this log
       subject: `[${parsed.data.manufacturer}] ${parsed.data.purpose}`,
       text: [
         `Hi ${parsed.data.fullName},`,
