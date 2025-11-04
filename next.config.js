@@ -73,7 +73,9 @@ const nextConfig = {
     ],
   },
   eslint: { ignoreDuringBuilds: true },
-  typescript: { ignoreBuildErrors: true },
+  typescript: {
+    ignoreBuildErrors: process.env.ALLOW_TS_BUILD_ERRORS === 'true',
+  },
 };
 
 
