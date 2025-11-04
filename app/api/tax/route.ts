@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getLocationByZip } from '@/lib/data/zip-tax-map';
 
+export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: Request) {
