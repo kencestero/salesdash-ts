@@ -1,23 +1,24 @@
-import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+// app/api/_debug/db/route.ts
+export const runtime = 'nodejs';
 
-export const runtime = 'nodejs';         // <-- IMPORTANT for Prisma
-export const dynamic = 'force-dynamic';  // no cache
+import { NextResponse } from 'next/server';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 export async function GET() {
-  const url = process.env.DATABASE_URL || '';
-  const masked =
-    url.replace(/:\/\/[^@]+@/, '://***:***@')    // hide user:pass
-       .replace(/(\?.*)$/, '');                   // drop query
   try {
-    const count = await prisma.trailer.count();
-    const sample = await prisma.trailer.findMany({
-      take: 3,
-      select: { vin: true, length: true, width: true, salePrice: true, manufacturer: true },
-      orderBy: { vin: 'asc' }
+    const sample = await prisma.trailer.findMany({ take: 3 });
+    return NextResponse.json({
+      ok: true,
+      db: process.env.DATABASE_URL ? 'postgresql://***:***@***/*' : null,
+      count: sample.length,
+      sample,
     });
-    return NextResponse.json({ ok: true, db: masked, count, sample });
-  } catch (e: any) {
-    return NextResponse.json({ ok: false, db: masked, error: e.message });
+  } catch (err: any) {
+    return NextResponse.json(
+      { ok: false, error: err?.message ?? 'Unknown error' },
+      { status: 500 }
+    );
   }
 }
