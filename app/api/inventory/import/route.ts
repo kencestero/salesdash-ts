@@ -42,7 +42,17 @@ export async function POST(req: Request) {
       const t = normalize(raw);
       if (!t?.vin) { skipped++; continue; }
 
+      // Check if trailer already exists
+      const existing = await prisma.trailer.findUnique({
+        where: { vin: t.vin },
+        select: { images: true },
+      });
+
+      // Only use standard image if no existing image
       const standardImage = pickStandardImage({ size: t.size, axle: t.axle || null });
+      const finalImages = (existing?.images && existing.images.length > 0)
+        ? existing.images // Preserve existing images
+        : standardImage ? [standardImage] : []; // Use standard image only if no existing
 
       // Map normalized trailer to Prisma schema
       const trailerData = {
@@ -58,7 +68,7 @@ export async function POST(req: Request) {
         salePrice: t.price || 0,
         cost: (t.price || 0) * 0.8, // Estimate cost as 80% of price if not provided
         status: t.status || "available",
-        images: standardImage ? [standardImage] : [],
+        images: finalImages, // Preserve existing OR use standard
       };
 
       await prisma.trailer.upsert({
