@@ -12,13 +12,12 @@ export default function InventoryUploadPage() {
     setRes(null);
 
     try {
-      const arrayBuf = await f.arrayBuffer();
-      const b64 = Buffer.from(arrayBuf).toString("base64");
+      const fd = new FormData();
+      fd.append('file', f); // Field name must be "file"
 
       const r = await fetch("/api/inventory/import", {
-        method:"POST",
-        headers:{ "Content-Type":"application/json" },
-        body: JSON.stringify({ fileBase64: b64, filename: f.name }),
+        method: "POST",
+        body: fd, // No Content-Type header - browser sets it with boundary
       });
 
       const j = await r.json();

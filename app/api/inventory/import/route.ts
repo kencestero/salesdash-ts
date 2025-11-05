@@ -1,25 +1,32 @@
 import { NextResponse } from "next/server";
-import * as XLSX from "xlsx";
-import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { pickStandardImage } from "@/lib/inventory/image-map";
 import { detectDiamond, normalizeDiamond } from "@/lib/inventory/importers/diamond";
 import { detectQuality, normalizeQuality } from "@/lib/inventory/importers/quality";
 
-export const runtime = "nodejs"; // NOT edge
-
-const BodySchema = z.object({
-  fileBase64: z.string(),               // base64 of the .xlsx
-  filename: z.string().optional(),
-});
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
   try {
-    const body = BodySchema.parse(await req.json());
-    const buf = Buffer.from(body.fileBase64, "base64");
-    const wb = XLSX.read(buf, { type: "buffer" });
-    const ws = wb.Sheets[wb.SheetNames[0]];
-    const rows = XLSX.utils.sheet_to_json<Record<string, any>>(ws, { defval: "" });
+    const form = await req.formData();
+    const file = form.get('file') as File | null;
+    if (!file) return NextResponse.json({ ok:false, error:'No file' }, { status: 400 });
+
+    const buf = Buffer.from(await file.arrayBuffer());
+    const name = (file.name || '').toLowerCase();
+
+    // Lazy import to keep edge bundles clean (even though we're node)
+    const XLSX = await import('xlsx');
+
+    let rows: any[] = [];
+    if (name.endsWith('.xlsx') || name.endsWith('.xls') || name.endsWith('.csv')) {
+      const wb = XLSX.read(buf, { type: 'buffer' });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      rows = XLSX.utils.sheet_to_json(ws, { defval: '' });
+    } else {
+      return NextResponse.json({ ok:false, error:'Unsupported file type' }, { status: 415 });
+    }
 
     if (!rows.length) return NextResponse.json({ ok:false, message:"Empty sheet" }, { status: 400 });
 
@@ -84,8 +91,8 @@ export async function POST(req: Request) {
     }
 
     return NextResponse.json({ ok:true, manufacturer, upserts, skipped });
-  } catch (e:any) {
-    console.error("Import error:", e);
-    return NextResponse.json({ ok:false, error: e?.message || "import failed" }, { status: 500 });
+  } catch (err:any) {
+    console.error('[inventory/import] failed', err);
+    return NextResponse.json({ ok:false, error: String(err?.message || err) }, { status: 500 });
   }
 }
