@@ -395,13 +395,14 @@ export default function InventoryPage() {
             </Button>
           )}
           {mounted && canUploadPDF && (
-            <Button
-              onClick={() => setShowUploadModal(true)}
-              className="bg-blue-500 hover:bg-blue-600 text-white text-base px-6"
-            >
-              <Upload className="mr-2 h-5 w-5" />
-              Upload File
-            </Button>
+            <Link href="/inventory/upload">
+              <Button
+                className="bg-blue-500 hover:bg-blue-600 text-white text-base px-6"
+              >
+                <Upload className="mr-2 h-5 w-5" />
+                Upload File
+              </Button>
+            </Link>
           )}
         </div>
       </div>

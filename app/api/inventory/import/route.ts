@@ -3,12 +3,24 @@ import { prisma } from "@/lib/prisma";
 import { pickStandardImage } from "@/lib/inventory/image-map";
 import { detectDiamond, normalizeDiamond } from "@/lib/inventory/importers/diamond";
 import { detectQuality, normalizeQuality } from "@/lib/inventory/importers/quality";
+import { computePrice } from "@/lib/pricing";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+// Quality Cargo validation: check for known QC headers
+function looksLikeQuality(headers: string[]): boolean {
+  const h = headers.map(s => s.toLowerCase());
+  return h.some(x => x.includes('stock #')) ||
+         (h.includes('model') && h.includes('size') && h.includes('retail') && h.includes('cost'));
+}
+
 export async function POST(req: Request) {
   try {
+    // Extract supplier query param
+    const url = new URL(req.url);
+    const supplierParam = url.searchParams.get('supplier'); // 'diamond', 'quality', or 'panther'
+
     const form = await req.formData();
     const file = form.get('file') as File | null;
     if (!file) return NextResponse.json({ ok:false, error:'No file' }, { status: 400 });
@@ -33,14 +45,37 @@ export async function POST(req: Request) {
     const headers = Object.keys(rows[0]);
     let normalize: (r:any)=>any, manufacturer: string;
 
-    if (detectDiamond(headers)) {
+    // Supplier-specific parser selection with validation
+    if (supplierParam === 'diamond') {
       normalize = normalizeDiamond;
       manufacturer = "Diamond Cargo";
-    } else if (detectQuality(headers)) {
+    } else if (supplierParam === 'quality') {
+      // Validate Quality Cargo file
+      if (!looksLikeQuality(headers)) {
+        return NextResponse.json({
+          ok:false,
+          error:'QUALITY_MISMATCH: wrong file for Quality tile. Expected QC headers (STOCK #, MODEL, SIZE, RETAIL, COST)'
+        }, { status: 400 });
+      }
       normalize = normalizeQuality;
       manufacturer = "Quality Cargo";
+    } else if (supplierParam === 'panther') {
+      // Panther parser not yet implemented, fallback to auto-detect
+      return NextResponse.json({
+        ok:false,
+        error:'Panther Cargo import not yet implemented'
+      }, { status: 501 });
     } else {
-      return NextResponse.json({ ok:false, message:"Unknown sheet format" }, { status: 400 });
+      // Fallback: auto-detect if no supplier param
+      if (detectDiamond(headers)) {
+        normalize = normalizeDiamond;
+        manufacturer = "Diamond Cargo";
+      } else if (detectQuality(headers)) {
+        normalize = normalizeQuality;
+        manufacturer = "Quality Cargo";
+      } else {
+        return NextResponse.json({ ok:false, message:"Unknown sheet format. Please specify supplier param (?supplier=diamond or ?supplier=quality)" }, { status: 400 });
+      }
     }
 
     let upserts = 0, skipped = 0;
@@ -55,11 +90,30 @@ export async function POST(req: Request) {
         select: { images: true },
       });
 
-      // Only use standard image if no existing image
-      const standardImage = pickStandardImage({ size: t.size, axle: t.axle || null });
+      // Detect blackout and special types from model/description
+      const modelLower = (t.model || '').toLowerCase();
+      const notesLower = (t.notes || '').toLowerCase();
+      const allText = `${modelLower} ${notesLower}`;
+
+      const blackout = allText.includes('blackout');
+      const specialType = allText.includes('dump') ? 'DUMP' :
+                          allText.includes('racing') ? 'RACING' : null;
+
+      // Enhanced standard image mapping
+      const standardImage = pickStandardImage({
+        size: t.size,
+        axle: t.axle || null,
+        blackout,
+        specialType
+      });
+
       const finalImages = (existing?.images && existing.images.length > 0)
         ? existing.images // Preserve existing images
         : standardImage ? [standardImage] : []; // Use standard image only if no existing
+
+      // Apply pricing formula: compute price from cost
+      const cost = t.price || 0; // Assuming t.price from Excel is actually cost
+      const calculatedPrice = cost > 0 ? computePrice(cost) : 0;
 
       // Map normalized trailer to Prisma schema
       const trailerData = {
@@ -71,9 +125,9 @@ export async function POST(req: Request) {
         length: t.lengthFeet || 0,
         width: t.widthFeet || 0,
         height: null,
-        msrp: t.price || 0,
-        salePrice: t.price || 0,
-        cost: (t.price || 0) * 0.8, // Estimate cost as 80% of price if not provided
+        msrp: calculatedPrice, // MSRP = calculated price
+        salePrice: calculatedPrice, // Sale price = calculated price (override Excel)
+        cost: cost, // Store original cost
         status: t.status || "available",
         images: finalImages, // Preserve existing OR use standard
       };
