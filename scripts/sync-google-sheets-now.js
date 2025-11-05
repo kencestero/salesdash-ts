@@ -5,7 +5,7 @@
  * Usage: node scripts/sync-google-sheets-now.js
  */
 
-const { PrismaClient } = require('../lib/generated/prisma');
+const { PrismaClient } = require('@prisma/client');
 const { google } = require('googleapis');
 
 const prisma = new PrismaClient();

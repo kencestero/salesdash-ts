@@ -1,7 +1,7 @@
 // Quick script to check your user role in the database
 // Usage: node scripts/check-my-role.js <your-email@example.com>
 
-const { PrismaClient } = require('../lib/generated/prisma');
+const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 async function checkUserRole(email) {

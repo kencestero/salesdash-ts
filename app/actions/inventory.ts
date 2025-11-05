@@ -1,6 +1,6 @@
 "use server";
 
-import { prisma } from "@/lib/generated/prisma";
+import { prisma } from "@/lib/prisma";
 
 export type TrailerByVIN = {
   vin: string;

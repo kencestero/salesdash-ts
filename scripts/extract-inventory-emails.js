@@ -17,7 +17,7 @@
  */
 
 require('dotenv').config();
-const { PrismaClient } = require('../lib/generated/prisma');
+const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 // NOTE: This script requires Gmail API setup with OAuth2
