@@ -193,6 +193,10 @@ model Trailer {
   soldAt          DateTime?
   soldBy          String?  // Salesperson ID who sold it
 
+  // Soft-delete & Batch Tracking
+  importBatchId   String?   @db.VarChar(36) // UUID for tracking bulk imports
+  deletedAt       DateTime? // Soft-delete timestamp
+
   // Relations
   deals           Deal[]
   creditApps      CreditApplication[]
@@ -201,6 +205,8 @@ model Trailer {
   @@index([status])
   @@index([category])
   @@index([manufacturer])
+  @@index([importBatchId])
+  @@index([deletedAt])
   @@index([soldBy])
 }
 
@@ -694,6 +700,22 @@ model UploadReport {
 
   @@index([manufacturer])
   @@index([uploadedBy])
+  @@index([createdAt])
+}
+
+// Import Log - Track each inventory import for rollback capability
+model ImportLog {
+  id        String   @id @default(cuid())
+  batchId   String   @unique // UUID for the import batch
+  supplier  String   // "Diamond Cargo", "Quality Cargo", "Panther Cargo"
+  created   Int      // Number of new trailers created
+  updated   Int      // Number of existing trailers updated
+  skipped   Int      // Number of rows skipped (invalid data)
+  userId    String   // User ID who performed the import
+  createdAt DateTime @default(now())
+
+  @@index([batchId])
+  @@index([userId])
   @@index([createdAt])
 }
 
