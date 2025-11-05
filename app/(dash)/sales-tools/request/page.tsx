@@ -36,7 +36,6 @@ export default function RequestPage() {
       toast({
         title: "Unexpected error",
         description: e.message || "Something went wrong.",
-        variant: "destructive",
       });
     };
     window.addEventListener("error", handler);
