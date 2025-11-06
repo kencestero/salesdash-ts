@@ -80,9 +80,18 @@ export async function POST(req: Request) {
 
     let upserts = 0, skipped = 0;
 
+    console.log(`[inventory/import] Processing ${rows.length} rows from ${manufacturer}`);
+    console.log(`[inventory/import] First row headers:`, Object.keys(rows[0]));
+    console.log(`[inventory/import] Sample first row:`, rows[0]);
+
     for (const raw of rows) {
       const t = normalize(raw);
-      if (!t?.vin) { skipped++; continue; }
+      if (!t?.vin) {
+        console.log(`[inventory/import] Skipped row (no VIN):`, { raw, normalized: t });
+        skipped++;
+        continue;
+      }
+      console.log(`[inventory/import] Processing VIN: ${t.vin}`);
 
       // Check if trailer already exists
       const existing = await prisma.trailer.findUnique({
