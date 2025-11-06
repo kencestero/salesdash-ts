@@ -124,7 +124,8 @@ export async function POST(req: Request) {
         category: "Enclosed", // Default category, can be enhanced later
         length: t.lengthFeet || 0,
         width: t.widthFeet || 0,
-        height: null,
+        height: t.heightFeet || null, // Use calculated height from parser
+        rearDoorType: t.rearDoorType || null, // Use parsed rear door type
         msrp: calculatedPrice, // MSRP = calculated price
         salePrice: calculatedPrice, // Sale price = calculated price (override Excel)
         cost: cost, // Store original cost

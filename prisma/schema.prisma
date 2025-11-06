@@ -169,6 +169,7 @@ model Trailer {
   gvwr            Int?     // Gross Vehicle Weight Rating (lbs)
   capacity        Int?     // payload capacity (lbs)
   axles           Int?     // number of axles
+  rearDoorType    String?  // Rear door code: R, DD, HDR, SRW, 8'P, R-RW
 
   // Pricing
   msrp            Float    // Manufacturer's Suggested Retail Price

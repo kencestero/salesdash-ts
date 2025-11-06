@@ -8,6 +8,8 @@ export type NormalizedTrailer = {
   axle?: "SA"|"TA"|"TA3"|"TA4"|null;
   lengthFeet?: number;    // 20, 24, etc.
   widthFeet?: number;     // 6, 7, 8.5
+  heightFeet?: number;    // 5.5 (5'6"), 6.25 (6'3"), etc.
+  rearDoorType?: string | null; // R, DD, HDR, SRW, 8'P, R-RW
   model?: string;
   price?: number | null;
   status?: "available" | "sold" | "pending" | "unknown";

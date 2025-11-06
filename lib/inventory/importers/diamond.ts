@@ -1,4 +1,5 @@
 import type { RawRow, NormalizedTrailer } from "./types";
+import { parseSize, parseRear, calculateDiamondHeight } from "../parsers";
 
 export function detectDiamond(sheetHeaders: string[]): boolean {
   // Diamond sheet has columns like: VIN, STOCK #, SIZE, MODEL, PRICE
@@ -12,14 +13,23 @@ export function normalizeDiamond(row: RawRow): NormalizedTrailer | null {
 
   const sizeRaw = String(row["SIZE"] || row["Size"] || row["Dimensions"] || "").trim();
   const model = String(row["MODEL"] || row["Model"] || "").trim();
-  const price = Number(String(row["PRICE"] || row["Price"] || "").replace(/[^0-9.]/g,"")) || null;
+  const description = String(row["DESCRIPTION"] || row["Description"] || "").trim();
+  const notes = String(row["NOTES"] || row["Notes"] || "").trim();
+  const price = Number(String(row["PRICE"] || row["Price"] || row["COST"] || row["Cost"] || "").replace(/[^0-9.]/g,"")) || null;
   const stock = String(row["STOCK #"] || row["Stock #"] || row["Stock"] || "").trim();
 
-  // parse size like "7x16" or "8.5x20"
-  const m = sizeRaw.match(/(\d+(?:\.\d+)?)\s*x\s*(\d+(?:\.\d+)?)/i);
-  const widthFeet = m ? Number(m[1]) : undefined;
-  const lengthFeet = m ? Number(m[2]) : undefined;
+  // Parse size from SIZE column first, then fallback to MODEL, then DESCRIPTION
+  const parsedSize = parseSize(sizeRaw) || parseSize(model) || parseSize(description);
+  const widthFeet = parsedSize?.width;
+  const lengthFeet = parsedSize?.length;
 
+  // Calculate height based on width (Diamond standard)
+  const heightFeet = widthFeet ? calculateDiamondHeight(widthFeet) : undefined;
+
+  // Parse rear door type from MODEL or DESCRIPTION
+  const rearDoorType = parseRear(model) || parseRear(description) || null;
+
+  // Parse axle type from model
   const axle = /TA4/i.test(model) ? "TA4" :
                /TA3/i.test(model) ? "TA3" :
                /TA|TANDEM/i.test(model) ? "TA" :
@@ -29,12 +39,15 @@ export function normalizeDiamond(row: RawRow): NormalizedTrailer | null {
     vin,
     stockNumber: stock || undefined,
     manufacturer: "Diamond Cargo",
-    size: sizeRaw || undefined,
+    size: parsedSize ? `${parsedSize.width}x${parsedSize.length}` : sizeRaw || undefined,
     axle,
-    widthFeet, lengthFeet,
+    widthFeet,
+    lengthFeet,
+    heightFeet,
+    rearDoorType,
     model: model || undefined,
     price,
     status: "available",
-    notes: null,
+    notes: notes || description || null,
   };
 }
