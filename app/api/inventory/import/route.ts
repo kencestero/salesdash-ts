@@ -35,7 +35,14 @@ export async function POST(req: Request) {
     if (name.endsWith('.xlsx') || name.endsWith('.xls') || name.endsWith('.csv')) {
       const wb = XLSX.read(buf, { type: 'buffer' });
       const ws = wb.Sheets[wb.SheetNames[0]];
-      rows = XLSX.utils.sheet_to_json(ws, { defval: '' });
+
+      // Diamond Cargo files have 5 header/title rows before actual data
+      // Row 6 contains column headers, Row 7+ contains data
+      // Use range option to skip first 5 rows and treat Row 6 as header
+      rows = XLSX.utils.sheet_to_json(ws, {
+        defval: '',
+        range: 5  // Skip first 5 rows (0-indexed, so row 6 becomes header)
+      });
     } else {
       return NextResponse.json({ ok:false, error:'Unsupported file type' }, { status: 415 });
     }
