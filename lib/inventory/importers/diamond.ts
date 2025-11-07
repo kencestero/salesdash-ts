@@ -49,9 +49,26 @@ export function normalizeDiamond(row: RawRow): NormalizedTrailer | null {
   const model = alias(row, ["MODEL", "Model"]) || "";
   const notes = alias(row, ["NOTES/OPTIONS", "Notes/Options", "NOTES", "Options"]);
 
-  // PRICE column contains COST (not selling price)
-  const priceStr = alias(row, ["PRICE", "Price", "COST", "Cost"]);
-  const cost = priceStr ? Number(priceStr.replace(/[^0-9.]/g, "")) : undefined;
+  // Pricing: prioritize discounted > price > cost
+  // Helper to extract number from string
+  const num = (v: any) => {
+    const n = Number(String(v || '').replace(/[^0-9.]/g, ''));
+    return n > 0 ? n : null;
+  };
+
+  const discounted = alias(row, ["DISCOUNT", "DISC PRICE", "SELL PRICE", "RETAIL", "SALE"]);
+  const price = alias(row, ["PRICE", "DEALER PRICE", "MSRP"]);
+  const cost = alias(row, ["COST", "DEALER COST"]);
+
+  // Find first non-empty price value: discounted > price > cost
+  const rawPrice = num(discounted) ?? num(price) ?? num(cost) ?? null;
+  const costValue = num(cost) ?? null;
+
+  // If we have a discounted or price value, use it directly
+  // If we only have cost, compute selling price
+  const sellingPrice = (num(discounted) ?? num(price))
+    ? rawPrice
+    : (costValue ? computePrice(costValue) : null);
 
   // Prefer explicit REAR cell; fall back to parser if empty
   const rearCell = alias(row, ["REAR", "Rear", "REAR DOOR"]);
@@ -101,8 +118,8 @@ export function normalizeDiamond(row: RawRow): NormalizedTrailer | null {
     metal,
     color,
     model: model || undefined,
-    price: cost,  // This is COST, will be used to calculate selling price
-    sellingPrice: typeof cost === "number" ? computePrice(cost) : undefined,
+    price: costValue,  // Store dealer cost
+    sellingPrice: sellingPrice || undefined,  // Computed or direct selling price
     status: "available",
     notes: notes || undefined,
   };

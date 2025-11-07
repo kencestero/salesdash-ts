@@ -1,5 +1,22 @@
 import type { RawRow, NormalizedTrailer } from "./types";
-import { parseSize, parseRear, calculateDiamondHeight } from "../parsers";
+import { parseSize, parseRear, parseHeightFeet, calculateDiamondHeight } from "../parsers";
+import { computePrice } from "@/lib/pricing";
+
+// Feature flag: enable/disable standard features injection
+const ENABLE_STD = true;
+
+/**
+ * Alias helper - tries multiple column name variants, returns first non-empty value
+ */
+function alias(row: Record<string, any>, keys: string[]): string | undefined {
+  for (const k of keys) {
+    const v = row[k];
+    if (v !== undefined && v !== null && String(v).trim() !== "") {
+      return String(v).trim();
+    }
+  }
+  return undefined;
+}
 
 export function detectQuality(sheetHeaders: string[]): boolean {
   const h = sheetHeaders.map(s => s.toLowerCase().replace(/\s+/g, ' '));
@@ -10,70 +27,116 @@ export function detectQuality(sheetHeaders: string[]): boolean {
 }
 
 /**
- * Find column value using flexible aliases
+ * Parse Quality Cargo Excel format with robust column name handling:
+ * - VIN / VIN NUMBER / Vin / STOCK / STOCK # (real VIN or stock number)
+ * - MODEL / BODY MODEL NAME / Body Model Name (contains size like 5X10SA, 8.5X34TA4)
+ * - DISCOUNT / DISC PRICE / SELL PRICE / RETAIL / SALE (selling price)
+ * - PRICE / DEALER PRICE / COST / WHOLESALE (dealer cost)
+ * - DESCRIPTION / DESC / NOTES / OPTIONS
+ * - HT / Ht / HEIGHT / Int HT / INT HEIGHT (height like 5'6", 7', 7'6", 8')
+ * - EXT COLOR / Color (exterior color)
+ * - FRONT / Front (FF for Flat Front, else V-Nose)
  */
-function findColumn(row: RawRow, aliases: string[]): string {
-  for (const alias of aliases) {
-    const normalized = alias.toLowerCase().replace(/\s+/g, ' ');
-
-    // Try exact match first
-    for (const key of Object.keys(row)) {
-      const keyNormalized = key.toLowerCase().replace(/\s+/g, ' ');
-      if (keyNormalized === normalized || keyNormalized.includes(normalized)) {
-        const val = row[key];
-        if (val !== null && val !== undefined) {
-          return String(val).trim();
-        }
-      }
-    }
-  }
-  return "";
-}
-
 export function normalizeQuality(row: RawRow): NormalizedTrailer | null {
-  // Flexible header matching with aliases
-  const vin = findColumn(row, ["VIN", "VIN NUMBER", "Vin"]);
+  // VIN or STOCK - Quality uses real VINs more often than Diamond
+  const vinRaw = alias(row, ["VIN", "VIN NUMBER", "Vin"]);
+  const stock = alias(row, ["STOCK", "STOCK #", "STOCK NUMBER", "UNIT #", "Unit #"]);
+
+  // Prefer VIN if present, else use stock
+  const vin = vinRaw || (stock ? `QC-${stock}` : null);
   if (!vin) return null;
 
-  const stock = findColumn(row, ["STOCK", "STOCK #", "STOCK NUMBER", "UNIT #", "Unit #"]);
-  const model = findColumn(row, ["MODEL", "BODY MODEL NAME", "Body Model Name"]);
-  const description = findColumn(row, ["DESCRIPTION", "DESC", "NOTES"]);
+  const model = alias(row, ["MODEL", "BODY MODEL NAME", "Body Model Name"]) || "";
+  const notes = alias(row, ["DESCRIPTION", "DESC", "NOTES", "OPTIONS"]);
 
-  // Quality Cargo sheets have COST and RETAIL columns
-  const costStr = findColumn(row, ["COST", "WHOLESALE", "DEALER COST", "Wholesale"]);
-  const price = Number(costStr.replace(/[^0-9.]/g,"")) || null;
+  // Pricing: prioritize discounted > price > cost (same as Diamond)
+  const num = (v: any) => {
+    const n = Number(String(v || '').replace(/[^0-9.]/g, ''));
+    return n > 0 ? n : null;
+  };
 
-  // Parse size from MODEL column (QC doesn't have separate SIZE column typically)
-  // Fallback to description if not in model
-  const parsedSize = parseSize(model) || parseSize(description);
-  const widthFeet = parsedSize?.width;
-  const lengthFeet = parsedSize?.length;
+  const discounted = alias(row, ["DISCOUNT", "DISC PRICE", "SELL PRICE", "RETAIL", "SALE"]);
+  const price = alias(row, ["PRICE", "DEALER PRICE", "MSRP"]);
+  const cost = alias(row, ["COST", "WHOLESALE", "DEALER COST"]);
 
-  // Calculate height based on width (assuming Quality Cargo follows Diamond standard)
-  const heightFeet = widthFeet ? calculateDiamondHeight(widthFeet) : undefined;
+  // Find first non-empty price value: discounted > price > cost
+  const rawPrice = num(discounted) ?? num(price) ?? num(cost) ?? null;
+  const costValue = num(cost) ?? null;
 
-  // Parse rear door type from MODEL or DESCRIPTION
-  const rearDoorType = parseRear(model) || parseRear(description) || null;
+  // If we have a discounted or price value, use it directly
+  // If we only have cost, compute selling price
+  const sellingPrice = (num(discounted) ?? num(price))
+    ? rawPrice
+    : (costValue ? computePrice(costValue) : null);
+
+  // Parse heights like "7'", "6'6\""
+  const ht = alias(row, ["HT", "Ht", "HEIGHT", "Int HT", "INT HEIGHT"]);
+  let heightFeet = parseHeightFeet(ht);
+
+  // Parse size from MODEL column (5X10SA → width: 5, length: 10)
+  const parsedSize = parseSize(model) || parseSize(notes || "");
+  const widthFeet = parsedSize?.widthFeet;
+  const lengthFeet = parsedSize?.lengthFeet;
+
+  // If no explicit height, calculate from width (Quality follows Diamond standards)
+  if (!heightFeet && widthFeet) {
+    heightFeet = calculateDiamondHeight(widthFeet);
+  }
 
   // Parse axle type from model
   const axle = /TA4/i.test(model) ? "TA4" :
                /TA3/i.test(model) ? "TA3" :
-               /TA|TANDEM/i.test(model) ? "TA" :
-               /SA|SINGLE/i.test(model) ? "SA" : null;
+               /\bTA\b|TANDEM/i.test(model) ? "TA" :
+               /\bSA\b|SINGLE/i.test(model) ? "SA" : undefined;
 
-  return {
+  // Prefer explicit REAR cell; fall back to parser if empty
+  const rearCell = alias(row, ["REAR", "Rear", "REAR DOOR"]);
+  const rearDoorType = rearCell || parseRear(model) || parseRear(notes || "") || undefined;
+
+  // Parse color and metal from EXT COLOR
+  const colorRaw = alias(row, ["EXT COLOR", "Color", "EXTERIOR COLOR"]);
+  const metal = colorRaw && /\.080/i.test(colorRaw) ? ".080 Polycore" : undefined;
+  const color = colorRaw ? colorRaw.replace(/\.0(30|80).*/i, "").trim() : undefined;
+
+  // Parse front type (FF = Flat Front, else V-Nose)
+  const frontRaw = alias(row, ["FRONT", "Front"]);
+  const front = frontRaw && /FF/i.test(frontRaw) ? "Flat Front" : "V-Nose";
+
+  // Build normalized trailer object
+  const normalized: NormalizedTrailer = {
     vin,
     stockNumber: stock || undefined,
     manufacturer: "Quality Cargo",
-    size: parsedSize ? `${parsedSize.width}x${parsedSize.length}` : undefined,
-    axle,
+    size: parsedSize ? `${parsedSize.width}x${parsedSize.length}` : model || undefined,
+    axle: axle || undefined,
     widthFeet,
     lengthFeet,
     heightFeet,
     rearDoorType,
+    front,
+    metal,
+    color,
     model: model || undefined,
-    price,
+    price: costValue,  // Store dealer cost
+    sellingPrice: sellingPrice || undefined,  // Computed or direct selling price
     status: "available",
-    notes: description || null,
+    notes: notes || undefined,
   };
+
+  // Standard features injection (if enabled)
+  if (ENABLE_STD && widthFeet && lengthFeet && axle) {
+    try {
+      const std = require("@/data/standards/quality.json");
+      const axleKey = axle === "SA" ? "SA" : "TA"; // Normalize axle to SA or TA
+      const sizeKey = `${widthFeet}x${lengthFeet} ${axleKey}`;
+      const standardFeatures = std[sizeKey];
+      if (standardFeatures && Array.isArray(standardFeatures)) {
+        (normalized as any).standard_features = standardFeatures;
+      }
+    } catch (err) {
+      // Silently ignore if data file doesn't exist yet
+    }
+  }
+
+  return normalized;
 }
