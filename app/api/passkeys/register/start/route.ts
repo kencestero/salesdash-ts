@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
     // Fetch existing credentials to exclude
     const creds = await prisma.webAuthnCredential.findMany({ where: { userId } });
 
-    const rpID = process.env.PASSKEY_RP_ID || 'mjsalesdash.com';
+    const rpID = 'mjsalesdash.com';
 
     const opts = await generateRegistrationOptions({
       rpName: 'MJ SalesDash',

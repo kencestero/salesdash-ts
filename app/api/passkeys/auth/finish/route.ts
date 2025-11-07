@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: false, error: 'credential-not-found' }, { status: 404 });
     }
 
-    const rpID = process.env.PASSKEY_RP_ID || 'mjsalesdash.com';
+    const rpID = 'mjsalesdash.com';
     const expectedOrigin = process.env.PASSKEY_ORIGIN || 'https://mjsalesdash.com';
 
     const verification = await verifyAuthenticationResponse({

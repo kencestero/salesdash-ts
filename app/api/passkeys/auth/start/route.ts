@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: false, error: 'no-passkeys' }, { status: 404 });
     }
 
-    const rpID = process.env.PASSKEY_RP_ID || 'mjsalesdash.com';
+    const rpID = 'mjsalesdash.com';
 
     const opts = await generateAuthenticationOptions({
       rpID,
