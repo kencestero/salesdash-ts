@@ -8,6 +8,21 @@ import { computePrice } from "@/lib/pricing";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+/**
+ * Find header row in Excel sheet (handles messy sheets with title rows before headers)
+ * Scans first 10 rows for a row that contains "MODEL" and either "VIN" or "VIN #"
+ * @returns 0-indexed row number of header row (default: 0)
+ */
+function findHeaderRow(sheet: any[][]): number {
+  for (let i = 0; i < Math.min(10, sheet.length); i++) {
+    const row = (sheet[i] || []).map(String);
+    const hasModel = row.some(c => /(^|\s)model(\s|$)/i.test(c));
+    const hasVin = row.some(c => /\bvin\b|vin\s*#/i.test(c));
+    if (hasModel && hasVin) return i;
+  }
+  return 0; // Default to first row if not found
+}
+
 // Quality Cargo validation: check for known QC headers
 function looksLikeQuality(headers: string[]): boolean {
   const h = headers.map(s => s.toLowerCase());
@@ -36,12 +51,16 @@ export async function POST(req: Request) {
       const wb = XLSX.read(buf, { type: 'buffer' });
       const ws = wb.Sheets[wb.SheetNames[0]];
 
-      // Diamond Cargo files have 5 header/title rows before actual data
-      // Row 6 contains column headers, Row 7+ contains data
-      // Use range option to skip first 5 rows and treat Row 6 as header
+      // Dynamic header detection: scan first 10 rows for header row (handles messy sheets)
+      const sheetArray = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' }) as any[][];
+      const headerRowIndex = findHeaderRow(sheetArray);
+
+      console.log(`[inventory/import] Detected header row at index: ${headerRowIndex}`);
+
+      // Use detected header row index to parse data
       rows = XLSX.utils.sheet_to_json(ws, {
         defval: '',
-        range: 5  // Skip first 5 rows (0-indexed, so row 6 becomes header)
+        range: headerRowIndex  // Start from detected header row
       });
     } else {
       return NextResponse.json({ ok:false, error:'Unsupported file type' }, { status: 415 });
@@ -91,14 +110,18 @@ export async function POST(req: Request) {
     console.log(`[inventory/import] First row headers:`, Object.keys(rows[0]));
     console.log(`[inventory/import] Sample first row:`, rows[0]);
 
-    for (const raw of rows) {
+    for (let idx = 0; idx < rows.length; idx++) {
+      const raw = rows[idx];
+      const rowNumber = idx + 1; // 1-indexed row number for logging
+
       const t = normalize(raw);
       if (!t?.vin) {
-        console.log(`[inventory/import] Skipped row (no VIN):`, { raw, normalized: t });
+        const reason = !t ? "Normalization returned null (missing stock/VIN)" : "Missing VIN in normalized object";
+        console.log(`[inventory/import] Skipped row ${rowNumber}:`, { reason, rowNumber, raw });
         skipped++;
         continue;
       }
-      console.log(`[inventory/import] Processing VIN: ${t.vin}`);
+      console.log(`[inventory/import] Processing VIN: ${t.vin} (row ${rowNumber})`);
 
       // Check if trailer already exists
       const existing = await prisma.trailer.findUnique({
@@ -147,6 +170,7 @@ export async function POST(req: Request) {
         cost: cost, // Store original cost
         status: t.status || "available",
         images: finalImages, // Preserve existing OR use standard
+        features: (t as any).standard_features || [], // Map standard_features to Prisma features field
       };
 
       await prisma.trailer.upsert({

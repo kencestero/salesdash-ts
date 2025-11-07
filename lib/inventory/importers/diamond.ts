@@ -1,5 +1,22 @@
 import type { RawRow, NormalizedTrailer } from "./types";
-import { parseSize, parseRear, calculateDiamondHeight } from "../parsers";
+import { parseSize, parseRear, parseHeightFeet, calculateDiamondHeight } from "../parsers";
+import { computePrice } from "@/lib/pricing";
+
+// Feature flag: enable/disable standard features injection
+const ENABLE_STD = true;
+
+/**
+ * Alias helper - tries multiple column name variants, returns first non-empty value
+ */
+function alias(row: Record<string, any>, keys: string[]): string | undefined {
+  for (const k of keys) {
+    const v = row[k];
+    if (v !== undefined && v !== null && String(v).trim() !== "") {
+      return String(v).trim();
+    }
+  }
+  return undefined;
+}
 
 export function detectDiamond(sheetHeaders: string[]): boolean {
   // Diamond sheet has columns like: VIN #, MODEL, PRICE, REAR, HT
@@ -10,53 +27,46 @@ export function detectDiamond(sheetHeaders: string[]): boolean {
 }
 
 /**
- * Parse Diamond Cargo Excel format with actual column names:
- * - VIN # (stock number, not real VIN)
- * - MODEL (contains size like 5X10SA, 8.5X34TA4)
- * - PRICE (dealer cost)
- * - REAR (rear door code: R, VN, N, FF, etc.)
- * - HT (height like 5'6", 7', 7'6", 8')
- * - NOTES/OPTIONS
+ * Parse Diamond Cargo Excel format with robust column name handling:
+ * - VIN # / VIN# / Vin # / Stock # (stock number, not real VIN)
+ * - MODEL / Model (contains size like 5X10SA, 8.5X34TA4)
+ * - PRICE / Price / COST / Cost (dealer cost)
+ * - REAR / Rear / REAR DOOR (rear door code: R, DD, etc.)
+ * - HT / Ht / HEIGHT / Int HT / INT HEIGHT (height like 5'6", 7', 7'6", 8')
+ * - EXT COLOR / Color (exterior color, may include metal spec like .080)
+ * - FRONT / Front (FF for Flat Front, else V-Nose)
+ * - NOTES/OPTIONS / Notes/Options / NOTES / Options
  */
 export function normalizeDiamond(row: RawRow): NormalizedTrailer | null {
-  // VIN # column contains stock number (6 digits like 112962)
-  const stockNum = String(row["VIN #"] || row["VIN#"] || row["Vin #"] || "").trim();
-  if (!stockNum) return null;
+  // Accept VIN or VIN #; Diamond "VIN #" is often a stock number (6 digits)
+  const stock = alias(row, ["VIN #", "VIN#", "Vin #", "Stock #", "STOCK #", "STK #"]);
+  if (!stock) return null;
 
-  // Generate a fake VIN from stock number (Prisma requires unique VIN)
-  const vin = `DC-${stockNum}`;
+  // Check for real VIN first (length >= 8), else synthesize DC-<stock>
+  const vinRaw = alias(row, ["VIN", "Vin"]);
+  const vin = vinRaw && vinRaw.length >= 8 ? vinRaw : `DC-${stock}`;
 
-  const model = String(row["MODEL"] || row["Model"] || "").trim();
-  const notes = String(row["NOTES/OPTIONS"] || row["Notes/Options"] || row["NOTES"] || "").trim();
+  const model = alias(row, ["MODEL", "Model"]) || "";
+  const notes = alias(row, ["NOTES/OPTIONS", "Notes/Options", "NOTES", "Options"]);
 
   // PRICE column contains COST (not selling price)
-  const priceStr = String(row["PRICE"] || row["Price"] || "").trim();
-  const price = Number(priceStr.replace(/[^0-9.]/g,"")) || null;
+  const priceStr = alias(row, ["PRICE", "Price", "COST", "Cost"]);
+  const cost = priceStr ? Number(priceStr.replace(/[^0-9.]/g, "")) : undefined;
 
-  // REAR column has rear door codes
-  const rearRaw = String(row["REAR"] || row["Rear"] || row["REA R"] || "").trim();
-  const rearDoorType = rearRaw || parseRear(model) || parseRear(notes) || null;
+  // Prefer explicit REAR cell; fall back to parser if empty
+  const rearCell = alias(row, ["REAR", "Rear", "REAR DOOR"]);
+  const rearDoorType = rearCell || parseRear(model) || parseRear(notes || "") || undefined;
 
-  // HT column has heights like "5'6\"", "7'", "7'6\"", "8'"
-  const htRaw = String(row["HT"] || row["Ht"] || row["HEIGHT"] || "").trim();
-  let heightFeet: number | undefined = undefined;
+  // Parse heights like "7'", "6'6\""
+  const ht = alias(row, ["HT", "Ht", "HEIGHT", "Int HT", "INT HEIGHT"]);
+  let heightFeet = parseHeightFeet(ht);
 
-  if (htRaw) {
-    // Parse heights like "5'6\"", "7'", "7'6\""
-    const match = htRaw.match(/(\d+)'(\d+)?"?/);
-    if (match) {
-      const feet = Number(match[1]);
-      const inches = match[2] ? Number(match[2]) : 0;
-      heightFeet = feet + (inches / 12);
-    }
-  }
-
-  // Parse size from MODEL column (5X10SA → 5' x 10')
-  const parsedSize = parseSize(model) || parseSize(notes);
+  // Parse size from MODEL column (5X10SA → width: 5, length: 10)
+  const parsedSize = parseSize(model) || parseSize(notes || "");
   const widthFeet = parsedSize?.width;
   const lengthFeet = parsedSize?.length;
 
-  // If no height from HT column, calculate from width
+  // If no explicit height, calculate from width (Diamond standard)
   if (!heightFeet && widthFeet) {
     heightFeet = calculateDiamondHeight(widthFeet);
   }
@@ -64,22 +74,53 @@ export function normalizeDiamond(row: RawRow): NormalizedTrailer | null {
   // Parse axle type from model
   const axle = /TA4/i.test(model) ? "TA4" :
                /TA3/i.test(model) ? "TA3" :
-               /TA|TANDEM/i.test(model) ? "TA" :
-               /SA|SINGLE/i.test(model) ? "SA" : null;
+               /\bTA\b|TANDEM/i.test(model) ? "TA" :
+               /\bSA\b|SINGLE/i.test(model) ? "SA" : undefined;
 
-  return {
+  // Parse color and metal from EXT COLOR
+  const colorRaw = alias(row, ["EXT COLOR", "Color"]);
+  const metal = colorRaw && /\.080/i.test(colorRaw) ? ".080 Polycore" : undefined;
+  const color = colorRaw ? colorRaw.replace(/\.0(30|80).*/i, "").trim() : undefined;
+
+  // Parse front type (FF = Flat Front, else V-Nose)
+  const frontRaw = alias(row, ["FRONT", "Front"]);
+  const front = frontRaw && /FF/i.test(frontRaw) ? "Flat Front" : "V-Nose";
+
+  // Build normalized trailer object
+  const normalized: NormalizedTrailer = {
     vin,
-    stockNumber: stockNum,
+    stockNumber: stock,
     manufacturer: "Diamond Cargo",
     size: parsedSize ? `${parsedSize.width}x${parsedSize.length}` : model || undefined,
-    axle,
+    axle: axle || undefined,
     widthFeet,
     lengthFeet,
     heightFeet,
     rearDoorType,
+    front,
+    metal,
+    color,
     model: model || undefined,
-    price,  // This is COST, will be used to calculate selling price
+    price: cost,  // This is COST, will be used to calculate selling price
+    sellingPrice: typeof cost === "number" ? computePrice(cost) : undefined,
     status: "available",
-    notes: notes || null,
+    notes: notes || undefined,
   };
+
+  // Standard features injection (if enabled)
+  if (ENABLE_STD && widthFeet && lengthFeet && axle) {
+    try {
+      const std = require("@/data/standards/diamond.json");
+      const axleKey = axle === "SA" ? "SA" : "TA"; // Normalize axle to SA or TA
+      const sizeKey = `${widthFeet}x${lengthFeet} ${axleKey}`;
+      const standardFeatures = std[sizeKey];
+      if (standardFeatures && Array.isArray(standardFeatures)) {
+        (normalized as any).standard_features = standardFeatures;
+      }
+    } catch (err) {
+      // Silently ignore if data file doesn't exist yet
+    }
+  }
+
+  return normalized;
 }

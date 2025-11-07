@@ -53,6 +53,27 @@ export function calculateDiamondHeight(widthFeet: number): number {
 }
 
 /**
+ * Parse height from string formats like "7'", "6'6\"", "5'6", etc.
+ *
+ * @param ht - Height string from Excel (e.g., "7'", "6'6\"", "5'6")
+ * @returns Height in feet as decimal (e.g., 7.0, 6.5, 5.5) or undefined if unparseable
+ */
+export function parseHeightFeet(ht: string | undefined | null): number | undefined {
+  if (!ht) return undefined;
+
+  const htStr = String(ht).trim();
+  if (!htStr) return undefined;
+
+  // Parse heights like "5'6\"", "7'", "7'6\"", "8'"
+  const match = htStr.match(/(\d+)'(\d+)?"?/);
+  if (!match) return undefined;
+
+  const feet = Number(match[1]);
+  const inches = match[2] ? Number(match[2]) : 0;
+  return feet + (inches / 12);
+}
+
+/**
  * Format height number to feet-inches string
  * Examples: 5.5 → "5'6\"", 6.25 → "6'3\""
  */
