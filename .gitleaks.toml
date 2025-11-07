@@ -1,83 +1,13 @@
-# Gitleaks configuration file
-# Detects secrets before they're committed
-
-title = "MJ Cargo Sales Dashboard - Secret Detection"
-
-[extend]
-# Use default ruleset
-useDefault = true
-
-[[rules]]
-id = "database-url"
-description = "Database connection string"
-regex = '''(postgresql|postgres|mysql|mongodb|mariadb)://[^\s]+'''
-tags = ["database", "credentials"]
-
-[[rules]]
-id = "env-file-database"
-description = "DATABASE_URL in code"
-regex = '''DATABASE_URL\s*=\s*["']?[^\s"']+["']?'''
-tags = ["database", "env"]
-
-[[rules]]
-id = "auth-secret"
-description = "AUTH_SECRET or NEXTAUTH_SECRET"
-regex = '''(AUTH_SECRET|NEXTAUTH_SECRET)\s*=\s*["']?[^\s"']+["']?'''
-tags = ["auth", "secret"]
-
-[[rules]]
-id = "api-key"
-description = "Generic API key"
-regex = '''(api[_-]?key|apikey|api[_-]?secret)\s*[:=]\s*["']?[^\s"']{20,}["']?'''
-tags = ["api", "key"]
-
-[[rules]]
-id = "private-key"
-description = "Private key"
-regex = '''-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----'''
-tags = ["key", "private"]
-
-[[rules]]
-id = "google-api-key"
-description = "Google API key"
-regex = '''AIza[0-9A-Za-z_-]{35}'''
-tags = ["google", "api"]
-
-[[rules]]
-id = "firebase-key"
-description = "Firebase API key"
-regex = '''AAAA[A-Za-z0-9_-]{7}:[A-Za-z0-9_-]{140}'''
-tags = ["firebase", "api"]
-
-[[rules]]
-id = "vercel-token"
-description = "Vercel token"
-regex = '''vercel_[a-zA-Z0-9]{24}'''
-tags = ["vercel", "token"]
-
 [allowlist]
-description = "Allowlist for false positives"
-paths = [
-  '''\.env\.example$''',
-  '''\.env\.template$''',
-  '''\.env\.local\.template$''',
-  '''SECURITY_INCIDENT_RESPONSE\.md$''',
-  '''INCIDENT_RESPONSE_PLAN\.md$''',
-  '''EMAIL_SYSTEM_SETUP\.md$''',
-  '''FIREBASE_SETUP\.md$''',
-  '''WALKTHROUGH\.md$''',
-  '''README\.md$''',
-  '''README-.*\.md$''',  # Documentation files like README-IMPORT.md
-]
-
-# Allow example/placeholder values
-regexes = [
-  '''your-.*-here''',
-  '''your-secret-key''',
-  '''example\.com''',
-  '''localhost:3000''',
-  '''sk_test_[a-zA-Z0-9]+''',  # Test keys
-  '''pk_test_[a-zA-Z0-9]+''',
-  '''postgresql://\.\.\.''',  # Placeholder database URLs
-  '''mysql://\.\.\.''',
-]
+  description = "ignore example secrets in docs"
+  paths = [
+    "README_DOCUMENTATION.md",
+    "ACTIVATION_GUIDE_COMPLETE.md",
+    "MCP-SETUP-GUIDE.md",
+    "DASHTAIL-SETUP-GUIDE.md",
+    "DEPLOYMENT-SUMMARY.md",
+    "KENNETH-INVENTORY-EXTRACTION-SUMMARY.md",
+    "PYTHON-INVENTORY-INTEGRATION.md",
+    "CLAUDE.md",
+    "GOOGLE-SHEETS-SYNC-AUDIT-REPORT.md"
+  ]

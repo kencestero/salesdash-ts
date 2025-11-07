@@ -26,6 +26,10 @@ import { calculateFinance } from "@/lib/finance/finance-calc";
 import { calculateRTO } from "@/lib/finance/rto-calc";
 import { getLocationByZip } from "@/lib/data/zip-tax-map";
 
+// Dynamic build info
+const COMMIT = (process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA ?? process.env.VERCEL_GIT_COMMIT_SHA ?? '').slice(0, 7);
+const ENV = process.env.NEXT_PUBLIC_VERCEL_ENV ?? process.env.VERCEL_ENV ?? 'local';
+
 interface Trailer {
   id: string;
   stockNumber: string;
@@ -67,9 +71,9 @@ export default function FinanceComparePage() {
     const fetchTrailers = async () => {
       try {
         setLoadingTrailers(true);
-        const res = await fetch("/api/inventory?status=available");
+        const res = await fetch("/api/trailers");
         const data = await res.json();
-        setTrailers(data.trailers || []);
+        setTrailers(data.items || []);
       } catch (error) {
         console.error("Failed to fetch trailers:", error);
         toast({
@@ -83,6 +87,22 @@ export default function FinanceComparePage() {
     };
     fetchTrailers();
   }, []);
+
+  // Auto-update tax rate when ZIP changes
+  useEffect(() => {
+    const updateTaxRate = async () => {
+      if (zipcode && zipcode.length >= 5) {
+        try {
+          const res = await fetch(`/api/tax?zip=${zipcode.slice(0, 5)}`);
+          const data = await res.json();
+          setTaxPct(data.rate || 0);
+        } catch (error) {
+          console.error("Failed to fetch tax rate:", error);
+        }
+      }
+    };
+    updateTaxRate();
+  }, [zipcode]);
 
   // Handle trailer selection and auto-update price
   const handleTrailerSelect = (trailerId: string) => {
@@ -851,6 +871,11 @@ export default function FinanceComparePage() {
             to select it for the PDF quote (max 3 options). Uncheck terms to hide them from the display.
           </p>
         </div>
+      </div>
+
+      {/* Version Stamp */}
+      <div className="text-[10px] text-gray-500 mt-6 opacity-70">
+        FIN-COMPARE v2 • commit {COMMIT} • env:{ENV}
       </div>
     </div>
   );

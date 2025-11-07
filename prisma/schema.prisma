@@ -3,7 +3,6 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../lib/generated/prisma"
 }
 
 datasource db {
@@ -56,9 +55,12 @@ model User {
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
-  accounts Account[]
-  sessions Session[]
-  profile  UserProfile?
+  accounts          Account[]
+  sessions          Session[]
+  profile           UserProfile?
+  trailerRequests   TrailerRequest[]
+  chatParticipants  ChatParticipant[]
+  chatMessages      ChatMessage[]
 }
 
 model VerificationToken {
@@ -98,9 +100,13 @@ model UserProfile {
   userId          String   @unique
   firstName       String?
   lastName        String?
+  preferredName   String?  // Preferred name / nickname
   phone           String?
   zipcode         String?
   city            String?
+  about           String?  @db.Text // Professional bio / about section
+  avatarUrl       String?  @db.Text // Profile avatar/photo URL
+  coverUrl        String?  @db.Text // Profile cover/banner image URL
   zip             String?  // Legacy field, use zipcode instead
   salespersonCode String?  @unique // REP12345, SMR12345, or VIP12345
   role            String   @default("salesperson") // "owner", "manager", "salesperson", "director"
@@ -163,12 +169,14 @@ model Trailer {
   gvwr            Int?     // Gross Vehicle Weight Rating (lbs)
   capacity        Int?     // payload capacity (lbs)
   axles           Int?     // number of axles
+  rearDoorType    String?  // Rear door code: R, DD, HDR, SRW, 8'P, R-RW
 
   // Pricing
   msrp            Float    // Manufacturer's Suggested Retail Price
   salePrice       Float    // Current sale price
   cost            Float    // Dealer cost (sensitive!)
   makeOffer       Boolean  @default(false) // If true, display "MAKE OFFER" instead of sale price
+  pricingStatus   String   @default("PRICED") // "PRICED" or "ASK_FOR_PRICING" (when cost is textual)
 
   // Status
   status          String   @default("available") // "available", "sold", "reserved", "pending"
@@ -186,6 +194,10 @@ model Trailer {
   soldAt          DateTime?
   soldBy          String?  // Salesperson ID who sold it
 
+  // Soft-delete & Batch Tracking
+  importBatchId   String?   @db.VarChar(36) // UUID for tracking bulk imports
+  deletedAt       DateTime? // Soft-delete timestamp
+
   // Relations
   deals           Deal[]
   creditApps      CreditApplication[]
@@ -194,6 +206,8 @@ model Trailer {
   @@index([status])
   @@index([category])
   @@index([manufacturer])
+  @@index([importBatchId])
+  @@index([deletedAt])
   @@index([soldBy])
 }
 
@@ -204,8 +218,8 @@ model Customer {
   // Personal Info
   firstName       String
   lastName        String
-  email           String   @unique
-  phone           String
+  email           String?  @unique
+  phone           String?
 
   // Address
   street          String?
@@ -690,6 +704,22 @@ model UploadReport {
   @@index([createdAt])
 }
 
+// Import Log - Track each inventory import for rollback capability
+model ImportLog {
+  id        String   @id @default(cuid())
+  batchId   String   @unique // UUID for the import batch
+  supplier  String   // "Diamond Cargo", "Quality Cargo", "Panther Cargo"
+  created   Int      // Number of new trailers created
+  updated   Int      // Number of existing trailers updated
+  skipped   Int      // Number of rows skipped (invalid data)
+  userId    String   // User ID who performed the import
+  createdAt DateTime @default(now())
+
+  @@index([batchId])
+  @@index([userId])
+  @@index([createdAt])
+}
+
 // Calendar & Events System
 model CalendarEvent {
   id              String   @id @default(cuid())
@@ -749,4 +779,152 @@ model LeadNote {
   @@index([customerId])
   @@index([authorId])
   @@index([createdAt])
+}
+
+model TrailerRequest {
+  id           String   @id @default(cuid())
+  userId       String
+  manufacturer String
+  purpose      String
+  vin          String?
+  message      String   @db.Text
+  status       String   @default("pending")
+  assignedTo   String?
+  response     String?  @db.Text
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         User     @relation(fields: [userId], references: [id])
+  @@index([status])
+}
+
+// Request Tool - Public request submissions
+enum RequestStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
+model RequestLog {
+  id                String        @id @default(cuid())
+  createdAt         DateTime      @default(now())
+  email             String
+  fullName          String
+  zip               String?
+  manufacturer      String
+  purpose           String
+  message           String        @db.Text
+  lang              String        @default("en")
+  ip                String?
+  userAgent         String?
+  status            RequestStatus @default(PENDING)
+  error             String?
+
+  // Rep tracking fields
+  submittedByUserId String?       // Salesperson who submitted
+  submittedByName   String?       // Salesperson full name
+  submittedByEmail  String?       // Salesperson email
+  repCode           String?       // REP482756
+  managerId         String?       // Manager's User ID
+  managerNotified   Boolean       @default(false) // Was manager notified?
+
+  @@index([createdAt])
+  @@index([email])
+  @@index([manufacturer])
+  @@index([purpose])
+  @@index([submittedByUserId])
+  @@index([repCode])
+  @@index([managerId])
+}
+
+// Help Center System
+model HelpArticle {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  content     String   @db.Text
+  excerpt     String?  @db.Text
+  category    String   // "request-tool", "crm", "inventory", "finance", "general", etc.
+  keywords    String[] // For search optimization
+  isPinned    Boolean  @default(false) // Show at top of search results
+  isPublished Boolean  @default(true)
+  viewCount   Int      @default(0)
+  
+  // Metadata
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   String   // User ID who created
+  
+  @@index([category])
+  @@index([isPublished])
+  @@index([isPinned])
+  @@index([slug])
+}
+
+// Real-Time Chat System
+model ChatThread {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  subject   String?
+
+  participants ChatParticipant[]
+  messages     ChatMessage[]
+}
+
+model ChatParticipant {
+  id       String     @id @default(cuid())
+  thread   ChatThread @relation(fields: [threadId], references: [id])
+  threadId String
+  userId   String // maps to User.id
+  user     User       @relation(fields: [userId], references: [id])
+
+  @@unique([threadId, userId])
+  @@index([threadId])
+  @@index([userId])
+}
+
+model ChatMessage {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  body      String   @db.Text
+  senderId  String   // maps to User.id
+  sender    User     @relation(fields: [senderId], references: [id])
+
+  thread   ChatThread @relation(fields: [threadId], references: [id])
+  threadId String
+
+  attachments ChatAttachment[]
+
+  @@index([threadId])
+  @@index([senderId])
+}
+
+model ChatAttachment {
+  id        String      @id @default(cuid())
+  fileUrl   String
+  fileName  String
+  mimeType  String
+  message   ChatMessage @relation(fields: [messageId], references: [id])
+  messageId String
+
+  @@index([messageId])
+}
+
+// Sync Log for tracking Google Sheets import runs
+model SyncLog {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  startedAt DateTime
+  durationMs Int
+  scanned   Int
+  inserted  Int
+  updated   Int
+  skipped   Int
+  errors    Int
+  errorDetails Json?
+  actor     String   // email or 'token' if using token auth
+  source    String   @default("google_sheets") // for future extensibility
+  
+  @@index([createdAt])
+  @@index([source])
 }

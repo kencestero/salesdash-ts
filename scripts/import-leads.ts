@@ -1,5 +1,5 @@
 // scripts/import-leads.ts
-import { PrismaClient } from '../lib/generated/prisma/index.js';
+import { PrismaClient } from '@prisma/client/index.js';
 import fs from 'fs';
 import { parse } from 'csv-parse';
 

@@ -1,11 +1,14 @@
 // Rent-To-Own (RTO) calculation utilities
-// Updated with Matt's official RTO formula (2.32 finance factor)
+// Updated with C3 Leasing rules - Up-Front Charges SEPARATE from monthly payment
+
+import { calculateUpFrontCharges, getRTOFeesByZIP } from '@/config/rto-fee-map';
 
 export type RTOInput = {
   price: number;
-  down: number;
+  down: number;                 // Down payment entered by user (can be $0)
   taxPct: number;
   termMonths: number;
+  zipCode?: string;             // Customer ZIP code (for state fee lookup) - defaults to "default"
   countyTaxPct?: number;        // Default: 1.5
   filingFee?: number;           // Default: 170
   nonRefundableFee?: number;    // Default: 300
@@ -26,17 +29,37 @@ export type RTOOutput = {
   monthlyRent: number;          // Monthly base payment before tax
   monthlyTax: number;           // Tax on monthly payment
   monthlyTotal: number;         // Total monthly payment (rent + tax)
-  dueAtSigning: number;         // Down + filing fee + non-refundable fee
+
+  // C3 LEASING UP-FRONT CHARGES (SEPARATE FROM MONTHLY)
+  upFrontCharges: {
+    firstMonthRent: number;     // First month's rent
+    securityDeposit: number;    // Security deposit (varies by state)
+    stateFee: number;           // State filing fee
+    countyFee: number;          // County fee (if applicable)
+    totalUF: number;            // Total Up-Front Charges
+  };
+
+  dueAtSigning: number;         // Down + UF charges
   buyoutFee: number;            // Fee to buyout early
   totalPaid: number;            // Total if all payments made
   docFee: number;               // Documentation fee (now includes filing + non-refundable)
   financedCost: number;         // Total financed cost (price × 2.32)
+
+  // State info
+  stateCode: string;            // State abbreviation (e.g., "GA", "FL")
+  rtoAllowed: boolean;          // Whether RTO is legal in this state
 };
 
 /**
- * Calculate Rent-To-Own pricing using the correct RTO formula
+ * Calculate Rent-To-Own pricing using C3 LEASING compliant formula
  *
- * CORRECT RTO FORMULA:
+ * C3 LEASING REQUIREMENTS (Phase 1):
+ * - Up-Front Charges (UF) are SEPARATE from monthly payment
+ * - UF = First Month Rent + Security Deposit + State/County Fees
+ * - $0 down ≠ $0 due at delivery (UF always applies)
+ * - State restrictions: NJ prohibits RTO entirely
+ *
+ * RTO FORMULA:
  * - RTO Factors by term (total cost multiplier):
  *   - 24 months: 1.75
  *   - 36 months: 2.10
@@ -48,7 +71,16 @@ export type RTOOutput = {
  * - Monthly Tax = baseMonthly × taxRate
  * - Total Monthly = baseMonthly + monthlyLDW + monthlyTax
  *
- * Fees: Title/Tag ($200), Registration ($75), GPS ($350), Doc ($195)
+ * UP-FRONT CHARGES (State-based, see config/rto-fee-map.ts):
+ * - First Month Rent = baseMonthly
+ * - Security Deposit = baseMonthly × depositRate (varies by state)
+ * - State Fee = fixed per state (e.g., GA: $25, FL: $45)
+ * - County Fee = optional county-specific fee
+ *
+ * Matt's Fees: Title/Tag ($200), Registration ($75), GPS ($350), Doc ($195)
+ *
+ * @param input - RTO input parameters including zipCode for state lookup
+ * @returns RTOOutput with separated upFrontCharges and monthly payment
  */
 export function calculateRTO(input: RTOInput): RTOOutput {
   const {
@@ -56,6 +88,7 @@ export function calculateRTO(input: RTOInput): RTOOutput {
     down: downInput,
     taxPct,
     termMonths,
+    zipCode = "",  // Default to empty string (uses default config)
     countyTaxPct = 0, // Not used in Matt's real calculator
     filingFee = 170,
     nonRefundableFee = 300,
@@ -68,6 +101,35 @@ export function calculateRTO(input: RTOInput): RTOOutput {
     docFeeUsd,
     buyoutFeeUsd = 250,
   } = input;
+
+  // Get state configuration from ZIP code (or default if not provided)
+  const stateConfig = getRTOFeesByZIP(zipCode || "");
+
+  // Check if RTO is allowed in this state (e.g., NJ disallows RTO)
+  if (!stateConfig.rtoAllowed) {
+    // Return disabled state
+    return {
+      rtoPrice: 0,
+      down: 0,
+      monthlyRent: 0,
+      monthlyTax: 0,
+      monthlyTotal: 0,
+      upFrontCharges: {
+        firstMonthRent: 0,
+        securityDeposit: 0,
+        stateFee: 0,
+        countyFee: 0,
+        totalUF: 0,
+      },
+      dueAtSigning: 0,
+      buyoutFee: 0,
+      totalPaid: 0,
+      docFee: 0,
+      financedCost: 0,
+      stateCode: stateConfig.stateName,
+      rtoAllowed: false,
+    };
+  }
 
   // Use Matt's formula (NEW METHOD) if legacy params not provided
   const useNewFormula = !monthlyFactor && !baseMarkupUsd;
@@ -109,17 +171,14 @@ export function calculateRTO(input: RTOInput): RTOOutput {
     const docFee = 195;
     const adminFee = 0;
 
-    // Security deposit (simplified - varies by ZIP in real calc)
-    const securityDeposit = baseMonthly * 0.5; // Approximate
+    // C3 LEASING: Calculate Up-Front Charges using state-based fees
+    const ufCharges = calculateUpFrontCharges(baseMonthly, zipCode);
 
-    // Total up front
-    const totalUpFront = downInput + titleTag + registration + gpsFee + docFee + adminFee + securityDeposit;
+    // Total up front = Down payment + UF charges (SEPARATE from monthly)
+    const totalUpFront = downInput + ufCharges.totalUF;
 
-    // Total term cost
-    const totalTermCost = totalMonthly * termMonths;
-
-    // Total paid over life (includes all fees and payments)
-    const totalPaid = totalUpFront + (totalMonthly * termMonths);
+    // Total paid over life (includes down, UF, and all monthly payments)
+    const totalPaid = downInput + ufCharges.totalUF + (totalMonthly * termMonths);
 
     return {
       rtoPrice: totalRTOPrice, // Total RTO price (amount financed × factor)
@@ -127,11 +186,25 @@ export function calculateRTO(input: RTOInput): RTOOutput {
       monthlyRent: baseMonthly,
       monthlyTax: monthlyTax,
       monthlyTotal: totalMonthly,
+
+      // C3 LEASING: Up-Front Charges (SEPARATE from monthly payment)
+      upFrontCharges: {
+        firstMonthRent: ufCharges.firstMonthRent,
+        securityDeposit: ufCharges.securityDeposit,
+        stateFee: ufCharges.stateFee,
+        countyFee: ufCharges.countyFee,
+        totalUF: ufCharges.totalUF,
+      },
+
       dueAtSigning: totalUpFront,
       buyoutFee: buyoutFeeUsd,
       totalPaid: totalPaid,
       docFee: titleTag + registration + gpsFee + docFee,
       financedCost: totalRTOPrice,
+
+      // State info
+      stateCode: ufCharges.stateConfig.stateName,
+      rtoAllowed: true,
     };
   } else {
     // LEGACY FORMULA (for backwards compatibility)
@@ -141,8 +214,11 @@ export function calculateRTO(input: RTOInput): RTOOutput {
     const taxRate = taxPct / 100;
     const monthlyTax = monthlyRent * taxRate;
     const monthlyTotal = monthlyRent + monthlyTax;
-    const dueAtSigning = down + (docFeeUsd || 99) + monthlyTotal;
-    const totalPaid = monthlyTotal * termMonths + down + (docFeeUsd || 99);
+
+    // C3 LEASING: Calculate Up-Front Charges (even for legacy formula)
+    const ufCharges = calculateUpFrontCharges(monthlyRent, zipCode);
+    const dueAtSigning = down + ufCharges.totalUF;
+    const totalPaid = down + ufCharges.totalUF + (monthlyTotal * termMonths);
 
     return {
       rtoPrice,
@@ -150,11 +226,25 @@ export function calculateRTO(input: RTOInput): RTOOutput {
       monthlyRent,
       monthlyTax,
       monthlyTotal,
+
+      // C3 LEASING: Up-Front Charges (SEPARATE from monthly payment)
+      upFrontCharges: {
+        firstMonthRent: ufCharges.firstMonthRent,
+        securityDeposit: ufCharges.securityDeposit,
+        stateFee: ufCharges.stateFee,
+        countyFee: ufCharges.countyFee,
+        totalUF: ufCharges.totalUF,
+      },
+
       dueAtSigning,
       buyoutFee: buyoutFeeUsd,
       totalPaid,
       docFee: docFeeUsd || 99,
       financedCost: rtoPrice,
+
+      // State info
+      stateCode: ufCharges.stateConfig.stateName,
+      rtoAllowed: true,
     };
   }
 }

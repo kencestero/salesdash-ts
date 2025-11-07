@@ -2,8 +2,8 @@
 import React from "react";
 import { useEffect } from "react";
 import { signOut, useSession } from "next-auth/react";
-import Header from "@/components/partials/header";
-import Sidebar from "@/components/partials/sidebar";
+import { AppTopbar } from "@/components/layout/AppTopbar";
+import { AppSidebar } from "@/components/layout/AppSidebar";
 import { cn } from "@/lib/utils";
 import { useSidebar, useThemeStore } from "@/store";
 import { motion, AnimatePresence } from "framer-motion";
@@ -59,8 +59,8 @@ const DashBoardLayoutProvider = ({ children, trans }: { children: React.ReactNod
     return (
       <>
         <SessionTimeout />
-        <Header handleOpenSearch={() => setOpen(true)} trans={trans} />
-        <Sidebar trans={trans} />
+        <AppTopbar handleOpenSearch={() => setOpen(true)} trans={trans} />
+        <AppSidebar trans={trans} />
 
         <div
           className={cn("content-wrapper transition-all duration-150 ", {
@@ -96,7 +96,7 @@ const DashBoardLayoutProvider = ({ children, trans }: { children: React.ReactNod
     return (
       <>
         <SessionTimeout />
-        <Header handleOpenSearch={() => setOpen(true)} trans={trans} />
+        <AppTopbar handleOpenSearch={() => setOpen(true)} trans={trans} />
 
         <div className={cn("content-wrapper transition-all duration-150 ")}>
           <div
@@ -126,8 +126,8 @@ const DashBoardLayoutProvider = ({ children, trans }: { children: React.ReactNod
     return (
       <>
         <SessionTimeout />
-        <Header handleOpenSearch={() => setOpen(true)} trans={trans} />
-        <Sidebar trans={trans} />
+        <AppTopbar handleOpenSearch={() => setOpen(true)} trans={trans} />
+        <AppSidebar trans={trans} />
 
         <div
           className={cn("content-wrapper transition-all duration-150 ", {
@@ -160,7 +160,7 @@ const DashBoardLayoutProvider = ({ children, trans }: { children: React.ReactNod
   return (
     <>
       <SessionTimeout />
-      <Header handleOpenSearch={() => setOpen(true)} trans={trans} />
+      <AppTopbar handleOpenSearch={() => setOpen(true)} trans={trans} />
       <Sidebar trans={trans} />
 
       <div

@@ -1,62 +1,76 @@
-import { NextResponse, NextRequest } from "next/server";
-import { db } from "@/lib/firebase";
-import { collection, addDoc, serverTimestamp, doc, getDoc, setDoc } from "firebase/firestore";
+import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import prisma from "@/lib/prisma";
 
-export const dynamic = 'force-dynamic';
-
-export async function POST(request: NextRequest, response: NextResponse) {
-  const session = await getServerSession(authOptions);
-
-  if (!session?.user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const obj = await request.json();
-  const { message, contact, replayMetadata } = obj;
-
+export async function GET(req: NextRequest) {
   try {
-    // Create or get chat document with consistent ID regardless of sender
-    const [userId1, userId2] = [session.user.id, contact.id].sort();
-    const chatId = `chat_${userId1}_${userId2}`;
-    const chatRef = doc(db, "chats", chatId);
+    // 1) Auth check
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
-    // Create message data
-    const newMessageData = {
-      message,
-      time: serverTimestamp(),
-      senderId: session.user.id,
-      senderEmail: session.user.email,
-      receiverId: contact.id,
-      replayMetadata: replayMetadata || false,
-    };
+    // 2) Get threadId from query params
+    const { searchParams } = new URL(req.url);
+    const threadId = searchParams.get("threadId");
 
-    // Add message to messages subcollection
-    const messagesRef = collection(chatRef, "messages");
-    const messageDoc = await addDoc(messagesRef, newMessageData);
+    if (!threadId) {
+      return NextResponse.json(
+        { error: "threadId is required" },
+        { status: 400 }
+      );
+    }
 
-    // Update chat metadata
-    await setDoc(chatRef, {
-      participants: [session.user.id, contact.id],
-      lastMessage: message,
-      lastMessageTime: serverTimestamp(),
-      unseenMsgs: 0,
-    }, { merge: true });
+    // 3) Find current user
+    const currentUser = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      select: { id: true },
+    });
 
-    return NextResponse.json(
-      {
-        id: messageDoc.id,
-        chatId,
-        ...newMessageData,
+    if (!currentUser) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    // 4) Verify user is a participant in this thread
+    const participant = await prisma.chatParticipant.findFirst({
+      where: {
+        threadId,
+        userId: currentUser.id,
       },
-      { status: 201 }
-    );
-  } catch (error) {
-    console.error("Error sending message:", error);
-    return NextResponse.json(
-      { error: "Failed to send message" },
-      { status: 500 }
-    );
+    });
+
+    if (!participant) {
+      return NextResponse.json(
+        { error: "You are not a participant in this thread" },
+        { status: 403 }
+      );
+    }
+
+    // 5) Fetch messages for this thread
+    const messages = await prisma.chatMessage.findMany({
+      where: {
+        threadId,
+      },
+      orderBy: {
+        createdAt: "asc",
+      },
+      include: {
+        sender: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+        attachments: true,
+      },
+    });
+
+    return NextResponse.json(messages);
+  } catch (err: unknown) {
+    console.error("Error fetching chat messages:", err);
+    const msg = err instanceof Error ? err.message : "Failed to fetch messages";
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
 }

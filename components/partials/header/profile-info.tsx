@@ -73,7 +73,7 @@ const ProfileInfo = () => {
             {
               name: "profile",
               icon: "heroicons:user",
-              href:"/user-profile"
+              href:"/profile"
             },
             {
               name: "Page Access",
