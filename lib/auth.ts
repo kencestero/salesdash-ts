@@ -3,6 +3,7 @@ import GoogleProvider from "next-auth/providers/google";
 import { prisma } from "./prisma";
 import { generateUniqueSalespersonCode } from "./salespersonCode";
 import bcrypt from "bcryptjs";
+import { verifyPasskeyJWT } from "./passkey-jwt";
 
 export const authOptions = {
   // Note: No adapter needed - we're using JWT sessions and handling user creation in signIn callback
@@ -59,6 +60,30 @@ export const authOptions = {
           name: user.name,
         };
       },
+    }),
+    // Passkey provider (WebAuthn)
+    CredentialsProvider({
+      id: 'passkey',
+      name: 'Passkey',
+      credentials: { token: { label: 'token', type: 'text' } },
+      async authorize(creds) {
+        const token = creds?.token;
+        if (!token) return null;
+        
+        const userId = await verifyPasskeyJWT(token);
+        if (!userId) return null;
+        
+        const user = await prisma.user.findUnique({ 
+          where: { id: userId },
+          include: { profile: true }
+        });
+        
+        return user ? { 
+          id: user.id, 
+          email: user.email || '', 
+          name: user.name 
+        } as any : null;
+      }
     }),
   ],
 

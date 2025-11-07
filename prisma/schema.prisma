@@ -53,6 +53,7 @@ model User {
   resetToken       String?   @unique // Password reset token
   resetTokenExpiry DateTime? // Token expiration time
   createdAt        DateTime  @default(now())
+  currentChallenge String?   // WebAuthn challenge for passkey registration/authentication
   updatedAt        DateTime  @updatedAt
 
   accounts          Account[]
@@ -60,6 +61,7 @@ model User {
   profile           UserProfile?
   trailerRequests   TrailerRequest[]
   chatParticipants  ChatParticipant[]
+  credentials       WebAuthnCredential[]
   chatMessages      ChatMessage[]
 }
 
@@ -927,4 +929,22 @@ model SyncLog {
   
   @@index([createdAt])
   @@index([source])
+}
+
+// WebAuthn Credentials (Passkeys)
+model WebAuthnCredential {
+  id             String   @id @default(cuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  credentialId   String   @unique    // base64url
+  publicKey      String               // base64url
+  counter        Int
+  deviceType     String?
+  backedUp       Boolean?
+  transports     String?              // json array string
+  createdAt      DateTime @default(now())
+  lastUsedAt     DateTime @updatedAt
+
+  @@index([userId])
 }
