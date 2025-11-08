@@ -6,6 +6,9 @@ import { usePasskey } from '@/lib/hooks/usePasskey';
 import { X } from 'lucide-react';
 
 export function PasskeyPrompt() {
+  // TEMPORARILY DISABLED - debugging RP ID issue
+  return null;
+
   const { data: session } = useSession();
   const { registerPasskey, loading, error } = usePasskey();
   const [show, setShow] = useState(false);
