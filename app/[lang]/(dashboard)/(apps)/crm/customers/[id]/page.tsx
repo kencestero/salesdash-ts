@@ -59,6 +59,8 @@ interface Customer {
   businessType?: string;
   source?: string;
   assignedTo?: string;
+  salesRepName?: string | null;      // Sales Rep from Google Sheets
+  assignedToName?: string | null;    // Manager from Google Sheets
   status: string;
   tags: string[];
   notes?: string;
@@ -510,6 +512,24 @@ export default function CustomerProfilePage() {
                   {customer.source || "Unknown"}
                 </span>
               </div>
+
+              {customer.salesRepName && (
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">Sales Rep</span>
+                  <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                    {customer.salesRepName}
+                  </Badge>
+                </div>
+              )}
+
+              {customer.assignedToName && (
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">Manager</span>
+                  <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
+                    {customer.assignedToName}
+                  </Badge>
+                </div>
+              )}
 
               {customer.trailerSize && (
                 <div className="flex items-center justify-between">
