@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
     }
 
     const rpID = 'mjsalesdash.com';
-    const expectedOrigin = process.env.PASSKEY_ORIGIN || 'https://mjsalesdash.com';
+    const expectedOrigin = 'https://mjsalesdash.com';
 
     const verification = await verifyAuthenticationResponse({
       response: cred,
