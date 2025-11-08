@@ -28,6 +28,12 @@ const ContactInfo = ({ handleSetIsOpenSearch, handleShowInfo, contact }: {
   const handleDrawer = (itemKey: any) => {
     setShowDrawer(itemKey);
   };
+
+  // Avatar guard: handle both string and object types
+  const avatarSrc = typeof contact?.avatar === "string"
+    ? contact.avatar
+    : contact?.avatar?.src ?? "/images/default-avatar.png";
+
   return (
     <div className="flex-none w-[285px] absolute xl:relative  right-0 h-full z-50 ">
       {showDrawer !== null && (
@@ -47,7 +53,7 @@ const ContactInfo = ({ handleSetIsOpenSearch, handleShowInfo, contact }: {
           </div>
           <div className="flex flex-col items-center">
             <Avatar className="w-16 h-16 lg:h-24 lg:w-24">
-              <AvatarImage src={contact?.avatar} alt="" />
+              <AvatarImage src={avatarSrc} alt="" />
               <AvatarFallback>{contact?.fullName.slice(0, 2)}</AvatarFallback>
             </Avatar>
             <div className="mt-3 text-lg lg:text-xl font-semibold text-default-900">

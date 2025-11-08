@@ -301,7 +301,7 @@ export default function RegisterPage() {
               )}
             </div>
             {err && <p className="text-red-300 text-sm mt-2 bg-red-500/20 backdrop-blur-sm rounded-lg py-2 px-3">{err}</p>}
-            {!codeValidated && !err && (
+            {!codeValidated && !err && process.env.NODE_ENV !== "production" && (
               <p className="text-xs text-white/70 mt-2">
                 Don't have a code? Try: <b className="text-white">OWNER1</b>, <b className="text-white">MGR001</b>, or <b className="text-white">REP001</b>
               </p>

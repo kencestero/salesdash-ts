@@ -36,12 +36,18 @@ export async function POST(req: Request) {
 
   const { code } = await req.json().catch(() => ({}));
   if (!code) return NextResponse.json({ message: "Missing code" }, { status: 400 });
+
+  // Mask code in production (first 2 chars + ***)
+  const maskedCode = process.env.NODE_ENV === 'production'
+    ? code.substring(0, 2) + '***'
+    : code;
+
   // DEBUG LOGGING - Remove after testing
   const nowNY = new Date().toLocaleString('en-US', { timeZone: 'America/New_York' });
   const expectedCodes = getAllTodayCodes();
   console.log('[REG-SECRET] Server time (NY):', nowNY);
   console.log('[REG-SECRET] Expected codes:', expectedCodes);
-  console.log('[REG-SECRET] Entered code:', code);
+  console.log('[REG-SECRET] Entered code:', maskedCode);
 
   // TEMPORARY: Manual override for testing
   const testCodes: Record<string, string> = {
@@ -55,7 +61,7 @@ export async function POST(req: Request) {
   // If normal validation fails, check test codes
   if (!role && testCodes[code.toUpperCase()]) {
     role = testCodes[code.toUpperCase()];
-    console.log('✅ Using test code:', code, '→', role);
+    console.log('✅ Using test code:', maskedCode, '→', role);
   }
 
   if (!role) {

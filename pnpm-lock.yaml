@@ -4,6 +4,10 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  '@simplewebauthn/browser': 12.x
+  '@simplewebauthn/server': 12.x
+
 importers:
 
   .:
@@ -162,10 +166,10 @@ importers:
         specifier: ^1.2.2
         version: 1.2.2(react@18.2.0)
       '@simplewebauthn/browser':
-        specifier: ^12.0.0
+        specifier: 12.x
         version: 12.0.0
       '@simplewebauthn/server':
-        specifier: ^12.0.0
+        specifier: 12.x
         version: 12.0.0
       '@smastrom/react-rating':
         specifier: ^1.4.0
@@ -542,8 +546,8 @@ packages:
   '@auth/core@0.40.0':
     resolution: {integrity: sha512-n53uJE0RH5SqZ7N1xZoMKekbHfQgjd0sAEyUbE+IYJnmuQkbvuZnXItCU7d+i7Fj8VGOgqvNO7Mw4YfBTlZeQw==}
     peerDependencies:
-      '@simplewebauthn/browser': ^9.0.1
-      '@simplewebauthn/server': ^9.0.2
+      '@simplewebauthn/browser': 12.x
+      '@simplewebauthn/server': 12.x
       nodemailer: ^6.8.0
     peerDependenciesMeta:
       '@simplewebauthn/browser':
@@ -11009,8 +11013,6 @@ snapshots:
       '@ckeditor/ckeditor5-core': 46.1.1
       '@ckeditor/ckeditor5-upload': 46.1.1
       ckeditor5: 46.1.1
-    transitivePeerDependencies:
-      - supports-color
 
   '@ckeditor/ckeditor5-alignment@46.1.1':
     dependencies:
@@ -11395,8 +11397,6 @@ snapshots:
       '@ckeditor/ckeditor5-utils': 46.1.1
       '@ckeditor/ckeditor5-widget': 46.1.1
       ckeditor5: 46.1.1
-    transitivePeerDependencies:
-      - supports-color
 
   '@ckeditor/ckeditor5-html-embed@46.1.1':
     dependencies:
@@ -11680,8 +11680,6 @@ snapshots:
       '@ckeditor/ckeditor5-ui': 46.1.1
       '@ckeditor/ckeditor5-utils': 46.1.1
       ckeditor5: 46.1.1
-    transitivePeerDependencies:
-      - supports-color
 
   '@ckeditor/ckeditor5-special-characters@46.1.1':
     dependencies:

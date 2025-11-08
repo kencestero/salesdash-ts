@@ -15,9 +15,8 @@ export interface RpConfig {
  * Extract and sanitize RP ID from host header
  * Removes www prefix and trims whitespace
  */
-export function getRpIDFromHost(hostHeader: string | null): string {
-  const host = (hostHeader || "mjsalesdash.com").trim().toLowerCase();
-  return host.replace(/^www\./, "");
+export function getRpIDFromHost(h: string | null): string {
+  return (h || "").trim().toLowerCase().replace(/^www\./, "");
 }
 
 /**
@@ -27,8 +26,8 @@ export function getRpIDFromHost(hostHeader: string | null): string {
 export function getRp(hostHeader: string | null): RpConfig {
   const rpID = getRpIDFromHost(hostHeader);
   return {
-    id: rpID,
+    id: rpID || "mjsalesdash.com",
     name: "MJ SalesDash",
-    origin: `https://${rpID}`,
+    origin: `https://${rpID || "mjsalesdash.com"}`,
   };
 }
