@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateRegistrationOptions } from '@simplewebauthn/server';
 import { prisma } from '@/lib/prisma';
+import { getRp } from '@/lib/webauthn/rp';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,10 +16,10 @@ export async function POST(req: NextRequest) {
     // Fetch existing credentials to exclude
     const creds = await prisma.webAuthnCredential.findMany({ where: { userId } });
 
-    const rpID = 'mjsalesdash.com';
+    const { id: rpID, name: rpName } = getRp(req.headers.get('host'));
 
     const opts = await generateRegistrationOptions({
-      rpName: 'MJ SalesDash',
+      rpName,
       rpID,
       userID: new TextEncoder().encode(userId),
       userName: email,

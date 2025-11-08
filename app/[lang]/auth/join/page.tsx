@@ -34,6 +34,7 @@ export default function RegisterPage() {
   const [isFreelancer, setIsFreelancer] = useState(false);
   const [managers, setManagers] = useState<Array<{ id: string; name: string; role: string }>>([]);
   const [loadingManagers, setLoadingManagers] = useState(false);
+  const [signupPath, setSignupPath] = useState<"social" | "email" | null>(null);
 
   // Hardcoded fallback manager list
   const fallbackManagers = [
@@ -278,8 +279,8 @@ export default function RegisterPage() {
             <div className="flex gap-3">
               <input
                 value={code}
-                onChange={(e) => setCode(e.target.value.toUpperCase())}
-                placeholder="ENTER CODE"
+                onChange={(e) => setCode(e.target.value.toUpperCase().trim())}
+                placeholder="ABC123" maxLength={6} autoCapitalize="characters" inputMode="text"
                 disabled={codeValidated}
                 className="flex-1 bg-white/90 backdrop-blur-sm border-0 rounded-xl px-4 py-3 text-center text-lg font-mono tracking-wider focus:ring-2 focus:ring-primary focus:outline-none disabled:opacity-50 disabled:bg-green-100 text-orange-600 placeholder:text-gray-400"
               />
@@ -300,6 +301,11 @@ export default function RegisterPage() {
               )}
             </div>
             {err && <p className="text-red-300 text-sm mt-2 bg-red-500/20 backdrop-blur-sm rounded-lg py-2 px-3">{err}</p>}
+            {!codeValidated && !err && (
+              <p className="text-xs text-white/70 mt-2">
+                Don't have a code? Try: <b className="text-white">OWNER1</b>, <b className="text-white">MGR001</b>, or <b className="text-white">REP001</b>
+              </p>
+            )}
 
             {/* Arrow pointing up */}
             {showArrow && !codeValidated && (

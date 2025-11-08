@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateAuthenticationOptions } from '@simplewebauthn/server';
 import { prisma } from '@/lib/prisma';
+import { getRp } from '@/lib/webauthn/rp';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,7 +24,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: false, error: 'no-passkeys' }, { status: 404 });
     }
 
-    const rpID = 'mjsalesdash.com';
+    const { id: rpID } = getRp(req.headers.get('host'));
 
     const opts = await generateAuthenticationOptions({
       rpID,

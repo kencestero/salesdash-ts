@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyRegistrationResponse } from '@simplewebauthn/server';
 import { prisma } from '@/lib/prisma';
+import { getRp } from '@/lib/webauthn/rp';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,8 +19,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: false, error: 'no-challenge' }, { status: 400 });
     }
 
-    const rpID = 'mjsalesdash.com';
-    const expectedOrigin = 'https://mjsalesdash.com';
+    const { id: rpID, origin: expectedOrigin } = getRp(req.headers.get('host'));
 
     const verification = await verifyRegistrationResponse({
       response: cred,

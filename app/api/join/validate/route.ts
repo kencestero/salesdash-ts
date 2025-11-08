@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { validateCodeAndGetRole } from "@/lib/joinCode";
+import { validateCodeAndGetRole, getAllTodayCodes } from "@/lib/joinCode";
 import { checkRateLimit, resetRateLimit, sendRateLimitAlert } from "@/lib/rate-limiter";
 
 export const dynamic = "force-dynamic";
@@ -36,6 +36,12 @@ export async function POST(req: Request) {
 
   const { code } = await req.json().catch(() => ({}));
   if (!code) return NextResponse.json({ message: "Missing code" }, { status: 400 });
+  // DEBUG LOGGING - Remove after testing
+  const nowNY = new Date().toLocaleString('en-US', { timeZone: 'America/New_York' });
+  const expectedCodes = getAllTodayCodes();
+  console.log('[REG-SECRET] Server time (NY):', nowNY);
+  console.log('[REG-SECRET] Expected codes:', expectedCodes);
+  console.log('[REG-SECRET] Entered code:', code);
 
   // TEMPORARY: Manual override for testing
   const testCodes: Record<string, string> = {

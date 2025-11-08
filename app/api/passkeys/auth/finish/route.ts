@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuthenticationResponse } from '@simplewebauthn/server';
 import { prisma } from '@/lib/prisma';
 import { createPasskeyJWT } from '@/lib/passkey-jwt';
+import { getRp } from '@/lib/webauthn/rp';
 
 export const dynamic = 'force-dynamic';
 
@@ -31,8 +32,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: false, error: 'credential-not-found' }, { status: 404 });
     }
 
-    const rpID = 'mjsalesdash.com';
-    const expectedOrigin = 'https://mjsalesdash.com';
+    const { id: rpID, origin: expectedOrigin } = getRp(req.headers.get('host'));
 
     const verification = await verifyAuthenticationResponse({
       response: cred,
