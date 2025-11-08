@@ -103,11 +103,102 @@ export async function fetchRawRowsFromSheet(): Promise<string[][]> {
   }
 }
 
-// Stub exports for build compatibility
+/**
+ * Fetch and parse leads from Google Sheets with header-based column mapping
+ */
 export async function fetchLeadsFromSheet() {
-  return [];
+  try {
+    const rows = await fetchRawRowsFromSheet();
+
+    if (rows.length === 0) {
+      console.log('No rows found in Google Sheet');
+      return [];
+    }
+
+    // First row is headers
+    const headers = rows[0];
+    const dataRows = rows.slice(1);
+
+    console.log(`📊 Found ${dataRows.length} lead rows with headers:`, headers);
+
+    // Map each row to a customer object using header-based lookup
+    const leads = dataRows.map((row, index) => {
+      // Helper to get column value by header name (case-insensitive)
+      const getColumn = (headerName: string): string => {
+        const headerIndex = headers.findIndex(h =>
+          h?.toString().toLowerCase().trim() === headerName.toLowerCase().trim()
+        );
+        return headerIndex >= 0 ? (row[headerIndex] || '').toString().trim() : '';
+      };
+
+      // Parse the row data
+      const lead = {
+        firstName: getColumn('First Name') || getColumn('first') || 'Unknown',
+        lastName: getColumn('Last Name') || getColumn('last') || '',
+        email: getColumn('Email') || null,
+        phone: getColumn('Phone') || getColumn('Phone Number') || null,
+        companyName: getColumn('Company') || getColumn('Company Name') || null,
+        city: getColumn('City') || null,
+        state: getColumn('State') || null,
+        zip: getColumn('ZIP') || getColumn('Zip Code') || null,
+        address: getColumn('Address') || null,
+        status: getColumn('Status') || 'lead', // Column D
+        source: getColumn('Source') || 'Google Sheets Import',
+
+        // CRITICAL: These are the fields the user wants displayed
+        salesRepName: getColumn('Sales Rep') || getColumn('Rep') || null,  // Column B
+        assignedToName: getColumn('Assigned Manager') || getColumn('Manager') || getColumn('Assigned To') || null,  // Column F
+
+        // Finance-related fields
+        applied: getColumn('Applied')?.toLowerCase() === 'yes' || getColumn('Applied')?.toLowerCase() === 'true',
+        dateApplied: getColumn('Date Applied') || null,
+
+        // Notes fields
+        managerNotes: getColumn('Manager Notes') || getColumn('Notes (Manager)') || null,
+        repNotes: getColumn('Rep Notes') || getColumn('Notes (Rep)') || null,
+        notes: getColumn('Notes') || null,
+      };
+
+      return lead;
+    });
+
+    console.log(`✅ Parsed ${leads.length} leads from Google Sheets`);
+    return leads;
+  } catch (error) {
+    console.error('Error in fetchLeadsFromSheet:', error);
+    throw error;
+  }
 }
 
-export function parseLeadForDatabase(x: any) {
-  return x;
+/**
+ * Parse individual lead for database insertion
+ * Ensures data types and required fields are correct
+ */
+export function parseLeadForDatabase(lead: any) {
+  return {
+    firstName: lead.firstName || 'Unknown',
+    lastName: lead.lastName || '',
+    email: lead.email || null,
+    phone: lead.phone || null,
+    companyName: lead.companyName || null,
+    city: lead.city || null,
+    state: lead.state || null,
+    zip: lead.zip || null,
+    address: lead.address || null,
+    status: lead.status || 'lead',
+    source: lead.source || 'Google Sheets Import',
+
+    // Rep and Manager assignments (CRITICAL)
+    salesRepName: lead.salesRepName || null,
+    assignedToName: lead.assignedToName || null,
+
+    // Finance fields
+    applied: Boolean(lead.applied),
+    dateApplied: lead.dateApplied || null,
+
+    // Notes
+    managerNotes: lead.managerNotes || null,
+    repNotes: lead.repNotes || null,
+    notes: lead.notes || null,
+  };
 }
