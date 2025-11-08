@@ -10,7 +10,6 @@
         }
       ],
       "destination": "https://mjsalesdash.com/:path*",
-      "permanent": true,
       "statusCode": 308
     }
   ],
