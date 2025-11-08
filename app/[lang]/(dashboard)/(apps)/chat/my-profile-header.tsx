@@ -19,7 +19,7 @@ const MyProfileHeader = ({ profile }: { profile: ProfileUserType }) => {
       <div className="flex  justify-between mb-4">
         <div className="flex   gap-3">
           <Avatar className="h-10 w-10">
-            <AvatarImage src={profile?.avatar.src} alt="" />
+            <AvatarImage src={profile?.avatar} alt="" />
             <AvatarFallback>{profile?.fullName.slice(0, 2)}</AvatarFallback>
           </Avatar>
           <div className="block">

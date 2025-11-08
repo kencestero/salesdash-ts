@@ -26,7 +26,7 @@ const ContactList = ({ contact, openChat, selectedChatId }: {
       <div className="flex-1 flex  gap-3 ">
         <div className="relative inline-block ">
           <Avatar>
-            <AvatarImage src={avatar.src} />
+            <AvatarImage src={avatar} />
             <AvatarFallback className="uppercase">
               {fullName.slice(0, 2)}
             </AvatarFallback>
