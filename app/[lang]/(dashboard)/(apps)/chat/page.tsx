@@ -91,16 +91,18 @@ const ChatPage = () => {
   const messageMutation = useMutation({
     mutationFn: sendMessage,
     onSuccess: () => {
-
-      queryClient.invalidateQueries({ queryKey: ["messages"] });
+      // Invalidate the messages query for the current chat
+      queryClient.invalidateQueries({ queryKey: ["message", selectedChatId] });
+      // Also invalidate contacts to update last message timestamp
+      queryClient.invalidateQueries({ queryKey: ["contacts"] });
     },
   });
 
   const deleteMutation = useMutation({
     mutationFn: deleteMessage,
     onSuccess: () => {
-
-      queryClient.invalidateQueries({ queryKey: ["messages"] });
+      // Invalidate the messages query for the current chat
+      queryClient.invalidateQueries({ queryKey: ["message", selectedChatId] });
     },
   });
 
