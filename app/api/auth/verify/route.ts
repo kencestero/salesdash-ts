@@ -169,9 +169,12 @@ export async function GET(req: Request) {
     console.error("❌ Email verification error:", error);
     console.error("Error details:", error.message);
     console.error("Stack trace:", error.stack);
+    console.error("Full error object:", JSON.stringify(error, Object.getOwnPropertyNames(error), 2));
 
+    // Return more detailed error for debugging
+    const errorMessage = encodeURIComponent(error.message || "Unknown error");
     return NextResponse.redirect(
-      new URL("/en/auth/verify-email?error=verification_failed", req.url)
+      new URL(`/en/auth/verify-email?error=verification_failed&details=${errorMessage}`, req.url)
     );
   }
 }

@@ -9,6 +9,7 @@ function VerifyEmailContent() {
   const searchParams = useSearchParams();
   const email = searchParams.get("email");
   const error = searchParams.get("error");
+  const details = searchParams.get("details");
   const [countdown, setCountdown] = useState(120); // 2 minutes in seconds
   const [canResend, setCanResend] = useState(false);
   const [resending, setResending] = useState(false);
@@ -100,6 +101,12 @@ function VerifyEmailContent() {
                 <p className="text-lg text-[#0d1f2d] leading-relaxed mb-6">
                   {errorMessage}
                 </p>
+                {details && (
+                  <div className="bg-red-100 border border-red-400 text-red-800 px-4 py-3 rounded-lg mb-6 text-left">
+                    <p className="font-semibold text-sm mb-1">Technical Details:</p>
+                    <p className="text-xs font-mono break-all">{decodeURIComponent(details)}</p>
+                  </div>
+                )}
 
                 {/* Resend Button for errors */}
                 {email && (
