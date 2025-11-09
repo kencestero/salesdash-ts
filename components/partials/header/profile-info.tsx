@@ -65,6 +65,7 @@ const ProfileInfo = () => {
             <AvatarImage
               src={displayAvatar}
               alt={session?.user?.name ?? "User"}
+              className="object-cover"
             />
             <AvatarFallback className="bg-[#E96114] text-white font-semibold">
               {getInitials(session?.user?.name)}
@@ -78,6 +79,7 @@ const ProfileInfo = () => {
             <AvatarImage
               src={displayAvatar}
               alt={session?.user?.name ?? "User"}
+              className="object-cover"
             />
             <AvatarFallback className="bg-[#E96114] text-white font-semibold">
               {getInitials(session?.user?.name)}
