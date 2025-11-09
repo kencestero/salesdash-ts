@@ -140,6 +140,10 @@ model UserProfile {
   isAvailableAsManager Boolean @default(false) // Can appear in manager dropdown during signup
   isActive            Boolean @default(true)   // Account active status (for soft-delete/suspension)
 
+  // User Presence Tracking (for chat online/offline status)
+  lastSeen   DateTime  @default(now())
+  isOnline   Boolean   @default(false)
+
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
@@ -871,8 +875,20 @@ model ChatThread {
   updatedAt DateTime @updatedAt
   subject   String?
 
+  // Group Chat Fields
+  isGroup      Boolean  @default(false)
+  groupName    String?
+  groupAvatar  String?
+  isPublic     Boolean  @default(false)
+  inviteToken  String?  @unique
+  createdBy    String?  // User ID who created the group
+
   participants ChatParticipant[]
   messages     ChatMessage[]
+
+  @@index([isGroup])
+  @@index([isPublic])
+  @@index([inviteToken])
 }
 
 model ChatParticipant {
@@ -881,6 +897,7 @@ model ChatParticipant {
   threadId String
   userId   String // maps to User.id
   user     User       @relation(fields: [userId], references: [id])
+  isAdmin  Boolean    @default(false) // Group chat admin privileges
 
   @@unique([threadId, userId])
   @@index([threadId])
