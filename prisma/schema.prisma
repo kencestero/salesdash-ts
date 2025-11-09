@@ -63,6 +63,8 @@ model User {
   chatParticipants  ChatParticipant[]
   credentials       WebAuthnCredential[]
   chatMessages      ChatMessage[]
+  sentMessages      InternalMessage[]  @relation("SentMessages")
+  receivedMessages  InternalMessage[]  @relation("ReceivedMessages")
 }
 
 model VerificationToken {
@@ -947,4 +949,25 @@ model WebAuthnCredential {
   lastUsedAt     DateTime @updatedAt
 
   @@index([userId])
+}
+
+// Internal Messaging System (for header inbox dropdown)
+model InternalMessage {
+  id          String   @id @default(cuid())
+  senderId    String
+  receiverId  String
+  subject     String?
+  message     String   @db.Text
+  read        Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  sender      User     @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver    User     @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@index([senderId])
+  @@index([receiverId])
+  @@index([read])
+  @@index([createdAt])
+  @@map("internal_messages")
 }
