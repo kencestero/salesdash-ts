@@ -49,7 +49,7 @@ export const deleteMessage = async (obj: any) => {
 };
 
 export const getProfile = async () => {
-  const response = await api.get("/user/profile");
+  const response = await api.get("/chat/profile-data");
   return response.data;
 };
 
