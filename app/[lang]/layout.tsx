@@ -8,6 +8,7 @@ import TanstackProvider from "@/provider/providers.client";
 import AuthProvider from "@/provider/auth.provider";
 import "flatpickr/dist/themes/light.css";
 import DirectionProvider from "@/provider/direction.provider";
+import { PresenceProvider } from "@/components/providers/presence-provider";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
@@ -51,7 +52,9 @@ export default function RootLayout({ children, params: { lang } }: { children: R
       <AuthProvider>
         <TanstackProvider>
           <Providers>
-            <DirectionProvider lang={lang}>{children}</DirectionProvider>
+            <PresenceProvider>
+              <DirectionProvider lang={lang}>{children}</DirectionProvider>
+            </PresenceProvider>
           </Providers>
         </TanstackProvider>
       </AuthProvider>

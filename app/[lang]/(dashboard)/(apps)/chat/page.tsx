@@ -166,6 +166,26 @@ const ChatPage = () => {
     }
   }, [pinnedMessages]);
 
+  // Polling: Refetch messages every 3 seconds when chat is selected
+  useEffect(() => {
+    if (!selectedChatId) return;
+
+    const messagePollingInterval = setInterval(() => {
+      refetchMessage();
+    }, 3000); // 3 seconds
+
+    return () => clearInterval(messagePollingInterval);
+  }, [selectedChatId, refetchMessage]);
+
+  // Polling: Refetch contact list every 10 seconds
+  useEffect(() => {
+    const contactPollingInterval = setInterval(() => {
+      refetchContact();
+    }, 10000); // 10 seconds
+
+    return () => clearInterval(contactPollingInterval);
+  }, [refetchContact]);
+
   // handle search bar
 
   const handleSetIsOpenSearch = () => {
