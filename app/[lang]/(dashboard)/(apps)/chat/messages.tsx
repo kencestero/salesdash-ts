@@ -53,6 +53,10 @@ const Messages = ({
 }: MessagesProps) => {
   const { senderId, message: chatMessage, time, replayMetadata } = message;
   const { avatar } = contact;
+
+  // Check if message is from current user
+  const isMyMessage = senderId === profile?.id;
+
   // State to manage pin status
   const isMessagePinned = pinnedMessages.some(
     (pinnedMessage: any) => pinnedMessage.index === index
@@ -70,7 +74,7 @@ const Messages = ({
   return (
     <>
       <div className="block md:px-6 px-0 ">
-        {senderId === 11 ? (
+        {isMyMessage ? (
           <>
             {replayMetadata === true && (
               <div className="w-max ml-auto -mb-2 mr-10">
@@ -129,8 +133,10 @@ const Messages = ({
               <div className="flex-none self-end -translate-y-5">
                 <div className="h-8 w-8 rounded-full ">
                   <Image
-                    src={profile?.avatar}
+                    src={profile?.avatar || '/images/default-avatar.png'}
                     alt=""
+                    width={32}
+                    height={32}
                     className="block w-full h-full object-cover rounded-full"
                   />
                 </div>
@@ -142,8 +148,10 @@ const Messages = ({
             <div className="flex-none self-end -translate-y-5">
               <div className="h-8 w-8 rounded-full">
                 <Image
-                  src={avatar}
+                  src={typeof avatar === 'string' ? avatar : avatar?.src || '/images/default-avatar.png'}
                   alt=""
+                  width={32}
+                  height={32}
                   className="block w-full h-full object-cover rounded-full"
                 />
               </div>

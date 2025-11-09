@@ -293,7 +293,7 @@ const ChatPage = () => {
                   <MessageHeader
                     showInfo={showInfo}
                     handleShowInfo={handleShowInfo}
-                    profile={profileData}
+                    profile={chats?.contact || null}
                     mblChatHandler={() =>
                       setShowContactSidebar(!showContactSidebar)
                     }
