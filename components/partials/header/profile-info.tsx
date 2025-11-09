@@ -1,5 +1,6 @@
 "use client";
 import { useSession, signOut } from "next-auth/react";
+import { useState, useEffect } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,7 +20,29 @@ import Link from "next/link";
 
 const ProfileInfo = () => {
   const { data: session } = useSession();
-  
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+
+  // Fetch user's uploaded avatar from profile
+  useEffect(() => {
+    const fetchAvatar = async () => {
+      try {
+        const response = await fetch('/api/user/profile');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.profile?.avatarUrl) {
+            setAvatarUrl(data.profile.avatarUrl);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch profile avatar:', error);
+      }
+    };
+
+    if (session?.user) {
+      fetchAvatar();
+    }
+  }, [session]);
+
   // Get initials from name (first 2 letters)
   const getInitials = (name?: string | null) => {
     if (!name) return "U";
@@ -31,14 +54,17 @@ const ProfileInfo = () => {
       .slice(0, 2);
   };
 
+  // Use uploaded avatar if available, otherwise fall back to OAuth image
+  const displayAvatar = avatarUrl || session?.user?.image || undefined;
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild className="cursor-pointer">
         <div className="flex items-center">
           <Avatar className="h-9 w-9">
-            <AvatarImage 
-              src={session?.user?.image || undefined} 
-              alt={session?.user?.name ?? "User"} 
+            <AvatarImage
+              src={displayAvatar}
+              alt={session?.user?.name ?? "User"}
             />
             <AvatarFallback className="bg-[#E96114] text-white font-semibold">
               {getInitials(session?.user?.name)}
@@ -49,9 +75,9 @@ const ProfileInfo = () => {
       <DropdownMenuContent className="w-56 p-0" align="end">
         <DropdownMenuLabel className="flex gap-2 items-center mb-1 p-3">
           <Avatar className="h-9 w-9">
-            <AvatarImage 
-              src={session?.user?.image || undefined} 
-              alt={session?.user?.name ?? "User"} 
+            <AvatarImage
+              src={displayAvatar}
+              alt={session?.user?.name ?? "User"}
             />
             <AvatarFallback className="bg-[#E96114] text-white font-semibold">
               {getInitials(session?.user?.name)}
