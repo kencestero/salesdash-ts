@@ -29,7 +29,11 @@ export async function GET(req: NextRequest) {
     // 3) Find current user
     const currentUser = await prisma.user.findUnique({
       where: { email: session.user.email },
-      select: { id: true, name: true, email: true, image: true, profile: { select: { avatarUrl: true } } },
+      include: {
+        profile: {
+          select: { avatarUrl: true },
+        },
+      },
     });
 
     if (!currentUser) {
@@ -58,12 +62,10 @@ export async function GET(req: NextRequest) {
         // No thread exists yet - return empty messages
         const receiver = await prisma.user.findUnique({
           where: { id: receiverId },
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            image: true,
-            profile: { select: { avatarUrl: true } },
+          include: {
+            profile: {
+              select: { avatarUrl: true },
+            },
           },
         });
 
@@ -102,12 +104,10 @@ export async function GET(req: NextRequest) {
         participants: {
           include: {
             user: {
-              select: {
-                id: true,
-                name: true,
-                email: true,
-                image: true,
-                profile: { select: { avatarUrl: true } },
+              include: {
+                profile: {
+                  select: { avatarUrl: true },
+                },
               },
             },
           },
