@@ -26,16 +26,8 @@ export async function GET(req: NextRequest) {
     const users = await prisma.user.findMany({
       where: {
         id: { not: currentUser.id },
-        profile: {
-          isActive: true,
-          accountStatus: "active",
-        },
       },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        image: true,
+      include: {
         profile: {
           select: {
             firstName: true,
@@ -44,6 +36,8 @@ export async function GET(req: NextRequest) {
             role: true,
             lastSeen: true,
             isOnline: true,
+            isActive: true,
+            accountStatus: true,
           },
         },
       },
@@ -52,25 +46,30 @@ export async function GET(req: NextRequest) {
       },
     });
 
-    // Calculate online status based on lastSeen timestamp
+    // Filter out inactive users and calculate online status
     // User is online if lastSeen < 2 minutes ago
     const now = new Date();
-    const usersWithStatus = users.map((user) => {
-      const lastSeen = user.profile?.lastSeen || new Date(0);
-      const minutesSinceLastSeen = (now.getTime() - lastSeen.getTime()) / 60000;
-      const isOnline = minutesSinceLastSeen < 2;
+    const usersWithStatus = users
+      .filter((user) => {
+        // Only show active users
+        return user.profile?.isActive !== false && user.profile?.accountStatus === "active";
+      })
+      .map((user) => {
+        const lastSeen = user.profile?.lastSeen || new Date(0);
+        const minutesSinceLastSeen = (now.getTime() - lastSeen.getTime()) / 60000;
+        const isOnline = minutesSinceLastSeen < 2;
 
-      return {
-        id: user.id,
-        name: user.name || `${user.profile?.firstName || ""} ${user.profile?.lastName || ""}`.trim() || user.email,
-        email: user.email,
-        avatar: user.profile?.avatarUrl || user.image || null,
-        role: user.profile?.role || "salesperson",
-        lastSeen: user.profile?.lastSeen || new Date(0),
-        isOnline,
-        status: isOnline ? "online" : "offline",
-      };
-    });
+        return {
+          id: user.id,
+          name: user.name || `${user.profile?.firstName || ""} ${user.profile?.lastName || ""}`.trim() || user.email,
+          email: user.email,
+          avatar: user.profile?.avatarUrl || user.image || null,
+          role: user.profile?.role || "salesperson",
+          lastSeen: user.profile?.lastSeen || new Date(0),
+          isOnline,
+          status: isOnline ? "online" : "offline",
+        };
+      });
 
     return NextResponse.json({ users: usersWithStatus });
   } catch (error) {
