@@ -113,16 +113,6 @@ const ProfileInfo = () => {
               icon: "heroicons:key",
               href:"/secret-code-instructions"
             },
-            {
-              name: "Settings",
-              icon: "heroicons:paper-airplane",
-              href:"/dashboard"
-            },
-            {
-              name: "Live Trailers Upload Section",
-              icon: "heroicons:arrow-up-tray",
-              href:"/file-uploader"
-            },
           ].map((item, index) => (
             <Link
               href={item.href}
