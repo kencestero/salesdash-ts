@@ -9,9 +9,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Undo2 } from "lucide-react";
 import { type ProfileUser as ProfileUser, type Contact as ContactType, type Chat as ChatType } from "@/app/api/chat/data";
-import Image from "next/image";
 const chatAction = [
   {
     label: "Remove",
@@ -131,30 +131,24 @@ const Messages = ({
                 </span>
               </div>
               <div className="flex-none self-end -translate-y-5">
-                <div className="h-8 w-8 rounded-full ">
-                  <Image
-                    src={profile?.avatar || '/images/default-avatar.png'}
-                    alt=""
-                    width={32}
-                    height={32}
-                    className="block w-full h-full object-cover rounded-full"
-                  />
-                </div>
+                <Avatar className="h-8 w-8">
+                  <AvatarImage src={profile?.avatar || undefined} alt="" />
+                  <AvatarFallback className="uppercase">
+                    {profile?.fullName?.slice(0, 2) || 'ME'}
+                  </AvatarFallback>
+                </Avatar>
               </div>
             </div>
           </>
         ) : (
           <div className="flex space-x-2 items-start group rtl:space-x-reverse mb-4">
             <div className="flex-none self-end -translate-y-5">
-              <div className="h-8 w-8 rounded-full">
-                <Image
-                  src={typeof avatar === 'string' ? avatar : avatar?.src || '/images/default-avatar.png'}
-                  alt=""
-                  width={32}
-                  height={32}
-                  className="block w-full h-full object-cover rounded-full"
-                />
-              </div>
+              <Avatar className="h-8 w-8">
+                <AvatarImage src={typeof avatar === 'string' ? avatar : avatar?.src} alt="" />
+                <AvatarFallback className="uppercase">
+                  {contact?.fullName?.slice(0, 2) || 'U'}
+                </AvatarFallback>
+              </Avatar>
             </div>
             <div className="flex-1 flex flex-col gap-2">
               <div className="flex flex-col   gap-1">
