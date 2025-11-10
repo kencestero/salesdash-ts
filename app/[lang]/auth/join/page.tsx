@@ -255,8 +255,8 @@ export default function RegisterPage() {
       </div>
 
       {/* MJ Logo - Fixed at top */}
-      <div className="fixed top-12 left-1/2 -translate-x-1/2 z-30 pointer-events-none">
-        <div className="w-32 h-32 relative drop-shadow-2xl">
+      <div className="fixed top-8 left-1/2 -translate-x-1/2 z-[9999] pointer-events-none">
+        <div className="w-24 h-24 relative drop-shadow-2xl">
           <Image
             src="/images/DASH_LOGO_EYE_IN_THE_SKY.webp"
             alt="MJ SalesDash Logo"
