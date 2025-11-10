@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo, useRef, useTransition } from 'react';
 import Image from 'next/image';
+import { Icon } from "@iconify/react";
 import { signIn } from "next-auth/react";
 import { DEFAULT_LANG } from "@/lib/i18n";
 import { ShootingStars } from "@/components/ui/shooting-stars";
@@ -11,6 +12,7 @@ import { usePasskey } from "@/lib/hooks/usePasskey";
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [passwordType, setPasswordType] = useState('password');
   const [showForm, setShowForm] = useState(false);
   const [eyeDirection, setEyeDirection] = useState('center');
   const [showForgotPassword, setShowForgotPassword] = useState(false);
@@ -98,6 +100,10 @@ export default function LoginPage() {
         setLoginError(response.error);
       }
     });
+  };
+
+  const togglePasswordType = () => {
+    setPasswordType(passwordType === "password" ? "text" : "password");
   };
 
   const handleForgotPassword = async (e: React.FormEvent) => {
@@ -271,15 +277,28 @@ export default function LoginPage() {
                   <label className="text-white/60 text-xs font-light tracking-wider uppercase block mb-2">
                     Password
                   </label>
-                  <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full rounded-xl px-5 py-4 text-white bg-black/20 border border-white/10 backdrop-blur-sm text-sm outline-none transition-all shadow-[inset_0_2px_4px_rgba(0,0,0,0.3),inset_0_-1px_2px_rgba(255,255,255,0.05)] focus:border-orange-500/60 focus:shadow-[0_0_20px_rgba(251,146,60,0.2),inset_0_2px_6px_rgba(0,0,0,0.4)] focus:bg-black/30"
-                    placeholder="••••••••"
-                    required
-                    disabled={isPending}
-                  />
+                  <div className="relative">
+                    <input
+                      type={passwordType}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="w-full rounded-xl px-5 py-4 pr-12 text-white bg-black/20 border border-white/10 backdrop-blur-sm text-sm outline-none transition-all shadow-[inset_0_2px_4px_rgba(0,0,0,0.3),inset_0_-1px_2px_rgba(255,255,255,0.05)] focus:border-orange-500/60 focus:shadow-[0_0_20px_rgba(251,146,60,0.2),inset_0_2px_6px_rgba(0,0,0,0.4)] focus:bg-black/30"
+                      placeholder="••••••••"
+                      required
+                      disabled={isPending}
+                    />
+                    <button
+                      type="button"
+                      onClick={togglePasswordType}
+                      className="absolute top-1/2 -translate-y-1/2 right-4 text-white/40 hover:text-white/70 transition-colors"
+                    >
+                      {passwordType === "password" ? (
+                        <Icon icon="heroicons:eye" className="w-5 h-5" />
+                      ) : (
+                        <Icon icon="heroicons:eye-slash" className="w-5 h-5" />
+                      )}
+                    </button>
+                  </div>
                 </div>
 
                 {loginError && (
