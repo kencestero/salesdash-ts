@@ -49,6 +49,8 @@ export function AddCustomerDialog({
     source: "website",
     status: "lead",
     notes: "",
+    salesRepName: "",      // Sales Rep assignment
+    assignedToName: "",    // Manager assignment
   });
 
   const handleInputChange = (
@@ -111,6 +113,8 @@ export function AddCustomerDialog({
         source: "website",
         status: "lead",
         notes: "",
+        salesRepName: "",
+        assignedToName: "",
       });
       onOpenChange(false);
       onSuccess();
@@ -323,6 +327,32 @@ export function AddCustomerDialog({
                     <SelectItem value="negotiating">Negotiating</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <h3 className="font-semibold text-sm text-muted-foreground">Assignment</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="salesRepName">Sales Rep (Salesperson)</Label>
+                <Input
+                  id="salesRepName"
+                  name="salesRepName"
+                  value={formData.salesRepName}
+                  onChange={handleInputChange}
+                  placeholder="Enter sales rep name"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="assignedToName">Manager</Label>
+                <Input
+                  id="assignedToName"
+                  name="assignedToName"
+                  value={formData.assignedToName}
+                  onChange={handleInputChange}
+                  placeholder="Enter manager name"
+                />
               </div>
             </div>
           </div>
