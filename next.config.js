@@ -80,6 +80,17 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  async redirects() {
+    return [
+      { source: '/inventory', destination: '/en/inventory', permanent: false },
+      { source: '/finance/compare', destination: '/en/finance/compare', permanent: false },
+      { source: '/credit', destination: '/en/credit', permanent: false },
+      { source: '/profile', destination: '/en/profile', permanent: false },
+      { source: '/user-management', destination: '/en/user-management', permanent: false },
+      { source: '/crm/customers', destination: '/en/crm/customers', permanent: false },
+      { source: '/secret-code-instructions', destination: '/en/secret-code-instructions', permanent: false },
+    ];
+  },
 };
 
 
