@@ -82,7 +82,7 @@ const ForgotForm = () => {
       </form>
       <div className="mt-8 text-center text-base text-default-600">
         Forget it. Send me back to{" "}
-        <Link href="/auth/login2" className="text-primary">
+        <Link href="/en/auth/login2" className="text-primary">
           Sign In
         </Link>
       </div>

@@ -76,7 +76,7 @@ const LockForm = () => {
       </form>
       <div className="mt-8 text-center text-base font-medium text-default-600">
         Not you? Return{" "}
-        <Link href="/auth/login5" className="text-primary">
+        <Link href="/en/auth/login5" className="text-primary">
           Sign In
         </Link>
       </div>
