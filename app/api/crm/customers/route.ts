@@ -41,15 +41,44 @@ export async function GET(req: NextRequest) {
       ];
     }
 
-    // Fetch customers with related data
+    // Fetch customers with related data using tight select projections
     const customers = await prisma.customer.findMany({
       where,
-      include: {
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        email: true,
+        phone: true,
+        companyName: true,
+        status: true,
+        leadSource: true,
+        assignedTo: true,
+        lastContactedAt: true,
+        createdAt: true,
+        updatedAt: true,
+        // Related data with select projections
         deals: {
+          select: {
+            id: true,
+            trailerId: true,
+            status: true,
+            value: true,
+            expectedCloseDate: true,
+            createdAt: true,
+          },
           orderBy: { createdAt: "desc" },
           take: 1, // Most recent deal
         },
         activities: {
+          select: {
+            id: true,
+            type: true,
+            subject: true,
+            description: true,
+            status: true,
+            createdAt: true,
+          },
           orderBy: { createdAt: "desc" },
           take: 5, // Recent activities
         },
