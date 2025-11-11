@@ -1,11 +1,12 @@
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
+import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { prisma } from "./prisma";
 import { generateUniqueSalespersonCode } from "./salespersonCode";
 import bcrypt from "bcryptjs";
 
 export const authOptions = {
-  // Note: No adapter needed - we're using JWT sessions and handling user creation in signIn callback
+  adapter: PrismaAdapter(prisma),
   session: {
     strategy: "jwt" as const, // JWT for credentials support
     maxAge: 24 * 60 * 60, // 24 hours - session expires after 1 day
@@ -54,12 +55,10 @@ export const authOptions = {
         };
       },
     }),
-    // 🔒 OAUTH DISABLED FOR SECURITY - Email-only signup for now
-    // Uncomment when ready to re-enable:
-    // GoogleProvider({
-    //   clientId: process.env.AUTH_GOOGLE_ID as string,
-    //   clientSecret: process.env.AUTH_GOOGLE_SECRET as string,
-    // }),
+    GoogleProvider({
+      clientId: process.env.AUTH_GOOGLE_ID as string,
+      clientSecret: process.env.AUTH_GOOGLE_SECRET as string,
+    }),
   ],
 
   callbacks: {
@@ -75,8 +74,30 @@ export const authOptions = {
           include: { profile: true },
         });
 
-        // EXISTING USER - Just let them in
+        // EXISTING USER - Check if UserProfile exists
         if (existingUser) {
+          // Create UserProfile if missing (OAuth users who signed up before profile creation)
+          if (!existingUser.profile) {
+            // Parse name into firstName/lastName
+            const nameParts = (user.name ?? "").split(" ");
+            const firstName = nameParts[0] || "";
+            const lastName = nameParts.slice(1).join(" ") || "";
+
+            await prisma.userProfile.create({
+              data: {
+                userId: existingUser.id,
+                firstName: firstName || undefined,
+                lastName: lastName || undefined,
+                role: "salesperson",
+                member: true,
+                needsJoinCode: false,
+                salespersonCode: await generateUniqueSalespersonCode("salesperson", prisma),
+                repCode: "REP000000", // Default for OAuth users without join code
+              },
+            });
+            console.log("✅ Created missing UserProfile for existing user");
+          }
+
           if (account?.provider && !existingUser.emailVerified) {
             await prisma.user.update({
               where: { id: existingUser.id },
