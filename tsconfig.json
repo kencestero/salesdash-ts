@@ -24,6 +24,7 @@
     "forceConsistentCasingInFileNames": true,
     "inlineSources": false,
     "noUnusedLocals": false,
+    "types": ["next-auth"],
 
     "plugins": [
       {
