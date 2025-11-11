@@ -1,8 +1,5 @@
-import React from "react";
-import LandingPage from "@/components/landing-page";
+import { redirect } from "next/navigation";
 
-const page = () => {
-  return <LandingPage />;
-};
-
-export default page;
+export default function LocalePage() {
+  redirect("/en/auth/login");
+}
