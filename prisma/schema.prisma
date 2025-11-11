@@ -460,6 +460,8 @@ model Activity {
   @@index([userId])
   @@index([type])
   @@index([dueDate])
+  @@index([customerId, createdAt]) // Composite index for customer activity timeline
+  @@index([userId, createdAt])     // Composite index for user activity history
 }
 
 // Email System
@@ -625,6 +627,8 @@ model Quote {
   @@index([customerId])
   @@index([userId])
   @@index([expiresAt])
+  @@index([userId, createdAt])        // Composite index for user quote history
+  @@index([salespersonCode, status])  // Composite index for rep quote filtering
 }
 
 model QuoteActivity {

@@ -620,6 +620,28 @@ export async function GET(req: Request) {
 
     const trailers = await prisma.trailer.findMany({
       where: whereClause,
+      select: {
+        id: true,
+        vin: true,
+        stockNumber: true,
+        manufacturer: true,
+        model: true,
+        year: true,
+        category: true,
+        length: true,
+        width: true,
+        height: true,
+        msrp: true,
+        salePrice: true,
+        cost: true,
+        status: true,
+        location: true,
+        images: true,
+        description: true,
+        features: true,
+        createdAt: true,
+        updatedAt: true,
+      },
       orderBy: [
         { createdAt: 'desc' },
         { stockNumber: 'asc' }
