@@ -1,6 +1,7 @@
 import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import GoogleProvider from "next-auth/providers/google";
+import { getServerSession } from "next-auth";
 import { prisma } from "./prisma";
 import { generateUniqueSalespersonCode } from "./salespersonCode";
 import bcrypt from "bcryptjs";
@@ -241,3 +242,8 @@ export const authOptions = {
   secret: process.env.AUTH_SECRET,
   debug: process.env.NODE_ENV !== "production",
 };
+
+// Helper to get session in server components
+export async function auth() {
+  return await getServerSession(authOptions);
+}

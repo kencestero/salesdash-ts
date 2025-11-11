@@ -4,6 +4,7 @@ import { pickStandardImage } from "@/lib/inventory/image-map";
 import { detectDiamond, normalizeDiamond } from "@/lib/inventory/importers/diamond";
 import { detectQuality, normalizeQuality } from "@/lib/inventory/importers/quality";
 import { computePrice } from "@/lib/pricing";
+import { requireRole } from "@/lib/authz";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -32,6 +33,19 @@ function looksLikeQuality(headers: string[]): boolean {
 
 export async function POST(req: Request) {
   try {
+    // Auth guard: only MANAGER or OWNER can import inventory
+    try {
+      await requireRole(["manager", "owner"]);
+    } catch (error: any) {
+      if (error.message === "UNAUTHORIZED") {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
+      if (error.message === "FORBIDDEN") {
+        return NextResponse.json({ error: "Forbidden: requires MANAGER or OWNER role" }, { status: 403 });
+      }
+      throw error;
+    }
+
     // Extract supplier query param
     const url = new URL(req.url);
     const supplierParam = url.searchParams.get('supplier'); // 'diamond', 'quality', or 'panther'
