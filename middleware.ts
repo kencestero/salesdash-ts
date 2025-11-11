@@ -3,13 +3,18 @@ import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 
 export async function middleware(req: NextRequest) {
-  const token = await getToken({ req, secret: process.env.AUTH_SECRET });
-  const isAuthed = !!token?.id;
   const url = req.nextUrl;
 
+  // Handle root and /en redirects FIRST (before auth check)
+  if (url.pathname === "/" || url.pathname === "/en") {
+    url.pathname = "/en/auth/login";
+    return NextResponse.redirect(url, 307);
+  }
+
+  const token = await getToken({ req, secret: process.env.AUTH_SECRET });
+  const isAuthed = !!token?.id;
+
   const publicPaths = [
-    "/",
-    "/en",
     "/en/auth",
     "/auth",
     "/api/health",
