@@ -1,43 +1,60 @@
-useEffect(() => {
-  if (image) {
-    const gutteredSvg = `
-      <svg xmlns='http://www.w3.org/2000/svg' width='${gutter + 100}' height='${gutter + 100}' viewBox='0 0 ${gutter + 100} ${gutter + 100}'>
-        <rect x='0' y='0' width='${gutter + 100}' height='${gutter + 100}' fill='transparent' />
-        <image href='${image}' x='${gutter / 2}' y='${gutter / 2}' width='100' height='100' />
-      </svg>
-    `;
-    const convertedSvg = encodeURIComponent(gutteredSvg)
-      .replace(/'/g, "%27")
-      .replace(/"/g, "%22");
+"use client";
 
-    setBackgroundImage(`url("data:image/svg+xml,${convertedSvg}")`);
-  } else {
-    const svg = generateSvg({
-      text,
-      textColor,
-      textSize,
-      fontFamily,
-      opacity,
-      gutter,
-      rotate,
-      multiline,
-      lineHeight,
-    });
-    const convertedSvg = encodeURIComponent(svg)
-      .replace(/'/g, "%27")
-      .replace(/"/g, "%22");
+import React from "react";
 
-    setBackgroundImage(`url("data:image/svg+xml,${convertedSvg}")`);
-  }
-}, [
-  image,
-  text,
-  textColor,
-  textSize,
-  fontFamily,
-  opacity,
-  gutter,
-  rotate,
-  multiline,
-  lineHeight,
-]);
+export interface WatermarkProps {
+  text?: string;
+  textColor?: string;
+  textSize?: number;
+  opacity?: number;
+  rotate?: number;
+  children?: React.ReactNode;
+}
+
+export default function Watermark({
+  text = "WATERMARK",
+  textColor = "#000000",
+  textSize = 16,
+  opacity = 0.1,
+  rotate = -45,
+  children,
+}: WatermarkProps) {
+  const watermarkStyle: React.CSSProperties = {
+    position: "relative",
+    width: "100%",
+    height: "100%",
+  };
+
+  const overlayStyle: React.CSSProperties = {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    pointerEvents: "none",
+    backgroundImage: `repeating-linear-gradient(
+      ${rotate}deg,
+      transparent,
+      transparent 200px,
+      ${textColor}${Math.round(opacity * 255).toString(16).padStart(2, "0")} 200px,
+      ${textColor}${Math.round(opacity * 255).toString(16).padStart(2, "0")} 201px
+    )`,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontSize: `${textSize}px`,
+    color: textColor,
+    opacity: opacity,
+    transform: `rotate(${rotate}deg)`,
+    userSelect: "none",
+  };
+
+  return (
+    <div style={watermarkStyle}>
+      {children}
+      <div style={overlayStyle}>
+        <span>{text}</span>
+      </div>
+    </div>
+  );
+}
