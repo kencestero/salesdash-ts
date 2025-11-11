@@ -4,6 +4,7 @@ export const maxDuration = 60; // Allow up to 60 seconds for PDF/PNG generation
 
 import { NextRequest, NextResponse } from 'next/server';
 import fs from 'node:fs/promises';
+import { requireRole } from '@/lib/authz';
 
 const esc = (s: string) =>
   s.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]!));
@@ -58,6 +59,19 @@ async function buildFilledHtml(u: URL) {
  * - paymentTablesHtml (optional)
  */
 export async function GET(req: NextRequest) {
+  // Auth guard: requires authenticated user
+  try {
+    await requireRole(["salesperson", "manager", "owner"]);
+  } catch (error: any) {
+    if (error.message === "UNAUTHORIZED") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    if (error.message === "FORBIDDEN") {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+    throw error;
+  }
+
   try {
     const u = new URL(req.url);
     const format = (u.searchParams.get('format') ?? 'pdf').toLowerCase(); // pdf|png

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import fs from "node:fs/promises";
 import path from "node:path";
+import { requireRole } from "@/lib/authz";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -28,6 +29,19 @@ function replaceOptional(html: string, token: string, value?: string | null): st
  * - rtoTableHtml (optional)
  */
 export async function GET(req: NextRequest) {
+  // Auth guard: requires authenticated user
+  try {
+    await requireRole(["salesperson", "manager", "owner"]);
+  } catch (error: any) {
+    if (error.message === "UNAUTHORIZED") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    if (error.message === "FORBIDDEN") {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+    throw error;
+  }
+
   try {
     const url = new URL(req.url);
 

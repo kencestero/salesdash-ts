@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
+import { requireRole } from "@/lib/authz";
 
 interface Trailer {
   id: string;
@@ -17,6 +18,19 @@ interface Trailer {
 }
 
 export async function POST(req: Request) {
+  // Auth guard: requires authenticated user
+  try {
+    await requireRole(["salesperson", "manager", "owner"]);
+  } catch (error: any) {
+    if (error.message === "UNAUTHORIZED") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    if (error.message === "FORBIDDEN") {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+    throw error;
+  }
+
   try {
     const { trailers }: { trailers: Trailer[] } = await req.json();
 
