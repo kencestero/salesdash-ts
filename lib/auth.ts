@@ -6,6 +6,7 @@ import { prisma } from "./prisma";
 import { generateUniqueSalespersonCode } from "./salespersonCode";
 import bcrypt from "bcryptjs";
 import { verifyPasskeyJWT } from "./passkey-jwt";
+import { rateLimit } from "./ratelimit";
 
 export const authOptions = {
   adapter: PrismaAdapter(prisma),
@@ -30,6 +31,11 @@ export const authOptions = {
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
           throw new Error("Email and password required");
+        }
+
+        // Rate limiting: max 10 login attempts per email per minute
+        if (!rateLimit(`login:${credentials.email}`, 10, 60_000)) {
+          throw new Error("Too many login attempts. Please try again later.");
         }
 
         const user = await prisma.user.findUnique({
