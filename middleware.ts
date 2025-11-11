@@ -9,11 +9,9 @@ export async function middleware(req: NextRequest) {
 
   const publicPaths = [
     "/",
-    "/en/auth/login",
-    "/en/auth/join",
-    "/en/auth/verify-email",
-    "/en/auth/reset-password",
-    "/en/auth/complete-signup",
+    "/en",
+    "/en/auth",
+    "/auth",
     "/api/health",
     "/api/auth",
     "/api/join",
@@ -27,7 +25,7 @@ export async function middleware(req: NextRequest) {
     "/test/firebase-check"
   ];
 
-  const isPublic = publicPaths.some(p => url.pathname.startsWith(p));
+  const isPublic = publicPaths.some((p) => url.pathname.startsWith(p));
 
   if (!isAuthed && !isPublic) {
     url.pathname = "/en/auth/login";
@@ -38,5 +36,7 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next|.*\\.(?:js|css|svg|png|jpg|jpeg|webp|ico|txt)).*)"],
+  matcher: [
+    "/((?!_next|api|.*\\..*|sitemap\\.xml|robots\\.txt|favicon\\.ico).*)",
+  ],
 };
