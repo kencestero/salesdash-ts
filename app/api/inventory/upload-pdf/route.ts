@@ -3,7 +3,6 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import OpenAI from 'openai';
-import * as pdf from 'pdf-parse';
 import * as XLSX from 'xlsx';
 
 export const dynamic = "force-dynamic";
@@ -24,8 +23,9 @@ function getOpenAIClient() {
 /**
  * POST /api/inventory/upload-pdf
  *
- * Accepts PDF, Excel (.xlsx), or CSV files containing trailer inventory data,
+ * Accepts Excel (.xlsx) or CSV files containing trailer inventory data,
  * uses OpenAI to extract structured data, and inserts the trailers into the database.
+ * Note: PDF support removed due to Vercel Edge runtime compatibility issues.
  */
 export async function POST(req: Request) {
   try {
@@ -62,18 +62,17 @@ export async function POST(req: Request) {
 
     // 4. Validate file type
     const validTypes = [
-      'application/pdf',
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
       'application/vnd.ms-excel', // .xls
       'text/csv',
     ];
 
     const fileName = file.name.toLowerCase();
-    const isValidExtension = fileName.endsWith('.pdf') || fileName.endsWith('.xlsx') || fileName.endsWith('.xls') || fileName.endsWith('.csv');
+    const isValidExtension = fileName.endsWith('.xlsx') || fileName.endsWith('.xls') || fileName.endsWith('.csv');
 
     if (!validTypes.includes(file.type) && !isValidExtension) {
       return NextResponse.json(
-        { error: 'Invalid file type. Please upload a PDF, Excel (.xlsx), or CSV file.' },
+        { error: 'Invalid file type. Please upload an Excel (.xlsx) or CSV file.' },
         { status: 400 }
       );
     }
@@ -86,13 +85,7 @@ export async function POST(req: Request) {
     let extractedText: string = '';
 
     try {
-      if (file.type === 'application/pdf' || fileName.endsWith('.pdf')) {
-        // PDF Processing
-        console.log('📄 Processing as PDF...');
-        const pdfData = await pdf.default(buffer);
-        extractedText = pdfData.text;
-        console.log('✅ PDF text extracted:', extractedText.substring(0, 200) + '...');
-      } else if (
+      if (
         file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
         file.type === 'application/vnd.ms-excel' ||
         fileName.endsWith('.xlsx') ||

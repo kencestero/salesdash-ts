@@ -24,12 +24,21 @@ export const metadata = {
   },
   icons: {
     icon: [
+      { url: '/logo.png', type: 'image/png' },
       { url: '/favicon.ico', sizes: 'any' },
-      { url: '/icon.png', type: 'image/png', sizes: '32x32' },
     ],
-    shortcut: '/favicon.ico',
-    apple: '/icon.png',
+    shortcut: '/logo.png',
+    apple: '/logo.png',
+    other: [
+      {
+        rel: 'icon',
+        type: 'image/png',
+        url: '/logo.png',
+      },
+    ],
   },
+  manifest: '/manifest.json',
+  themeColor: '#ee6832',
   openGraph: {
     type: 'website',
     locale: 'en_US',

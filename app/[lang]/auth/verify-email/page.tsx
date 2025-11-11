@@ -8,6 +8,8 @@ import { DEFAULT_LANG } from "@/lib/i18n";
 function VerifyEmailContent() {
   const searchParams = useSearchParams();
   const email = searchParams.get("email");
+  const error = searchParams.get("error");
+  const details = searchParams.get("details");
   const [countdown, setCountdown] = useState(120); // 2 minutes in seconds
   const [canResend, setCanResend] = useState(false);
   const [resending, setResending] = useState(false);
@@ -20,6 +22,24 @@ function VerifyEmailContent() {
       setCanResend(true);
     }
   }, [countdown]);
+
+  // Error messages
+  const getErrorMessage = () => {
+    switch (error) {
+      case "missing_token":
+        return "Verification link is invalid. Please check your email or request a new verification link.";
+      case "invalid_token":
+        return "This verification link is invalid or has already been used. Please request a new verification link.";
+      case "expired_token":
+        return "This verification link has expired. Please request a new verification link below.";
+      case "verification_failed":
+        return "Verification failed due to a server error. Please try again or contact support.";
+      default:
+        return null;
+    }
+  };
+
+  const errorMessage = getErrorMessage();
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -72,40 +92,72 @@ function VerifyEmailContent() {
 
           {/* Content */}
           <div className="bg-[#f5a623] px-8 py-10 text-center">
-            <h2 className="text-4xl font-bold text-[#0d1f2d] mb-4">
-              Verify Your Email!
-            </h2>
-            <p className="text-lg text-[#0d1f2d] leading-relaxed mb-6">
-              We sent you a verification link via email. Please click it to verify your email
-              address. If you don&apos;t see the email, please check your SPAM folder.
-            </p>
+            {errorMessage ? (
+              <>
+                {/* Error State */}
+                <h2 className="text-4xl font-bold text-red-700 mb-4">
+                  Verification Error
+                </h2>
+                <p className="text-lg text-[#0d1f2d] leading-relaxed mb-6">
+                  {errorMessage}
+                </p>
+                {details && (
+                  <div className="bg-red-100 border border-red-400 text-red-800 px-4 py-3 rounded-lg mb-6 text-left">
+                    <p className="font-semibold text-sm mb-1">Technical Details:</p>
+                    <p className="text-xs font-mono break-all">{decodeURIComponent(details)}</p>
+                  </div>
+                )}
 
-            {/* Open Email Button */}
-            <Button
-              onClick={handleOpenEmail}
-              className="w-full bg-[#1a3a52] hover:bg-[#0d1f2d] text-white text-xl font-semibold py-8 rounded-2xl mb-6 transition-all hover:scale-105"
-            >
-              Open email
-            </Button>
-
-            {/* Countdown */}
-            <div className="text-6xl font-bold text-[#0d1f2d] mb-3">
-              {formatTime(countdown)}
-            </div>
-
-            {/* Resend Button */}
-            {canResend ? (
-              <button
-                onClick={handleResend}
-                disabled={resending}
-                className="text-[#0d1f2d] font-semibold text-lg underline hover:no-underline disabled:opacity-50"
-              >
-                {resending ? "Sending..." : "Resend email verification"}
-              </button>
+                {/* Resend Button for errors */}
+                {email && (
+                  <button
+                    onClick={handleResend}
+                    disabled={resending}
+                    className="w-full bg-[#1a3a52] hover:bg-[#0d1f2d] text-white text-xl font-semibold py-8 rounded-2xl transition-all hover:scale-105 disabled:opacity-50"
+                  >
+                    {resending ? "Sending..." : "Resend Verification Email"}
+                  </button>
+                )}
+              </>
             ) : (
-              <p className="text-[#0d1f2d] font-semibold text-lg">
-                Resend email verification
-              </p>
+              <>
+                {/* Normal State - Waiting for verification */}
+                <h2 className="text-4xl font-bold text-[#0d1f2d] mb-4">
+                  Verify Your Email!
+                </h2>
+                <p className="text-lg text-[#0d1f2d] leading-relaxed mb-6">
+                  We sent you a verification link via email. Please click it to verify your email
+                  address. If you don&apos;t see the email, please check your SPAM folder.
+                </p>
+
+                {/* Open Email Button */}
+                <Button
+                  onClick={handleOpenEmail}
+                  className="w-full bg-[#1a3a52] hover:bg-[#0d1f2d] text-white text-xl font-semibold py-8 rounded-2xl mb-6 transition-all hover:scale-105"
+                >
+                  Open email
+                </Button>
+
+                {/* Countdown */}
+                <div className="text-6xl font-bold text-[#0d1f2d] mb-3">
+                  {formatTime(countdown)}
+                </div>
+
+                {/* Resend Button */}
+                {canResend ? (
+                  <button
+                    onClick={handleResend}
+                    disabled={resending}
+                    className="text-[#0d1f2d] font-semibold text-lg underline hover:no-underline disabled:opacity-50"
+                  >
+                    {resending ? "Sending..." : "Resend email verification"}
+                  </button>
+                ) : (
+                  <p className="text-[#0d1f2d] font-semibold text-lg">
+                    Resend email verification
+                  </p>
+                )}
+              </>
             )}
           </div>
         </div>

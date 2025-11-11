@@ -102,6 +102,8 @@ export async function POST(req: NextRequest) {
       status,
       tags,
       notes,
+      salesRepName,      // Sales Rep assignment
+      assignedToName,    // Manager assignment
     } = body;
 
     // Validation
@@ -142,6 +144,8 @@ export async function POST(req: NextRequest) {
         status: status || "lead",
         tags: tags || [],
         notes,
+        salesRepName,
+        assignedToName,
         lastContactedAt: new Date(),
       },
     });

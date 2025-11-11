@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MJ SalesDash Login - Fixed with Background</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: system-ui, -apple-system, sans-serif; }
+
+    @keyframes aurora {
+      0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.3; }
+      50% { transform: translate(20px, -20px) scale(1.05); opacity: 0.5; }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 1; }
+    }
+
+    .container {
+      min-height: 100vh;
+      position: relative;
+      overflow: hidden;
+      background-color: #000;
+    }
+
+    /* Background Image - FIXED PATH */
+    .bg-image {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+    }
+
+    .bg-image::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: url('../public/images/111.png') center/cover no-repeat;
+      /* Fallback if relative path doesn't work */
+      background-image: url('file:///C:/Users/kence/salesdash-ts/public/images/111.png');
+    }
+
+    /* Dark overlay to make form readable */
+    .bg-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.3);
+      z-index: 1;
+    }
+
+    /* Aurora effects - lighter so background shows through */
+    .aurora-container {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    .aurora {
+      position: absolute;
+      border-radius: 50%;
+      mix-blend-mode: screen;
+      animation: aurora 15s ease-in-out infinite;
+    }
+
+    .aurora1 {
+      width: 600px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(251, 146, 60, 0.15) 0%, transparent 70%);
+      top: -10%;
+      left: -10%;
+      filter: blur(80px);
+    }
+
+    .aurora2 {
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(253, 186, 116, 0.1) 0%, transparent 70%);
+      bottom: -10%;
+      right: -10%;
+      filter: blur(80px);
+      animation-delay: 7s;
+    }
+
+    /* Floating Logo with Spring Physics */
+    .logo-container {
+      position: fixed;
+      top: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 50;
+      will-change: transform;
+      transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); /* Spring easing */
+    }
+
+    .logo-wrapper {
+      position: relative;
+      width: 180px;
+      height: 180px;
+    }
+
+    .rotating-text {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      animation: rotate 15s linear infinite;
+    }
+
+    .logo-center {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .logo-center img {
+      width: 96px;
+      height: 96px;
+      object-fit: contain;
+      filter: drop-shadow(0 0 20px rgba(251,146,60,0.8));
+    }
+
+    /* Add glow effect to logo circle */
+    .logo-glow {
+      position: absolute;
+      inset: 20px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(251, 146, 60, 0.2) 0%, transparent 70%);
+      filter: blur(20px);
+    }
+
+    .form-container {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      min-height: 100vh;
+      align-items: center;
+      justify-content: center;
+      padding-top: 8rem;
+    }
+
+    .form-wrapper {
+      width: 100%;
+      max-width: 28rem;
+      padding: 0 1.5rem;
+    }
+
+    .form-card {
+      animation: fadeIn 0.7s ease-out forwards;
+      animation-delay: 0.2s;
+      opacity: 0;
+      border-radius: 1.5rem;
+      padding: 2.5rem;
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(25px) saturate(150%);
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 0 80px rgba(251, 146, 60, 0.1);
+    }
+
+    .form-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .form-header h3 {
+      color: rgba(255,255,255,0.95);
+      font-size: 1.5rem;
+      font-weight: 300;
+      margin-bottom: 0.75rem;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    }
+
+    .form-header p {
+      color: rgba(255,255,255,0.6);
+      font-size: 0.875rem;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    label {
+      color: rgba(255,255,255,0.6);
+      font-size: 0.75rem;
+      font-weight: 300;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+
+    input {
+      width: 100%;
+      border-radius: 0.75rem;
+      padding: 1rem 1.25rem;
+      color: white;
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      font-size: 0.875rem;
+      outline: none;
+      transition: all 0.3s;
+    }
+
+    input:focus {
+      border: 1px solid rgba(251, 146, 60, 0.6);
+      box-shadow: 0 0 20px rgba(251, 146, 60, 0.2);
+      background: rgba(0, 0, 0, 0.6);
+    }
+
+    input::placeholder {
+      color: rgba(255,255,255,0.3);
+    }
+
+    .forgot-link {
+      text-align: right;
+    }
+
+    .forgot-link a {
+      color: rgba(255,255,255,0.5);
+      font-size: 0.75rem;
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    .forgot-link a:hover {
+      color: rgba(251, 146, 60, 0.9);
+    }
+
+    button {
+      width: 100%;
+      color: black;
+      font-weight: 600;
+      padding: 1rem 1.5rem;
+      border-radius: 0.75rem;
+      background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+      box-shadow: 0 4px 20px rgba(251, 191, 36, 0.4);
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(251, 191, 36, 0.6);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .assistance {
+      margin-top: 2rem;
+      text-align: center;
+    }
+
+    .assistance a {
+      color: rgba(255,255,255,0.5);
+      font-size: 0.75rem;
+      text-decoration: none;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      transition: color 0.3s;
+    }
+
+    .assistance a:hover {
+      color: rgba(251, 146, 60, 0.9);
+    }
+
+    .footer {
+      margin-top: 2.5rem;
+      padding-top: 2rem;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .logos {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    .logos a {
+      transition: all 0.3s;
+      display: block;
+    }
+
+    .logos a:hover {
+      transform: scale(1.05);
+      filter: brightness(1.2);
+    }
+
+    .logos img {
+      height: 56px;
+      width: auto;
+      object-fit: contain;
+      filter: drop-shadow(0 2px 8px rgba(0,0,0,0.5));
+    }
+
+    .copyright {
+      color: rgba(255,255,255,0.3);
+      font-size: 0.75rem;
+      text-align: center;
+    }
+
+    /* Subtle stars that don't overpower background */
+    .star {
+      position: absolute;
+      background: white;
+      border-radius: 50%;
+      animation: twinkle 4s ease-in-out infinite;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Background Image (Starry Trailer) -->
+    <div class="bg-image"></div>
+    <div class="bg-overlay"></div>
+
+    <!-- Aurora Effects (Lighter) -->
+    <div class="aurora-container">
+      <div class="aurora aurora1"></div>
+      <div class="aurora aurora2"></div>
+      <div id="stars"></div>
+    </div>
+
+    <!-- Floating Logo with Spring Motion -->
+    <div class="logo-container" id="logo">
+      <div class="logo-wrapper">
+        <div class="logo-glow"></div>
+        <svg class="rotating-text" viewBox="0 0 180 180">
+          <defs>
+            <path id="circle" d="M 90,90 m -70,0 a 70,70 0 1,1 140,0 a 70,70 0 1,1 -140,0" />
+          </defs>
+          <text style="font-size: 11px; font-weight: 300; letter-spacing: 0.3em; fill: rgba(255,255,255,0.9); text-transform: uppercase;">
+            <textPath href="#circle">MJ SALESDASH PORTAL • MJ SALESDASH PORTAL •</textPath>
+          </text>
+        </svg>
+
+        <div class="logo-center">
+          <svg width="96" height="96" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="45" fill="#E96114" opacity="0.9"/>
+            <text x="50" y="65" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="white" text-anchor="middle">MJ</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Login Form -->
+    <div class="form-container">
+      <div class="form-wrapper">
+        <div class="form-card">
+          <div class="form-header">
+            <h3>Welcome Back</h3>
+            <p>Access your SalesDash account to manage leads and close deals</p>
+          </div>
+
+          <form onsubmit="event.preventDefault(); alert('Login functionality will be connected to NextAuth');">
+            <div>
+              <label>Email</label>
+              <input type="email" placeholder="your@email.com" required autofocus>
+            </div>
+
+            <div>
+              <label>Password</label>
+              <input type="password" placeholder="••••••••" required>
+            </div>
+
+            <div class="forgot-link">
+              <a href="#reset">Forgot your password?</a>
+            </div>
+
+            <button type="submit">Continue</button>
+          </form>
+
+          <div class="assistance">
+            <a href="mailto:noreply@mjsalesdash.com">Need assistance?</a>
+          </div>
+
+          <div class="footer">
+            <div class="logos">
+              <a href="https://www.diamondcargomfg.com/" target="_blank" rel="noopener noreferrer">
+                <svg width="120" height="56" viewBox="0 0 200 80">
+                  <text x="100" y="45" font-family="Arial" font-size="24" font-weight="bold" fill="#E96114" text-anchor="middle">DIAMOND CARGO</text>
+                </svg>
+              </a>
+              <a href="https://panthercargo.llc/" target="_blank" rel="noopener noreferrer">
+                <svg width="120" height="56" viewBox="0 0 200 80">
+                  <text x="100" y="45" font-family="Arial" font-size="24" font-weight="bold" fill="#E96114" text-anchor="middle">PANTHER</text>
+                </svg>
+              </a>
+              <a href="https://qualitycargo.llc/" target="_blank" rel="noopener noreferrer">
+                <svg width="120" height="56" viewBox="0 0 200 80">
+                  <text x="100" y="45" font-family="Arial" font-size="24" font-weight="bold" fill="#E96114" text-anchor="middle">QUALITY</text>
+                </svg>
+              </a>
+            </div>
+            <p class="copyright">© 2024 MJ Cargo Sales • Enterprise CRM Platform</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Create subtle twinkling stars (don't overpower the background)
+    const starsContainer = document.getElementById('stars');
+    for (let i = 0; i < 15; i++) {
+      const star = document.createElement('div');
+      star.className = 'star';
+      star.style.top = Math.random() * 100 + '%';
+      star.style.left = Math.random() * 100 + '%';
+      star.style.width = (Math.random() * 1.5 + 0.5) + 'px';
+      star.style.height = star.style.width;
+      star.style.animationDelay = Math.random() * 4 + 's';
+      starsContainer.appendChild(star);
+    }
+
+    // Spring-like cursor following (Motion.dev style)
+    const logo = document.getElementById('logo');
+    let targetX = 0;
+    let targetY = 0;
+    let currentX = 0;
+    let currentY = 0;
+
+    document.addEventListener('mousemove', (e) => {
+      targetX = (e.clientX - window.innerWidth / 2) * 0.05;
+      targetY = (e.clientY - 150) * 0.05;
+    });
+
+    // Spring animation loop
+    function animateLogo() {
+      // Spring physics - smooth interpolation
+      currentX += (targetX - currentX) * 0.1;
+      currentY += (targetY - currentY) * 0.1;
+
+      logo.style.transform = `translate(calc(-50% + ${currentX}px), ${currentY}px)`;
+      requestAnimationFrame(animateLogo);
+    }
+
+    animateLogo();
+
+    // Try to load the actual background image
+    const bgImage = new Image();
+    bgImage.src = '../public/images/111.png';
+    bgImage.onerror = () => {
+      // Fallback: try absolute path
+      const bg = document.querySelector('.bg-image::before');
+      console.log('Background image not found at relative path, trying absolute...');
+    };
+  </script>
+</body>
+</html>

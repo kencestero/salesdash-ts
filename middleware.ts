@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 const DEFAULT_LANG = "en";
-const LOGIN = `/${DEFAULT_LANG}/login`;
+const LOGIN = `/${DEFAULT_LANG}/auth/login`;
 const AUTH_PREFIX = `/${DEFAULT_LANG}/auth`;
 const DASHBOARD = `/${DEFAULT_LANG}/dashboard`;
 
@@ -38,6 +38,14 @@ const MARKETING = new Set([
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
+  // 0. Force non-www (fixes WebAuthn RP ID mismatch)
+  const host = req.headers.get("host") || "";
+  if (host.startsWith("www.")) {
+    const url = req.nextUrl.clone();
+    url.host = host.replace(/^www\./, "");
+    return NextResponse.redirect(url, 308);
+  }
+
   // 1. Allow static files (skip middleware)
   if (ALLOW_STATIC.some(path => pathname.startsWith(path))) {
     return NextResponse.next();
@@ -46,6 +54,19 @@ export async function middleware(req: NextRequest) {
   // 2. Allow public demo pages (no auth required)
   if (PUBLIC_PAGES.some(path => pathname.startsWith(path))) {
     return NextResponse.next();
+  }
+
+  // 2.5. Redirect old auth pages to new login page
+  if (pathname === "/auth/login") {
+    const url = req.nextUrl.clone();
+    url.pathname = `/${DEFAULT_LANG}/auth/login`;
+    return NextResponse.redirect(url, 308);
+  }
+
+  if (pathname === "/auth/register") {
+    const url = req.nextUrl.clone();
+    url.pathname = `/${DEFAULT_LANG}/auth/register`;
+    return NextResponse.redirect(url, 308);
   }
 
   // 3. Add /en prefix if missing (EXCEPT for /apply routes - they're at root)
@@ -59,13 +80,6 @@ export async function middleware(req: NextRequest) {
   const pathnameWithoutLang = pathname.replace(`/${DEFAULT_LANG}`, '');
   if (PUBLIC_PAGES.some(path => pathnameWithoutLang.startsWith(path))) {
     return NextResponse.next();
-  }
-
-  // 3c. Redirect shortcut routes to full dashboard paths
-  if (pathname === `/${DEFAULT_LANG}/inventory`) {
-    const url = req.nextUrl.clone();
-    url.pathname = `/${DEFAULT_LANG}/dashboard/inventory`;
-    return NextResponse.redirect(url);
   }
 
   // 4. Auth check - Check for session cookie (database strategy)

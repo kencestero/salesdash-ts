@@ -1,5 +1,5 @@
 // Fix Kenneth's name in the database
-const { PrismaClient } = require('../lib/generated/prisma');
+const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 async function fixKennethName() {

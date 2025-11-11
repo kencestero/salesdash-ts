@@ -26,6 +26,10 @@ import { calculateFinance } from "@/lib/finance/finance-calc";
 import { calculateRTO } from "@/lib/finance/rto-calc";
 import { getLocationByZip } from "@/lib/data/zip-tax-map";
 
+// Dynamic build info
+const COMMIT = (process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA ?? process.env.VERCEL_GIT_COMMIT_SHA ?? '').slice(0, 7);
+const ENV = process.env.NEXT_PUBLIC_VERCEL_ENV ?? process.env.VERCEL_ENV ?? 'local';
+
 interface Trailer {
   id: string;
   stockNumber: string;
@@ -67,9 +71,9 @@ export default function FinanceComparePage() {
     const fetchTrailers = async () => {
       try {
         setLoadingTrailers(true);
-        const res = await fetch("/api/inventory?status=available");
+        const res = await fetch("/api/trailers");
         const data = await res.json();
-        setTrailers(data.trailers || []);
+        setTrailers(data.items || []);
       } catch (error) {
         console.error("Failed to fetch trailers:", error);
         toast({
@@ -83,6 +87,22 @@ export default function FinanceComparePage() {
     };
     fetchTrailers();
   }, []);
+
+  // Auto-update tax rate when ZIP changes
+  useEffect(() => {
+    const updateTaxRate = async () => {
+      if (zipcode && zipcode.length >= 5) {
+        try {
+          const res = await fetch(`/api/tax?zip=${zipcode.slice(0, 5)}`);
+          const data = await res.json();
+          setTaxPct(data.rate || 0);
+        } catch (error) {
+          console.error("Failed to fetch tax rate:", error);
+        }
+      }
+    };
+    updateTaxRate();
+  }, [zipcode]);
 
   // Handle trailer selection and auto-update price
   const handleTrailerSelect = (trailerId: string) => {
@@ -452,9 +472,9 @@ export default function FinanceComparePage() {
             </div>
             <div>
               <h1 className="text-3xl font-bold text-foreground">
-                MJ Finance Calculator
+                Finance Calculator
               </h1>
-              <p className="text-muted-foreground">
+              <p className="text-foreground/70">
                 Compare Cash, Finance, and Rent-To-Own options side-by-side
               </p>
             </div>
@@ -469,7 +489,7 @@ export default function FinanceComparePage() {
                 {session.user.role === "VIP" && `VIP#${session.user.id?.slice(0, 6).toUpperCase()}`}
                 {!["REP", "SMA", "DIR", "VIP"].includes(session.user.role || "") && session.user.name}
               </p>
-              <p className="text-xs text-muted-foreground">{session.user.email}</p>
+              <p className="text-xs text-foreground/70">{session.user.email}</p>
             </div>
           )}
         </div>
@@ -489,9 +509,11 @@ export default function FinanceComparePage() {
         {/* Customer Information Card */}
         <Card className="border-border bg-card">
           <CardHeader>
-            <CardTitle className="text-foreground flex items-center gap-2">
-              <User className="h-5 w-5" />
-              Customer Information
+            <CardTitle asChild>
+              <h2 className="text-foreground flex items-center gap-2">
+                <User className="h-5 w-5" aria-hidden="true" />
+                Customer Information
+              </h2>
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -544,7 +566,9 @@ export default function FinanceComparePage() {
         {/* Input Controls Card */}
         <Card className="border-border bg-card">
           <CardHeader>
-            <CardTitle className="text-foreground">Quote Details</CardTitle>
+            <CardTitle asChild>
+              <h2 className="text-foreground">Quote Details</h2>
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-6">
@@ -607,7 +631,7 @@ export default function FinanceComparePage() {
                     onChange={(e) => setTaxPct(parseFloat(e.target.value) || 0)}
                     className="pr-7"
                   />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/70">
                     %
                   </span>
                 </div>
@@ -619,7 +643,7 @@ export default function FinanceComparePage() {
                   Fees
                 </Label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/70">
                     $
                   </span>
                   <Input
@@ -646,7 +670,7 @@ export default function FinanceComparePage() {
                     onChange={(e) => setApr(parseFloat(e.target.value) || 0)}
                     className="pr-7"
                   />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/70">
                     %
                   </span>
                 </div>
@@ -676,7 +700,7 @@ export default function FinanceComparePage() {
                   </SelectContent>
                 </Select>
                 {!loadingTrailers && trailers.length > 0 && (
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-foreground/70">
                     {trailers.length} trailers available in inventory
                   </p>
                 )}
@@ -732,43 +756,46 @@ export default function FinanceComparePage() {
         {selectedOptions.length > 0 && (
           <Card className="border-primary/30 bg-primary/5">
             <CardHeader>
-              <CardTitle className="space-y-4 text-foreground">
-                <div className="flex items-center justify-between">
-                  <span className="flex items-center gap-2">
-                    <Check className="h-5 w-5 text-primary" />
+              <div className="space-y-4">
+                <CardTitle asChild>
+                  <h2 className="flex items-center gap-2 text-foreground">
+                    <Check className="h-5 w-5 text-primary" aria-hidden="true" />
                     Selected Payment Options ({selectedOptions.length}/3)
-                  </span>
-                </div>
+                  </h2>
+                </CardTitle>
 
                 {/* Export Format Selector & Generate Button */}
                 <div className="flex items-center gap-4 flex-wrap">
                   <div className="flex gap-2">
                     <button
                       onClick={() => setExportFormat("pdf")}
+                      aria-label="Export as PDF"
                       className={`px-4 py-2 rounded-lg font-medium transition-all text-sm ${
                         exportFormat === "pdf"
                           ? "bg-primary text-primary-foreground shadow-md scale-105"
-                          : "bg-muted hover:bg-muted/80 text-muted-foreground"
+                          : "bg-muted hover:bg-muted/80 text-foreground/70"
                       }`}
                     >
                       📄 PDF
                     </button>
                     <button
                       onClick={() => setExportFormat("jpeg")}
+                      aria-label="Export as JPEG"
                       className={`px-4 py-2 rounded-lg font-medium transition-all text-sm ${
                         exportFormat === "jpeg"
                           ? "bg-primary text-primary-foreground shadow-md scale-105"
-                          : "bg-muted hover:bg-muted/80 text-muted-foreground"
+                          : "bg-muted hover:bg-muted/80 text-foreground/70"
                       }`}
                     >
                       🖼️ JPEG
                     </button>
                     <button
                       onClick={() => setExportFormat("png")}
+                      aria-label="Export as PNG"
                       className={`px-4 py-2 rounded-lg font-medium transition-all text-sm ${
                         exportFormat === "png"
                           ? "bg-primary text-primary-foreground shadow-md scale-105"
-                          : "bg-muted hover:bg-muted/80 text-muted-foreground"
+                          : "bg-muted hover:bg-muted/80 text-foreground/70"
                       }`}
                     >
                       🎨 PNG
@@ -781,11 +808,11 @@ export default function FinanceComparePage() {
                     className="gap-2 flex-1 min-w-[200px]"
                     size="lg"
                   >
-                    <FileDown className="h-5 w-5" />
+                    <FileDown className="h-5 w-5" aria-hidden="true" />
                     Generate {exportFormat.toUpperCase()} Quote
                   </Button>
                 </div>
-              </CardTitle>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -811,17 +838,17 @@ export default function FinanceComparePage() {
                         : `$${option.amount.toFixed(2)}/mo`}
                     </div>
                     {option.term && (
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-foreground/70">
                         {option.term} months
                       </p>
                     )}
                     {option.down !== undefined && (
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-foreground/70">
                         Down: ${option.down.toLocaleString()}
                       </p>
                     )}
                     {option.details && (
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-foreground/70">
                         {option.details}
                       </p>
                     )}
@@ -846,11 +873,16 @@ export default function FinanceComparePage() {
 
         {/* Info Footer */}
         <div className="rounded-lg border border-border bg-muted/50 p-4">
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-foreground/80">
             💡 <strong>Pro Tip:</strong> Click any payment amount in the matrix
             to select it for the PDF quote (max 3 options). Uncheck terms to hide them from the display.
           </p>
         </div>
+      </div>
+
+      {/* Version Stamp */}
+      <div className="text-[10px] text-gray-500 mt-6 opacity-70">
+        FIN-COMPARE v2 • commit {COMMIT} • env:{ENV}
       </div>
     </div>
   );

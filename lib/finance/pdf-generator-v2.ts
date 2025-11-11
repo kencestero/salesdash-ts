@@ -72,8 +72,19 @@ function generateQuoteHTML(data: QuoteData): string {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MJ Cargo Quote</title>
+  <title>MJ Cargo Quote - Luxury</title>
   <style>
+    /* Official MJ Cargo Color Palette */
+    :root {
+      --mj-orange-gold: #E6840D;
+      --mj-deep-navy: #203F55;
+      --mj-charcoal-brown: #33251B;
+      --mj-steel-gray: #5C524A;
+      --mj-burnt-orange: #A84E03;
+      --mj-midnight-blue: #0B151E;
+      --mj-light-gray: #F5F5F5;
+    }
+
     * {
       margin: 0;
       padding: 0;
@@ -81,7 +92,7 @@ function generateQuoteHTML(data: QuoteData): string {
     }
 
     body {
-      font-family: 'Segoe UI', Arial, sans-serif;
+      font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
       width: 210mm;
       height: 297mm;
       margin: 0;
@@ -95,79 +106,172 @@ function generateQuoteHTML(data: QuoteData): string {
       padding: 0;
       background: white;
       position: relative;
+      background-image:
+        repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(92,82,74,0.02) 35px, rgba(92,82,74,0.02) 70px),
+        repeating-linear-gradient(-45deg, transparent, transparent 35px, rgba(92,82,74,0.02) 35px, rgba(92,82,74,0.02) 70px);
     }
 
-    .header {
-      background: linear-gradient(135deg, #E6840D 0%, #A84E03 100%);
-      padding: 20px;
+    .premium-badge {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      background: linear-gradient(135deg, gold, #FFD700);
+      color: var(--mj-deep-navy);
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-size: 10px;
+      font-weight: bold;
+      box-shadow: 0 4px 12px rgba(255,215,0,0.4);
+      z-index: 10;
+    }
+
+    .luxury-header {
+      background: linear-gradient(135deg, var(--mj-orange-gold), var(--mj-burnt-orange));
+      padding: 25px 20px;
       text-align: center;
       color: white;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
     }
 
-    .header h1 {
+    .logo-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .logo {
+      width: 50px;
+      height: 50px;
+      background: linear-gradient(135deg, var(--mj-deep-navy), var(--mj-midnight-blue));
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 20px;
+      color: var(--mj-orange-gold);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      border: 2px solid white;
+    }
+
+    .luxury-header h1 {
       font-size: 32px;
-      font-weight: 800;
+      margin-bottom: 6px;
+      text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
       letter-spacing: 2px;
-      margin-bottom: 8px;
+      font-weight: 800;
     }
 
-    .header h2 {
+    .luxury-header h2 {
       font-size: 16px;
-      font-weight: 400;
-      letter-spacing: 2px;
+      font-weight: 300;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      opacity: 0.95;
+    }
+
+    .header-divider {
+      width: 250px;
+      height: 2px;
+      background: white;
+      margin: 12px auto;
+      position: relative;
+    }
+
+    .tagline {
+      font-style: italic;
+      font-size: 13px;
+      margin-top: 8px;
+      opacity: 0.9;
     }
 
     .quote-info {
-      background: #F5F5F5;
-      padding: 12px 20px;
-      display: flex;
-      justify-content: space-between;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      padding: 20px;
+    }
+
+    .quote-info-item {
+      background: linear-gradient(135deg, var(--mj-light-gray), white);
+      padding: 12px;
+      border-radius: 8px;
+      text-align: center;
+      border: 1px solid #e0e0e0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .quote-info-item .label {
+      font-size: 10px;
+      color: var(--mj-steel-gray);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 4px;
+    }
+
+    .quote-info-item .value {
       font-size: 11px;
+      color: var(--mj-deep-navy);
       font-weight: 600;
-      color: #203F55;
     }
 
     .content {
       padding: 20px;
     }
 
-    .section-header {
-      background: #203F55;
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .info-section {
+      border: 2px solid var(--mj-deep-navy);
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .info-header {
+      background: var(--mj-deep-navy);
       color: white;
-      padding: 8px 12px;
-      font-size: 12px;
+      padding: 10px 15px;
       font-weight: bold;
+      font-size: 12px;
       letter-spacing: 1px;
-      margin-bottom: 10px;
     }
 
-    .section-content {
-      background: white;
-      padding: 12px;
-      margin-bottom: 15px;
-      border: 1px solid #ddd;
+    .info-content {
+      padding: 12px 15px;
       font-size: 11px;
-      line-height: 1.6;
+      background: white;
     }
 
-    .section-content p {
-      margin: 4px 0;
+    .info-content p {
+      margin: 6px 0;
+      color: var(--mj-charcoal-brown);
     }
 
-    .section-content strong {
-      color: #203F55;
+    .info-content strong {
+      color: var(--mj-deep-navy);
     }
 
-    .payment-options-header {
-      background: linear-gradient(135deg, #E6840D 0%, #A84E03 100%);
+    .payment-header {
+      background: linear-gradient(135deg, var(--mj-orange-gold), var(--mj-burnt-orange));
       color: white;
       text-align: center;
-      padding: 10px;
-      font-size: 14px;
-      font-weight: bold;
-      letter-spacing: 2px;
+      padding: 12px;
       margin: 20px 0 15px;
-      border-radius: 4px;
+      font-weight: bold;
+      font-size: 15px;
+      border-radius: 8px;
+      box-shadow: 0 4px 16px rgba(230,132,13,0.3);
+      letter-spacing: 2px;
+      text-transform: uppercase;
     }
 
     .payment-cards {
@@ -179,42 +283,57 @@ function generateQuoteHTML(data: QuoteData): string {
 
     .payment-card {
       flex: 1;
-      border-radius: 8px;
+      border-radius: 12px;
       overflow: hidden;
-      border: 2px solid #ddd;
-      text-align: center;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.15);
+      border: 3px solid;
+    }
+
+    .finance-card {
+      border-color: #5C524A;
+    }
+
+    .rto-card {
+      border-color: #0B151E;
+    }
+
+    .cash-card {
+      border-color: #A84E03;
     }
 
     .card-header {
-      padding: 10px;
+      padding: 12px;
       color: white;
-      font-size: 12px;
+      font-size: 13px;
       font-weight: bold;
       letter-spacing: 1px;
+      text-align: center;
     }
 
     .finance-card .card-header {
-      background: #3B82F6;
+      background: linear-gradient(135deg, var(--mj-steel-gray), #4A423C);
     }
 
     .rto-card .card-header {
-      background: #A855F7;
+      background: linear-gradient(135deg, var(--mj-midnight-blue), #1A2633);
     }
 
     .cash-card .card-header {
-      background: #22C55E;
+      background: linear-gradient(135deg, var(--mj-burnt-orange), #D16203);
     }
 
     .card-body {
-      padding: 20px;
-      background: #FAFAFA;
+      padding: 20px 15px;
+      background: linear-gradient(135deg, white, var(--mj-light-gray));
+      text-align: center;
     }
 
     .payment-amount {
       font-size: 24px;
       font-weight: bold;
-      color: #203F55;
-      margin: 10px 0;
+      color: var(--mj-deep-navy);
+      margin: 8px 0;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
     }
 
     .payment-details {
@@ -224,16 +343,28 @@ function generateQuoteHTML(data: QuoteData): string {
     }
 
     .signature-section {
-      margin-top: 30px;
-      padding: 15px;
+      margin-top: 25px;
+      padding: 20px;
+      background: linear-gradient(135deg, var(--mj-light-gray), white);
+      border-radius: 8px;
       border: 1px solid #ddd;
-      border-radius: 4px;
+    }
+
+    .signature-header {
+      background: var(--mj-charcoal-brown);
+      color: white;
+      padding: 8px;
+      margin: -20px -20px 15px;
+      text-align: center;
+      font-size: 11px;
+      font-weight: bold;
+      letter-spacing: 1px;
     }
 
     .signature-fields {
       display: flex;
       justify-content: space-between;
-      margin-top: 10px;
+      gap: 30px;
     }
 
     .signature-field {
@@ -241,28 +372,40 @@ function generateQuoteHTML(data: QuoteData): string {
     }
 
     .signature-line {
-      border-bottom: 2px solid #203F55;
+      border-bottom: 2px solid var(--mj-deep-navy);
+      display: block;
       margin-top: 25px;
-      margin-right: 20px;
     }
 
     .footer {
-      background: #203F55;
-      color: white;
-      padding: 15px;
       text-align: center;
-      font-size: 9px;
-      line-height: 1.6;
+      padding: 18px 20px;
+      background: linear-gradient(135deg, #fafafa, white);
+      border-radius: 8px;
+      border: 1px solid #e0e0e0;
       position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
+      bottom: 15px;
+      left: 20px;
+      right: 20px;
     }
 
-    .footer-title {
-      font-size: 11px;
+    .footer-logo {
+      font-size: 16px;
       font-weight: bold;
-      margin-bottom: 4px;
+      color: var(--mj-deep-navy);
+      margin-bottom: 6px;
+    }
+
+    .footer-tagline {
+      color: var(--mj-steel-gray);
+      font-size: 10px;
+      margin-bottom: 8px;
+    }
+
+    .footer-info {
+      font-size: 9px;
+      color: #999;
+      margin-top: 8px;
     }
 
     .tax-disclaimer {
@@ -276,46 +419,71 @@ function generateQuoteHTML(data: QuoteData): string {
 </head>
 <body>
   <div class="page" id="quote-page">
-    <!-- Header -->
-    <div class="header">
-      <h1>MJ CARGO TRAILERS</h1>
-      <h2>FINANCE CALCULATOR - Payment Quote</h2>
+    <div class="premium-badge">PREMIUM</div>
+
+    <!-- Luxury Header -->
+    <div class="luxury-header">
+      <div class="logo-container">
+        <div class="logo">MJ</div>
+        <div style="flex: 1;">
+          <h1>MJ CARGO TRAILERS</h1>
+          <h2>Finance Calculator</h2>
+        </div>
+        <div class="logo">MJ</div>
+      </div>
+      <div class="header-divider"></div>
+      <div class="tagline">Rugged Quality, Smooth Financing</div>
     </div>
 
-    <!-- Quote Info Bar -->
+    <!-- Quote Info -->
     <div class="quote-info">
-      <div>Quote Date: ${data.quoteDate}</div>
-      <div>Generated by: ${data.repName}</div>
-      <div>Quote #${quoteNumber}</div>
+      <div class="quote-info-item">
+        <div class="label">Quote Date</div>
+        <div class="value">${data.quoteDate}</div>
+      </div>
+      <div class="quote-info-item">
+        <div class="label">Representative</div>
+        <div class="value">${data.repName}</div>
+      </div>
+      <div class="quote-info-item">
+        <div class="label">Quote Number</div>
+        <div class="value">#${quoteNumber}</div>
+      </div>
     </div>
 
     <!-- Content -->
     <div class="content">
-      <!-- Customer Information -->
-      <div class="section-header">CUSTOMER INFORMATION</div>
-      <div class="section-content">
-        <p><strong>Name:</strong> ${data.customerName}</p>
-        ${data.customerPhone ? `<p><strong>Phone:</strong> ${data.customerPhone}</p>` : ''}
-        ${data.customerEmail ? `<p><strong>Email:</strong> ${data.customerEmail}</p>` : ''}
-      </div>
-
-      <!-- Unit Details -->
-      <div class="section-header">UNIT DETAILS</div>
-      <div class="section-content">
-        <p><strong>${brand} Unit (Brand New)</strong></p>
-        <p>with a ${warranty} at no extra cost</p>
-        ${data.unitDescription ? `<p><strong>Unit Size:</strong> ${data.unitDescription}</p>` : ''}
-        <p><strong>Base Price:</strong> $${data.unitPrice.toLocaleString()}</p>
-        <p><strong>Tax:</strong> ${data.taxPercent.toFixed(2)}%&nbsp;&nbsp;&nbsp;&nbsp;<strong>Fees:</strong> $${data.fees}</p>
-        <div class="tax-disclaimer">
-          * Prices may vary depending on State and County.<br>
-          If Cash deal, customer will be responsible to pay taxes and registration at The Department of Motor Vehicles.<br>
-          For more information on local registration fees visit: https://www.fhwa.dot.gov/ohim/hwytaxes/2001/pt11b.htm
+      <!-- Customer & Unit Info -->
+      <div class="info-grid">
+        <div class="info-section">
+          <div class="info-header">CUSTOMER INFORMATION</div>
+          <div class="info-content">
+            <p><strong>Name:</strong> ${data.customerName}</p>
+            ${data.customerPhone ? `<p><strong>Phone:</strong> ${data.customerPhone}</p>` : ''}
+            ${data.customerEmail ? `<p><strong>Email:</strong> ${data.customerEmail}</p>` : ''}
+          </div>
+        </div>
+        <div class="info-section">
+          <div class="info-header">UNIT DETAILS</div>
+          <div class="info-content">
+            <p><strong>${brand} Unit</strong> (Brand New)</p>
+            <p>${warranty}</p>
+            ${data.unitDescription ? `<p><strong>Size:</strong> ${data.unitDescription}</p>` : ''}
+            <p><strong>Base:</strong> $${data.unitPrice.toLocaleString()}</p>
+            <p><strong>Tax:</strong> ${data.taxPercent.toFixed(2)}% | <strong>Fees:</strong> $${data.fees}</p>
+          </div>
         </div>
       </div>
 
+      <!-- Tax Disclaimer -->
+      <div class="tax-disclaimer">
+        * Prices may vary depending on State and County.
+        If Cash deal, customer will be responsible to pay taxes and registration at The Department of Motor Vehicles.
+        For more information on local registration fees visit: https://www.fhwa.dot.gov/ohim/hwytaxes/2001/pt11b.htm
+      </div>
+
       <!-- Payment Options Header -->
-      <div class="payment-options-header">YOUR PAYMENT OPTIONS</div>
+      <div class="payment-header">Your Premium Payment Options</div>
 
       <!-- Payment Cards -->
       <div class="payment-cards">
@@ -335,7 +503,7 @@ function generateQuoteHTML(data: QuoteData): string {
 
         ${rtoOption ? `
         <div class="payment-card rto-card">
-          <div class="card-header">RTO</div>
+          <div class="card-header">LEASE / RENT-TO-OWN</div>
           <div class="card-body">
             <div class="payment-amount">$${rtoOption.amount.toFixed(2)}/mo</div>
             <div class="payment-details">
@@ -348,7 +516,7 @@ function generateQuoteHTML(data: QuoteData): string {
 
         ${cashOption ? `
         <div class="payment-card cash-card">
-          <div class="card-header">CASH</div>
+          <div class="card-header">CASH PURCHASE OPTION</div>
           <div class="card-body">
             <div class="payment-amount">$${totalCash.toFixed(2)}</div>
             <div class="payment-details">
@@ -361,14 +529,15 @@ function generateQuoteHTML(data: QuoteData): string {
 
       <!-- Signature Section -->
       <div class="signature-section">
+        <div class="signature-header">AUTHORIZATION & AGREEMENT</div>
         <div class="signature-fields">
           <div class="signature-field">
             Customer Signature:
-            <div class="signature-line"></div>
+            <span class="signature-line"></span>
           </div>
           <div class="signature-field">
             Date:
-            <div class="signature-line"></div>
+            <span class="signature-line"></span>
           </div>
         </div>
       </div>
@@ -376,10 +545,12 @@ function generateQuoteHTML(data: QuoteData): string {
 
     <!-- Footer -->
     <div class="footer">
-      <div class="footer-title">MJ Cargo Trailers - Premium Enclosed Cargo Trailers & Equipment Trailers</div>
-      <div>We offer delivery service, and deliver for free subject to distance from our location.</div>
-      <div>This quote and prices subject to change without notice.</div>
-      <div style="margin-top: 6px;">Rep: ${data.repName} | ${data.repEmail}</div>
+      <div class="footer-logo">MJ CARGO TRAILERS</div>
+      <div class="footer-tagline">Premium Enclosed Cargo & Equipment Trailers</div>
+      <div class="footer-info">
+        Free Delivery Available | Flexible Financing | Contact Your Representative<br>
+        www.mjcargotrailers.com | Prices subject to change | Rep: ${data.repName} | ${data.repEmail}
+      </div>
     </div>
   </div>
 </body>

@@ -1,9 +1,10 @@
-import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
+import GoogleProvider from "next-auth/providers/google";
 import { prisma } from "./prisma";
 import { generateUniqueSalespersonCode } from "./salespersonCode";
 import bcrypt from "bcryptjs";
+import { verifyPasskeyJWT } from "./passkey-jwt";
 
 export const authOptions = {
   adapter: PrismaAdapter(prisma),
@@ -13,6 +14,12 @@ export const authOptions = {
     updateAge: 15 * 60, // 15 minutes - update session every 15 min
   },
   providers: [
+    // Google OAuth (hidden in UI via NEXT_PUBLIC_GOOGLE_ENABLED env var)
+    GoogleProvider({
+      clientId: process.env.AUTH_GOOGLE_ID!,
+      clientSecret: process.env.AUTH_GOOGLE_SECRET!,
+    }),
+
     CredentialsProvider({
       name: "credentials",
       credentials: {
@@ -43,7 +50,7 @@ export const authOptions = {
           throw new Error("Invalid email or password");
         }
 
-        // ✅ RE-ENABLED: Email verification check
+        // ✅ Email verification check
         if (!user.emailVerified) {
           throw new Error("Please verify your email before logging in. Check your inbox!");
         }
@@ -55,9 +62,29 @@ export const authOptions = {
         };
       },
     }),
-    GoogleProvider({
-      clientId: process.env.AUTH_GOOGLE_ID as string,
-      clientSecret: process.env.AUTH_GOOGLE_SECRET as string,
+    // Passkey provider (WebAuthn)
+    CredentialsProvider({
+      id: 'passkey',
+      name: 'Passkey',
+      credentials: { token: { label: 'token', type: 'text' } },
+      async authorize(creds) {
+        const token = creds?.token;
+        if (!token) return null;
+
+        const userId = await verifyPasskeyJWT(token);
+        if (!userId) return null;
+
+        const user = await prisma.user.findUnique({
+          where: { id: userId },
+          include: { profile: true }
+        });
+
+        return user ? {
+          id: user.id,
+          email: user.email || '',
+          name: user.name
+        } as any : null;
+      }
     }),
   ],
 

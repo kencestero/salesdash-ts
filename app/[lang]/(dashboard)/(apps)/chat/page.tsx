@@ -91,16 +91,18 @@ const ChatPage = () => {
   const messageMutation = useMutation({
     mutationFn: sendMessage,
     onSuccess: () => {
-
-      queryClient.invalidateQueries({ queryKey: ["messages"] });
+      // Invalidate the messages query for the current chat
+      queryClient.invalidateQueries({ queryKey: ["message", selectedChatId] });
+      // Also invalidate contacts to update last message timestamp
+      queryClient.invalidateQueries({ queryKey: ["contacts"] });
     },
   });
 
   const deleteMutation = useMutation({
     mutationFn: deleteMessage,
     onSuccess: () => {
-
-      queryClient.invalidateQueries({ queryKey: ["messages"] });
+      // Invalidate the messages query for the current chat
+      queryClient.invalidateQueries({ queryKey: ["message", selectedChatId] });
     },
   });
 
@@ -165,6 +167,26 @@ const ChatPage = () => {
       });
     }
   }, [pinnedMessages]);
+
+  // Polling: Refetch messages every 3 seconds when chat is selected
+  useEffect(() => {
+    if (!selectedChatId) return;
+
+    const messagePollingInterval = setInterval(() => {
+      refetchMessage();
+    }, 3000); // 3 seconds
+
+    return () => clearInterval(messagePollingInterval);
+  }, [selectedChatId, refetchMessage]);
+
+  // Polling: Refetch contact list every 10 seconds
+  useEffect(() => {
+    const contactPollingInterval = setInterval(() => {
+      refetchContact();
+    }, 10000); // 10 seconds
+
+    return () => clearInterval(contactPollingInterval);
+  }, [refetchContact]);
 
   // handle search bar
 
@@ -271,7 +293,7 @@ const ChatPage = () => {
                   <MessageHeader
                     showInfo={showInfo}
                     handleShowInfo={handleShowInfo}
-                    profile={profileData}
+                    profile={chats?.contact || null}
                     mblChatHandler={() =>
                       setShowContactSidebar(!showContactSidebar)
                     }

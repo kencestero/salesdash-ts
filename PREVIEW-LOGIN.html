@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MJ SalesDash Login Preview</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: system-ui, -apple-system, sans-serif; }
+
+    @keyframes aurora {
+      0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); filter: blur(120px); }
+      25% { transform: translate(50px, -50px) scale(1.1) rotate(90deg); filter: blur(100px); }
+      50% { transform: translate(-30px, 30px) scale(0.95) rotate(180deg); filter: blur(110px); }
+      75% { transform: translate(-50px, -20px) scale(1.05) rotate(270deg); filter: blur(105px); }
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0) translateX(0) scale(1); opacity: 0; }
+      10% { opacity: 0.4; }
+      50% { transform: translateY(-100px) translateX(50px) scale(1.5); opacity: 0.8; }
+      90% { opacity: 0.4; }
+    }
+
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.2; }
+      50% { opacity: 1; }
+    }
+
+    .container {
+      min-height: 100vh;
+      position: relative;
+      overflow: hidden;
+      background-color: #000;
+    }
+
+    .bg-image {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+    }
+
+    .bg-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .aurora-container {
+      position: absolute;
+      inset: -50%;
+      width: 200%;
+      height: 200%;
+      z-index: 1;
+    }
+
+    .aurora {
+      position: absolute;
+      border-radius: 50%;
+      mix-blend-mode: screen;
+      animation: aurora 20s ease-in-out infinite;
+    }
+
+    .aurora1 {
+      width: 800px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(251, 146, 60, 0.2) 0%, rgba(249, 115, 22, 0.1) 25%, transparent 70%);
+      top: -30%;
+      left: -20%;
+      animation-duration: 25s;
+    }
+
+    .aurora2 {
+      width: 700px;
+      height: 700px;
+      background: radial-gradient(circle, rgba(253, 186, 116, 0.15) 0%, rgba(251, 146, 60, 0.08) 30%, transparent 80%);
+      bottom: -20%;
+      right: -15%;
+      animation-duration: 30s;
+      animation-delay: 5s;
+    }
+
+    .particle {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      background: rgba(251, 146, 60, 0.8);
+      border-radius: 50%;
+      animation: float 10s ease-in-out infinite;
+      box-shadow: 0 0 6px rgba(251, 146, 60, 0.6);
+    }
+
+    .star {
+      position: absolute;
+      background: white;
+      border-radius: 50%;
+      animation: twinkle 3s ease-in-out infinite;
+    }
+
+    .logo-container {
+      position: fixed;
+      top: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      transition: transform 0.3s ease-out;
+      z-index: 50;
+    }
+
+    .logo-wrapper {
+      position: relative;
+      width: 180px;
+      height: 180px;
+    }
+
+    .rotating-text {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      animation: rotate 10s linear infinite;
+    }
+
+    .logo-center {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .logo-center img {
+      width: 96px;
+      height: 96px;
+      object-fit: contain;
+      filter: drop-shadow(0 0 15px rgba(251,146,60,0.6));
+    }
+
+    .form-container {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      min-height: 100vh;
+      align-items: center;
+      justify-content: center;
+      padding-top: 8rem;
+    }
+
+    .form-wrapper {
+      width: 100%;
+      max-width: 28rem;
+      padding: 0 1.5rem;
+    }
+
+    .form-card {
+      animation: fadeIn 0.7s ease-out forwards;
+      border-radius: 1.5rem;
+      padding: 2.5rem;
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(20px);
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .form-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .form-header h3 {
+      color: rgba(255,255,255,0.9);
+      font-size: 1.25rem;
+      font-weight: 300;
+      margin-bottom: 0.75rem;
+    }
+
+    .form-header p {
+      color: rgba(255,255,255,0.4);
+      font-size: 0.875rem;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    label {
+      color: rgba(255,255,255,0.5);
+      font-size: 0.75rem;
+      font-weight: 300;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+
+    input {
+      width: 100%;
+      border-radius: 0.75rem;
+      padding: 1rem 1.25rem;
+      color: white;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(10px);
+      font-size: 0.875rem;
+      outline: none;
+      transition: border 0.3s;
+    }
+
+    input:focus {
+      border: 1px solid rgba(251, 146, 60, 0.5);
+    }
+
+    input::placeholder {
+      color: rgba(255,255,255,0.3);
+    }
+
+    .forgot-link {
+      text-align: right;
+    }
+
+    .forgot-link a {
+      color: rgba(255,255,255,0.4);
+      font-size: 0.75rem;
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    .forgot-link a:hover {
+      color: rgba(255,255,255,0.7);
+    }
+
+    button {
+      width: 100%;
+      color: black;
+      font-weight: 500;
+      padding: 1rem 1.5rem;
+      border-radius: 0.75rem;
+      background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+      box-shadow: 0 4px 15px rgba(251, 191, 36, 0.3);
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(251, 191, 36, 0.4);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .assistance {
+      margin-top: 2rem;
+      text-align: center;
+    }
+
+    .assistance a {
+      color: rgba(255,255,255,0.4);
+      font-size: 0.75rem;
+      text-decoration: none;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      transition: color 0.3s;
+    }
+
+    .assistance a:hover {
+      color: rgba(255,255,255,0.7);
+    }
+
+    .footer {
+      margin-top: 2.5rem;
+      padding-top: 2rem;
+      border-top: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .logos {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    .logos a {
+      transition: transform 0.3s;
+      display: block;
+    }
+
+    .logos a:hover {
+      transform: scale(1.1);
+    }
+
+    .logos img {
+      height: 64px;
+      width: auto;
+      object-fit: contain;
+    }
+
+    .copyright {
+      color: rgba(255,255,255,0.2);
+      font-size: 0.75rem;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Background -->
+    <div class="bg-image">
+      <img src="/images/111.png" alt="Background" onerror="this.style.display='none'">
+    </div>
+
+    <!-- Aurora & Particles -->
+    <div class="aurora-container">
+      <div class="aurora aurora1"></div>
+      <div class="aurora aurora2"></div>
+
+      <div id="stars"></div>
+      <div id="particles"></div>
+    </div>
+
+    <!-- Floating Logo -->
+    <div class="logo-container" id="logo">
+      <div class="logo-wrapper">
+        <svg class="rotating-text" viewBox="0 0 180 180">
+          <defs>
+            <path id="circle" d="M 90,90 m -70,0 a 70,70 0 1,1 140,0 a 70,70 0 1,1 -140,0" />
+          </defs>
+          <text style="font-size: 11px; font-weight: 300; letter-spacing: 0.3em; fill: rgba(255,255,255,0.8); text-transform: uppercase;">
+            <textPath href="#circle">MJ SALESDASH PORTAL • MJ SALESDASH PORTAL •</textPath>
+          </text>
+        </svg>
+
+        <div class="logo-center">
+          <img src="/images/3dlogo.png" alt="MJ Logo" onerror="this.style.display='none'">
+        </div>
+      </div>
+    </div>
+
+    <!-- Login Form -->
+    <div class="form-container">
+      <div class="form-wrapper">
+        <div class="form-card">
+          <div class="form-header">
+            <h3>Enter your credentials</h3>
+            <p>Access your SalesDash account to manage leads and close deals</p>
+          </div>
+
+          <form onsubmit="event.preventDefault(); alert('Login functionality will be connected to NextAuth');">
+            <div>
+              <label>Email</label>
+              <input type="email" placeholder="your@email.com" required>
+            </div>
+
+            <div>
+              <label>Password</label>
+              <input type="password" placeholder="••••••••" required>
+            </div>
+
+            <div class="forgot-link">
+              <a href="#reset">Forgot your password?</a>
+            </div>
+
+            <button type="submit">Continue</button>
+          </form>
+
+          <div class="assistance">
+            <a href="mailto:noreply@mjsalesdash.com">Need assistance?</a>
+          </div>
+
+          <div class="footer">
+            <div class="logos">
+              <a href="https://www.diamondcargomfg.com/" target="_blank" rel="noopener noreferrer">
+                <img src="/images/diamondcargoorangeloco.png" alt="Diamond Cargo" onerror="this.style.display='none'">
+              </a>
+              <a href="https://panthercargo.llc/" target="_blank" rel="noopener noreferrer">
+                <img src="/images/pantherorange.png" alt="Panther Cargo" onerror="this.style.display='none'">
+              </a>
+              <a href="https://qualitycargo.llc/" target="_blank" rel="noopener noreferrer">
+                <img src="/images/qualitylogoorange.png" alt="Quality Cargo" onerror="this.style.display='none'">
+              </a>
+            </div>
+            <p class="copyright">© 2024 MJ Cargo Sales • Enterprise CRM Platform</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Generate stars
+    const starsContainer = document.getElementById('stars');
+    for (let i = 0; i < 50; i++) {
+      const star = document.createElement('div');
+      star.className = 'star';
+      star.style.top = Math.random() * 100 + '%';
+      star.style.left = Math.random() * 100 + '%';
+      star.style.width = (Math.random() * 2 + 0.5) + 'px';
+      star.style.height = star.style.width;
+      star.style.animationDelay = Math.random() * 5 + 's';
+      star.style.animationDuration = (Math.random() * 3 + 2) + 's';
+      star.style.opacity = Math.random() * 0.8 + 0.2;
+      starsContainer.appendChild(star);
+    }
+
+    // Generate particles
+    const particlesContainer = document.getElementById('particles');
+    for (let i = 0; i < 40; i++) {
+      const particle = document.createElement('div');
+      particle.className = 'particle';
+      particle.style.top = Math.random() * 100 + '%';
+      particle.style.left = Math.random() * 100 + '%';
+      particle.style.animationDelay = Math.random() * 10 + 's';
+      particle.style.animationDuration = (Math.random() * 5 + 10) + 's';
+      particlesContainer.appendChild(particle);
+    }
+
+    // Mouse tracking for logo
+    const logo = document.getElementById('logo');
+    document.addEventListener('mousemove', (e) => {
+      const x = (e.clientX - window.innerWidth / 2) * 0.1;
+      const y = (e.clientY - 200) * 0.1;
+      logo.style.transform = `translate(calc(-50% + ${x}px), ${y}px)`;
+    });
+  </script>
+</body>
+</html>

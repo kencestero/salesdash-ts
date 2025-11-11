@@ -48,7 +48,7 @@ export function CashSummary({
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
-        <DollarSign className="h-5 w-5 text-success" />
+        <DollarSign className="h-5 w-5 text-success" aria-hidden="true" />
         <h3 className="text-lg font-semibold text-foreground">
           Cash Purchase Option
         </h3>
@@ -59,7 +59,7 @@ export function CashSummary({
         <div className="space-y-4">
           {/* Sale Price */}
           <div className="flex justify-between text-base">
-            <span className="text-muted-foreground">Sale Price:</span>
+            <span className="text-foreground/70">Sale Price:</span>
             <span className="font-medium tabular-nums">
               {formatCurrency(cashData.basePrice)}
             </span>
@@ -68,7 +68,7 @@ export function CashSummary({
           {/* Added Options */}
           {addedOptions > 0 && (
             <div className="flex justify-between text-base">
-              <span className="text-muted-foreground">Added Options:</span>
+              <span className="text-foreground/70">Added Options:</span>
               <span className="font-medium tabular-nums">
                 {formatCurrency(cashData.addedOptions)}
               </span>
@@ -77,7 +77,7 @@ export function CashSummary({
 
           {/* Gov / Other Fees */}
           <div className="flex justify-between text-base">
-            <span className="text-muted-foreground">Gov / Other Fees:</span>
+            <span className="text-foreground/70">Gov / Other Fees:</span>
             <span className="font-medium tabular-nums">
               {formatCurrency(cashData.fees)}
             </span>
@@ -85,7 +85,7 @@ export function CashSummary({
 
           {/* Sales Tax */}
           <div className="flex justify-between text-base">
-            <span className="text-muted-foreground">
+            <span className="text-foreground/70">
               Sales Tax ({taxPct.toFixed(2)}%):
             </span>
             <span className="font-medium tabular-nums">
@@ -108,7 +108,7 @@ export function CashSummary({
         <div className="mt-6 flex gap-3">
           <Button
             onClick={() => onSaveQuote?.({ totalCash: cashData.totalCash, mode: "CASH" })}
-            className="flex-1 bg-success hover:bg-success/90"
+            className="flex-1 bg-green-600 hover:bg-green-700 text-white"
           >
             ✅ Click to add Cash scenario to Quote to share
           </Button>
@@ -122,7 +122,7 @@ export function CashSummary({
 
       {/* Info card */}
       <div className="rounded-lg bg-success/10 p-3 border border-success/20">
-        <p className="text-xs text-success-foreground">
+        <p className="text-xs text-foreground/80">
           ✨ <strong>Cash Payment Advantage:</strong> No monthly payments, no
           interest charges. Pay once and own it immediately!
         </p>

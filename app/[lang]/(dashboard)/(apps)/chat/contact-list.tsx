@@ -13,6 +13,9 @@ const ContactList = ({ contact, openChat, selectedChatId }: {
   const { avatar, id, fullName, status, about, unreadmessage, date } =
     contact;
 
+  // Avatar guard: handle both string and object types
+  const avatarSrc = typeof avatar === "string" ? avatar : avatar?.src ?? "/images/default-avatar.png";
+
   return (
     <div
       className={cn(
@@ -25,8 +28,8 @@ const ContactList = ({ contact, openChat, selectedChatId }: {
     >
       <div className="flex-1 flex  gap-3 ">
         <div className="relative inline-block ">
-          <Avatar>
-            <AvatarImage src={avatar.src} />
+          <Avatar className="h-10 w-10">
+            <AvatarImage src={avatarSrc} alt="" />
             <AvatarFallback className="uppercase">
               {fullName.slice(0, 2)}
             </AvatarFallback>

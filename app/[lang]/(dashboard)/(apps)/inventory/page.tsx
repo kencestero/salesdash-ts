@@ -1,9 +1,11 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Search, Eye, FileText, Upload, X, ArrowUp, Info, History } from "lucide-react";
+import { Search, Eye, FileText, Upload, X, ArrowUp, Info, History, DollarSign, Ruler, Package, Calendar } from "lucide-react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
+import { useDraggableColumns } from '@/hooks/use-draggable-columns';
+import { ColumnManager } from '@/components/inventory/column-manager';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -29,6 +31,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
 import { FireBadge } from "@/components/ui/fire-badge";
 import { toast } from "@/components/ui/use-toast";
@@ -106,6 +114,20 @@ export default function InventoryPage() {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Draggable columns hook
+  const {
+    columns,
+    allColumns,
+    handleDragStart,
+    handleDragOver,
+    handleDragEnd,
+    handleDrop,
+    toggleColumnVisibility,
+    moveColumn,
+    resetColumns
+  } = useDraggableColumns();
+
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
@@ -118,6 +140,10 @@ export default function InventoryPage() {
   const [showScrollTop, setShowScrollTop] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [sortBy, setSortBy] = useState<"age" | "price" | "size" | "stock">("age");
+
+  // Drawer/Sheet state for trailer details
+  const [selectedTrailerForView, setSelectedTrailerForView] = useState<Trailer | null>(null);
+  const [loadingTrailerDetail, setLoadingTrailerDetail] = useState(false);
 
   // Scroll to top handler
   useEffect(() => {
@@ -338,6 +364,36 @@ export default function InventoryPage() {
 
   const allSelected = filteredTrailers.length > 0 && selectedTrailers.length === filteredTrailers.length;
 
+  const handleViewTrailer = async (trailerId: string) => {
+    try {
+      setLoadingTrailerDetail(true);
+      const response = await fetch(`/api/inventory/${trailerId}`);
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch trailer");
+      }
+
+      const data = await response.json();
+      setSelectedTrailerForView(data.trailer);
+    } catch (error) {
+      console.error("Error fetching trailer:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load trailer details",
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingTrailerDetail(false);
+    }
+  };
+
+  const formatCurrency = (amount: number) => new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(amount);
+
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
@@ -347,8 +403,18 @@ export default function InventoryPage() {
           <p className="text-lg text-gray-400 mt-1">Manage your trailer inventory</p>
         </div>
         <div className="flex gap-3">
+          <ColumnManager
+            columns={allColumns}
+            onToggleVisibility={toggleColumnVisibility}
+            onMoveColumn={moveColumn}
+            onReset={resetColumns}
+            onDragStart={handleDragStart}
+            onDragOver={handleDragOver}
+            onDragEnd={handleDragEnd}
+            onDrop={handleDrop}
+          />
           {mounted && canUploadPDF && (
-            <Link href="/dashboard/inventory/history">
+            <Link href="/inventory/history">
               <Button
                 variant="outline"
                 className="border-gray-600 text-gray-300 hover:bg-[#1a1d29] hover:text-white text-base px-6"
@@ -369,13 +435,14 @@ export default function InventoryPage() {
             </Button>
           )}
           {mounted && canUploadPDF && (
-            <Button
-              onClick={() => setShowUploadModal(true)}
-              className="bg-blue-500 hover:bg-blue-600 text-white text-base px-6"
-            >
-              <Upload className="mr-2 h-5 w-5" />
-              Upload File
-            </Button>
+            <Link href="/inventory/upload">
+              <Button
+                className="bg-blue-500 hover:bg-blue-600 text-white text-base px-6"
+              >
+                <Upload className="mr-2 h-5 w-5" />
+                Upload File
+              </Button>
+            </Link>
           )}
         </div>
       </div>
@@ -503,22 +570,27 @@ export default function InventoryPage() {
               <Table>
                 <TableHeader>
                   <TableRow className="border-gray-700">
-                    <TableHead className="text-gray-400 w-12 text-base">
-                      <Checkbox
-                        checked={allSelected}
-                        onCheckedChange={handleSelectAll}
-                        aria-label="Select all"
-                      />
-                    </TableHead>
-                    <TableHead className="text-gray-400 text-base font-bold">VIN</TableHead>
-                    <TableHead className="text-gray-400 text-base font-bold">Stock #</TableHead>
-                    <TableHead className="text-gray-400 text-base font-bold">Image</TableHead>
-                    <TableHead className="text-gray-400 text-base font-bold">Size</TableHead>
-                    <TableHead className="text-gray-400 text-base font-bold">Details</TableHead>
-                    <TableHead className="text-gray-400 text-base font-bold">Price</TableHead>
-                    <TableHead className="text-gray-400 text-base font-bold">Status</TableHead>
-                    <TableHead className="text-gray-400 text-base font-bold">Notes</TableHead>
-                    <TableHead className="text-gray-400 text-base font-bold">Actions</TableHead>
+                    {columns.map((column) => (
+                      <TableHead
+                        key={column.id}
+                        draggable
+                        onDragStart={() => handleDragStart(column.id)}
+                        onDragOver={(e) => handleDragOver(e, column.id)}
+                        onDragEnd={handleDragEnd}
+                        onDrop={(e) => handleDrop(e, column.id)}
+                        className={`text-gray-400 text-base font-bold cursor-move ${column.width || ''}`}
+                      >
+                        {column.id === 'select' ? (
+                          <Checkbox
+                            checked={allSelected}
+                            onCheckedChange={handleSelectAll}
+                            aria-label="Select all"
+                          />
+                        ) : (
+                          column.label
+                        )}
+                      </TableHead>
+                    ))}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -527,145 +599,209 @@ export default function InventoryPage() {
 
                     return (
                       <TableRow key={trailer.id} className="border-gray-700 hover:bg-[#0f1117]">
-                        <TableCell>
-                          <Checkbox
-                            checked={selectedTrailers.includes(trailer.id)}
-                            onCheckedChange={(checked) =>
-                              handleSelectTrailer(trailer.id, checked as boolean)
-                            }
-                            aria-label={`Select ${trailer.stockNumber}`}
-                          />
-                        </TableCell>
+                        {columns.map((column) => {
+                          switch(column.id) {
+                            case 'select':
+                              return (
+                                <TableCell key={column.id}>
+                                  <Checkbox
+                                    checked={selectedTrailers.includes(trailer.id)}
+                                    onCheckedChange={(checked) =>
+                                      handleSelectTrailer(trailer.id, checked as boolean)
+                                    }
+                                    aria-label={`Select ${trailer.stockNumber}`}
+                                  />
+                                </TableCell>
+                              );
 
-                        {/* VIN - BRIGHT ORANGE AND BOLD */}
-                        <TableCell className="font-black text-[#f5a623] text-lg">
-                          {trailer.vin}
-                        </TableCell>
+                            case 'stockVin':
+                              return (
+                                <TableCell key={column.id}>
+                                  <div className="space-y-1">
+                                    <div className="font-bold text-white text-base flex items-center gap-2">
+                                      {trailer.stockNumber}
+                                      {trailer.daysOld !== undefined && trailer.daysOld <= 2 && (
+                                        <FireBadge daysOld={trailer.daysOld} size="sm" />
+                                      )}
+                                    </div>
+                                    <div className="font-mono text-[#f5a623] text-sm">
+                                      {trailer.vin}
+                                    </div>
+                                  </div>
+                                </TableCell>
+                              );
 
-                        {/* Stock Number */}
-                        <TableCell className="font-medium text-white text-base">
-                          <div className="flex items-center gap-2">
-                            {trailer.stockNumber}
-                            {trailer.daysOld !== undefined && trailer.daysOld <= 2 && (
-                              <FireBadge daysOld={trailer.daysOld} size="sm" />
-                            )}
-                          </div>
-                        </TableCell>
+                            case 'manufacturer':
+                              return (
+                                <TableCell key={column.id}>
+                                  <div className="flex items-center gap-3">
+                                    {trailer.manufacturer.toLowerCase().includes('diamond') ? (
+                                      <img
+                                        src="/images/logo/dctranslogo.png"
+                                        alt="Diamond Cargo"
+                                        className="w-12 h-12 object-contain"
+                                      />
+                                    ) : trailer.manufacturer.toLowerCase().includes('quality') ? (
+                                      <img
+                                        src="/images/logo/qualitycargologo.webp"
+                                        alt="Quality Cargo"
+                                        className="w-12 h-12 object-contain"
+                                      />
+                                    ) : (
+                                      <div className="w-12 h-12 bg-gray-700 rounded flex items-center justify-center text-xs text-gray-400">
+                                        MJ
+                                      </div>
+                                    )}
+                                    <div className={`text-base font-bold ${
+                                      trailer.manufacturer.toLowerCase().includes('diamond')
+                                        ? 'text-blue-400'
+                                        : trailer.manufacturer.toLowerCase().includes('quality')
+                                        ? 'text-red-400'
+                                        : 'text-white'
+                                    }`}>
+                                      {trailer.manufacturer}
+                                    </div>
+                                  </div>
+                                </TableCell>
+                              );
 
-                        {/* Image */}
-                        <TableCell>
-                          {trailer.images && trailer.images.length > 0 ? (
-                            <img
-                              src={trailer.images[0]}
-                              alt={trailer.model}
-                              className="w-20 h-20 object-cover rounded"
-                            />
-                          ) : (
-                            <div className="w-20 h-20 bg-gray-700 rounded flex items-center justify-center text-gray-400 text-sm">
-                              No Image
-                            </div>
-                          )}
-                        </TableCell>
+                            case 'image':
+                              return (
+                                <TableCell key={column.id}>
+                                  {trailer.images && trailer.images.length > 0 ? (
+                                    <img
+                                      src={trailer.images[0]}
+                                      alt={trailer.model}
+                                      className="w-20 h-20 object-cover rounded"
+                                    />
+                                  ) : (
+                                    <div className="w-20 h-20 bg-gray-700 rounded flex items-center justify-center text-gray-400 text-sm">
+                                      No Image
+                                    </div>
+                                  )}
+                                </TableCell>
+                              );
 
-                        {/* Size - 2.5x LARGER */}
-                        <TableCell className="text-white font-bold text-3xl">
-                          {trailer.length}' × {trailer.width}'
-                          {trailer.height && <div className="text-sm text-gray-400 font-normal">H: {trailer.height}'</div>}
-                        </TableCell>
+                            case 'size':
+                              return (
+                                <TableCell key={column.id} className="text-white font-bold text-3xl">
+                                  {trailer.length}' × {trailer.width}'
+                                  {trailer.height && <div className="text-sm text-gray-400 font-normal">H: {trailer.height}'</div>}
+                                </TableCell>
+                              );
 
-                        {/* Details - REMOVED YEAR, COLOR CODED MANUFACTURER */}
-                        <TableCell className="text-white">
-                          <div className={`text-lg font-semibold ${
-                            trailer.manufacturer.toLowerCase().includes('diamond')
-                              ? 'text-blue-400'
-                              : trailer.manufacturer.toLowerCase().includes('quality')
-                              ? 'text-red-400'
-                              : 'text-white'
-                          }`}>
-                            {trailer.manufacturer}
-                          </div>
-                          <div className="text-base text-gray-300">{trailer.model}</div>
-                          <div className="text-sm text-gray-400">{trailerCategory}</div>
-                        </TableCell>
+                            case 'details':
+                              return (
+                                <TableCell key={column.id} className="text-white">
+                                  <div className={`text-lg font-semibold ${
+                                    trailer.manufacturer.toLowerCase().includes('diamond')
+                                      ? 'text-blue-400'
+                                      : trailer.manufacturer.toLowerCase().includes('quality')
+                                      ? 'text-red-400'
+                                      : 'text-white'
+                                  }`}>
+                                    {trailer.manufacturer}
+                                  </div>
+                                  <div className="text-base text-gray-300">{trailer.model}</div>
+                                  <div className="text-sm text-gray-400">{trailerCategory}</div>
+                                </TableCell>
+                              );
 
-                        {/* Price - SHOW MAKE OFFER OR SALE PRICE */}
-                        <TableCell className="text-white">
-                          {trailer.makeOffer ? (
-                            <div>
-                              <div className="text-xl font-black text-red-600 animate-pulse">
-                                MAKE OFFER
-                              </div>
-                              <div className="text-xs text-gray-500">
-                                Cost: {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(trailer.cost)}
-                              </div>
-                            </div>
-                          ) : (
-                            <div>
-                              <div className="text-xl font-bold text-green-400">
-                                {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(trailer.salePrice)}
-                              </div>
-                              {trailer.msrp > trailer.salePrice && (
-                                <div className="text-xs text-gray-500 line-through">
-                                  MSRP: {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(trailer.msrp)}
-                                </div>
-                              )}
-                            </div>
-                          )}
-                        </TableCell>
+                            case 'price':
+                              return (
+                                <TableCell key={column.id} className="text-white">
+                                  {trailer.makeOffer ? (
+                                    <div>
+                                      <div className="text-xl font-black text-red-600 animate-pulse">
+                                        MAKE OFFER
+                                      </div>
+                                      <div className="text-xs text-gray-500">
+                                        Cost: {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(trailer.cost)}
+                                      </div>
+                                    </div>
+                                  ) : !trailer.salePrice || trailer.salePrice === 0 ? (
+                                    <div className="text-xl font-bold text-yellow-400">
+                                      Ask for Pricing
+                                    </div>
+                                  ) : (
+                                    <div>
+                                      <div className="text-xl font-bold text-green-400">
+                                        {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(trailer.salePrice)}
+                                      </div>
+                                      {trailer.msrp > trailer.salePrice && (
+                                        <div className="text-xs text-gray-500 line-through">
+                                          MSRP: {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(trailer.msrp)}
+                                        </div>
+                                      )}
+                                    </div>
+                                  )}
+                                </TableCell>
+                              );
 
-                        {/* Status */}
-                        <TableCell>
-                          <Badge className={`${getStatusColor(trailer.status)} text-white text-sm px-3 py-1`}>
-                            {trailer.status}
-                          </Badge>
-                        </TableCell>
+                            case 'status':
+                              return (
+                                <TableCell key={column.id}>
+                                  <Badge className={`${getStatusColor(trailer.status)} text-white text-sm px-3 py-1`}>
+                                    {trailer.status}
+                                  </Badge>
+                                </TableCell>
+                              );
 
-                        {/* Notes/Options with Tooltip */}
-                        <TableCell>
-                          {trailer.description && (
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="text-blue-400 hover:text-blue-300"
-                                  >
-                                    <Info className="h-5 w-5" />
-                                  </Button>
-                                </TooltipTrigger>
-                                <TooltipContent className="max-w-md bg-[#1a1d29] border-gray-700 text-white">
-                                  <p className="text-sm whitespace-pre-wrap">{trailer.description}</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                          )}
-                        </TableCell>
+                            case 'notes':
+                              return (
+                                <TableCell key={column.id}>
+                                  {trailer.description && (
+                                    <TooltipProvider>
+                                      <Tooltip>
+                                        <TooltipTrigger asChild>
+                                          <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className="text-blue-400 hover:text-blue-300"
+                                          >
+                                            <Info className="h-5 w-5" />
+                                          </Button>
+                                        </TooltipTrigger>
+                                        <TooltipContent className="max-w-md bg-[#1a1d29] border-gray-700 text-white">
+                                          <p className="text-sm whitespace-pre-wrap">{trailer.description}</p>
+                                        </TooltipContent>
+                                      </Tooltip>
+                                    </TooltipProvider>
+                                  )}
+                                </TableCell>
+                              );
 
-                        {/* Actions */}
-                        <TableCell>
-                          <div className="flex gap-2">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="text-blue-400 hover:text-blue-300"
-                              onClick={() => window.open(`/dashboard/inventory/${trailer.id}`, '_blank')}
-                            >
-                              <Eye className="h-5 w-5" />
-                            </Button>
-                            {mounted && canUploadPDF && (
-                              <Link href={`/dashboard/inventory/${trailer.id}/edit`}>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="text-green-400 hover:text-green-300"
-                                >
-                                  Edit
-                                </Button>
-                              </Link>
-                            )}
-                          </div>
-                        </TableCell>
+                            case 'actions':
+                              return (
+                                <TableCell key={column.id}>
+                                  <div className="flex gap-2">
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="text-blue-400 hover:text-blue-300"
+                                      onClick={() => handleViewTrailer(trailer.id)}
+                                    >
+                                      <Eye className="h-5 w-5" />
+                                    </Button>
+                                    {mounted && canUploadPDF && (
+                                      <Link href={`/inventory/${trailer.id}/edit`}>
+                                        <Button
+                                          variant="ghost"
+                                          size="sm"
+                                          className="text-green-400 hover:text-green-300"
+                                        >
+                                          Edit
+                                        </Button>
+                                      </Link>
+                                    )}
+                                  </div>
+                                </TableCell>
+                              );
+
+                            default:
+                              return <TableCell key={column.id}>-</TableCell>;
+                          }
+                        })}
                       </TableRow>
                     );
                   })}
@@ -675,6 +811,160 @@ export default function InventoryPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Trailer Detail Drawer */}
+      <Sheet open={!!selectedTrailerForView} onOpenChange={(open) => !open && setSelectedTrailerForView(null)}>
+        <SheetContent side="right" className="w-full sm:max-w-2xl bg-[#0f1117] border-gray-700 overflow-y-auto">
+          {loadingTrailerDetail ? (
+            <div className="flex items-center justify-center h-full">
+              <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"></div>
+            </div>
+          ) : selectedTrailerForView && (
+            <div className="space-y-6">
+              <SheetHeader>
+                <div className="flex items-center gap-3">
+                  <SheetTitle className="text-2xl font-bold text-white">
+                    {selectedTrailerForView.manufacturer} {selectedTrailerForView.model}
+                  </SheetTitle>
+                  <Badge className={`${getStatusColor(selectedTrailerForView.status)} text-white`}>
+                    {selectedTrailerForView.status}
+                  </Badge>
+                  {selectedTrailerForView.daysOld !== undefined && selectedTrailerForView.daysOld <= 2 && (
+                    <FireBadge daysOld={selectedTrailerForView.daysOld} size="md" />
+                  )}
+                </div>
+                <p className="text-gray-400 text-left">
+                  Stock #{selectedTrailerForView.stockNumber} • VIN: <span className="text-[#f5a623] font-bold">{selectedTrailerForView.vin}</span>
+                </p>
+              </SheetHeader>
+
+              {/* Image Gallery */}
+              {selectedTrailerForView.images && selectedTrailerForView.images.length > 0 && (
+                <div className="space-y-2">
+                  <img
+                    src={selectedTrailerForView.images[0]}
+                    alt={selectedTrailerForView.model}
+                    className="w-full h-64 object-cover rounded-lg"
+                  />
+                </div>
+              )}
+
+              {/* Pricing Card */}
+              <Card className="bg-[#1a1d29] border-gray-700">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center gap-2">
+                    <DollarSign className="w-5 h-5 text-green-400" />
+                    Pricing
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {selectedTrailerForView.makeOffer ? (
+                    <div className="text-center py-4">
+                      <div className="text-3xl font-black text-red-600 animate-pulse mb-2">
+                        MAKE OFFER
+                      </div>
+                      <div className="text-sm text-gray-400">Contact us for pricing</div>
+                    </div>
+                  ) : !selectedTrailerForView.salePrice || selectedTrailerForView.salePrice === 0 ? (
+                    <div className="text-center py-4">
+                      <div className="text-3xl font-bold text-yellow-400 mb-2">Ask for Pricing</div>
+                      <div className="text-sm text-gray-400">Contact us for current pricing</div>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <div>
+                        <p className="text-sm text-gray-400">Selling Price</p>
+                        <p className="text-4xl font-bold text-green-400">
+                          {formatCurrency(selectedTrailerForView.salePrice)}
+                        </p>
+                      </div>
+                      {selectedTrailerForView.msrp > selectedTrailerForView.salePrice && (
+                        <div className="border-t border-gray-700 pt-3 space-y-2">
+                          <div className="flex justify-between text-sm">
+                            <span className="text-gray-400">MSRP</span>
+                            <span className="text-gray-500 line-through">{formatCurrency(selectedTrailerForView.msrp)}</span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span className="text-gray-400">Savings</span>
+                            <span className="text-green-400 font-bold">{formatCurrency(selectedTrailerForView.msrp - selectedTrailerForView.salePrice)}</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Specifications Card */}
+              <Card className="bg-[#1a1d29] border-gray-700">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center gap-2">
+                    <Ruler className="w-5 h-5 text-blue-400" />
+                    Specifications
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-400">Dimensions (L × W)</span>
+                    <span className="text-2xl font-bold text-white">
+                      {selectedTrailerForView.length}' × {selectedTrailerForView.width}'
+                    </span>
+                  </div>
+                  {selectedTrailerForView.height && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-400">Height</span>
+                      <span className="text-xl font-bold text-white">{selectedTrailerForView.height}'</span>
+                    </div>
+                  )}
+                  <div className="border-t border-gray-700 pt-3 space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-400">Category</span>
+                      <Badge variant="outline" className="text-purple-400 border-purple-400">
+                        {classifyTrailer(selectedTrailerForView)}
+                      </Badge>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-400">Year</span>
+                      <span className="text-white font-medium">{selectedTrailerForView.year}</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Features */}
+              {selectedTrailerForView.features && selectedTrailerForView.features.length > 0 && (
+                <Card className="bg-[#1a1d29] border-gray-700">
+                  <CardHeader>
+                    <CardTitle className="text-white flex items-center gap-2">
+                      <Info className="w-5 h-5" />
+                      Features
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="grid grid-cols-1 gap-2">
+                      {selectedTrailerForView.features.map((feature, idx) => (
+                        <li key={idx} className="text-white flex items-start gap-2 text-sm">
+                          <span className="text-green-400 mt-1">•</span>
+                          <span>{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Edit Button for Owners/Directors */}
+              {canUploadPDF && (
+                <Link href={`/inventory/${selectedTrailerForView.id}/edit`}>
+                  <Button className="w-full bg-green-500 hover:bg-green-600 text-white">
+                    Edit Trailer
+                  </Button>
+                </Link>
+              )}
+            </div>
+          )}
+        </SheetContent>
+      </Sheet>
 
       {/* Scroll to Top Button */}
       {showScrollTop && (
@@ -824,7 +1114,7 @@ export default function InventoryPage() {
                   )}
 
                   <div className="flex gap-2">
-                    <Link href="/dashboard/inventory/history" className="flex-1">
+                    <Link href="/inventory/history" className="flex-1">
                       <Button
                         variant="outline"
                         className="w-full border-gray-600 text-gray-300 hover:bg-[#0f1117]"

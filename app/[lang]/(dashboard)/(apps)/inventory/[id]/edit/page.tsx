@@ -75,7 +75,7 @@ export default function EditTrailerPage() {
         description: "Only Directors and Owners can edit inventory",
         variant: "destructive",
       });
-      router.push("/dashboard/inventory");
+      router.push("/inventory");
     }
   }, [status, canEdit, router]);
 
@@ -90,17 +90,17 @@ export default function EditTrailerPage() {
       if (!res.ok) throw new Error("Failed to fetch trailer");
 
       const data = await res.json();
-      setTrailer(data);
+      setTrailer(data.trailer);
 
       // Pre-fill form
-      const autoPrice = calculateDesiredPrice(data.cost);
-      const isAutoPrice = Math.abs(data.salePrice - autoPrice) < 1; // Check if using auto-calculated price
+      const autoPrice = calculateDesiredPrice(data.trailer.cost);
+      const isAutoPrice = Math.abs(data.trailer.salePrice - autoPrice) < 1; // Check if using auto-calculated price
 
-      setSalePrice(data.salePrice);
-      setMakeOffer(data.makeOffer);
-      setStatus(data.status);
-      setLocation(data.location || "");
-      setDescription(data.description || "");
+      setSalePrice(data.trailer.salePrice);
+      setMakeOffer(data.trailer.makeOffer);
+      setStatus(data.trailer.status);
+      setLocation(data.trailer.location || "");
+      setDescription(data.trailer.description || "");
       setUseAutoPrice(isAutoPrice);
     } catch (error) {
       console.error("Failed to fetch trailer:", error);
@@ -141,7 +141,7 @@ export default function EditTrailerPage() {
         description: `${trailer.stockNumber} has been updated successfully`,
       });
 
-      router.push("/dashboard/inventory");
+      router.push("/inventory");
     } catch (error) {
       console.error("Save error:", error);
       toast({
@@ -183,7 +183,7 @@ export default function EditTrailerPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link href="/dashboard/inventory">
+          <Link href="/inventory">
             <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white">
               <ArrowLeft className="h-5 w-5" />
             </Button>
@@ -437,7 +437,7 @@ export default function EditTrailerPage() {
 
       {/* Action Buttons */}
       <div className="flex gap-3">
-        <Link href="/dashboard/inventory" className="flex-1">
+        <Link href="/inventory" className="flex-1">
           <Button
             variant="outline"
             className="w-full border-gray-600 text-gray-300 hover:bg-[#1a1d29]"
