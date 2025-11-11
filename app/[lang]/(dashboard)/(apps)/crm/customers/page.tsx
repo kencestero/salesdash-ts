@@ -93,6 +93,8 @@ export default function CustomersPage() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [showAddDialog, setShowAddDialog] = useState(false);
+  const [importing, setImporting] = useState(false);
+  const [importMessage, setImportMessage] = useState("");
 
   // Check if we should auto-open the add dialog
   useEffect(() => {
@@ -133,6 +135,43 @@ export default function CustomersPage() {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const importGoogleLeads = async () => {
+    try {
+      setImporting(true);
+      setImportMessage("Importing...");
+
+      const response = await fetch("/api/leads/import/google", { method: "POST" });
+
+      if (!response.ok) {
+        throw new Error("Import failed");
+      }
+
+      const data = await response.json();
+      setImportMessage(`✅ Imported: ${data.imported} | Skipped: ${data.skipped} | Total: ${data.total}`);
+
+      toast({
+        title: "Import Complete",
+        description: `Imported ${data.imported} leads, skipped ${data.skipped}`,
+      });
+
+      // Refresh the customer list
+      fetchCustomers();
+
+      // Clear message after 5 seconds
+      setTimeout(() => setImportMessage(""), 5000);
+    } catch (error) {
+      console.error("Error importing leads:", error);
+      setImportMessage("❌ Import failed");
+      toast({
+        title: "Error",
+        description: "Failed to import leads",
+        variant: "destructive",
+      });
+    } finally {
+      setImporting(false);
     }
   };
 
@@ -185,13 +224,25 @@ export default function CustomersPage() {
             Manage your leads, customers, and sales opportunities
           </p>
         </div>
-        <Button
-          onClick={() => setShowAddDialog(true)}
-          className="bg-orange-500 hover:bg-orange-600 text-white"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Add Customer
-        </Button>
+        <div className="flex items-center gap-3">
+          <Button
+            onClick={importGoogleLeads}
+            disabled={importing}
+            className="bg-blue-500 hover:bg-blue-600 text-white"
+          >
+            {importing ? "Importing..." : "Import Google Leads"}
+          </Button>
+          {importMessage && (
+            <span className="text-sm text-default-600">{importMessage}</span>
+          )}
+          <Button
+            onClick={() => setShowAddDialog(true)}
+            className="bg-orange-500 hover:bg-orange-600 text-white"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Add Customer
+          </Button>
+        </div>
       </div>
 
       {/* Stats Cards */}
