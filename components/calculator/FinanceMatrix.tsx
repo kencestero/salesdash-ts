@@ -172,13 +172,14 @@ export function FinanceMatrix({
         <h3 className="text-lg font-semibold text-foreground">Finance Options</h3>
         <div className="flex items-center gap-3">
           {showAPR && (
-            <span className="text-sm text-muted-foreground">APR: {apr.toFixed(2)}%</span>
+            <span className="text-sm text-foreground/80">APR: {apr.toFixed(2)}%</span>
           )}
           <Button
             variant="outline"
             size="sm"
             onClick={() => setShowAPR(!showAPR)}
             className="gap-2"
+            aria-label={showAPR ? "Hide APR percentage" : "Show APR percentage"}
           >
             {showAPR ? "Hide APR%" : "Show APR%"}
           </Button>
@@ -190,13 +191,13 @@ export function FinanceMatrix({
         <table className="w-full">
           <thead>
             <tr className="border-b border-border bg-muted/50">
-              <th className="p-3 text-left text-sm font-medium text-muted-foreground">
+              <th className="p-3 text-left text-sm font-medium text-foreground/70">
                 Term ↓
               </th>
               {downPayments.map((down, index) => (
                 <th
                   key={`down-${index}-${down}`}
-                  className="p-3 text-right text-sm font-medium text-muted-foreground"
+                  className="p-3 text-right text-sm font-medium text-foreground/70"
                 >
                   {editingDownIndex === index ? (
                     <div className="flex items-center justify-end gap-1">
@@ -212,13 +213,14 @@ export function FinanceMatrix({
                         onBlur={() => saveEditingDown(index)}
                         className="h-7 w-24 text-right text-sm"
                         autoFocus
+                        aria-label={`Edit down payment ${index + 1}`}
                       />
                     </div>
                   ) : (
                     <button
                       onClick={() => startEditingDown(index, down)}
                       className="hover:text-primary transition-colors cursor-pointer"
-                      title="Click to edit (max 70% of price)"
+                      aria-label={`Edit down payment: $${down.toLocaleString()} (max 70% of price)`}
                     >
                       ${down.toLocaleString()} ✏️
                     </button>
@@ -252,10 +254,10 @@ export function FinanceMatrix({
                       {isCustomTerm(term) && (
                         <button
                           onClick={() => removeCustomTerm(term)}
-                          className="ml-1 rounded p-0.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-                          title="Remove custom term"
+                          className="ml-1 rounded p-0.5 text-foreground/70 hover:bg-destructive/10 hover:text-destructive"
+                          aria-label={`Remove custom ${term} month term`}
                         >
-                          <X className="h-3 w-3" />
+                          <X className="h-3 w-3" aria-hidden="true" />
                         </button>
                       )}
                     </div>
@@ -278,7 +280,7 @@ export function FinanceMatrix({
                           ${monthly.toFixed(2)}
                         </div>
                         {showAPR && (
-                          <div className="text-xs text-muted-foreground">
+                          <div className="text-xs text-foreground/70">
                             APR {apr.toFixed(2)}%
                           </div>
                         )}
@@ -299,6 +301,7 @@ export function FinanceMatrix({
                           mode: "FINANCE",
                         });
                       }}
+                      aria-label={`Save ${term} month finance option`}
                     >
                       💾
                     </Button>
@@ -316,9 +319,9 @@ export function FinanceMatrix({
           <Button
             variant="outline"
             size="sm"
-            className="gap-2 text-muted-foreground transition-colors hover:text-primary"
+            className="gap-2 text-foreground/70 transition-colors hover:text-primary"
           >
-            <Plus className="h-4 w-4" />
+            <Plus className="h-4 w-4" aria-hidden="true" />
             Add Custom Term (1-140 months)
           </Button>
         </CollapsibleTrigger>
@@ -335,6 +338,7 @@ export function FinanceMatrix({
                 if (e.key === "Enter") addCustomTerm();
               }}
               className="max-w-xs"
+              aria-label="Custom term in months"
             />
             <Button onClick={addCustomTerm} disabled={!customTermInput}>
               Add
@@ -344,7 +348,7 @@ export function FinanceMatrix({
       </Collapsible>
 
       {/* Helper text */}
-      <p className="text-xs text-muted-foreground">
+      <p className="text-xs text-foreground/80">
         💡 Tip: Click down payment headers ✏️ to edit (max ${maxDownPayment.toLocaleString()} = 70% of price).
         Uncheck terms to hide. Add custom terms 1-140 months. Click any payment to save as quote.
       </p>
@@ -355,7 +359,7 @@ export function FinanceMatrix({
           {onSaveQuote && (
             <Button
               onClick={onSaveQuote}
-              className="flex-1 bg-green-500 hover:bg-green-600 text-white"
+              className="flex-1 bg-green-600 hover:bg-green-700 text-white"
             >
               ✅ Click to add Finance scenario to Quote to share
             </Button>

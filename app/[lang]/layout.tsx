@@ -8,6 +8,7 @@ import TanstackProvider from "@/provider/providers.client";
 import AuthProvider from "@/provider/auth.provider";
 import "flatpickr/dist/themes/light.css";
 import DirectionProvider from "@/provider/direction.provider";
+import { PresenceProvider } from "@/components/providers/presence-provider";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
@@ -17,9 +18,31 @@ export const metadata = {
   },
   description: siteConfig.description,
   icons: {
-    icon: '/icon.svg',
-    shortcut: '/icon.svg',
-    apple: '/icon.svg',
+    icon: '/favicon.ico',
+    shortcut: '/favicon.ico',
+    apple: '/favicon.ico',
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: 'https://mjsalesdash.com',
+    siteName: siteConfig.name,
+    title: siteConfig.name,
+    description: siteConfig.description,
+    images: [
+      {
+        url: '/images/mj-og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'MJ Cargo Sales Dashboard',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: siteConfig.name,
+    description: siteConfig.description,
+    images: ['/images/mj-og-image.png'],
   },
 };
 
@@ -29,7 +52,9 @@ export default function RootLayout({ children, params: { lang } }: { children: R
       <AuthProvider>
         <TanstackProvider>
           <Providers>
-            <DirectionProvider lang={lang}>{children}</DirectionProvider>
+            <PresenceProvider>
+              <DirectionProvider lang={lang}>{children}</DirectionProvider>
+            </PresenceProvider>
           </Providers>
         </TanstackProvider>
       </AuthProvider>

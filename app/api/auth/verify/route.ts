@@ -90,73 +90,128 @@ export async function GET(req: Request) {
     );
     console.log('✅ Salesperson code:', salespersonCode);
 
-    // Generate rep code: "REP" + 6 random digits or "REP000000" for freelancers
+    // Generate rep code: "REP" + timestamp + random for better uniqueness
     let repCode: string;
     if (pendingUser.status === "freelancer") {
       repCode = "REP000000";
     } else {
-      // Generate unique 6-digit code
+      // Generate unique code using timestamp + random for better uniqueness
+      // This reduces collision probability significantly
       let isUnique = false;
       repCode = "";
-      while (!isUnique) {
-        const randomDigits = Math.floor(100000 + Math.random() * 900000).toString();
-        repCode = `REP${randomDigits}`;
+      let attempts = 0;
+      const maxAttempts = 10;
+
+      while (!isUnique && attempts < maxAttempts) {
+        attempts++;
+
+        // Use last 3 digits of timestamp + 3 random digits for uniqueness
+        const timestamp = Date.now().toString().slice(-3);
+        const randomDigits = Math.floor(100 + Math.random() * 900).toString();
+        repCode = `REP${timestamp}${randomDigits}`;
 
         // Check if this code already exists
         const existing = await prisma.userProfile.findUnique({
           where: { repCode },
         });
+
         if (!existing) {
           isUnique = true;
         }
+
+        console.log(`🔄 Rep code generation attempt ${attempts}:`, repCode, isUnique ? '✅ unique' : '❌ duplicate');
+      }
+
+      if (!isUnique) {
+        // Fallback: use full timestamp if we couldn't find unique code
+        const fullTimestamp = Date.now().toString().slice(-6);
+        repCode = `REP${fullTimestamp}`;
+        console.log('⚠️ Using fallback timestamp-based repCode:', repCode);
       }
     }
-    console.log('✅ Rep code:', repCode);
+    console.log('✅ Final rep code:', repCode);
 
-    // 5. Create User account and UserProfile in a transaction
+    // 5. Create User account and UserProfile in a transaction with retry logic
     console.log('📝 Creating User account and profile...');
 
-    const user = await prisma.$transaction(async (tx) => {
-      // Create User
-      const newUser = await tx.user.create({
-        data: {
-          email: pendingUser.email,
-          name: `${pendingUser.firstName} ${pendingUser.lastName}`,
-          password: pendingUser.hashedPassword,
-          emailVerified: new Date(), // Mark as verified immediately
-        },
-      });
+    let user;
+    let transactionAttempts = 0;
+    const maxTransactionAttempts = 3;
+    let lastError;
 
-      console.log('✅ User created:', newUser.id);
+    while (transactionAttempts < maxTransactionAttempts && !user) {
+      transactionAttempts++;
+      console.log(`🔄 Transaction attempt ${transactionAttempts}/${maxTransactionAttempts}`);
 
-      // Create UserProfile
-      await tx.userProfile.create({
-        data: {
-          userId: newUser.id,
-          firstName: pendingUser.firstName,
-          lastName: pendingUser.lastName,
-          phone: pendingUser.phone,
-          zipcode: pendingUser.zipcode,
-          salespersonCode: salespersonCode,
-          role: pendingUser.role,
-          member: true, // They're a verified member now
-          repCode: repCode,
-          managerId: pendingUser.managerId,
-          status: pendingUser.status,
-        },
-      });
+      try {
+        user = await prisma.$transaction(async (tx) => {
+          // Create User
+          const newUser = await tx.user.create({
+            data: {
+              email: pendingUser.email,
+              name: `${pendingUser.firstName} ${pendingUser.lastName}`,
+              password: pendingUser.hashedPassword,
+              emailVerified: new Date(), // Mark as verified immediately
+            },
+          });
 
-      console.log('✅ UserProfile created');
+          console.log('✅ User created:', newUser.id);
 
-      // Delete the pending user record
-      await tx.pendingUser.delete({
-        where: { id: pendingUser.id },
-      });
+          // Create UserProfile
+          await tx.userProfile.create({
+            data: {
+              userId: newUser.id,
+              firstName: pendingUser.firstName,
+              lastName: pendingUser.lastName,
+              phone: pendingUser.phone,
+              zipcode: pendingUser.zipcode,
+              salespersonCode: salespersonCode,
+              role: pendingUser.role,
+              member: true, // They're a verified member now
+              repCode: repCode,
+              managerId: pendingUser.managerId,
+              status: pendingUser.status,
+            },
+          });
 
-      console.log('🗑️ PendingUser deleted');
+          console.log('✅ UserProfile created');
 
-      return newUser;
-    });
+          // Delete the pending user record
+          await tx.pendingUser.delete({
+            where: { id: pendingUser.id },
+          });
+
+          console.log('🗑️ PendingUser deleted');
+
+          return newUser;
+        });
+
+        console.log('✅ Transaction completed successfully');
+      } catch (error: any) {
+        lastError = error;
+        console.error(`❌ Transaction attempt ${transactionAttempts} failed:`, error.message);
+
+        // If it's a unique constraint error on repCode, generate a new one and retry
+        if (error.message?.includes('Unique constraint') && error.message?.includes('repCode')) {
+          console.log('🔄 Unique constraint on repCode, generating new code...');
+
+          // Generate a completely new repCode with current timestamp
+          const newTimestamp = Date.now().toString().slice(-6);
+          repCode = `REP${newTimestamp}`;
+          console.log('✅ New rep code for retry:', repCode);
+
+          // Continue to next iteration
+          continue;
+        } else {
+          // Different error, don't retry
+          throw error;
+        }
+      }
+    }
+
+    if (!user) {
+      throw lastError || new Error('Failed to create user after maximum attempts');
+    }
 
     console.log('🎉 Email verification complete for:', user.email);
 
@@ -169,9 +224,12 @@ export async function GET(req: Request) {
     console.error("❌ Email verification error:", error);
     console.error("Error details:", error.message);
     console.error("Stack trace:", error.stack);
+    console.error("Full error object:", JSON.stringify(error, Object.getOwnPropertyNames(error), 2));
 
+    // Return more detailed error for debugging
+    const errorMessage = encodeURIComponent(error.message || "Unknown error");
     return NextResponse.redirect(
-      new URL("/en/auth/verify-email?error=verification_failed", req.url)
+      new URL(`/en/auth/verify-email?error=verification_failed&details=${errorMessage}`, req.url)
     );
   }
 }

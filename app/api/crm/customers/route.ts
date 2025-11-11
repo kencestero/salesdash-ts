@@ -102,6 +102,8 @@ export async function POST(req: NextRequest) {
       status,
       tags,
       notes,
+      salesRepName,      // Sales Rep assignment
+      assignedToName,    // Manager assignment
     } = body;
 
     // Validation
@@ -142,6 +144,8 @@ export async function POST(req: NextRequest) {
         status: status || "lead",
         tags: tags || [],
         notes,
+        salesRepName,
+        assignedToName,
         lastContactedAt: new Date(),
       },
     });
@@ -150,7 +154,7 @@ export async function POST(req: NextRequest) {
     await prisma.activity.create({
       data: {
         customerId: customer.id,
-        userId: session.user.email, // Store email as userId
+        userId: session.user.id,
         type: "note",
         subject: "Customer Created",
         description: `New customer added to CRM by ${session.user.name || session.user.email}`,

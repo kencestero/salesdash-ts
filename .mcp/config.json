@@ -1,0 +1,32 @@
+{
+  "tools": {
+    "fs": {
+      "type": "filesystem",
+      "root": "./"
+    },
+    "db": {
+      "type": "database",
+      "description": "Prisma database access for PostgreSQL (Neon)",
+      "connection": "prisma"
+    },
+    "email": {
+      "type": "email",
+      "description": "Resend email API for transactional emails",
+      "provider": "resend"
+    },
+    "google_sheets": {
+      "type": "google_sheets",
+      "description": "Google Sheets API for CRM lead sync",
+      "service_account": true
+    }
+  },
+  "agents": {
+    "description": "MJ Cargo SalesDash - Next.js 14 CRM for trailer dealership",
+    "project_root": "./",
+    "primary_docs": [
+      "CLAUDE.md",
+      "PROJECT.md",
+      "PAPI_CLAUDE_TASKS.md"
+    ]
+  }
+}

@@ -110,7 +110,7 @@ export default function InventoryHistoryPage() {
             <RefreshCw className="h-4 w-4 mr-2" />
             Refresh
           </Button>
-          <Link href="/dashboard/inventory">
+          <Link href="/inventory">
             <Button variant="default" size="sm">
               Back to Inventory
             </Button>

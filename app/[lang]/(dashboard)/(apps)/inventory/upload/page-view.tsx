@@ -16,11 +16,19 @@ export default function UploadPageView({ session }: UploadPageViewProps) {
     setUploading(manufacturer);
 
     try {
+      // Map manufacturer name to supplier param
+      const supplierMap: Record<string, string> = {
+        "Diamond Cargo": "diamond",
+        "Quality Cargo": "quality",
+        "Panther Cargo": "panther"
+      };
+      const supplier = supplierMap[manufacturer] || "";
+
       const formData = new FormData();
       formData.append("file", file);
-      formData.append("manufacturer", manufacturer);
 
-      const response = await fetch("/api/inventory/upload-excel", {
+      // Send supplier as query param
+      const response = await fetch(`/api/inventory/import?supplier=${supplier}`, {
         method: "POST",
         body: formData,
       });
@@ -30,20 +38,18 @@ export default function UploadPageView({ session }: UploadPageViewProps) {
       if (response.ok) {
         toast({
           title: "✅ Upload Successful!",
-          description: `Imported ${result.summary?.total || 0} trailers from ${manufacturer} (${result.summary?.new || 0} new, ${result.summary?.updated || 0} updated)`,
+          description: `Imported ${result.upserts || 0} trailers from ${manufacturer} (skipped: ${result.skipped || 0})`,
         });
       } else {
         toast({
           title: "❌ Upload Failed",
           description: result.error || "Something went wrong",
-          variant: "destructive",
         });
       }
     } catch (error) {
       toast({
         title: "❌ Upload Failed",
         description: "Failed to upload file",
-        variant: "destructive",
       });
     } finally {
       setUploading(null);

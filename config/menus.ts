@@ -83,6 +83,11 @@ export const menusConfig = {
           href: "/chat",
         },
         {
+          title: "Messages",
+          icon: Messages,
+          href: "/messages",
+        },
+        {
           title: "email",
           icon: Envelope,
           href: "/email",
@@ -819,24 +824,34 @@ export const menusConfig = {
         icon: Cart,
         child: [
           {
+            title: "Academy",
+            icon: Book,
+            href: "/sales-tools/academy",
+          },
+          {
             title: "Live Inventory",
             icon: Stacks2,
             href: "/inventory",
           },
           {
-            title: "Finance Calculator",
-            icon: ChartBar,
-            href: "/finance/compare",
+            title: "Links",
+            icon: MenuBar,
+            href: "/sales-tools/links",
           },
           {
-            title: "Credit Applications",
+            title: "Manufacturers",
+            icon: Building,
+            href: "/sales-tools/manufacturers",
+          },
+          {
+            title: "Request Form",
             icon: ClipBoard,
-            href: "/credit",
+            href: "/sales-tools/request",
           },
           {
-            title: "Customers (CRM)",
-            icon: Users,
-            href: "/crm/customers",
+            title: "Request Inbox",
+            icon: Envelope,
+            href: "/sales-tools/requests/inbox",
           },
         ],
       },
@@ -850,9 +865,19 @@ export const menusConfig = {
             href: "/manager",
           },
           {
+            title: "Team Requests",
+            icon: ClipBoard,
+            href: "/manager/requests",
+          },
+          {
             title: "User Management",
             icon: Users,
             href: "/user-management",
+          },
+          {
+            title: "Photo Request",
+            icon: Mail,
+            href: "/request-photos",
           },
           {
             title: "chat",

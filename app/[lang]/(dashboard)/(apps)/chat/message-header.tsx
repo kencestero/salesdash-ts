@@ -39,8 +39,8 @@ const MessageHeader = ({
         )}
         <div className="relative inline-block">
           <Avatar>
-            <AvatarImage src={profile?.avatar?.src} alt="" />
-            <AvatarFallback>{profile?.fullName?.slice(0, 2)}</AvatarFallback>
+            <AvatarImage src={typeof profile?.avatar === 'string' ? profile?.avatar : profile?.avatar?.src || '/images/default-avatar.png'} alt="" />
+            <AvatarFallback>{profile?.fullName?.slice(0, 2) || 'U'}</AvatarFallback>
           </Avatar>
           <Badge
             className=" h-3 w-3  p-0 ring-1 ring-border ring-offset-[1px]   items-center justify-center absolute left-[calc(100%-12px)] top-[calc(100%-12px)]"
