@@ -154,7 +154,7 @@ export async function POST(req: NextRequest) {
     await prisma.activity.create({
       data: {
         customerId: customer.id,
-        userId: session.user.email, // Store email as userId
+        userId: session.user.id,
         type: "note",
         subject: "Customer Created",
         description: `New customer added to CRM by ${session.user.name || session.user.email}`,

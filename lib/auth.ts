@@ -1,4 +1,5 @@
 import CredentialsProvider from "next-auth/providers/credentials";
+import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import GoogleProvider from "next-auth/providers/google";
 import { prisma } from "./prisma";
 import { generateUniqueSalespersonCode } from "./salespersonCode";
@@ -6,7 +7,7 @@ import bcrypt from "bcryptjs";
 import { verifyPasskeyJWT } from "./passkey-jwt";
 
 export const authOptions = {
-  // Note: No adapter needed - we're using JWT sessions and handling user creation in signIn callback
+  adapter: PrismaAdapter(prisma),
   session: {
     strategy: "jwt" as const, // JWT for credentials support
     maxAge: 24 * 60 * 60, // 24 hours - session expires after 1 day
@@ -69,31 +70,149 @@ export const authOptions = {
       async authorize(creds) {
         const token = creds?.token;
         if (!token) return null;
-        
+
         const userId = await verifyPasskeyJWT(token);
         if (!userId) return null;
-        
-        const user = await prisma.user.findUnique({ 
+
+        const user = await prisma.user.findUnique({
           where: { id: userId },
           include: { profile: true }
         });
-        
-        return user ? { 
-          id: user.id, 
-          email: user.email || '', 
-          name: user.name 
+
+        return user ? {
+          id: user.id,
+          email: user.email || '',
+          name: user.name
         } as any : null;
       }
     }),
   ],
 
   callbacks: {
-    async signIn({ user }: any) {
-      // For credentials provider, authorize() already validated everything
-      // Just allow the sign-in
-      console.log("✅ Sign-in allowed for:", user.email);
-      return true;
-    },
+    async signIn({ user, account, profile }: any) {
+      console.log("=== SignIn Callback ===");
+      console.log("User:", user.email);
+      console.log("Account:", account?.provider);
+
+      try {
+        // Check if user exists
+        const existingUser = await prisma.user.findUnique({
+          where: { email: user.email },
+          include: { profile: true },
+        });
+
+        // EXISTING USER - Check if UserProfile exists
+        if (existingUser) {
+          // Create UserProfile if missing (OAuth users who signed up before profile creation)
+          if (!existingUser.profile) {
+            // Parse name into firstName/lastName
+            const nameParts = (user.name ?? "").split(" ");
+            const firstName = nameParts[0] || "";
+            const lastName = nameParts.slice(1).join(" ") || "";
+
+            await prisma.userProfile.create({
+              data: {
+                userId: existingUser.id,
+                firstName: firstName || undefined,
+                lastName: lastName || undefined,
+                role: "salesperson",
+                member: true,
+                needsJoinCode: false,
+                salespersonCode: await generateUniqueSalespersonCode("salesperson", prisma),
+                repCode: "REP000000", // Default for OAuth users without join code
+              },
+            });
+            console.log("✅ Created missing UserProfile for existing user");
+          }
+
+          if (account?.provider && !existingUser.emailVerified) {
+            await prisma.user.update({
+              where: { id: existingUser.id },
+              data: { emailVerified: new Date() },
+            });
+          }
+          console.log("✅ Existing user - login allowed");
+          return true;
+        }
+
+        // NEW USER - Check join code
+        const { cookies } = await import("next/headers");
+        const joinCodeValid = cookies().get("join_ok")?.value;
+        const joinRole = cookies().get("join_role")?.value || "salesperson";
+
+        // NEW USER WITHOUT JOIN CODE - Block signup
+        if (!joinCodeValid) {
+          console.log("❌ New user without join code - blocking signup");
+          // Block OAuth - redirect to join page
+          return false; // ✅ PROPER FIX - Block unauthorized signups
+        }
+
+    // NEW USER WITH VALID JOIN CODE
+    const firstName = cookies().get("signup_firstName")?.value;
+    const lastName = cookies().get("signup_lastName")?.value;
+    const phone = cookies().get("signup_phone")?.value;
+    const zipcode = cookies().get("signup_zipcode")?.value;
+    const managerId = cookies().get("signup_managerId")?.value;
+    const status = cookies().get("signup_status")?.value || "employee";
+
+    // Generate rep code
+    let repCode: string;
+    if (status === "freelancer") {
+      repCode = "REP000000";
+    } else {
+      let isUnique = false;
+      repCode = "";
+      while (!isUnique) {
+        const randomDigits = Math.floor(100000 + Math.random() * 900000).toString();
+        repCode = `REP${randomDigits}`;
+        const existing = await prisma.userProfile.findUnique({ where: { repCode } });
+        if (!existing) isUnique = true;
+      }
+    }
+
+    const newUser = await prisma.user.create({
+      data: {
+        email: user.email,
+        name: user.name,
+        image: user.image,
+        emailVerified: account?.provider ? new Date() : null,
+      }
+    });
+
+    await prisma.userProfile.create({
+      data: {
+        userId: newUser.id,
+        firstName: firstName ? decodeURIComponent(firstName) : undefined,
+        lastName: lastName ? decodeURIComponent(lastName) : undefined,
+        phone: phone ? decodeURIComponent(phone) : undefined,
+        zipcode: zipcode ? decodeURIComponent(zipcode) : undefined,
+        salespersonCode: await generateUniqueSalespersonCode(joinRole, prisma),
+        repCode: repCode,
+        managerId: managerId ? decodeURIComponent(managerId) : null,
+        status: status,
+        role: joinRole as "owner" | "manager" | "salesperson",
+        member: true,
+        needsJoinCode: false,
+      },
+    });
+
+    cookies().delete("join_ok");
+    cookies().delete("join_role");
+    cookies().delete("signup_firstName");
+    cookies().delete("signup_lastName");
+    cookies().delete("signup_phone");
+    cookies().delete("signup_zipcode");
+    cookies().delete("signup_managerId");
+    cookies().delete("signup_status");
+
+    console.log("✅ User created successfully");
+    return true;
+
+  } catch (error) {
+    console.error("❌ SignIn callback error:", error);
+    return true; // ✅ Even on error, return true to avoid loop
+  }
+},
     async jwt({ token, user }: any) {
       // Add user ID to token on sign in
       if (user) {
