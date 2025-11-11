@@ -46,6 +46,8 @@ interface Customer {
   city?: string;
   state?: string;
   assignedTo?: string;
+  salesRepName?: string | null;      // Sales Rep from Google Sheets
+  assignedToName?: string | null;    // Manager from Google Sheets
   createdAt: string;
   lastContactedAt?: string;
   _count: {
@@ -386,6 +388,24 @@ export default function CustomersPage() {
                                 Last contact: {formatDate(customer.lastContactedAt)}
                               </div>
                             </div>
+
+                            {/* Rep and Manager Assignments */}
+                            {(customer.salesRepName || customer.assignedToName) && (
+                              <div className="flex items-center gap-3 mt-3">
+                                {customer.salesRepName && (
+                                  <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                                    <Users className="w-3 h-3 mr-1" />
+                                    Rep: {customer.salesRepName}
+                                  </Badge>
+                                )}
+                                {customer.assignedToName && (
+                                  <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
+                                    <Users className="w-3 h-3 mr-1" />
+                                    Manager: {customer.assignedToName}
+                                  </Badge>
+                                )}
+                              </div>
+                            )}
 
                             {/* Activity Summary */}
                             <div className="flex items-center gap-4 mt-3 text-xs text-muted-foreground">

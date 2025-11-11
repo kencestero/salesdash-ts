@@ -14,12 +14,17 @@ import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { type ProfileUser as ProfileUserType } from "@/app/api/chat/data";
 const MyProfileHeader = ({ profile }: { profile: ProfileUserType }) => {
+  // Avatar guard: handle both string and object types
+  const avatarSrc = typeof profile?.avatar === "string"
+    ? profile.avatar
+    : profile?.avatar?.src ?? "/images/default-avatar.png";
+
   return (
     <>
       <div className="flex  justify-between mb-4">
         <div className="flex   gap-3">
           <Avatar className="h-10 w-10">
-            <AvatarImage src={profile?.avatar.src} alt="" />
+            <AvatarImage src={avatarSrc} alt="" />
             <AvatarFallback>{profile?.fullName.slice(0, 2)}</AvatarFallback>
           </Avatar>
           <div className="block">

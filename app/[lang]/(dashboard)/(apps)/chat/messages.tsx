@@ -9,9 +9,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Undo2 } from "lucide-react";
 import { type ProfileUser as ProfileUser, type Contact as ContactType, type Chat as ChatType } from "@/app/api/chat/data";
-import Image from "next/image";
 const chatAction = [
   {
     label: "Remove",
@@ -53,6 +53,10 @@ const Messages = ({
 }: MessagesProps) => {
   const { senderId, message: chatMessage, time, replayMetadata } = message;
   const { avatar } = contact;
+
+  // Check if message is from current user
+  const isMyMessage = senderId === profile?.id;
+
   // State to manage pin status
   const isMessagePinned = pinnedMessages.some(
     (pinnedMessage: any) => pinnedMessage.index === index
@@ -70,7 +74,7 @@ const Messages = ({
   return (
     <>
       <div className="block md:px-6 px-0 ">
-        {senderId === 11 ? (
+        {isMyMessage ? (
           <>
             {replayMetadata === true && (
               <div className="w-max ml-auto -mb-2 mr-10">
@@ -127,26 +131,24 @@ const Messages = ({
                 </span>
               </div>
               <div className="flex-none self-end -translate-y-5">
-                <div className="h-8 w-8 rounded-full ">
-                  <Image
-                    src={profile?.avatar}
-                    alt=""
-                    className="block w-full h-full object-cover rounded-full"
-                  />
-                </div>
+                <Avatar className="h-8 w-8">
+                  <AvatarImage src={profile?.avatar || undefined} alt="" />
+                  <AvatarFallback className="uppercase">
+                    {profile?.fullName?.slice(0, 2) || 'ME'}
+                  </AvatarFallback>
+                </Avatar>
               </div>
             </div>
           </>
         ) : (
           <div className="flex space-x-2 items-start group rtl:space-x-reverse mb-4">
             <div className="flex-none self-end -translate-y-5">
-              <div className="h-8 w-8 rounded-full">
-                <Image
-                  src={avatar}
-                  alt=""
-                  className="block w-full h-full object-cover rounded-full"
-                />
-              </div>
+              <Avatar className="h-8 w-8">
+                <AvatarImage src={typeof avatar === 'string' ? avatar : avatar?.src} alt="" />
+                <AvatarFallback className="uppercase">
+                  {contact?.fullName?.slice(0, 2) || 'U'}
+                </AvatarFallback>
+              </Avatar>
             </div>
             <div className="flex-1 flex flex-col gap-2">
               <div className="flex flex-col   gap-1">

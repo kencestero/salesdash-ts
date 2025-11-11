@@ -38,6 +38,14 @@ const MARKETING = new Set([
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
+  // 0. Force non-www (fixes WebAuthn RP ID mismatch)
+  const host = req.headers.get("host") || "";
+  if (host.startsWith("www.")) {
+    const url = req.nextUrl.clone();
+    url.host = host.replace(/^www\./, "");
+    return NextResponse.redirect(url, 308);
+  }
+
   // 1. Allow static files (skip middleware)
   if (ALLOW_STATIC.some(path => pathname.startsWith(path))) {
     return NextResponse.next();

@@ -60,6 +60,8 @@ export async function GET() {
         status: user.profile.status,
         salespersonCode: user.profile.salespersonCode,
         member: user.profile.member,
+        avatarUrl: user.profile.avatarUrl,
+        coverUrl: user.profile.coverUrl,
       },
     });
   } catch (error) {

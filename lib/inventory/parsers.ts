@@ -4,23 +4,30 @@
 
 /**
  * Parse size from model or description string
+ * IMPORTANT: Only looks BEFORE axle token to avoid parsing "TA2" as dimensions
  * Handles variants like: 5X10SA, 6 x 12 TA, 7×16 TA3, 8.5X20TA, etc.
  *
- * @returns { width: number, length: number } or null if not found
+ * @returns { widthFeet: number, lengthFeet: number } or null if not found
  */
-export function parseSize(modelOrDesc: string): { width: number; length: number } | null {
+export function parseSize(modelOrDesc: string): { width: number; length: number; widthFeet: number; lengthFeet: number } | null {
   if (!modelOrDesc) return null;
 
-  // Normalize: remove all non-numeric and non-X characters, convert to uppercase
-  const s = modelOrDesc.replace(/[^0-9.xX]/g, '').toUpperCase();
+  // Cut string at axle token to avoid parsing "TA2" or "162" from model numbers
+  // Split at: TA2, TA3, TA4, SA, TA, TTA, TOR, GA
+  const preAxle = modelOrDesc.split(/T[A\d]+|SA|TA|TTA|TOR|GA/i)[0];
 
-  // Match pattern like 5X10 or 8.5X20
-  const match = s.match(/(\d+(?:\.\d+)?)X(\d+(?:\.\d+)?)/i);
+  // Match pattern like 5X10 or 8.5X20 (width × length)
+  const match = preAxle.match(/\b(\d+(?:\.\d+)?)\s*[xX×]\s*(\d+(?:\.\d+)?)/);
   if (!match) return null;
 
+  const widthFeet = parseFloat(match[1]);
+  const lengthFeet = parseFloat(match[2]);
+
   return {
-    width: Number(match[1]),
-    length: Number(match[2])
+    width: widthFeet,
+    length: lengthFeet,
+    widthFeet,
+    lengthFeet
   };
 }
 

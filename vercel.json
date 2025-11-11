@@ -1,5 +1,18 @@
 {
   "buildCommand": "prisma generate && next build",
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.mjsalesdash.com"
+        }
+      ],
+      "destination": "https://mjsalesdash.com/:path*",
+      "statusCode": 308
+    }
+  ],
   "crons": [
     {
       "path": "/api/cron/sync-sheets",

@@ -34,6 +34,7 @@ export default function RegisterPage() {
   const [isFreelancer, setIsFreelancer] = useState(false);
   const [managers, setManagers] = useState<Array<{ id: string; name: string; role: string }>>([]);
   const [loadingManagers, setLoadingManagers] = useState(false);
+  const [signupPath, setSignupPath] = useState<"social" | "email" | null>(null);
 
   // Hardcoded fallback manager list
   const fallbackManagers = [
@@ -253,16 +254,21 @@ export default function RegisterPage() {
         ))}
       </div>
 
-      {/* MJ Logo - Fixed at top */}
-      <div className="fixed top-12 left-1/2 -translate-x-1/2 z-30 pointer-events-none">
-        <div className="w-32 h-32 relative drop-shadow-2xl">
-          <Image
-            src="/images/DASH_LOGO_EYE_IN_THE_SKY.webp"
-            alt="MJ SalesDash Logo"
-            fill
-            className="object-contain"
-            priority
-          />
+      {/* MJ Logo - Fixed at top with backdrop */}
+      <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[9999] pointer-events-none">
+        <div className="relative">
+          {/* Backdrop circle */}
+          <div className="absolute inset-0 w-28 h-28 -left-2 -top-2 bg-gradient-to-br from-black/60 to-black/40 backdrop-blur-md rounded-full" />
+          {/* Logo */}
+          <div className="w-24 h-24 relative drop-shadow-2xl">
+            <Image
+              src="/images/DASH_LOGO_EYE_IN_THE_SKY.webp"
+              alt="MJ SalesDash Logo"
+              fill
+              className="object-contain"
+              priority
+            />
+          </div>
         </div>
       </div>
 
@@ -278,8 +284,8 @@ export default function RegisterPage() {
             <div className="flex gap-3">
               <input
                 value={code}
-                onChange={(e) => setCode(e.target.value.toUpperCase())}
-                placeholder="ENTER CODE"
+                onChange={(e) => setCode(e.target.value.toUpperCase().trim())}
+                placeholder="ABC123" maxLength={6} autoCapitalize="characters" inputMode="text"
                 disabled={codeValidated}
                 className="flex-1 bg-white/90 backdrop-blur-sm border-0 rounded-xl px-4 py-3 text-center text-lg font-mono tracking-wider focus:ring-2 focus:ring-primary focus:outline-none disabled:opacity-50 disabled:bg-green-100 text-orange-600 placeholder:text-gray-400"
               />
@@ -300,6 +306,11 @@ export default function RegisterPage() {
               )}
             </div>
             {err && <p className="text-red-300 text-sm mt-2 bg-red-500/20 backdrop-blur-sm rounded-lg py-2 px-3">{err}</p>}
+            {!codeValidated && !err && process.env.NODE_ENV !== "production" && (
+              <p className="text-xs text-white/70 mt-2">
+                Don't have a code? Try: <b className="text-white">OWNER1</b>, <b className="text-white">MGR001</b>, or <b className="text-white">REP001</b>
+              </p>
+            )}
 
             {/* Arrow pointing up */}
             {showArrow && !codeValidated && (

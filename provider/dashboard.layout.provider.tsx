@@ -15,6 +15,7 @@ import MobileSidebar from "@/components/partials/sidebar/mobile-sidebar";
 import HeaderSearch from "@/components/header-search";
 import { useMounted } from "@/hooks/use-mounted";
 import LayoutLoader from "@/components/layout-loader";
+import { PasskeyPrompt } from "@/components/passkey-prompt";
 
 function SessionTimeout() {
   const { data: session } = useSession();
@@ -59,6 +60,7 @@ const DashBoardLayoutProvider = ({ children, trans }: { children: React.ReactNod
     return (
       <>
         <SessionTimeout />
+        <PasskeyPrompt />
         <AppTopbar handleOpenSearch={() => setOpen(true)} trans={trans} />
         <AppSidebar trans={trans} />
 
@@ -96,6 +98,7 @@ const DashBoardLayoutProvider = ({ children, trans }: { children: React.ReactNod
     return (
       <>
         <SessionTimeout />
+        <PasskeyPrompt />
         <AppTopbar handleOpenSearch={() => setOpen(true)} trans={trans} />
 
         <div className={cn("content-wrapper transition-all duration-150 ")}>
@@ -126,6 +129,7 @@ const DashBoardLayoutProvider = ({ children, trans }: { children: React.ReactNod
     return (
       <>
         <SessionTimeout />
+        <PasskeyPrompt />
         <AppTopbar handleOpenSearch={() => setOpen(true)} trans={trans} />
         <AppSidebar trans={trans} />
 
@@ -160,6 +164,7 @@ const DashBoardLayoutProvider = ({ children, trans }: { children: React.ReactNod
   return (
     <>
       <SessionTimeout />
+        <PasskeyPrompt />
       <AppTopbar handleOpenSearch={() => setOpen(true)} trans={trans} />
       <Sidebar trans={trans} />
 

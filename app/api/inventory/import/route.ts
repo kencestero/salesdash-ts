@@ -121,7 +121,16 @@ export async function POST(req: Request) {
         skipped++;
         continue;
       }
-      console.log(`[inventory/import] Processing VIN: ${t.vin} (row ${rowNumber})`);
+
+      // Detailed validation logging
+      console.log(`[inventory/import] Row ${rowNumber} normalized:`, {
+        stock: t.stockNumber,
+        model: t.model,
+        size: { width: t.widthFeet, length: t.lengthFeet },
+        height: t.heightFeet,
+        salePrice: (t as any).sellingPrice,
+        cost: t.price
+      });
 
       // Check if trailer already exists
       const existing = await prisma.trailer.findUnique({
@@ -150,9 +159,9 @@ export async function POST(req: Request) {
         ? existing.images // Preserve existing images
         : standardImage ? [standardImage] : []; // Use standard image only if no existing
 
-      // Apply pricing formula: compute price from cost
-      const cost = t.price || 0; // Assuming t.price from Excel is actually cost
-      const calculatedPrice = cost > 0 ? computePrice(cost) : 0;
+      // Use selling price from importer (prioritizes discounted > price > computed from cost)
+      const cost = t.price || 0; // t.price contains dealer cost
+      const sellingPrice = (t as any).sellingPrice || (cost > 0 ? computePrice(cost) : 0);
 
       // Map normalized trailer to Prisma schema
       const trailerData = {
@@ -165,9 +174,9 @@ export async function POST(req: Request) {
         width: t.widthFeet || 0,
         height: t.heightFeet || null, // Use calculated height from parser
         rearDoorType: t.rearDoorType || null, // Use parsed rear door type
-        msrp: calculatedPrice, // MSRP = calculated price
-        salePrice: calculatedPrice, // Sale price = calculated price (override Excel)
-        cost: cost, // Store original cost
+        msrp: sellingPrice, // MSRP = selling price (from discounted/price or computed)
+        salePrice: sellingPrice, // Sale price = selling price
+        cost: cost, // Store dealer cost
         status: t.status || "available",
         images: finalImages, // Preserve existing OR use standard
         features: (t as any).standard_features || [], // Map standard_features to Prisma features field

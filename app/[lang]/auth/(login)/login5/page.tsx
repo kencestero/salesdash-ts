@@ -2,14 +2,17 @@
 
 import React, { useState, useEffect, useMemo, useRef, useTransition } from 'react';
 import Image from 'next/image';
+import { Icon } from "@iconify/react";
 import { signIn } from "next-auth/react";
 import { DEFAULT_LANG } from "@/lib/i18n";
 import { ShootingStars } from "@/components/ui/shooting-stars";
 import { AuroraBackground } from "@/components/ui/aurora-background";
+import { usePasskey } from "@/lib/hooks/usePasskey";
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [passwordType, setPasswordType] = useState('password');
   const [showForm, setShowForm] = useState(false);
   const [eyeDirection, setEyeDirection] = useState('center');
   const [showForgotPassword, setShowForgotPassword] = useState(false);
@@ -19,6 +22,7 @@ export default function LoginPage() {
   const [resetError, setResetError] = useState('');
   const [loginError, setLoginError] = useState('');
   const [isPending, startTransition] = useTransition();
+  const { loginWithPasskey, loading: passkeyLoading, error: passkeyError } = usePasskey();
   const logoRef = useRef<HTMLDivElement>(null);
 
   const starPositions = useMemo(() => {
@@ -96,6 +100,10 @@ export default function LoginPage() {
         setLoginError(response.error);
       }
     });
+  };
+
+  const togglePasswordType = () => {
+    setPasswordType(passwordType === "password" ? "text" : "password");
   };
 
   const handleForgotPassword = async (e: React.FormEvent) => {
@@ -269,20 +277,39 @@ export default function LoginPage() {
                   <label className="text-white/60 text-xs font-light tracking-wider uppercase block mb-2">
                     Password
                   </label>
-                  <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full rounded-xl px-5 py-4 text-white bg-black/20 border border-white/10 backdrop-blur-sm text-sm outline-none transition-all shadow-[inset_0_2px_4px_rgba(0,0,0,0.3),inset_0_-1px_2px_rgba(255,255,255,0.05)] focus:border-orange-500/60 focus:shadow-[0_0_20px_rgba(251,146,60,0.2),inset_0_2px_6px_rgba(0,0,0,0.4)] focus:bg-black/30"
-                    placeholder="••••••••"
-                    required
-                    disabled={isPending}
-                  />
+                  <div className="relative">
+                    <input
+                      type={passwordType}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="w-full rounded-xl px-5 py-4 pr-12 text-white bg-black/20 border border-white/10 backdrop-blur-sm text-sm outline-none transition-all shadow-[inset_0_2px_4px_rgba(0,0,0,0.3),inset_0_-1px_2px_rgba(255,255,255,0.05)] focus:border-orange-500/60 focus:shadow-[0_0_20px_rgba(251,146,60,0.2),inset_0_2px_6px_rgba(0,0,0,0.4)] focus:bg-black/30"
+                      placeholder="••••••••"
+                      required
+                      disabled={isPending}
+                    />
+                    <button
+                      type="button"
+                      onClick={togglePasswordType}
+                      className="absolute top-1/2 -translate-y-1/2 right-4 text-white/40 hover:text-white/70 transition-colors"
+                    >
+                      {passwordType === "password" ? (
+                        <Icon icon="heroicons:eye" className="w-5 h-5" />
+                      ) : (
+                        <Icon icon="heroicons:eye-slash" className="w-5 h-5" />
+                      )}
+                    </button>
+                  </div>
                 </div>
 
                 {loginError && (
                   <div className="text-red-400 text-sm text-center bg-red-500/10 border border-red-500/20 rounded-lg py-2 px-3">
                     {loginError}
+                  </div>
+                )}
+
+                {passkeyError && (
+                  <div className="text-red-400 text-sm text-center bg-red-500/10 border border-red-500/20 rounded-lg py-2 px-3">
+                    {passkeyError}
                   </div>
                 )}
 
@@ -318,6 +345,29 @@ export default function LoginPage() {
                     <path fill="#ffffff" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                   </svg>
                   Sign in with Google
+                </button>
+
+                {/* Passkey Button */}
+                <button
+                  type="button"
+                  onClick={async () => {
+                    if (!email) {
+                      setLoginError('Please enter your email first');
+                      return;
+                    }
+                    try {
+                      await loginWithPasskey(email, `/${DEFAULT_LANG}/dashboard`);
+                    } catch (err: any) {
+                      setLoginError(err.message || 'Passkey authentication failed');
+                    }
+                  }}
+                  disabled={isPending || passkeyLoading}
+                  className="w-full text-white font-semibold py-4 px-6 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 shadow-[0_4px_20px_rgba(147,51,234,0.4)] text-sm uppercase tracking-wider border-none cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_30px_rgba(147,51,234,0.6)] active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
+                >
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                  {passkeyLoading ? 'Authenticating...' : 'Sign in with Face/Touch ID'}
                 </button>
               </form>
 

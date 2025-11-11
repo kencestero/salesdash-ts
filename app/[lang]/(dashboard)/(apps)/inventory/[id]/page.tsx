@@ -286,6 +286,15 @@ export default function TrailerDetailPage() {
                     Contact us for pricing
                   </div>
                 </div>
+              ) : !trailer.salePrice || trailer.salePrice === 0 ? (
+                <div className="text-center py-4">
+                  <div className="text-3xl font-bold text-yellow-400 mb-2">
+                    Ask for Pricing
+                  </div>
+                  <div className="text-sm text-gray-400">
+                    Contact us for current pricing
+                  </div>
+                </div>
               ) : (
                 <div className="space-y-3">
                   <div>

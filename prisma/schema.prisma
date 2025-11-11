@@ -53,6 +53,7 @@ model User {
   resetToken       String?   @unique // Password reset token
   resetTokenExpiry DateTime? // Token expiration time
   createdAt        DateTime  @default(now())
+  currentChallenge String?   // WebAuthn challenge for passkey registration/authentication
   updatedAt        DateTime  @updatedAt
 
   accounts          Account[]
@@ -60,7 +61,10 @@ model User {
   profile           UserProfile?
   trailerRequests   TrailerRequest[]
   chatParticipants  ChatParticipant[]
+  credentials       WebAuthnCredential[]
   chatMessages      ChatMessage[]
+  sentMessages      InternalMessage[]  @relation("SentMessages")
+  receivedMessages  InternalMessage[]  @relation("ReceivedMessages")
 }
 
 model VerificationToken {
@@ -135,6 +139,10 @@ model UserProfile {
   // Manager System Controls
   isAvailableAsManager Boolean @default(false) // Can appear in manager dropdown during signup
   isActive            Boolean @default(true)   // Account active status (for soft-delete/suspension)
+
+  // User Presence Tracking (for chat online/offline status)
+  lastSeen   DateTime  @default(now())
+  isOnline   Boolean   @default(false)
 
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
@@ -867,8 +875,20 @@ model ChatThread {
   updatedAt DateTime @updatedAt
   subject   String?
 
+  // Group Chat Fields
+  isGroup      Boolean  @default(false)
+  groupName    String?
+  groupAvatar  String?
+  isPublic     Boolean  @default(false)
+  inviteToken  String?  @unique
+  createdBy    String?  // User ID who created the group
+
   participants ChatParticipant[]
   messages     ChatMessage[]
+
+  @@index([isGroup])
+  @@index([isPublic])
+  @@index([inviteToken])
 }
 
 model ChatParticipant {
@@ -877,6 +897,7 @@ model ChatParticipant {
   threadId String
   userId   String // maps to User.id
   user     User       @relation(fields: [userId], references: [id])
+  isAdmin  Boolean    @default(false) // Group chat admin privileges
 
   @@unique([threadId, userId])
   @@index([threadId])
@@ -927,4 +948,43 @@ model SyncLog {
   
   @@index([createdAt])
   @@index([source])
+}
+
+// WebAuthn Credentials (Passkeys)
+model WebAuthnCredential {
+  id             String   @id @default(cuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  credentialId   String   @unique    // base64url
+  publicKey      String               // base64url
+  counter        Int
+  deviceType     String?
+  backedUp       Boolean?
+  transports     String?              // json array string
+  createdAt      DateTime @default(now())
+  lastUsedAt     DateTime @updatedAt
+
+  @@index([userId])
+}
+
+// Internal Messaging System (for header inbox dropdown)
+model InternalMessage {
+  id          String   @id @default(cuid())
+  senderId    String
+  receiverId  String
+  subject     String?
+  message     String   @db.Text
+  read        Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  sender      User     @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver    User     @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@index([senderId])
+  @@index([receiverId])
+  @@index([read])
+  @@index([createdAt])
+  @@map("internal_messages")
 }

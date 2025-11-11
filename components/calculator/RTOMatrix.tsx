@@ -119,7 +119,7 @@ export function RTOMatrix({
         <h3 className="text-lg font-semibold text-foreground">
           Lease / Rent-To-Own Options
         </h3>
-        <span className="text-sm text-muted-foreground">
+        <span className="text-sm text-foreground/80">
           Includes $19.99/mo LDW + Fees
         </span>
       </div>
@@ -129,13 +129,13 @@ export function RTOMatrix({
         <table className="w-full">
           <thead>
             <tr className="border-b border-border bg-muted/50">
-              <th className="p-3 text-left text-sm font-medium text-muted-foreground">
+              <th className="p-3 text-left text-sm font-medium text-foreground/70">
                 Term ↓
               </th>
               {downPayments.map((down, index) => (
                 <th
                   key={`down-${index}-${down}`}
-                  className="p-3 text-right text-sm font-medium text-muted-foreground"
+                  className="p-3 text-right text-sm font-medium text-foreground/70"
                 >
                   {editingDownIndex === index ? (
                     <div className="flex items-center justify-end gap-1">
@@ -151,13 +151,14 @@ export function RTOMatrix({
                         onBlur={() => saveEditingDown(index)}
                         className="h-7 w-24 text-right text-sm"
                         autoFocus
+                        aria-label={`Edit down payment ${index + 1}`}
                       />
                     </div>
                   ) : (
                     <button
                       onClick={() => startEditingDown(index, down)}
                       className="hover:text-primary transition-colors cursor-pointer"
-                      title="Click to edit (max 70% of price)"
+                      aria-label={`Edit down payment: $${down.toLocaleString()} (max 70% of price)`}
                     >
                       ${down.toLocaleString()} ✏️
                     </button>
@@ -208,7 +209,7 @@ export function RTOMatrix({
                         <div className="text-2xl font-bold tabular-nums">
                           ${monthly.toFixed(2)}
                         </div>
-                        <div className="text-xs text-muted-foreground">
+                        <div className="text-xs text-foreground/70">
                           {term} months
                         </div>
                       </div>
@@ -228,6 +229,7 @@ export function RTOMatrix({
                           mode: "RTO",
                         });
                       }}
+                      aria-label={`Save ${term} month RTO option`}
                     >
                       💾
                     </Button>
@@ -241,14 +243,14 @@ export function RTOMatrix({
 
       {/* Info notice */}
       <div className="rounded-lg bg-muted/50 p-3">
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs text-foreground/80">
           ⚠️ <strong>Note:</strong> RTO terms are fixed at 24, 36, or 48 months.
           Custom terms are not available for Rent-To-Own financing.
         </p>
       </div>
 
       {/* Helper text */}
-      <p className="text-xs text-muted-foreground">
+      <p className="text-xs text-foreground/80">
         💡 Tip: Click down payment headers ✏️ to edit (max ${maxDownPayment.toLocaleString()} = 70% of price).
         Uncheck terms to hide. Click any payment to save as quote.
       </p>
@@ -259,7 +261,7 @@ export function RTOMatrix({
           {onSaveQuote && (
             <Button
               onClick={onSaveQuote}
-              className="flex-1 bg-green-500 hover:bg-green-600 text-white"
+              className="flex-1 bg-green-600 hover:bg-green-700 text-white"
             >
               ✅ Click to add RTO Scenario to Quote to share
             </Button>
