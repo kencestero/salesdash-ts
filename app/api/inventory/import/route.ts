@@ -4,6 +4,8 @@ import { pickStandardImage } from "@/lib/inventory/image-map";
 import { detectDiamond, normalizeDiamond } from "@/lib/inventory/importers/diamond";
 import { detectQuality, normalizeQuality } from "@/lib/inventory/importers/quality";
 import { computePrice } from "@/lib/pricing";
+import { ImportInventorySchema } from "@/lib/validation";
+import { rateLimit } from "@/lib/ratelimit";
 import { requireRole } from "@/lib/authz";
 
 export const runtime = "nodejs";
@@ -46,9 +48,31 @@ export async function POST(req: Request) {
       throw error;
     }
 
+    // Rate limiting: extract IP from headers
+    const ip = req.headers.get('x-forwarded-for')?.split(',')[0] ||
+               req.headers.get('x-real-ip') ||
+               'anon:import';
+
+    if (!rateLimit(`import:${ip}`, 10, 60_000)) {
+      return new Response("Too Many Requests", { status: 429 });
+    }
+
     // Extract supplier query param
     const url = new URL(req.url);
     const supplierParam = url.searchParams.get('supplier'); // 'diamond', 'quality', or 'panther'
+
+    // Validate supplier param if provided
+    if (supplierParam) {
+      const validation = ImportInventorySchema.safeParse({
+        supplier: supplierParam.toUpperCase()
+      });
+      if (!validation.success) {
+        return NextResponse.json(
+          { ok: false, error: "Invalid supplier. Must be DIAMOND or QUALITY", details: validation.error.format() },
+          { status: 400 }
+        );
+      }
+    }
 
     const form = await req.formData();
     const file = form.get('file') as File | null;

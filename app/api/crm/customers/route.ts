@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { CreateCustomerSchema } from "@/lib/validation";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -115,6 +116,16 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
+
+    // Validate with Zod schema
+    const validation = CreateCustomerSchema.safeParse(body);
+    if (!validation.success) {
+      return NextResponse.json(
+        { error: "Validation failed", details: validation.error.format() },
+        { status: 400 }
+      );
+    }
+
     const {
       firstName,
       lastName,
@@ -133,15 +144,7 @@ export async function POST(req: NextRequest) {
       notes,
       salesRepName,      // Sales Rep assignment
       assignedToName,    // Manager assignment
-    } = body;
-
-    // Validation
-    if (!firstName || !lastName || !email || !phone) {
-      return NextResponse.json(
-        { error: "Missing required fields: firstName, lastName, email, phone" },
-        { status: 400 }
-      );
-    }
+    } = validation.data;
 
     // Check if customer already exists
     const existing = await prisma.customer.findUnique({
