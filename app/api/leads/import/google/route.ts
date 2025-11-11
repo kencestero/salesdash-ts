@@ -37,33 +37,65 @@ export async function POST() {
       const lead = rowToLead(r);
       if (!lead.email && !lead.phone) { skipped++; continue; }
 
-      const importHash = hashLead(lead);
+      // Use email as unique identifier for Customer
       try {
-        await prisma.lead.upsert({
-          where: { importHash },
-          update: {
-            name: lead.name,
-            email: lead.email,
-            phone: lead.phone,
-            zip: lead.zip,
-            city: lead.city,
-            state: lead.state,
-            note: lead.note,
-          },
-          create: {
-            importHash,
-            source: "google-sheet",
-            name: lead.name,
-            email: lead.email,
-            phone: lead.phone,
-            zip: lead.zip,
-            city: lead.city,
-            state: lead.state,
-            note: lead.note,
-          },
-        });
-        imported++;
-      } catch {
+        if (lead.email) {
+          // Import to Customer table for CRM display
+          await prisma.customer.upsert({
+            where: { email: lead.email },
+            update: {
+              firstName: lead.name?.split(' ')[0] || 'Unknown',
+              lastName: lead.name?.split(' ').slice(1).join(' ') || '',
+              phone: lead.phone || null,
+              city: lead.city || null,
+              state: lead.state || null,
+              zipcode: lead.zip || null,
+              notes: lead.note || null,
+              source: "google-sheet",
+              status: "lead",
+            },
+            create: {
+              firstName: lead.name?.split(' ')[0] || 'Unknown',
+              lastName: lead.name?.split(' ').slice(1).join(' ') || '',
+              email: lead.email,
+              phone: lead.phone || null,
+              city: lead.city || null,
+              state: lead.state || null,
+              zipcode: lead.zip || null,
+              notes: lead.note || null,
+              source: "google-sheet",
+              status: "lead",
+            },
+          });
+          imported++;
+        } else if (lead.phone) {
+          // Try to find by phone if no email
+          const existing = await prisma.customer.findFirst({
+            where: { phone: lead.phone },
+          });
+
+          if (!existing) {
+            await prisma.customer.create({
+              data: {
+                firstName: lead.name?.split(' ')[0] || 'Unknown',
+                lastName: lead.name?.split(' ').slice(1).join(' ') || '',
+                email: lead.email || `noemail_${Date.now()}@placeholder.com`,
+                phone: lead.phone,
+                city: lead.city || null,
+                state: lead.state || null,
+                zipcode: lead.zip || null,
+                notes: lead.note || null,
+                source: "google-sheet",
+                status: "lead",
+              },
+            });
+            imported++;
+          } else {
+            skipped++;
+          }
+        }
+      } catch (e) {
+        console.error('Import error:', e);
         skipped++;
       }
     }
