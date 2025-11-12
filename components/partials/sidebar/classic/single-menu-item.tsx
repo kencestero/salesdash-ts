@@ -10,50 +10,62 @@ const SingleMenuItem = ({ item, collapsed, hovered, trans }: {
   hovered: boolean;
   trans: any
 }) => {
-  const { badge, href, title } = item;
+  const { badge, href, title, disabled } = item;
 
   const pathname = usePathname();
   const locationName = getDynamicPath(pathname);
-  return (
-    <Link href={href}>
-      <>
-        {!collapsed || hovered ? (
-          <div
+
+  const content = (
+    <>
+      {!collapsed || hovered ? (
+        <div
+          className={cn(
+            "flex  gap-3 group  text-default-700 dark:text-default-950  font-medium  text-sm capitalize px-[10px] py-3 rounded",
+            {
+              "bg-primary text-primary-foreground ": !disabled && isLocationMatch(
+                href,
+                locationName
+              ),
+              "cursor-pointer hover:bg-primary hover:text-primary-foreground": !disabled,
+              "opacity-50 cursor-not-allowed": disabled,
+            }
+          )}
+        >
+          <span className="flex-grow-0">
+            <item.icon className="w-5 h-5  " />
+          </span>
+          <div className="text-box flex-grow">{translate(title, trans)}</div>
+          {badge && <Badge className=" rounded">{item.badge}</Badge>}
+        </div>
+      ) : (
+        <div>
+          <span
             className={cn(
-              "flex  gap-3 group  text-default-700 dark:text-default-950  font-medium  text-sm capitalize px-[10px] py-3 rounded cursor-pointer hover:bg-primary hover:text-primary-foreground",
+              "h-12 w-12 mx-auto rounded-md  transition-all duration-300 inline-flex flex-col items-center justify-center  relative  ",
               {
-                "bg-primary text-primary-foreground ": isLocationMatch(
+                "bg-primary text-primary-foreground ": !disabled && isLocationMatch(
                   href,
                   locationName
                 ),
+                " text-default-600   ": !disabled && !isLocationMatch(href, locationName),
+                "opacity-50 cursor-not-allowed": disabled,
               }
             )}
           >
-            <span className="flex-grow-0">
-              <item.icon className="w-5 h-5  " />
-            </span>
-            <div className="text-box flex-grow">{translate(title, trans)}</div>
-            {badge && <Badge className=" rounded">{item.badge}</Badge>}
-          </div>
-        ) : (
-          <div>
-            <span
-              className={cn(
-                "h-12 w-12 mx-auto rounded-md  transition-all duration-300 inline-flex flex-col items-center justify-center  relative  ",
-                {
-                  "bg-primary text-primary-foreground ": isLocationMatch(
-                    href,
-                    locationName
-                  ),
-                  " text-default-600   ": !isLocationMatch(href, locationName),
-                }
-              )}
-            >
-              <item.icon className="w-6 h-6" />
-            </span>
-          </div>
-        )}
-      </>
+            <item.icon className="w-6 h-6" />
+          </span>
+        </div>
+      )}
+    </>
+  );
+
+  if (disabled) {
+    return <div>{content}</div>;
+  }
+
+  return (
+    <Link href={href}>
+      {content}
     </Link>
   );
 };

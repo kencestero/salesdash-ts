@@ -10,7 +10,32 @@ function NavLink({ childItem, locationName, trans }: {
   locationName: string;
   trans: any
 }) {
-  const { href, icon, title, badge } = childItem;
+  const { href, icon, title, badge, disabled } = childItem;
+
+  const content = (
+    <>
+      {icon && (
+        <span className="inline-flex items-center   flex-grow-0">
+          <childItem.icon className=" h-5 w-5" />
+        </span>
+      )}
+      <div className="flex-grow truncate">{translate(title, trans)}</div>
+      {badge && <Badge className="rounded h-min ">{badge}</Badge>}
+    </>
+  );
+
+  if (disabled) {
+    return (
+      <div
+        className={cn(
+          "flex  font-medium  text-sm capitalize px-[10px] py-3 gap-3 rounded-md opacity-50 cursor-not-allowed text-default-600"
+        )}
+      >
+        {content}
+      </div>
+    );
+  }
+
   return (
     <Link
       href={href}
@@ -25,13 +50,7 @@ function NavLink({ childItem, locationName, trans }: {
         }
       )}
     >
-      {icon && (
-        <span className="inline-flex items-center   flex-grow-0">
-          <childItem.icon className=" h-5 w-5" />
-        </span>
-      )}
-      <div className="flex-grow truncate">{translate(title, trans)}</div>
-      {badge && <Badge className="rounded h-min ">{badge}</Badge>}
+      {content}
     </Link>
   );
 }
