@@ -1,11 +1,13 @@
 /**
- * Google Sheets API Client for SalesDash (Header-Mapped Sync)
+ * Google Sheets API Client for SalesDash (Bidirectional Sync)
  *
  * Connects to Google Sheets to sync CRM leads automatically
  * Uses header-based column mapping instead of hardcoded indices
+ * BIDIRECTIONAL: CRM changes sync back to Google Sheets
  */
 
 import { google } from 'googleapis';
+import type { Customer } from '@prisma/client';
 
 // Google Sheets configuration (HARD-CODED FOR TODAY - 848 LEAD IMPORT)
 const SHEET_ID = '1T9PRlXBS1LBlB5VL9nwn_m3AIcT6KIjqg5lk3Xy1le8';
@@ -26,7 +28,7 @@ function getGoogleSheetsClient() {
       client_email: process.env.GOOGLE_SHEETS_CLIENT_EMAIL,
       private_key: process.env.GOOGLE_SHEETS_PRIVATE_KEY.replace(/\\n/g, '\n'),
     },
-    scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
+    scopes: ['https://www.googleapis.com/auth/spreadsheets'], // FULL READ/WRITE ACCESS
   });
 
   return google.sheets({ version: 'v4', auth });
@@ -133,25 +135,25 @@ export async function fetchLeadsFromSheet() {
 
       // Parse the row data
       const lead = {
-        firstName: getColumn('First Name') || getColumn('first') || 'Unknown',
-        lastName: getColumn('Last Name') || getColumn('last') || '',
+        firstName: getColumn('Customer First Name') || getColumn('First Name') || getColumn('first') || 'Unknown',
+        lastName: getColumn('Customer Last Name') || getColumn('Last Name') || getColumn('last') || '',
         email: getColumn('Email') || null,
-        phone: getColumn('Phone') || getColumn('Phone Number') || null,
+        phone: getColumn('Customer Phone Number') || getColumn('Phone Number') || getColumn('Phone') || null,
         companyName: getColumn('Company') || getColumn('Company Name') || null,
         city: getColumn('City') || null,
         state: getColumn('State') || null,
-        zip: getColumn('ZIP') || getColumn('Zip Code') || null,
+        zip: getColumn('Zip Code') || getColumn('ZIP') || null,
         address: getColumn('Address') || null,
         status: getColumn('Status') || 'lead', // Column D
         source: getColumn('Source') || 'Google Sheets Import',
 
         // CRITICAL: These are the fields the user wants displayed
-        salesRepName: getColumn('Sales Rep') || getColumn('Rep') || null,  // Column B
+        salesRepName: getColumn('Rep Full Name') || getColumn('Sales Rep') || getColumn('Rep') || null,  // Column B
         assignedToName: getColumn('Assigned Manager') || getColumn('Manager') || getColumn('Assigned To') || null,  // Column F
 
         // Finance-related fields
         applied: getColumn('Applied')?.toLowerCase() === 'yes' || getColumn('Applied')?.toLowerCase() === 'true',
-        dateApplied: getColumn('Date Applied') || null,
+        dateApplied: getColumn('Date of Submission') || getColumn('Date Applied') || null,
 
         // Notes fields
         managerNotes: getColumn('Manager Notes') || getColumn('Notes (Manager)') || null,

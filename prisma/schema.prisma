@@ -66,6 +66,7 @@ model User {
   sentMessages      InternalMessage[]  @relation("SentMessages")
   receivedMessages  InternalMessage[]  @relation("ReceivedMessages")
   createdLeads      Lead[]             @relation("CreatedLeads")
+  pushSubscriptions PushSubscription[] @relation("PushSubscriptions")
 }
 
 model VerificationToken {
@@ -253,6 +254,18 @@ model Customer {
   source          String?
   status          String   @default("new") // "new", "contacted", "qualified", "applied", "approved", "dead", "won"
 
+  // Advanced Lead Tracking (VinSolutions-level features)
+  leadScore       Int      @default(0) // 0-100 scoring system
+  temperature     String   @default("warm") // "hot", "warm", "cold", "dead"
+  priority        String   @default("medium") // "low", "medium", "high", "urgent"
+  daysInStage     Int      @default(0) // Days in current status
+  responseTime    Int?     // Minutes from lead creation to first contact
+  lastActivityAt  DateTime? // Last time ANY activity occurred (call, email, note, etc.)
+
+  // Bidirectional Sync Tracking
+  lastSyncedToSheets DateTime? // When we last synced this record to Google Sheets
+  syncStatus      String   @default("pending") // "pending", "synced", "failed"
+
   // Trailer Requirements - NEW FIELDS
   trailerSize     String?
   trailerType     String?
@@ -293,6 +306,13 @@ model Customer {
   @@index([assignedToId])
   @@index([nextFollowUpDate])
   @@index([hasAppliedCredit])
+  @@index([leadScore])
+  @@index([temperature])
+  @@index([priority])
+  @@index([lastActivityAt])
+  @@index([syncStatus])
+  @@index([assignedToId, status]) // Composite: for rep's pipeline view
+  @@index([temperature, leadScore]) // Composite: for hot leads dashboard
 }
 
 // Deal/Opportunity Tracking
@@ -897,12 +917,13 @@ model ChatThread {
 }
 
 model ChatParticipant {
-  id       String     @id @default(cuid())
-  thread   ChatThread @relation(fields: [threadId], references: [id])
-  threadId String
-  userId   String // maps to User.id
-  user     User       @relation(fields: [userId], references: [id])
-  isAdmin  Boolean    @default(false) // Group chat admin privileges
+  id         String     @id @default(cuid())
+  thread     ChatThread @relation(fields: [threadId], references: [id])
+  threadId   String
+  userId     String // maps to User.id
+  user       User       @relation(fields: [userId], references: [id])
+  isAdmin    Boolean    @default(false) // Group chat admin privileges
+  lastReadAt DateTime?  // Track when user last viewed this thread (for unread counts)
 
   @@unique([threadId, userId])
   @@index([threadId])
@@ -1026,4 +1047,30 @@ model LeadEvent {
   lead      Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
 
   @@index([leadId])
+}
+
+// Push Notification Subscriptions
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation("PushSubscriptions", fields: [userId], references: [id], onDelete: Cascade)
+
+  endpoint  String   @unique
+  p256dh    String   // Public key
+  auth      String   // Auth secret
+
+  // Preferences
+  emailNotifications  Boolean  @default(true)
+  pushNotifications   Boolean  @default(true)
+  notifyNewLeads      Boolean  @default(true)
+  notifyStatusChanges Boolean  @default(true)
+  notifyStaleLeads    Boolean  @default(true)
+  notifyDailyDigest   Boolean  @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  lastUsedAt DateTime?
+
+  @@index([userId])
+  @@index([endpoint])
 }

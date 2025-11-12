@@ -82,7 +82,7 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    // 5) Verify user is a participant in this thread
+    // 5) Verify user is a participant in this thread and mark as read
     const participant = await prisma.chatParticipant.findFirst({
       where: {
         threadId: threadId!,
@@ -96,6 +96,16 @@ export async function GET(req: NextRequest) {
         { status: 403 }
       );
     }
+
+    // Mark thread as read by updating lastReadAt
+    await prisma.chatParticipant.update({
+      where: {
+        id: participant.id,
+      },
+      data: {
+        lastReadAt: new Date(),
+      },
+    });
 
     // 6) Get thread with participants info
     const thread = await prisma.chatThread.findUnique({
