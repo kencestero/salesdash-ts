@@ -31,7 +31,6 @@ export default function SheetsSyncPage() {
       toast({
         title: "Sync Failed",
         description: "Failed to sync with Google Sheets",
-        variant: "destructive",
       });
     } finally {
       setSyncing(false);

@@ -27,7 +27,7 @@ export default function BulkActionsPage() {
           <BulkActionsToolbar
             selectedIds={selectedIds}
             onClearSelection={() => setSelectedIds([])}
-            onActionComplete={() => {
+            onBulkComplete={() => {
               setSelectedIds([]);
               // Refresh data logic here
             }}

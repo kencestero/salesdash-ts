@@ -24,8 +24,8 @@ export default function QuickActionsPage() {
           <QuickActions
             customerId="sample-id"
             customerName="Sample Customer"
-            customerEmail="sample@example.com"
-            customerPhone="555-0123"
+            email="sample@example.com"
+            phone="555-0123"
           />
 
           <div className="mt-6 text-sm text-muted-foreground">
