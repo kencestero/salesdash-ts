@@ -7,11 +7,11 @@ import { Metadata } from "next";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import PipelineProDemoView from "./page-view";
+import PipelineProDemoViewV2 from "./page-view-v2";
 
 export const metadata: Metadata = {
-  title: "Pipeline Pro Demo | SalesDash CRM",
-  description: "Professional CRM pipeline redesign demonstration with enhanced features and modern UI",
+  title: "Pipeline Pro Demo V2 | SalesDash CRM",
+  description: "Enhanced CRM pipeline with theme colors, horizontal cards, table view, and required call notes",
 };
 
 export default async function PipelineProDemoPage() {
@@ -21,5 +21,5 @@ export default async function PipelineProDemoPage() {
     redirect("/en/login");
   }
 
-  return <PipelineProDemoView />;
+  return <PipelineProDemoViewV2 />;
 }
