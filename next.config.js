@@ -82,13 +82,27 @@ const nextConfig = {
   },
   async redirects() {
     return [
+      // Main pages
+      { source: '/dashboard', destination: '/en/dashboard', permanent: false },
+      { source: '/chat', destination: '/en/chat', permanent: false },
+      { source: '/calendar', destination: '/en/calendar', permanent: false },
       { source: '/inventory', destination: '/en/inventory', permanent: false },
       { source: '/finance/compare', destination: '/en/finance/compare', permanent: false },
       { source: '/credit', destination: '/en/credit', permanent: false },
       { source: '/profile', destination: '/en/profile', permanent: false },
       { source: '/user-management', destination: '/en/user-management', permanent: false },
-      { source: '/crm/customers', destination: '/en/crm/customers', permanent: false },
       { source: '/secret-code-instructions', destination: '/en/secret-code-instructions', permanent: false },
+      // CRM pages
+      { source: '/crm/customers', destination: '/en/crm/customers', permanent: false },
+      { source: '/crm/dashboard', destination: '/en/crm/dashboard', permanent: false },
+      { source: '/crm/pipeline', destination: '/en/crm/pipeline', permanent: false },
+      { source: '/crm/duplicates', destination: '/en/crm/duplicates', permanent: false },
+      { source: '/crm/search', destination: '/en/crm/search', permanent: false },
+      { source: '/crm/bulk-actions', destination: '/en/crm/bulk-actions', permanent: false },
+      { source: '/crm/quick-actions', destination: '/en/crm/quick-actions', permanent: false },
+      { source: '/crm/lead-scoring', destination: '/en/crm/lead-scoring', permanent: false },
+      { source: '/crm/follow-ups', destination: '/en/crm/follow-ups', permanent: false },
+      { source: '/crm/sheets-sync', destination: '/en/crm/sheets-sync', permanent: false },
     ];
   },
 };
