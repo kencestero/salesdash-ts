@@ -85,10 +85,13 @@ export default function PipelineViewEnhancedV2({ session }: PipelineViewProps) {
       const response = await fetch("/api/crm/customers");
 
       if (!response.ok) {
-        throw new Error("Failed to fetch leads");
+        const errorText = await response.text();
+        console.error("API Error:", response.status, errorText);
+        throw new Error(`Failed to fetch leads: ${response.status} - ${errorText}`);
       }
 
       const data = await response.json();
+      console.log("Fetched customers:", data.customers?.length || 0);
 
       // Transform customers to include all V2 fields
       const transformedLeads = data.customers.map((customer: any) => ({
@@ -130,7 +133,8 @@ export default function PipelineViewEnhancedV2({ session }: PipelineViewProps) {
 
       toast({
         title: "Error",
-        description: "Failed to load leads. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to load leads. Please try again.",
+        variant: "destructive",
       });
     } finally {
       setIsLoading(false);

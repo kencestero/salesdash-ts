@@ -1,4 +1,4 @@
-import { Search, Zap, Star, RefreshCw, Calculator, GraduationCap, Sparkles } from "lucide-react";
+import { Search, Zap, Star, RefreshCw, Calculator, GraduationCap, Sparkles, Package } from "lucide-react";
 import {
   Application,
   Chart,
@@ -130,11 +130,6 @@ export const menusConfig = {
         icon: ChartBar,
         child: [
           {
-            title: "CRM Dashboard",
-            icon: ChartBar,
-            href: "/crm/dashboard",
-          },
-          {
             title: "Pipeline Board",
             icon: ClipBoard,
             href: "/crm/pipeline",
@@ -201,6 +196,11 @@ export const menusConfig = {
             icon: Files,
             href: "/credit",
           },
+          {
+            title: "Delivery Log",
+            icon: Package,
+            href: "/deliveries",
+          },
         ],
       },
       {
@@ -255,11 +255,6 @@ export const menusConfig = {
       {
         title: "CRM",
         isHeader: true,
-      },
-      {
-        title: "CRM Dashboard",
-        icon: ChartBar,
-        href: "/crm/dashboard",
       },
       {
         title: "Pipeline Board",
@@ -319,6 +314,11 @@ export const menusConfig = {
         title: "Credit Application",
         icon: Files,
         href: "/credit",
+      },
+      {
+        title: "Delivery Log",
+        icon: Package,
+        href: "/deliveries",
       },
       {
         title: "APPLICATION",
