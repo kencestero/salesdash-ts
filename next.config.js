@@ -103,6 +103,7 @@ const nextConfig = {
       { source: '/crm/lead-scoring', destination: '/en/crm/lead-scoring', permanent: false },
       { source: '/crm/follow-ups', destination: '/en/crm/follow-ups', permanent: false },
       { source: '/crm/sheets-sync', destination: '/en/crm/sheets-sync', permanent: false },
+      { source: '/crm/pipeline-pro-demo', destination: '/en/crm/pipeline-pro-demo', permanent: false },
     ];
   },
 };

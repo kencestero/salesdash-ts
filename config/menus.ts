@@ -1,4 +1,4 @@
-import { Search, Zap, Star, RefreshCw, Calculator, GraduationCap } from "lucide-react";
+import { Search, Zap, Star, RefreshCw, Calculator, GraduationCap, Sparkles } from "lucide-react";
 import {
   Application,
   Chart,
@@ -138,6 +138,12 @@ export const menusConfig = {
             title: "Pipeline Board",
             icon: ClipBoard,
             href: "/crm/pipeline",
+          },
+          {
+            title: "Pipeline Pro Demo",
+            icon: Sparkles,
+            href: "/crm/pipeline-pro-demo",
+            badge: "NEW",
           },
           {
             title: "Duplicate Manager",
