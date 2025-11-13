@@ -39,6 +39,44 @@ export default function PipelineViewEnhancedV2({ session }: PipelineViewProps) {
   const [priorityFilter, setPriorityFilter] = useState<string>("all");
   const [viewMode, setViewMode] = useState<ViewMode>("list"); // Default to list view
 
+  // Map Google Sheets statuses to pipeline statuses
+  const normalizeStatus = (status: string): string => {
+    if (!status) return "new";
+
+    const statusLower = status.toLowerCase().trim();
+
+    // Direct matches (already normalized)
+    if (["new", "contacted", "qualified", "applied", "approved", "won", "dead"].includes(statusLower)) {
+      return statusLower;
+    }
+
+    // Google Sheets status mappings
+    const statusMap: Record<string, string> = {
+      "needs attention – no contact": "new",
+      "needs attention - no contact": "new",
+      "need": "new",
+      "lead": "new",
+      "contact": "contacted",
+      "call": "contacted",
+      "qualify": "qualified",
+      "qualified lead": "qualified",
+      "apply": "applied",
+      "application": "applied",
+      "approve": "approved",
+      "approved financing": "approved",
+      "win": "won",
+      "won deal": "won",
+      "sold": "won",
+      "close": "won",
+      "closed": "won",
+      "dead lead": "dead",
+      "lost": "dead",
+      "declined": "dead",
+    };
+
+    return statusMap[statusLower] || "new";
+  };
+
   // Fetch leads from API
   const fetchLeads = useCallback(async () => {
     try {
@@ -78,7 +116,7 @@ export default function PipelineViewEnhancedV2({ session }: PipelineViewProps) {
         tags: customer.tags || [],
         trailerInfo: customer.trailerSize || customer.trailerType,
         notes: customer.notes || customer.repNotes || customer.managerNotes || "",
-        status: customer.status || "new",
+        status: normalizeStatus(customer.status || "new"),
         applied: customer.applied || false,
         assignedToName: customer.assignedToName,
         trailerSize: customer.trailerSize,
