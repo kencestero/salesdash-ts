@@ -67,6 +67,7 @@ model User {
   receivedMessages  InternalMessage[]  @relation("ReceivedMessages")
   createdLeads      Lead[]             @relation("CreatedLeads")
   pushSubscriptions PushSubscription[] @relation("PushSubscriptions")
+  deliveryRecords   DeliveryRecord[]   @relation("CreatedDeliveryRecords")
 }
 
 model VerificationToken {
@@ -313,6 +314,30 @@ model Customer {
   @@index([syncStatus])
   @@index([assignedToId, status]) // Composite: for rep's pipeline view
   @@index([temperature, leadScore]) // Composite: for hot leads dashboard
+}
+
+// Delivery Records - Track actual delivered trailers
+model DeliveryRecord {
+  id                  String   @id @default(cuid())
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  // Basic delivery information
+  customerName        String
+  trailerIdentifier   String   // VIN, stock number, or unit number (string for now)
+  deliveryDate        DateTime
+
+  // Financial tracking
+  commissionAmount    Decimal  @db.Decimal(12, 2)
+  profitAmount        Decimal  @db.Decimal(12, 2)
+
+  // Who logged this delivery
+  createdByUserId     String?
+  createdByUser       User?    @relation("CreatedDeliveryRecords", fields: [createdByUserId], references: [id])
+
+  @@index([createdByUserId])
+  @@index([deliveryDate])
+  @@index([trailerIdentifier])
 }
 
 // Deal/Opportunity Tracking
