@@ -1,17 +1,17 @@
 /**
  * CRM Pipeline Page (Server Component)
- * Fetches initial data and renders the pipeline view
+ * Enhanced with 3-way view toggle: Kanban | List | Table
  */
 
 import { Metadata } from "next";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import PipelineView from "./page-view";
+import PipelineViewEnhancedV2 from "./page-view-enhanced-v2";
 
 export const metadata: Metadata = {
   title: "Sales Pipeline | SalesDash CRM",
-  description: "Visual kanban board for managing your sales pipeline",
+  description: "Manage your sales pipeline with Kanban board, list view, and table view",
 };
 
 export default async function PipelinePage() {
@@ -21,5 +21,5 @@ export default async function PipelinePage() {
     redirect("/en/login");
   }
 
-  return <PipelineView session={session} />;
+  return <PipelineViewEnhancedV2 session={session} />;
 }
