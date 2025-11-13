@@ -13,6 +13,44 @@ import { buildPermissionContext, applyPermissionFilter } from "@/lib/crm-permiss
 
 export const dynamic = "force-dynamic";
 
+// Normalize Google Sheets statuses to pipeline statuses
+function normalizeStatus(status: string): string {
+  if (!status) return "new";
+
+  const statusLower = status.toLowerCase().trim();
+
+  // Direct matches (already normalized)
+  if (["new", "contacted", "qualified", "applied", "approved", "won", "dead"].includes(statusLower)) {
+    return statusLower;
+  }
+
+  // Google Sheets status mappings
+  const statusMap: Record<string, string> = {
+    "needs attention – no contact": "new",
+    "needs attention - no contact": "new",
+    "need": "new",
+    "lead": "new",
+    "contact": "contacted",
+    "call": "contacted",
+    "qualify": "qualified",
+    "qualified lead": "qualified",
+    "apply": "applied",
+    "application": "applied",
+    "approve": "approved",
+    "approved financing": "approved",
+    "win": "won",
+    "won deal": "won",
+    "sold": "won",
+    "close": "won",
+    "closed": "won",
+    "dead lead": "dead",
+    "lost": "dead",
+    "declined": "dead",
+  };
+
+  return statusMap[statusLower] || "new";
+}
+
 export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -58,15 +96,15 @@ export async function GET(req: NextRequest) {
     // Calculate metrics
     const totalLeads = customers.length;
 
-    // Leads by status
+    // Leads by status (with normalization)
     const leadsByStatus = {
-      new: customers.filter((c) => c.status === "new").length,
-      contacted: customers.filter((c) => c.status === "contacted").length,
-      qualified: customers.filter((c) => c.status === "qualified").length,
-      applied: customers.filter((c) => c.status === "applied").length,
-      approved: customers.filter((c) => c.status === "approved").length,
-      won: customers.filter((c) => c.status === "won").length,
-      dead: customers.filter((c) => c.status === "dead").length,
+      new: customers.filter((c) => normalizeStatus(c.status) === "new").length,
+      contacted: customers.filter((c) => normalizeStatus(c.status) === "contacted").length,
+      qualified: customers.filter((c) => normalizeStatus(c.status) === "qualified").length,
+      applied: customers.filter((c) => normalizeStatus(c.status) === "applied").length,
+      approved: customers.filter((c) => normalizeStatus(c.status) === "approved").length,
+      won: customers.filter((c) => normalizeStatus(c.status) === "won").length,
+      dead: customers.filter((c) => normalizeStatus(c.status) === "dead").length,
     };
 
     // Leads by temperature
@@ -131,7 +169,7 @@ export async function GET(req: NextRequest) {
         teamPerformance[repName].hotLeads++;
       }
 
-      if (customer.status === "won") {
+      if (normalizeStatus(customer.status) === "won") {
         teamPerformance[repName].wonLeads++;
       }
 
@@ -221,7 +259,7 @@ export async function GET(req: NextRequest) {
         phone: lead.phone,
         leadScore: lead.leadScore,
         temperature: lead.temperature,
-        status: lead.status,
+        status: normalizeStatus(lead.status),
         daysInStage: lead.daysInStage,
         salesRepName: lead.salesRepName,
       })),
