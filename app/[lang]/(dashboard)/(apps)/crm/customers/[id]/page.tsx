@@ -27,6 +27,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -69,10 +71,11 @@ interface Customer {
   lastContactedAt?: string;
   // New fields
   trailerSize?: string;
+  trailerType?: string;
   financingType?: string;
   stockNumber?: string;
   isFactoryOrder?: boolean;
-  appliedDate?: string;
+  dateApplied?: string;
   assignedManager?: string;
   _count: {
     deals: number;
@@ -119,6 +122,9 @@ export default function CustomerProfilePage() {
   const [callNotes, setCallNotes] = useState("");
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showCallOutcomeDialog, setShowCallOutcomeDialog] = useState(false);
+  const [callOutcome, setCallOutcome] = useState<'left_voice' | 'spoke_to_customer' | 'no_voicemail'>('spoke_to_customer');
+  const [callOutcomeNotes, setCallOutcomeNotes] = useState("");
 
   // Fetch customer data
   useEffect(() => {
@@ -154,6 +160,14 @@ export default function CustomerProfilePage() {
 
   const handleSaveNotes = async () => {
     if (!customer) return;
+    if (!notes || !notes.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter some notes before saving",
+        variant: "destructive",
+      });
+      return;
+    }
 
     try {
       const response = await fetch(`/api/crm/customers/${customer.id}`, {
@@ -166,28 +180,78 @@ export default function CustomerProfilePage() {
         throw new Error("Failed to update notes");
       }
 
-      // Log activity for notes update
+      // Log activity for notes update with actual note content
       await fetch('/api/crm/activities', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           customerId: customer.id,
           type: 'note',
-          subject: 'Notes Updated',
-          description: 'Customer notes were updated',
+          subject: 'Notes Added',
+          description: notes, // Show the actual notes content
         }),
       });
 
       toast({
         title: "Success",
-        description: "Notes updated successfully",
+        description: "Notes saved and added to Activity Timeline",
       });
+      setNotes(''); // Clear the notes field after saving
       fetchCustomer();
     } catch (error) {
       console.error("Error updating notes:", error);
       toast({
         title: "Error",
         description: "Failed to update notes",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleLogCallOutcome = async () => {
+    if (!customer) return;
+
+    try {
+      // Map outcome to readable text
+      const outcomeText = {
+        'left_voice': 'Left Voicemail',
+        'spoke_to_customer': 'Spoke to Customer',
+        'no_voicemail': 'Unable to Leave Voicemail'
+      }[callOutcome];
+
+      // Build description with outcome and notes
+      let description = `${outcomeText}`;
+      if (callOutcomeNotes.trim()) {
+        description += ` - ${callOutcomeNotes}`;
+      }
+
+      // Log the call activity
+      await fetch('/api/crm/activities', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customerId: customer.id,
+          type: 'call',
+          subject: `Phone Call: ${outcomeText}`,
+          description: description,
+        }),
+      });
+
+      toast({
+        title: "Success",
+        description: "Call logged successfully",
+      });
+
+      // Reset and close dialog
+      setCallOutcome('spoke_to_customer');
+      setCallOutcomeNotes('');
+      setShowCallOutcomeDialog(false);
+      fetchCustomer();
+    } catch (error) {
+      console.error("Error logging call:", error);
+      toast({
+        title: "Error",
+        description: "Failed to log call",
         variant: "destructive",
       });
     }
@@ -561,10 +625,10 @@ export default function CustomerProfilePage() {
                 </div>
               )}
 
-              {customer.appliedDate && (
+              {customer.dateApplied && (
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">Applied Date</span>
-                  <span className="text-sm font-medium">{formatDate(customer.appliedDate)}</span>
+                  <span className="text-sm font-medium">{formatDate(customer.dateApplied)}</span>
                 </div>
               )}
 
@@ -623,8 +687,7 @@ export default function CustomerProfilePage() {
               className="w-full justify-start"
               variant="outline"
               disabled={!customer.phone}
-              onClick={async () => {
-                // Actually call the customer!
+              onClick={() => {
                 if (!customer.phone) {
                   toast({
                     title: "❌ No Phone Number",
@@ -634,47 +697,13 @@ export default function CustomerProfilePage() {
                   return;
                 }
 
-                try {
-                  const response = await fetch('/api/crm/call', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                      phone: customer.phone,
-                      customerName: `${customer.firstName} ${customer.lastName}`
-                    }),
-                  });
-
-                  if (response.ok) {
-                    toast({
-                      title: "📞 Call Initiated",
-                      description: `Calling ${customer.firstName} ${customer.lastName} at ${customer.phone}`,
-                    });
-
-                    // Open phone dialer on mobile
-                    if (typeof window !== 'undefined' && customer.phone) {
-                      window.open(`tel:${customer.phone}`, '_self');
-                    }
-
-                    // Also log the activity
-                    await fetch('/api/crm/activities', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({
-                        customerId: customer.id,
-                        type: 'call',
-                        subject: 'Phone Call',
-                        description: `Called ${customer.firstName} ${customer.lastName}`,
-                      }),
-                    });
-                    fetchCustomer();
-                  }
-                } catch (error) {
-                  toast({
-                    title: "❌ Call Failed",
-                    description: "Failed to initiate call",
-                    variant: "destructive",
-                  });
+                // Open phone dialer first
+                if (typeof window !== 'undefined' && customer.phone) {
+                  window.open(`tel:${customer.phone}`, '_self');
                 }
+
+                // Then open the outcome dialog
+                setShowCallOutcomeDialog(true);
               }}
             >
               <Phone className="w-4 h-4 mr-2" />
@@ -920,6 +949,56 @@ export default function CustomerProfilePage() {
               Cancel
             </Button>
             <Button onClick={handleLogCall}>
+              Log Call
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Call Outcome Dialog */}
+      <Dialog open={showCallOutcomeDialog} onOpenChange={setShowCallOutcomeDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Log Call Outcome</DialogTitle>
+            <DialogDescription>
+              How did the call with {customer.firstName} {customer.lastName} go?
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <RadioGroup value={callOutcome} onValueChange={(value: any) => setCallOutcome(value)}>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="spoke_to_customer" id="spoke" />
+                <Label htmlFor="spoke" className="cursor-pointer">Spoke to Customer</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="left_voice" id="voicemail" />
+                <Label htmlFor="voicemail" className="cursor-pointer">Left Voicemail</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="no_voicemail" id="no-vm" />
+                <Label htmlFor="no-vm" className="cursor-pointer">Unable to Leave Voicemail</Label>
+              </div>
+            </RadioGroup>
+            <Textarea
+              placeholder="Add notes about the call (optional)..."
+              value={callOutcomeNotes}
+              onChange={(e) => setCallOutcomeNotes(e.target.value)}
+              rows={4}
+              className="w-full mt-3"
+            />
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowCallOutcomeDialog(false);
+                setCallOutcome('spoke_to_customer');
+                setCallOutcomeNotes('');
+              }}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleLogCallOutcome}>
               Log Call
             </Button>
           </DialogFooter>

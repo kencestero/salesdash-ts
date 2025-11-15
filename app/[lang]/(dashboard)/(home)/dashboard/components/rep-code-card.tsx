@@ -68,53 +68,42 @@ export default function RepCodeCard() {
 
   return (
     <>
-      <Card className="bg-primary text-primary-foreground border-0 max-w-sm">
-        <CardHeader className="pb-2 pt-3">
-          <CardTitle className="flex items-center gap-2 text-sm">
-            <User className="w-4 h-4" />
-            Your Rep Code
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          <div className="flex items-center justify-between bg-primary-foreground/10 backdrop-blur-sm rounded-lg p-2">
-            <div>
-              <p className="text-xs opacity-80">Your Code</p>
-              <p className="text-lg font-bold tracking-wider">{repCode}</p>
+      <Card className="bg-gradient-to-r from-[#E96114] to-[#ff7a2e] text-white border-0 w-[85%] mx-auto shadow-lg">
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between gap-6">
+            {/* Left: Rep Code Display */}
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <User className="w-5 h-5 opacity-90" />
+                <span className="text-sm font-medium opacity-90">Rep Code:</span>
+              </div>
+              <div className="font-mono text-xl font-bold tracking-wide bg-white/10 px-4 py-1.5 rounded-md backdrop-blur-sm">
+                {repCode}
+              </div>
             </div>
-            <Button
-              size="sm"
-              variant="ghost"
-              className="hover:bg-primary-foreground/20 h-8 w-8 p-0"
-              onClick={copyRepCode}
-            >
-              <Copy className="w-3 h-3" />
-            </Button>
-          </div>
 
-          <div className="flex gap-2">
-            <Button
-              size="sm"
-              variant="outline"
-              className="flex-1 bg-primary-foreground/10 border-primary-foreground/20 hover:bg-primary-foreground/20 h-8 text-xs"
-              onClick={copyRepCode}
-            >
-              <Copy className="w-3 h-3 mr-1" />
-              Copy Code
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              className="flex-1 bg-primary-foreground/10 border-primary-foreground/20 hover:bg-primary-foreground/20 h-8 text-xs"
-              onClick={copyRepLink}
-            >
-              <LinkIcon className="w-3 h-3 mr-1" />
-              Copy Link
-            </Button>
+            {/* Right: Actions */}
+            <div className="flex items-center gap-3">
+              <Button
+                size="sm"
+                variant="ghost"
+                className="bg-white/10 hover:bg-white/20 text-white border-white/20 h-9 px-4 font-medium"
+                onClick={copyRepCode}
+              >
+                <Copy className="w-4 h-4 mr-2" />
+                Copy Code
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="bg-white hover:bg-white/90 text-[#E96114] hover:text-[#E96114] h-9 px-4 font-semibold"
+                onClick={copyRepLink}
+              >
+                <LinkIcon className="w-4 h-4 mr-2" />
+                Copy Link
+              </Button>
+            </div>
           </div>
-
-          <p className="text-xs opacity-80 leading-tight">
-            mjsalesdash.com/credit-application/{repCode}
-          </p>
         </CardContent>
       </Card>
 

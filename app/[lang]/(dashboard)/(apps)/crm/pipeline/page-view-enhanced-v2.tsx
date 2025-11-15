@@ -101,7 +101,7 @@ export default function PipelineViewEnhancedV2({ session }: PipelineViewProps) {
         salesRepName: customer.salesRepName || "Unassigned",
         phone: customer.phone,
         email: customer.email,
-        address: customer.address,
+        address: customer.street,  // API returns 'street' field
         city: customer.city,
         state: customer.state,
         zipcode: customer.zipcode,
@@ -173,13 +173,38 @@ export default function PipelineViewEnhancedV2({ session }: PipelineViewProps) {
     setFilteredLeads(filtered);
   }, [leads, searchQuery, temperatureFilter, priorityFilter]);
 
-  const handleCall = (customerId: string, notes: string, outcome: string) => {
-    console.log("Call logged:", { customerId, notes, outcome });
-    toast({
-      title: "Call Logged Successfully",
-      description: `Call notes saved for customer`,
-    });
-    // In production, you'd call: POST /api/crm/activities with the notes
+  const handleCall = async (customerId: string, notes: string, outcome: string) => {
+    try {
+      const response = await fetch("/api/crm/activities", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          customerId,
+          type: "call",
+          subject: `Phone call - ${outcome}`,
+          description: notes,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to save call notes");
+      }
+
+      toast({
+        title: "Call Logged Successfully",
+        description: `Call notes saved for customer`,
+      });
+
+      // Refresh leads to show updated data
+      await fetchLeads();
+    } catch (error) {
+      console.error("Error saving call notes:", error);
+      toast({
+        title: "Error",
+        description: "Failed to save call notes. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleEmail = (customerId: string) => {

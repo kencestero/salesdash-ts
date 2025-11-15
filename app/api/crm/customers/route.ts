@@ -52,7 +52,7 @@ export async function GET(req: NextRequest) {
         email: true,
         phone: true,
         companyName: true,
-        address: true,
+        street: true,  // FIX: Changed from 'address' to 'street' to match schema
         city: true,
         state: true,
         zipcode: true,
@@ -118,10 +118,26 @@ export async function GET(req: NextRequest) {
     });
 
     return NextResponse.json({ customers });
-  } catch (error) {
-    console.error("Error fetching customers:", error);
+  } catch (error: any) {
+    // DETAILED ERROR LOGGING FOR PRODUCTION DEBUGGING
+    console.error("═══════════════════════════════════════");
+    console.error("PIPELINE_CUSTOMERS_ERROR - Full Details:");
+    console.error("═══════════════════════════════════════");
+    console.error("Error Message:", error?.message);
+    console.error("Error Name:", error?.name);
+    console.error("Error Code:", error?.code);
+    console.error("Error Meta:", error?.meta);
+    console.error("Full Error Object:", JSON.stringify(error, null, 2));
+    console.error("Stack Trace:", error?.stack);
+    console.error("═══════════════════════════════════════");
+
+    // Return graceful error response
     return NextResponse.json(
-      { error: "Failed to fetch customers" },
+      {
+        error: "Failed to fetch customers",
+        details: process.env.NODE_ENV === "development" ? error?.message : undefined,
+        code: error?.code
+      },
       { status: 500 }
     );
   }

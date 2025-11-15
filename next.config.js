@@ -91,6 +91,7 @@ const nextConfig = {
       { source: '/credit', destination: '/en/credit', permanent: false },
       { source: '/profile', destination: '/en/profile', permanent: false },
       { source: '/user-management', destination: '/en/user-management', permanent: false },
+      { source: '/deliveries', destination: '/en/deliveries', permanent: false },
       { source: '/secret-code-instructions', destination: '/en/secret-code-instructions', permanent: false },
       // CRM pages
       { source: '/crm/customers', destination: '/en/crm/customers', permanent: false },
