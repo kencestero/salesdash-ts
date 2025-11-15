@@ -279,6 +279,8 @@ model Customer {
   creditAppStatus String?  // "not_applied", "applied", "approved", "declined"
   applied         Boolean @default(false) // Google Sheets Column H - Applied status
   dateApplied     DateTime? // Google Sheets Column I - Date Applied
+  linkSentStatus  String   @default("not_sent") // "applied", "link_sent", "not_sent"
+  approvalStatus  String   @default("status") // "status", "approved", "pending", "need_docs", "denied"
 
   // Tags for segmentation
   tags            String[]

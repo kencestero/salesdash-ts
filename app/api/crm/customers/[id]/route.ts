@@ -4,9 +4,65 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
-export const revalidate = 0;
 
-// GET /api/crm/customers/[id] - Get single customer with all related data
+// PATCH /api/crm/customers/[id] - Update customer (managers+ only)
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Get user profile with role
+    const currentUser = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      include: { profile: true },
+    });
+
+    if (!currentUser?.profile) {
+      return NextResponse.json({ error: "User profile not found" }, { status: 404 });
+    }
+
+    // Only managers and above can edit
+    const canEdit = ["owner", "director", "manager"].includes(currentUser.profile.role);
+    if (!canEdit) {
+      return NextResponse.json(
+        { error: "Only managers and above can edit leads" },
+        { status: 403 }
+      );
+    }
+
+    const { id } = params;
+    const body = await req.json();
+
+    // Update customer with allowed fields
+    const customer = await prisma.customer.update({
+      where: { id },
+      data: {
+        ...(body.temperature && { temperature: body.temperature }),
+        ...(body.linkSentStatus && { linkSentStatus: body.linkSentStatus }),
+        ...(body.approvalStatus && { approvalStatus: body.approvalStatus }),
+        ...(body.status && { status: body.status }),
+        ...(body.notes && { notes: body.notes }),
+        ...(body.managerNotes && { managerNotes: body.managerNotes }),
+        updatedAt: new Date(),
+      },
+    });
+
+    return NextResponse.json({ customer });
+  } catch (error: any) {
+    console.error("Error updating customer:", error);
+    return NextResponse.json(
+      { error: "Failed to update customer", details: error.message },
+      { status: 500 }
+    );
+  }
+}
+
+// GET /api/crm/customers/[id] - Get single customer
 export async function GET(
   req: NextRequest,
   { params }: { params: { id: string } }
@@ -17,25 +73,18 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const { id } = params;
+
     const customer = await prisma.customer.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
-        deals: {
-          orderBy: { createdAt: "desc" },
-          take: 10,
-        },
+        deals: true,
         activities: {
           orderBy: { createdAt: "desc" },
-          take: 20,
-        },
-        creditApps: {
-          orderBy: { createdAt: "desc" },
-          take: 5,
-        },
-        quotes: {
-          orderBy: { createdAt: "desc" },
           take: 10,
         },
+        creditApps: true,
+        quotes: true,
         _count: {
           select: {
             deals: true,
@@ -48,154 +97,14 @@ export async function GET(
     });
 
     if (!customer) {
-      return NextResponse.json(
-        { error: "Customer not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Customer not found" }, { status: 404 });
     }
 
     return NextResponse.json({ customer });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error fetching customer:", error);
     return NextResponse.json(
-      { error: "Failed to fetch customer" },
-      { status: 500 }
-    );
-  }
-}
-
-// PATCH /api/crm/customers/[id] - Update customer
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const body = await req.json();
-    const {
-      firstName,
-      lastName,
-      email,
-      phone,
-      street,
-      city,
-      state,
-      zipcode,
-      companyName,
-      businessType,
-      source,
-      assignedTo,
-      status,
-      tags,
-      notes,
-    } = body;
-
-    // Check if customer exists
-    const existing = await prisma.customer.findUnique({
-      where: { id: params.id },
-    });
-
-    if (!existing) {
-      return NextResponse.json(
-        { error: "Customer not found" },
-        { status: 404 }
-      );
-    }
-
-    // If email is being changed, check for duplicates
-    if (email && email !== existing.email) {
-      const emailExists = await prisma.customer.findUnique({
-        where: { email },
-      });
-
-      if (emailExists) {
-        return NextResponse.json(
-          { error: "Email already in use by another customer" },
-          { status: 400 }
-        );
-      }
-    }
-
-    // Update customer
-    const customer = await prisma.customer.update({
-      where: { id: params.id },
-      data: {
-        ...(firstName && { firstName }),
-        ...(lastName && { lastName }),
-        ...(email && { email }),
-        ...(phone && { phone }),
-        ...(street !== undefined && { street }),
-        ...(city !== undefined && { city }),
-        ...(state !== undefined && { state }),
-        ...(zipcode !== undefined && { zipcode }),
-        ...(companyName !== undefined && { companyName }),
-        ...(businessType && { businessType }),
-        ...(source !== undefined && { source }),
-        ...(assignedTo !== undefined && { assignedTo }),
-        ...(status && { status }),
-        ...(tags !== undefined && { tags }),
-        ...(notes !== undefined && { notes }),
-        updatedAt: new Date(),
-      },
-      include: {
-        _count: {
-          select: {
-            deals: true,
-            activities: true,
-            creditApps: true,
-            quotes: true,
-          },
-        },
-      },
-    });
-
-    return NextResponse.json({ customer });
-  } catch (error) {
-    console.error("Error updating customer:", error);
-    return NextResponse.json(
-      { error: "Failed to update customer" },
-      { status: 500 }
-    );
-  }
-}
-
-// DELETE /api/crm/customers/[id] - Delete customer
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    // Check if customer exists
-    const existing = await prisma.customer.findUnique({
-      where: { id: params.id },
-    });
-
-    if (!existing) {
-      return NextResponse.json(
-        { error: "Customer not found" },
-        { status: 404 }
-      );
-    }
-
-    // Delete customer (CASCADE will handle related records)
-    await prisma.customer.delete({
-      where: { id: params.id },
-    });
-
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error("Error deleting customer:", error);
-    return NextResponse.json(
-      { error: "Failed to delete customer" },
+      { error: "Failed to fetch customer", details: error.message },
       { status: 500 }
     );
   }
