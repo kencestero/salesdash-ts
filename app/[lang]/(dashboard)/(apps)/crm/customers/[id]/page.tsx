@@ -46,6 +46,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "@/components/ui/use-toast";
 import Link from "next/link";
+import { EmailComposerDialog } from "@/components/crm/email-composer-dialog";
 
 interface Customer {
   id: string;
@@ -125,6 +126,7 @@ export default function CustomerProfilePage() {
   const [showCallOutcomeDialog, setShowCallOutcomeDialog] = useState(false);
   const [callOutcome, setCallOutcome] = useState<'left_voice' | 'spoke_to_customer' | 'no_voicemail'>('spoke_to_customer');
   const [callOutcomeNotes, setCallOutcomeNotes] = useState("");
+  const [showEmailDialog, setShowEmailDialog] = useState(false);
 
   // Fetch customer data
   useEffect(() => {
@@ -713,55 +715,7 @@ export default function CustomerProfilePage() {
               className="w-full justify-start"
               variant="outline"
               disabled={!customer.email}
-              onClick={async () => {
-                // Actually send the email!
-                if (!customer.email) {
-                  toast({
-                    title: "❌ No Email Address",
-                    description: "This customer doesn't have an email address on file",
-                    variant: "destructive",
-                  });
-                  return;
-                }
-
-                try {
-                  const response = await fetch('/api/crm/email', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                      to: customer.email,
-                      customerName: customer.firstName,
-                      subject: `Follow up from MJ Cargo Trailer Sales`
-                    }),
-                  });
-
-                  if (response.ok) {
-                    toast({
-                      title: "✉️ Email Sent Successfully",
-                      description: `Email delivered to ${customer.email}`,
-                    });
-
-                    // Also log the activity
-                    await fetch('/api/crm/activities', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({
-                        customerId: customer.id,
-                        type: 'email',
-                        subject: 'Email Sent',
-                        description: `Follow-up email sent to ${customer.email}`,
-                      }),
-                    });
-                    fetchCustomer();
-                  }
-                } catch (error) {
-                  toast({
-                    title: "❌ Email Failed",
-                    description: "Failed to send email",
-                    variant: "destructive",
-                  });
-                }
-              }}
+              onClick={() => setShowEmailDialog(true)}
             >
               <Mail className="w-4 h-4 mr-2" />
               Send Email
@@ -1032,6 +986,22 @@ export default function CustomerProfilePage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Email Composer Dialog */}
+      {customer && (
+        <EmailComposerDialog
+          open={showEmailDialog}
+          onOpenChange={setShowEmailDialog}
+          customer={{
+            id: customer.id,
+            firstName: customer.firstName,
+            lastName: customer.lastName,
+            email: customer.email,
+            companyName: customer.companyName,
+            phone: customer.phone,
+          }}
+        />
+      )}
     </div>
   );
 }
