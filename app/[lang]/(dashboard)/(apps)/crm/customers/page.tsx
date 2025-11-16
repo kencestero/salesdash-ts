@@ -29,6 +29,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/components/ui/use-toast";
 import Link from "next/link";
@@ -90,7 +98,7 @@ export default function CustomersPage() {
   const searchParams = useSearchParams();
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
-  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<string[]>(["all"]);
   const [searchQuery, setSearchQuery] = useState("");
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [importing, setImporting] = useState(false);
@@ -110,8 +118,13 @@ export default function CustomersPage() {
       setLoading(true);
       const params = new URLSearchParams();
 
-      if (statusFilter !== "all") {
-        params.append("status", statusFilter);
+      // Handle multi-select status filter
+      const hasAllSelected = statusFilter.includes("all");
+      if (!hasAllSelected && statusFilter.length > 0) {
+        // Add each selected status as a separate query param
+        statusFilter.forEach(status => {
+          params.append("status", status);
+        });
       }
 
       if (searchQuery) {
@@ -173,6 +186,45 @@ export default function CustomersPage() {
     } finally {
       setImporting(false);
     }
+  };
+
+  // Multi-select filter helper functions
+  const handleStatusToggle = (status: string) => {
+    if (status === "all") {
+      // Select All clicked
+      setStatusFilter(["all"]);
+    } else {
+      // Specific status clicked
+      setStatusFilter(prev => {
+        // Remove "all" if it exists
+        const withoutAll = prev.filter(s => s !== "all");
+
+        // Toggle the status
+        if (withoutAll.includes(status)) {
+          const updated = withoutAll.filter(s => s !== status);
+          // If nothing left, default to "all"
+          return updated.length === 0 ? ["all"] : updated;
+        } else {
+          return [...withoutAll, status];
+        }
+      });
+    }
+  };
+
+  const getFilterLabel = () => {
+    if (statusFilter.includes("all") || statusFilter.length === 0) {
+      return "All Status";
+    }
+    if (statusFilter.length === 1) {
+      const statusLabels: Record<string, string> = {
+        lead: "New Leads",
+        Applied: "Applied",
+        Approved: "Approved",
+        "Dead Deal": "Dead Deals"
+      };
+      return statusLabels[statusFilter[0]] || statusFilter[0];
+    }
+    return `${statusFilter.length} statuses selected`;
   };
 
   // Fetch on mount and when filters change
@@ -333,20 +385,48 @@ export default function CustomersPage() {
               />
             </div>
 
-            {/* Status Filter */}
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full md:w-[200px]">
-                <Filter className="w-4 h-4 mr-2" />
-                <SelectValue placeholder="Filter by status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="lead">New Leads</SelectItem>
-                <SelectItem value="Applied">Applied</SelectItem>
-                <SelectItem value="Approved">Approved</SelectItem>
-                <SelectItem value="Dead Deal">Dead Deals</SelectItem>
-              </SelectContent>
-            </Select>
+            {/* Status Filter - Multi-Select with Checkboxes */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="w-full md:w-[220px] justify-start">
+                  <Filter className="w-4 h-4 mr-2" />
+                  {getFilterLabel()}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-[200px]">
+                <DropdownMenuCheckboxItem
+                  checked={statusFilter.includes("all")}
+                  onCheckedChange={() => handleStatusToggle("all")}
+                >
+                  Select All
+                </DropdownMenuCheckboxItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuCheckboxItem
+                  checked={statusFilter.includes("lead")}
+                  onCheckedChange={() => handleStatusToggle("lead")}
+                >
+                  New Leads
+                </DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem
+                  checked={statusFilter.includes("Applied")}
+                  onCheckedChange={() => handleStatusToggle("Applied")}
+                >
+                  Applied
+                </DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem
+                  checked={statusFilter.includes("Approved")}
+                  onCheckedChange={() => handleStatusToggle("Approved")}
+                >
+                  Approved
+                </DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem
+                  checked={statusFilter.includes("Dead Deal")}
+                  onCheckedChange={() => handleStatusToggle("Dead Deal")}
+                >
+                  Dead Deals
+                </DropdownMenuCheckboxItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </CardContent>
       </Card>
@@ -355,7 +435,11 @@ export default function CustomersPage() {
       <Card>
         <CardHeader>
           <CardTitle>
-            {statusFilter === "all" ? "All Customers" : `${statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)} Customers`}
+            {statusFilter.includes("all") || statusFilter.length === 0
+              ? "All Customers"
+              : statusFilter.length === 1
+                ? `${statusFilter[0].charAt(0).toUpperCase() + statusFilter[0].slice(1)} Customers`
+                : "Filtered Customers"}
             {" "}({customers.length})
           </CardTitle>
         </CardHeader>
@@ -370,7 +454,7 @@ export default function CustomersPage() {
               <Users className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
               <p className="text-lg font-medium">No customers found</p>
               <p className="text-muted-foreground mt-1">
-                {searchQuery || statusFilter !== "all"
+                {searchQuery || !statusFilter.includes("all")
                   ? "Try adjusting your filters"
                   : "Add your first customer to get started"}
               </p>

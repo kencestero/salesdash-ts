@@ -17,15 +17,22 @@ export async function GET(req: NextRequest) {
 
     // Get query parameters for filtering
     const { searchParams } = new URL(req.url);
-    const status = searchParams.get("status"); // lead, contacted, qualified, etc.
+    const statuses = searchParams.getAll("status"); // Support multiple status filters
     const assignedTo = searchParams.get("assignedTo");
     const search = searchParams.get("search"); // Search name/email/phone
 
     // Build where clause
     const where: any = {};
 
-    if (status) {
-      where.status = status;
+    // Handle multi-select status filter
+    if (statuses && statuses.length > 0) {
+      if (statuses.length === 1) {
+        // Single status - direct equality
+        where.status = statuses[0];
+      } else {
+        // Multiple statuses - use "in" operator for OR logic
+        where.status = { in: statuses };
+      }
     }
 
     if (assignedTo) {
