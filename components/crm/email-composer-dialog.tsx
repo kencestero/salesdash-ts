@@ -52,12 +52,12 @@ interface EmailComposerDialogProps {
   };
 }
 
-// Email Templates
+// Email Templates (placeholders removed - data auto-filled)
 const EMAIL_TEMPLATES = {
   follow_up: {
     name: "Follow Up",
-    subject: "Following Up - {{firstName}} {{lastName}}",
-    body: `Hi {{firstName}},
+    subject: "Following Up",
+    body: `Hi there,
 
 I wanted to follow up regarding your interest in our trailers. Do you have any questions I can help answer?
 
@@ -69,7 +69,7 @@ MJ Cargo Sales Team`,
   quote: {
     name: "Quote Request",
     subject: "Your Trailer Quote",
-    body: `Hello {{firstName}},
+    body: `Hello,
 
 Thank you for your interest! I'm putting together a quote for you based on your requirements.
 
@@ -80,14 +80,14 @@ MJ Cargo Sales Team`,
   },
   welcome: {
     name: "Welcome Email",
-    subject: "Welcome to MJ Cargo - {{firstName}}!",
-    body: `Hello {{firstName}},
+    subject: "Welcome to MJ Cargo!",
+    body: `Hello,
 
 Welcome! We're excited to help you find the perfect trailer.
 
 Our team is here to answer any questions and guide you through the process.
 
-Feel free to reach out anytime at {{phone}} or reply to this email.
+Feel free to reach out anytime or reply to this email.
 
 Best regards,
 MJ Cargo Sales Team`,
@@ -95,7 +95,7 @@ MJ Cargo Sales Team`,
   financing: {
     name: "Financing Information",
     subject: "Financing Options Available",
-    body: `Hi {{firstName}},
+    body: `Hi there,
 
 I wanted to share our financing options with you. We offer:
 
@@ -121,6 +121,7 @@ export function EmailComposerDialog({
   customer,
 }: EmailComposerDialogProps) {
   const [selectedTemplate, setSelectedTemplate] = useState<keyof typeof EMAIL_TEMPLATES>("custom");
+  const [activeTab, setActiveTab] = useState("compose");
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
   const [attachments, setAttachments] = useState<File[]>([]);
@@ -132,22 +133,17 @@ export function EmailComposerDialog({
     const template = EMAIL_TEMPLATES[templateKey];
     setSelectedTemplate(templateKey);
 
-    // Replace placeholders
-    const replacePlaceholders = (text: string) => {
-      return text
-        .replace(/\{\{firstName\}\}/g, customer.firstName || "")
-        .replace(/\{\{lastName\}\}/g, customer.lastName || "")
-        .replace(/\{\{companyName\}\}/g, customer.companyName || "")
-        .replace(/\{\{phone\}\}/g, customer.phone || "");
-    };
+    setSubject(template.subject);
+    setBody(template.body);
 
-    setSubject(replacePlaceholders(template.subject));
-    setBody(replacePlaceholders(template.body));
-  };
+    // Show confirmation toast
+    toast({
+      title: "Template Selected",
+      description: `"${template.name}" template applied successfully`,
+    });
 
-  // Insert placeholder at cursor
-  const insertPlaceholder = (placeholder: string) => {
-    setBody((prev) => prev + placeholder);
+    // Auto-switch to Compose tab
+    setActiveTab("compose");
   };
 
   // Handle file attachment
@@ -286,7 +282,7 @@ export function EmailComposerDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <Tabs defaultValue="compose" className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="compose">Compose</TabsTrigger>
             <TabsTrigger value="templates">
@@ -337,21 +333,6 @@ export function EmailComposerDialog({
               >
                 <List className="w-4 h-4" />
               </Button>
-
-              <div className="h-4 w-px bg-border mx-2" />
-
-              {/* Placeholders */}
-              <Select onValueChange={(value) => insertPlaceholder(value)}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Insert placeholder" />
-                </SelectTrigger>
-                <SelectContent className="z-[9999]">
-                  <SelectItem value="{{firstName}}">First Name</SelectItem>
-                  <SelectItem value="{{lastName}}">Last Name</SelectItem>
-                  <SelectItem value="{{companyName}}">Company</SelectItem>
-                  <SelectItem value="{{phone}}">Phone</SelectItem>
-                </SelectContent>
-              </Select>
             </div>
 
             {/* Message Body */}
@@ -366,7 +347,7 @@ export function EmailComposerDialog({
                 className="font-mono text-sm"
               />
               <p className="text-xs text-muted-foreground">
-                Tip: Select text and use formatting buttons above, or insert placeholders
+                Tip: Select text and use formatting buttons above
               </p>
             </div>
 
@@ -428,24 +409,16 @@ export function EmailComposerDialog({
                 <Button
                   key={key}
                   variant="outline"
-                  className="h-auto p-4 flex flex-col items-start gap-2"
+                  className="h-auto p-4 flex items-center justify-start gap-2"
                   onClick={() => applyTemplate(key as keyof typeof EMAIL_TEMPLATES)}
                 >
-                  <div className="flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-blue-600" />
-                    <span className="font-semibold">{template.name}</span>
-                  </div>
-                  {template.subject && (
-                    <p className="text-xs text-muted-foreground text-left">
-                      {template.subject.substring(0, 50)}...
-                    </p>
-                  )}
+                  <Sparkles className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                  <span className="font-semibold">{template.name}</span>
                 </Button>
               ))}
             </div>
             <p className="text-sm text-muted-foreground">
-              Select a template to use as a starting point. Placeholders like {"{"}
-              {"{"}firstName{"}"} will be automatically filled.
+              Select a template to use as a starting point. You can edit the content after selecting.
             </p>
           </TabsContent>
         </Tabs>
