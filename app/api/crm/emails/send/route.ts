@@ -62,8 +62,12 @@ export async function POST(req: NextRequest) {
       where: { email: session.user.email },
     });
 
+    let createdEmailId: string | undefined;
+    let createdActivityId: string | undefined;
+
     if (user && customerId) {
-      await prisma.email.create({
+      // Create email record and capture ID
+      const emailRecord = await prisma.email.create({
         data: {
           customerId,
           userId: user.id,
@@ -73,12 +77,14 @@ export async function POST(req: NextRequest) {
           status: "sent",
         },
       });
+      createdEmailId = emailRecord.id;
 
-      // Also create activity log
-      await prisma.activity.create({
+      // Also create activity log linked to email
+      const activityRecord = await prisma.activity.create({
         data: {
           customerId,
           userId: user.id,
+          emailId: emailRecord.id,  // Link to email record
           type: "email",
           subject: `Email Sent: ${subject}`,
           description: body.substring(0, 200),
@@ -86,6 +92,7 @@ export async function POST(req: NextRequest) {
           completedAt: new Date(),
         },
       });
+      createdActivityId = activityRecord.id;
 
       // Update customer lastContactedAt
       await prisma.customer.update({
@@ -96,7 +103,8 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      emailId: data?.id,
+      emailId: createdEmailId || data?.id,
+      activityId: createdActivityId,
       message: "Email sent successfully",
     });
   } catch (error: any) {

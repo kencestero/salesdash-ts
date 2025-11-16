@@ -486,6 +486,7 @@ model Activity {
   // Related To
   customerId      String?
   userId          String?  // User who performed activity
+  emailId         String?  // Link to Email record (for email activities)
 
   // Activity Details
   type            String   // "call", "email", "meeting", "note", "task"
@@ -506,6 +507,7 @@ model Activity {
 
   @@index([customerId])
   @@index([userId])
+  @@index([emailId])
   @@index([type])
   @@index([dueDate])
   @@index([customerId, createdAt]) // Composite index for customer activity timeline

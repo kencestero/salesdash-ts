@@ -37,6 +37,7 @@ import {
 } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import { Badge } from "@/components/ui/badge";
+import { EmailSendingLoadingDialog } from "@/components/crm/email-sending-loading-dialog";
 
 interface EmailComposerDialogProps {
   open: boolean;
@@ -124,6 +125,7 @@ export function EmailComposerDialog({
   const [body, setBody] = useState("");
   const [attachments, setAttachments] = useState<File[]>([]);
   const [sending, setSending] = useState(false);
+  const [showLoadingAnimation, setShowLoadingAnimation] = useState(false);
 
   // Apply template
   const applyTemplate = (templateKey: keyof typeof EMAIL_TEMPLATES) => {
@@ -208,6 +210,13 @@ export function EmailComposerDialog({
     }
 
     setSending(true);
+
+    // Step 1: Close the composer dialog immediately
+    onOpenChange(false);
+
+    // Step 2: Show loading animation
+    setShowLoadingAnimation(true);
+
     try {
       // Create FormData for file uploads
       const formData = new FormData();
@@ -229,6 +238,7 @@ export function EmailComposerDialog({
         throw new Error("Failed to send email");
       }
 
+      // Email sent successfully - animation will auto-close via onComplete
       toast({
         title: "Email Sent!",
         description: `Email sent to ${customer.email}`,
@@ -239,9 +249,12 @@ export function EmailComposerDialog({
       setBody("");
       setAttachments([]);
       setSelectedTemplate("custom");
-      onOpenChange(false);
     } catch (error) {
       console.error("Error sending email:", error);
+
+      // On error, close animation immediately
+      setShowLoadingAnimation(false);
+
       toast({
         title: "Error",
         description: "Failed to send email. Please try again.",
@@ -253,6 +266,7 @@ export function EmailComposerDialog({
   };
 
   return (
+    <>
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
@@ -451,5 +465,16 @@ export function EmailComposerDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
+
+    {/* Email Sending Loading Animation */}
+    <EmailSendingLoadingDialog
+      open={showLoadingAnimation}
+      onComplete={() => {
+        setShowLoadingAnimation(false);
+        // Trigger customer refresh if there's an onUpdate callback
+        // This will make the new email appear in the activity timeline
+      }}
+    />
+  </>
   );
 }

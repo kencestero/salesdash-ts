@@ -47,6 +47,7 @@ import {
 import { toast } from "@/components/ui/use-toast";
 import Link from "next/link";
 import { EmailComposerDialog } from "@/components/crm/email-composer-dialog";
+import { EmailViewerDialog } from "@/components/crm/email-viewer-dialog";
 
 interface Customer {
   id: string;
@@ -127,6 +128,8 @@ export default function CustomerProfilePage() {
   const [callOutcome, setCallOutcome] = useState<'left_voice' | 'spoke_to_customer' | 'no_voicemail'>('spoke_to_customer');
   const [callOutcomeNotes, setCallOutcomeNotes] = useState("");
   const [showEmailDialog, setShowEmailDialog] = useState(false);
+  const [showEmailViewer, setShowEmailViewer] = useState(false);
+  const [selectedEmail, setSelectedEmail] = useState<any>(null);
 
   // Fetch customer data
   useEffect(() => {
@@ -157,6 +160,26 @@ export default function CustomerProfilePage() {
       router.push("/en/crm/customers");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleViewEmail = async (emailId: string) => {
+    try {
+      const response = await fetch(`/api/crm/emails/${emailId}`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch email");
+      }
+
+      const data = await response.json();
+      setSelectedEmail(data.email);
+      setShowEmailViewer(true);
+    } catch (error) {
+      console.error("Error fetching email:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load email details",
+        variant: "destructive",
+      });
     }
   };
 
@@ -815,17 +838,34 @@ export default function CustomerProfilePage() {
 
                 const { icon: Icon, bg, color } = getActivityIcon(activity.type);
 
+                const isEmailActivity = activity.type === 'email' && activity.emailId;
+
                 return (
-                  <div key={activity.id} className="flex items-start gap-4 pb-4 border-b last:border-0">
+                  <div
+                    key={activity.id}
+                    className={`flex items-start gap-4 pb-4 border-b last:border-0 ${
+                      isEmailActivity ? 'cursor-pointer hover:bg-gray-50 p-3 rounded-lg transition-colors' : ''
+                    }`}
+                    onClick={() => {
+                      if (isEmailActivity) {
+                        handleViewEmail(activity.emailId);
+                      }
+                    }}
+                  >
                     <div className={`p-3 ${bg} rounded-lg`}>
                       <Icon className={`w-5 h-5 ${color}`} />
                     </div>
                     <div className="flex-1">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <p className="text-sm font-semibold">{activity.subject}</p>
                         <Badge variant="outline" className="text-xs capitalize">
                           {activity.type}
                         </Badge>
+                        {isEmailActivity && (
+                          <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
+                            Click to View Email
+                          </Badge>
+                        )}
                       </div>
                       <p className="text-sm text-muted-foreground mt-1">
                         {activity.description}
@@ -1002,6 +1042,13 @@ export default function CustomerProfilePage() {
           }}
         />
       )}
+
+      {/* Email Viewer Dialog */}
+      <EmailViewerDialog
+        open={showEmailViewer}
+        onOpenChange={setShowEmailViewer}
+        emailData={selectedEmail}
+      />
     </div>
   );
 }
