@@ -42,6 +42,26 @@ export async function PATCH(
     const customer = await prisma.customer.update({
       where: { id },
       data: {
+        // Contact info
+        ...(body.firstName !== undefined && { firstName: body.firstName }),
+        ...(body.lastName !== undefined && { lastName: body.lastName }),
+        ...(body.email !== undefined && { email: body.email }),
+        ...(body.phone !== undefined && { phone: body.phone }),
+        // Address
+        ...(body.street !== undefined && { street: body.street }),
+        ...(body.city !== undefined && { city: body.city }),
+        ...(body.state !== undefined && { state: body.state }),
+        ...(body.zipcode !== undefined && { zipcode: body.zipcode }),
+        // Business details
+        ...(body.companyName !== undefined && { companyName: body.companyName }),
+        ...(body.businessType !== undefined && { businessType: body.businessType }),
+        ...(body.source !== undefined && { source: body.source }),
+        // Trailer details
+        ...(body.trailerSize !== undefined && { trailerSize: body.trailerSize }),
+        ...(body.trailerType !== undefined && { trailerType: body.trailerType }),
+        ...(body.financingType !== undefined && { financingType: body.financingType }),
+        ...(body.stockNumber !== undefined && { stockNumber: body.stockNumber }),
+        // Lead status fields
         ...(body.temperature && { temperature: body.temperature }),
         ...(body.linkSentStatus && { linkSentStatus: body.linkSentStatus }),
         ...(body.approvalStatus && { approvalStatus: body.approvalStatus }),

@@ -48,6 +48,7 @@ import { toast } from "@/components/ui/use-toast";
 import Link from "next/link";
 import { EmailComposerDialog } from "@/components/crm/email-composer-dialog";
 import { EmailViewerDialog } from "@/components/crm/email-viewer-dialog";
+import { LeadStatusManager } from "@/components/crm/lead-status-manager";
 
 interface Customer {
   id: string;
@@ -79,6 +80,10 @@ interface Customer {
   isFactoryOrder?: boolean;
   dateApplied?: string;
   assignedManager?: string;
+  // Lead Status Manager fields
+  temperature?: string;
+  linkSentStatus?: string;
+  approvalStatus?: string;
   _count: {
     deals: number;
     activities: number;
@@ -131,6 +136,26 @@ export default function CustomerProfilePage() {
   const [showEmailViewer, setShowEmailViewer] = useState(false);
   const [selectedEmail, setSelectedEmail] = useState<any>(null);
 
+  // Edit mode form state
+  const [editForm, setEditForm] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    street: "",
+    city: "",
+    state: "",
+    zipcode: "",
+    companyName: "",
+    businessType: "",
+    source: "",
+    trailerSize: "",
+    trailerType: "",
+    financingType: "",
+    stockNumber: "",
+  });
+  const [isSaving, setIsSaving] = useState(false);
+
   // Fetch customer data
   useEffect(() => {
     if (params.id) {
@@ -150,6 +175,25 @@ export default function CustomerProfilePage() {
       const data = await response.json();
       setCustomer(data.customer);
       setNotes(data.customer.notes || "");
+
+      // Initialize edit form with customer data
+      setEditForm({
+        firstName: data.customer.firstName || "",
+        lastName: data.customer.lastName || "",
+        email: data.customer.email || "",
+        phone: data.customer.phone || "",
+        street: data.customer.street || "",
+        city: data.customer.city || "",
+        state: data.customer.state || "",
+        zipcode: data.customer.zipcode || "",
+        companyName: data.customer.companyName || "",
+        businessType: data.customer.businessType || "",
+        source: data.customer.source || "",
+        trailerSize: data.customer.trailerSize || "",
+        trailerType: data.customer.trailerType || "",
+        financingType: data.customer.financingType || "",
+        stockNumber: data.customer.stockNumber || "",
+      });
     } catch (error) {
       console.error("Error fetching customer:", error);
       toast({
@@ -179,6 +223,64 @@ export default function CustomerProfilePage() {
         title: "Error",
         description: "Failed to load email details",
         variant: "destructive",
+      });
+    }
+  };
+
+  const handleSaveCustomer = async () => {
+    if (!customer) return;
+
+    setIsSaving(true);
+    try {
+      const response = await fetch(`/api/crm/customers/${customer.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(editForm),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update customer");
+      }
+
+      toast({
+        title: "Success",
+        description: "Customer updated successfully",
+      });
+
+      setIsEditing(false);
+      fetchCustomer(); // Refresh customer data
+    } catch (error) {
+      console.error("Error updating customer:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update customer",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+    // Reset form to original customer data
+    if (customer) {
+      setEditForm({
+        firstName: customer.firstName || "",
+        lastName: customer.lastName || "",
+        email: customer.email || "",
+        phone: customer.phone || "",
+        street: customer.street || "",
+        city: customer.city || "",
+        state: customer.state || "",
+        zipcode: customer.zipcode || "",
+        companyName: customer.companyName || "",
+        businessType: customer.businessType || "",
+        source: customer.source || "",
+        trailerSize: customer.trailerSize || "",
+        trailerType: customer.trailerType || "",
+        financingType: customer.financingType || "",
+        stockNumber: customer.stockNumber || "",
       });
     }
   };
@@ -454,21 +556,44 @@ export default function CustomerProfilePage() {
           </div>
         </div>
         <div className="flex gap-2">
-          <Button
-            variant="outline"
-            onClick={() => setIsEditing(!isEditing)}
-          >
-            <Edit className="w-4 h-4 mr-2" />
-            Edit
-          </Button>
-          <Button
-            variant="outline"
-            className="text-destructive"
-            onClick={() => setShowDeleteDialog(true)}
-          >
-            <Trash2 className="w-4 h-4 mr-2" />
-            Delete
-          </Button>
+          {isEditing ? (
+            <>
+              <Button
+                onClick={handleSaveCustomer}
+                disabled={isSaving}
+                className="bg-blue-600 text-white hover:bg-blue-700"
+              >
+                <CheckCircle2 className="w-4 h-4 mr-2" />
+                {isSaving ? "Saving..." : "Save Changes"}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={handleCancelEdit}
+                disabled={isSaving}
+              >
+                <XCircle className="w-4 h-4 mr-2" />
+                Cancel
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button
+                variant="outline"
+                onClick={() => setIsEditing(true)}
+              >
+                <Edit className="w-4 h-4 mr-2" />
+                Edit
+              </Button>
+              <Button
+                variant="outline"
+                className="text-destructive"
+                onClick={() => setShowDeleteDialog(true)}
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete
+              </Button>
+            </>
+          )}
         </div>
       </div>
 
@@ -540,52 +665,217 @@ export default function CustomerProfilePage() {
           </CardHeader>
           <CardContent className="space-y-4">
             {/* Contact Information */}
-            <div className="space-y-3">
-              {customer.email && !customer.email.includes('@placeholder.com') && (
-                <div className="flex items-start gap-3">
-                  <Mail className="w-4 h-4 text-muted-foreground mt-1" />
-                  <div className="flex-1">
-                    <p className="text-sm text-muted-foreground">Email</p>
-                    <a
-                      href={`mailto:${customer.email}`}
-                      className="text-sm font-medium hover:text-primary"
-                    >
-                      {customer.email}
-                    </a>
-                  </div>
-                </div>
-              )}
+            {isEditing ? (
+              <div className="space-y-4 p-4 bg-blue-50 rounded-lg border-2 border-blue-200">
+                <p className="text-sm font-semibold text-blue-900">Edit Mode Active</p>
 
-              {customer.phone && !customer.phone.includes('@placeholder.com') && (
-                <div className="flex items-start gap-3">
-                  <Phone className="w-4 h-4 text-muted-foreground mt-1" />
-                  <div className="flex-1">
-                    <p className="text-sm text-muted-foreground">Phone</p>
-                    <a
-                      href={`tel:${customer.phone}`}
-                      className="text-sm font-medium hover:text-primary"
-                    >
-                      {customer.phone}
-                    </a>
+                {/* Name Fields */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label htmlFor="firstName">First Name</Label>
+                    <Input
+                      id="firstName"
+                      value={editForm.firstName}
+                      onChange={(e) => setEditForm({...editForm, firstName: e.target.value})}
+                      placeholder="First name"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="lastName">Last Name</Label>
+                    <Input
+                      id="lastName"
+                      value={editForm.lastName}
+                      onChange={(e) => setEditForm({...editForm, lastName: e.target.value})}
+                      placeholder="Last name"
+                    />
                   </div>
                 </div>
-              )}
 
-              {(customer.street || customer.city || customer.state) && (
-                <div className="flex items-start gap-3">
-                  <MapPin className="w-4 h-4 text-muted-foreground mt-1" />
-                  <div className="flex-1">
-                    <p className="text-sm text-muted-foreground">Address</p>
-                    <p className="text-sm font-medium">
-                      {customer.street && <>{customer.street}<br /></>}
-                      {customer.city && customer.state
-                        ? `${customer.city}, ${customer.state} ${customer.zipcode || ""}`
-                        : customer.city || customer.state}
-                    </p>
+                {/* Email & Phone */}
+                <div>
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={editForm.email}
+                    onChange={(e) => setEditForm({...editForm, email: e.target.value})}
+                    placeholder="email@example.com"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="phone">Phone</Label>
+                  <Input
+                    id="phone"
+                    value={editForm.phone}
+                    onChange={(e) => setEditForm({...editForm, phone: e.target.value})}
+                    placeholder="(555) 123-4567"
+                  />
+                </div>
+
+                {/* Company */}
+                <div>
+                  <Label htmlFor="companyName">Company Name</Label>
+                  <Input
+                    id="companyName"
+                    value={editForm.companyName}
+                    onChange={(e) => setEditForm({...editForm, companyName: e.target.value})}
+                    placeholder="Company name (optional)"
+                  />
+                </div>
+
+                {/* Address Fields */}
+                <div>
+                  <Label htmlFor="street">Street Address</Label>
+                  <Input
+                    id="street"
+                    value={editForm.street}
+                    onChange={(e) => setEditForm({...editForm, street: e.target.value})}
+                    placeholder="123 Main St"
+                  />
+                </div>
+                <div className="grid grid-cols-3 gap-3">
+                  <div>
+                    <Label htmlFor="city">City</Label>
+                    <Input
+                      id="city"
+                      value={editForm.city}
+                      onChange={(e) => setEditForm({...editForm, city: e.target.value})}
+                      placeholder="City"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="state">State</Label>
+                    <Input
+                      id="state"
+                      value={editForm.state}
+                      onChange={(e) => setEditForm({...editForm, state: e.target.value})}
+                      placeholder="TX"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="zipcode">Zip</Label>
+                    <Input
+                      id="zipcode"
+                      value={editForm.zipcode}
+                      onChange={(e) => setEditForm({...editForm, zipcode: e.target.value})}
+                      placeholder="77001"
+                    />
                   </div>
                 </div>
-              )}
-            </div>
+
+                {/* Business Details */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label htmlFor="businessType">Business Type</Label>
+                    <Input
+                      id="businessType"
+                      value={editForm.businessType}
+                      onChange={(e) => setEditForm({...editForm, businessType: e.target.value})}
+                      placeholder="Individual"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="source">Source</Label>
+                    <Input
+                      id="source"
+                      value={editForm.source}
+                      onChange={(e) => setEditForm({...editForm, source: e.target.value})}
+                      placeholder="referral"
+                    />
+                  </div>
+                </div>
+
+                {/* Trailer Details */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label htmlFor="trailerSize">Trailer Size</Label>
+                    <Input
+                      id="trailerSize"
+                      value={editForm.trailerSize}
+                      onChange={(e) => setEditForm({...editForm, trailerSize: e.target.value})}
+                      placeholder="6x12"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="trailerType">Trailer Type</Label>
+                    <Input
+                      id="trailerType"
+                      value={editForm.trailerType}
+                      onChange={(e) => setEditForm({...editForm, trailerType: e.target.value})}
+                      placeholder="Enclosed"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label htmlFor="financingType">Financing Type</Label>
+                    <Input
+                      id="financingType"
+                      value={editForm.financingType}
+                      onChange={(e) => setEditForm({...editForm, financingType: e.target.value})}
+                      placeholder="Cash"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="stockNumber">Stock Number</Label>
+                    <Input
+                      id="stockNumber"
+                      value={editForm.stockNumber}
+                      onChange={(e) => setEditForm({...editForm, stockNumber: e.target.value})}
+                      placeholder="Stock #"
+                    />
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {customer.email && !customer.email.includes('@placeholder.com') && (
+                  <div className="flex items-start gap-3">
+                    <Mail className="w-4 h-4 text-muted-foreground mt-1" />
+                    <div className="flex-1">
+                      <p className="text-sm text-muted-foreground">Email</p>
+                      <a
+                        href={`mailto:${customer.email}`}
+                        className="text-sm font-medium hover:text-primary"
+                      >
+                        {customer.email}
+                      </a>
+                    </div>
+                  </div>
+                )}
+
+                {customer.phone && !customer.phone.includes('@placeholder.com') && (
+                  <div className="flex items-start gap-3">
+                    <Phone className="w-4 h-4 text-muted-foreground mt-1" />
+                    <div className="flex-1">
+                      <p className="text-sm text-muted-foreground">Phone</p>
+                      <a
+                        href={`tel:${customer.phone}`}
+                        className="text-sm font-medium hover:text-primary"
+                      >
+                        {customer.phone}
+                      </a>
+                    </div>
+                  </div>
+                )}
+
+                {(customer.street || customer.city || customer.state) && (
+                  <div className="flex items-start gap-3">
+                    <MapPin className="w-4 h-4 text-muted-foreground mt-1" />
+                    <div className="flex-1">
+                      <p className="text-sm text-muted-foreground">Address</p>
+                      <p className="text-sm font-medium">
+                        {customer.street && <>{customer.street}<br /></>}
+                        {customer.city && customer.state
+                          ? `${customer.city}, ${customer.state} ${customer.zipcode || ""}`
+                          : customer.city || customer.state}
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
 
             <div className="border-t pt-4 space-y-3">
               <div className="flex items-center justify-between">
@@ -803,6 +1093,18 @@ export default function CustomerProfilePage() {
             </Button>
           </CardContent>
         </Card>
+
+        {/* Lead Status Manager - Hot/Cold/Credit Status */}
+        <div className="lg:col-span-1">
+          <LeadStatusManager
+            customerId={customer.id}
+            currentTemperature={customer.temperature}
+            currentLinkStatus={customer.linkSentStatus}
+            currentApprovalStatus={customer.approvalStatus}
+            userRole="owner" // TODO: Get from session
+            onUpdate={fetchCustomer}
+          />
+        </div>
       </div>
 
       {/* Activity Timeline - Full History (Non-Erasable) */}
