@@ -656,10 +656,10 @@ export default function CustomerProfilePage() {
         </Card>
       </div>
 
-      {/* 2-Column Layout: Customer Details + Actions */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Left Column - Customer Details (takes 3 columns) */}
-        <Card className="lg:col-span-3">
+      {/* 3-Column Layout: Customer Details + Lead Status + Actions */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left Column - Customer Details (takes 1 column) */}
+        <Card className="lg:col-span-1">
           <CardHeader>
             <CardTitle>Customer Details</CardTitle>
           </CardHeader>
@@ -992,6 +992,18 @@ export default function CustomerProfilePage() {
           </CardContent>
         </Card>
 
+        {/* Middle Column - Lead Status Management (takes 1 column) */}
+        <div className="lg:col-span-1">
+          <LeadStatusManager
+            customerId={customer.id}
+            currentTemperature={customer.temperature}
+            currentLinkStatus={customer.linkSentStatus}
+            currentApprovalStatus={customer.approvalStatus}
+            userRole="owner" // TODO: Get from session
+            onUpdate={fetchCustomer}
+          />
+        </div>
+
         {/* Right Column - Actions (takes 1 column) */}
         <Card className="lg:col-span-1">
           <CardHeader>
@@ -1093,18 +1105,6 @@ export default function CustomerProfilePage() {
             </Button>
           </CardContent>
         </Card>
-
-        {/* Lead Status Manager - Hot/Cold/Credit Status */}
-        <div className="lg:col-span-1">
-          <LeadStatusManager
-            customerId={customer.id}
-            currentTemperature={customer.temperature}
-            currentLinkStatus={customer.linkSentStatus}
-            currentApprovalStatus={customer.approvalStatus}
-            userRole="owner" // TODO: Get from session
-            onUpdate={fetchCustomer}
-          />
-        </div>
       </div>
 
       {/* Activity Timeline - Full History (Non-Erasable) */}

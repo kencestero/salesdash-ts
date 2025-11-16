@@ -207,12 +207,6 @@ export function EmailComposerDialog({
 
     setSending(true);
 
-    // Step 1: Close the composer dialog immediately
-    onOpenChange(false);
-
-    // Step 2: Show loading animation
-    setShowLoadingAnimation(true);
-
     try {
       // Create FormData for file uploads
       const formData = new FormData();
@@ -230,30 +224,35 @@ export function EmailComposerDialog({
         body: formData,
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error("Failed to send email");
+        throw new Error(data.error || "Failed to send email");
       }
+
+      // Reset form BEFORE closing dialog
+      setSubject("");
+      setBody("");
+      setAttachments([]);
+      setSelectedTemplate("custom");
+
+      // Close the composer dialog
+      onOpenChange(false);
+
+      // Show loading animation
+      setShowLoadingAnimation(true);
 
       // Email sent successfully - animation will auto-close via onComplete
       toast({
         title: "Email Sent!",
         description: `Email sent to ${customer.email}`,
       });
-
-      // Reset form
-      setSubject("");
-      setBody("");
-      setAttachments([]);
-      setSelectedTemplate("custom");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error sending email:", error);
-
-      // On error, close animation immediately
-      setShowLoadingAnimation(false);
 
       toast({
         title: "Error",
-        description: "Failed to send email. Please try again.",
+        description: error.message || "Failed to send email. Please try again.",
         variant: "destructive",
       });
     } finally {
