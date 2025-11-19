@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ReportsChart from "./reports-chart";
 import { useThemeStore } from "@/store";
@@ -9,27 +10,50 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import DashboardSelect from "@/components/dasboard-select";
 import { cn } from "@/lib/utils";
 
-const allUsersSeries = [
-  {
-    data: [90, 70, 85, 60, 80, 70, 90, 75, 60, 80],
-  },
-];
-const conversationSeries = [
-  {
-    data: [80, 70, 65, 40, 40, 100, 100, 75, 60, 80],
-  },
-];
-const eventCountSeries = [
-  {
-    data: [20, 70, 65, 60, 40, 60, 90, 75, 60, 40],
-  },
-];
-const newUserSeries = [
-  {
-    data: [20, 70, 65, 40, 100, 60, 100, 75, 60, 80],
-  },
-];
+interface AnalyticsData {
+  allUsers: {
+    total: number;
+    change: number;
+    chartData: number[];
+  };
+  activities: {
+    total: number;
+    change: number;
+    chartData: number[];
+  };
+  conversations: {
+    total: number;
+    change: number;
+    chartData: number[];
+  };
+  newUsers: {
+    total: number;
+    change: number;
+    chartData: number[];
+  };
+}
+
 const ReportsSnapshot = () => {
+  const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchAnalytics();
+  }, []);
+
+  const fetchAnalytics = async () => {
+    try {
+      const response = await fetch("/api/analytics/reports-snapshot");
+      if (response.ok) {
+        const data = await response.json();
+        setAnalyticsData(data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch analytics:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
   const { theme: config, setTheme: setConfig } = useThemeStore();
   const { theme: mode } = useTheme();
   const theme = themes.find((theme) => theme.name === config);
@@ -39,51 +63,57 @@ const ReportsSnapshot = () => {
   const success = `hsl(${theme?.cssVars[mode === "dark" ? "dark" : "light"].success})`;
   const info = `hsl(${theme?.cssVars[mode === "dark" ? "dark" : "light"].info})`;
 
+  // Format numbers with commas
+  const formatNumber = (num: number) => {
+    return num.toLocaleString();
+  };
+
   const tabsTrigger = [
     {
       value: "all",
       text: "all user",
-      total: "10,234",
+      total: loading ? "..." : formatNumber(analyticsData?.allUsers.total ?? 0),
       color: "primary",
     },
     {
       value: "event",
-      text: "Event Count",
-      total: "536",
+      text: "Customer Activities",
+      total: loading ? "..." : formatNumber(analyticsData?.activities.total ?? 0),
       color: "warning",
     },
     {
       value: "conversation",
       text: "conversations",
-      total: "21",
+      total: loading ? "..." : formatNumber(analyticsData?.conversations.total ?? 0),
       color: "success",
     },
     {
       value: "newuser",
-      text: "New User",
-      total: "3321",
+      text: "New Users (30d)",
+      total: loading ? "..." : formatNumber(analyticsData?.newUsers.total ?? 0),
       color: "info",
     },
   ];
+
   const tabsContentData = [
     {
       value: "all",
-      series: allUsersSeries,
+      series: [{ data: analyticsData?.allUsers.chartData ?? [0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }],
       color: primary,
     },
     {
       value: "event",
-      series: eventCountSeries,
+      series: [{ data: analyticsData?.activities.chartData ?? [0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }],
       color: warning,
     },
     {
       value: "conversation",
-      series: conversationSeries,
+      series: [{ data: analyticsData?.conversations.chartData ?? [0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }],
       color: success,
     },
     {
       value: "newuser",
-      series: newUserSeries,
+      series: [{ data: analyticsData?.newUsers.chartData ?? [0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }],
       color: info,
     },
   ];
@@ -96,7 +126,7 @@ const ReportsSnapshot = () => {
               Reports Snapshot
             </div>
             <span className="text-xs text-default-600">
-              Demographic properties of your customer
+              Real-time business activity metrics
             </span>
           </div>
           <div className="flex-none">
