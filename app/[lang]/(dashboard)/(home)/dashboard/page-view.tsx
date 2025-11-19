@@ -12,6 +12,9 @@ import TopTen from "./components/top-ten";
 import TopPage from "./components/top-page";
 import DatePickerWithRange from "@/components/date-picker-with-range";
 import RepCodeCard from "./components/rep-code-card";
+import { LogDashboardVisitOnMount } from "@/components/dashboard/log-dashboard-visit";
+import { DashboardUsersCard } from "@/components/dashboard/dashboard-users-card";
+import { SalesDashBenefitsCard } from "@/components/dashboard/SalesDashBenefitsCard";
 
 interface DashboardPageViewProps {
   trans: {
@@ -21,6 +24,9 @@ interface DashboardPageViewProps {
 const DashboardPageView = ({ trans }: DashboardPageViewProps) => {
   return (
     <div className="space-y-6">
+      {/* Log dashboard visit (invisible component) */}
+      <LogDashboardVisitOnMount />
+
       <div className="flex items-center flex-wrap justify-between gap-4">
         <div className="text-2xl font-medium text-default-800 ">
           Analytics {trans?.dashboard}
@@ -31,13 +37,17 @@ const DashboardPageView = ({ trans }: DashboardPageViewProps) => {
       {/* Rep Code Card */}
       <RepCodeCard />
 
+      {/* SalesDash Benefits Card */}
+      <SalesDashBenefitsCard />
+
       {/* reports area */}
       <div className="grid grid-cols-12  gap-6 ">
         <div className="col-span-12 lg:col-span-8">
           <ReportsSnapshot />
         </div>
-        <div className="col-span-12 lg:col-span-4">
+        <div className="col-span-12 lg:col-span-4 space-y-6">
           <UsersStat />
+          <DashboardUsersCard />
         </div>
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
