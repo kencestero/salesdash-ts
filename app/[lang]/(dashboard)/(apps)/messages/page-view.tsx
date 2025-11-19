@@ -97,7 +97,6 @@ export default function MessagesView({ session }: { session: any }) {
       toast({
         title: "Error",
         description: "Failed to load messages",
-        variant: "destructive",
       });
     } finally {
       setLoading(false);
@@ -174,7 +173,6 @@ export default function MessagesView({ session }: { session: any }) {
       toast({
         title: "Error",
         description: "Please select a recipient and enter a message",
-        variant: "destructive",
       });
       return;
     }
@@ -201,7 +199,6 @@ export default function MessagesView({ session }: { session: any }) {
       toast({
         title: "Error",
         description: "Failed to send message",
-        variant: "destructive",
       });
     }
   };
@@ -211,7 +208,6 @@ export default function MessagesView({ session }: { session: any }) {
       toast({
         title: "Error",
         description: "Please enter a reply message",
-        variant: "destructive",
       });
       return;
     }
@@ -244,7 +240,6 @@ export default function MessagesView({ session }: { session: any }) {
       toast({
         title: "Error",
         description: "Failed to send reply",
-        variant: "destructive",
       });
     }
   };
@@ -271,7 +266,6 @@ export default function MessagesView({ session }: { session: any }) {
       toast({
         title: "Error",
         description: "Failed to delete message",
-        variant: "destructive",
       });
     }
   };
@@ -323,18 +317,18 @@ export default function MessagesView({ session }: { session: any }) {
 
             <div className="flex gap-2">
               <Button
-                variant={filter === "all" ? "default" : "outline"}
+                variant="outline"
                 size="sm"
                 onClick={() => setFilter("all")}
-                className={filter === "all" ? "bg-[#E96114] hover:bg-[#d5550f]" : ""}
+                className={filter === "all" ? "bg-[#E96114] hover:bg-[#d5550f] text-white border-[#E96114]" : ""}
               >
                 All
               </Button>
               <Button
-                variant={filter === "unread" ? "default" : "outline"}
+                variant="outline"
                 size="sm"
                 onClick={() => setFilter("unread")}
-                className={filter === "unread" ? "bg-[#E96114] hover:bg-[#d5550f]" : ""}
+                className={filter === "unread" ? "bg-[#E96114] hover:bg-[#d5550f] text-white border-[#E96114]" : ""}
               >
                 Unread ({unreadCount})
               </Button>

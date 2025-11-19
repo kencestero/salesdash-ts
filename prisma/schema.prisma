@@ -68,6 +68,7 @@ model User {
   createdLeads      Lead[]             @relation("CreatedLeads")
   pushSubscriptions PushSubscription[] @relation("PushSubscriptions")
   deliveryRecords   DeliveryRecord[]   @relation("CreatedDeliveryRecords")
+  dashboardVisits   DashboardVisit[]
 }
 
 model VerificationToken {
@@ -510,6 +511,7 @@ model Activity {
   @@index([emailId])
   @@index([type])
   @@index([dueDate])
+  @@index([createdAt])              // Index for analytics queries
   @@index([customerId, createdAt]) // Composite index for customer activity timeline
   @@index([userId, createdAt])     // Composite index for user activity history
 }
@@ -1102,4 +1104,15 @@ model PushSubscription {
 
   @@index([userId])
   @@index([endpoint])
+}
+
+// Analytics: Dashboard Visits
+model DashboardVisit {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([userId, createdAt])
 }

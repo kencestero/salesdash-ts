@@ -116,7 +116,7 @@ export async function GET(req: NextRequest) {
 
     const dailyMessages = await prisma.$queryRaw<Array<{ date: Date; count: bigint }>>`
       SELECT DATE("createdAt") as date, COUNT(*)::bigint as count
-      FROM "InternalMessage"
+      FROM "internal_messages"
       WHERE "createdAt" >= ${last10Days}
       GROUP BY DATE("createdAt")
       ORDER BY date ASC
