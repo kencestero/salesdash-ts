@@ -174,7 +174,7 @@ export default function CustomerProfilePage() {
 
       const data = await response.json();
       setCustomer(data.customer);
-      setNotes(data.customer.notes || "");
+      // Don't set notes from customer data - keep textarea empty for new notes only
 
       // Initialize edit form with customer data
       setEditForm({
@@ -1198,7 +1198,7 @@ export default function CustomerProfilePage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <FileText className="w-5 h-5 text-orange-600" />
-            Customer Notes
+            Add New Notes
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -1209,12 +1209,9 @@ export default function CustomerProfilePage() {
             rows={8}
             className="mb-3"
           />
-          {customer.notes && customer.updatedAt && (
-            <p className="text-xs text-muted-foreground mb-3 flex items-center gap-1">
-              <Clock className="w-3 h-3" />
-              Last saved: {formatDate(customer.updatedAt)}
-            </p>
-          )}
+          <p className="text-xs text-muted-foreground mb-3">
+            Notes will be added to the Activity Timeline above. Previous notes are visible in the timeline.
+          </p>
           <Button onClick={handleSaveNotes} className="bg-orange-500 hover:bg-orange-600">
             <FileText className="w-4 h-4 mr-2" />
             Save Notes
