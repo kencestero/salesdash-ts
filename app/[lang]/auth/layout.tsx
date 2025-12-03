@@ -1,24 +1,24 @@
 export const metadata = {
-  title: "MJ Cargo Sales Dashboard - Authentication",
-  description: "Sales training platform for MJ Cargo trailer reps",
+  title: "Remotive Logistics - Authentication",
+  description: "Sales training platform for Remotive Logistics trailer reps",
   openGraph: {
-    title: "MJ Cargo Sales Dashboard",
+    title: "Remotive Logistics",
     description: "Your personal virtual desk for trailer sales success",
-    url: "https://www.mjsalesdash.com/en/auth/login",
-    siteName: "MJ Cargo Sales Dashboard",
+    url: "[domain TBD]/en/auth/login",
+    siteName: "Remotive Logistics",
     images: [
       {
         url: "/og-image.png",
         width: 1920,
         height: 1080,
-        alt: "MJ Cargo Sales Dashboard - Discover SalesDash"
+        alt: "Remotive Logistics - Discover Remotive"
       }
     ],
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "MJ Cargo Sales Dashboard",
+    title: "Remotive Logistics",
     description: "Your personal virtual desk for trailer sales success",
     images: ["/og-image.png"],
   }

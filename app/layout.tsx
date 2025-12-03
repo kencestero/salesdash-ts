@@ -42,7 +42,7 @@ export const metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://mjsalesdash.com',
+    url: '[domain TBD]',
     siteName: siteConfig.name,
     title: siteConfig.name,
     description: siteConfig.description,
@@ -51,7 +51,7 @@ export const metadata = {
         url: '/images/mj-og-image.png',
         width: 1200,
         height: 630,
-        alt: 'MJ Cargo Sales Dashboard',
+        alt: 'Remotive Logistics Dashboard',
       },
     ],
   },

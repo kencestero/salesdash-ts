@@ -19,7 +19,7 @@ const resend = new Resend(apiKey);
 
 // Default sender email (use your verified domain)
 // Strip quotes if they exist in the environment variable
-const rawFromEmail = process.env.RESEND_FROM_EMAIL || 'MJ Cargo Sales <noreply@mjsalesdash.com>';
+const rawFromEmail = process.env.RESEND_FROM_EMAIL || 'Remotive Logistics <noreply@remotivelogistics.com>';
 const DEFAULT_FROM = rawFromEmail.replace(/^["']|["']$/g, '').trim();
 
 export interface SendEmailOptions {

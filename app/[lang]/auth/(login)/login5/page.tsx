@@ -219,7 +219,7 @@ export default function LoginPage() {
               <path id="circle" d="M 90,90 m -70,0 a 70,70 0 1,1 140,0 a 70,70 0 1,1 -140,0" />
             </defs>
             <text className="text-[11px] font-light tracking-[0.3em] fill-white/90 uppercase">
-              <textPath href="#circle">MJ SALESDASH AI • MJ SALESDASH AI • MJ SALESDASH AI •</textPath>
+              <textPath href="#circle">REMOTIVE AI • REMOTIVE AI • REMOTIVE AI • REMOTIVE AI •</textPath>
             </text>
           </svg>
 
@@ -227,7 +227,7 @@ export default function LoginPage() {
             <div className="relative w-24 h-24">
               <Image
                 src={getEyeImage()}
-                alt="MJ AI Eye"
+                alt="Remotive AI Eye"
                 width={96}
                 height={96}
                 className="transition-opacity duration-200"
@@ -252,7 +252,7 @@ export default function LoginPage() {
                   Welcome Back
                 </h3>
                 <p className="text-white/60 text-sm">
-                  Access your SalesDash account to manage leads and close deals
+                  Access your Remotive account to manage leads and close deals
                 </p>
               </div>
 
@@ -382,7 +382,7 @@ export default function LoginPage() {
 
               <div className="mt-8 text-center">
                 <a
-                  href="mailto:noreply@mjsalesdash.com"
+                  href="mailto:support@remotivelogistics.com"
                   className="text-white/50 text-xs uppercase tracking-wider hover:text-orange-500/90 transition-colors"
                 >
                   Need assistance?
@@ -402,7 +402,7 @@ export default function LoginPage() {
                   </a>
                 </div>
                 <p className="text-white/30 text-xs text-center">
-                  © 2024 MJ Cargo Sales • Enterprise CRM Platform
+                  © 2024 Remotive Logistics • Haverstraw, NY 10927 • Enterprise CRM Platform
                 </p>
               </div>
             </div>

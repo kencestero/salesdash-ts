@@ -14,7 +14,7 @@ import DatePickerWithRange from "@/components/date-picker-with-range";
 import RepCodeCard from "./components/rep-code-card";
 import { LogDashboardVisitOnMount } from "@/components/dashboard/log-dashboard-visit";
 import { DashboardUsersCard } from "@/components/dashboard/dashboard-users-card";
-import { SalesDashBenefitsCard } from "@/components/dashboard/SalesDashBenefitsCard";
+import { RemotiveBenefitsCard } from "@/components/dashboard/RemotiveBenefitsCard";
 
 interface DashboardPageViewProps {
   trans: {
@@ -37,8 +37,8 @@ const DashboardPageView = ({ trans }: DashboardPageViewProps) => {
       {/* Rep Code Card */}
       <RepCodeCard />
 
-      {/* SalesDash Benefits Card */}
-      <SalesDashBenefitsCard />
+      {/* Remotive Benefits Card */}
+      <RemotiveBenefitsCard />
 
       {/* reports area */}
       <div className="grid grid-cols-12  gap-6 ">

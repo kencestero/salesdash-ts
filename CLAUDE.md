@@ -4,9 +4,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**MJ Cargo SalesDash** is a comprehensive sales management system for trailer dealerships built on Next.js 14 with TypeScript, Prisma ORM, PostgreSQL (Neon), NextAuth.js, and Firebase. Built on the DashTail template with custom CRM features for remote trailer sales reps.
+**Remotive Logistics** is a comprehensive sales management system for trailer dealerships built on Next.js 14 with TypeScript, Prisma ORM, PostgreSQL (Neon), NextAuth.js, and Firebase. Built on the DashTail template with custom CRM features for remote trailer sales reps.
 
-**Live Site:** https://mjsalesdash.com
+**Company Location:** Haverstraw, NY 10927
+**Live Site:** [Domain TBD]
 **Repository:** https://github.com/kencestero/salesdash-ts
 
 **Tech Stack:**
@@ -19,9 +20,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Branding:** Dark mode with #E96114 (orange) + #09213C (dark blue) color scheme.
 
-**Email Configuration:** All system emails sent from `noreply@mjsalesdash.com` via Resend API.
+**Email Configuration:** All system emails sent from `noreply@remotivelogistics.com` via Resend API.
 
-**Credit Application Domain:** All rep code links point to `https://mjcargotrailers.com/credit-application/{repCode}` (external site with Matt's notification system).
+**Credit Application Domain:** Rep code links point to credit application portal (configurable).
 
 ## Development Commands
 
@@ -391,7 +392,7 @@ toast({
 **Google Sheets CRM Auto-Sync:**
 - **Schedule:** Daily at 8:00 AM UTC (Vercel Hobby plan limitation)
 - **Endpoint:** `/api/cron/sync-google-sheets`
-- **Function:** Syncs leads from Google Sheets to SalesDash CRM
+- **Function:** Syncs leads from Google Sheets to Remotive CRM
 - **Features:**
   - Maps all 20 columns (A-T) from Google Sheets
   - Detects new vs existing leads by phone/email
@@ -449,7 +450,7 @@ NEXT_PUBLIC_FIREBASE_APP_ID=your-app-id
 
 # Email Service (Resend)
 RESEND_API_KEY=your-resend-api-key
-RESEND_FROM_EMAIL=MJ Cargo Sales <noreply@mjsalesdash.com>
+RESEND_FROM_EMAIL=Remotive Logistics <noreply@remotivelogistics.com>
 # Note: Quotes around email are optional - auto-stripped if present
 
 # Inventory System (Optional)
@@ -581,7 +582,7 @@ GOOGLE_PRIVATE_KEY=-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----
 - Session timeout component (30 min inactivity)
 
 **UI Updates:**
-- Rep code card: 75% smaller, theme colors, mjsalesdash.com links
+- Rep code card: 75% smaller, theme colors, portal links
 - Manager dropdown on social signup paths
 - Cookie settings for localhost development
 
@@ -664,7 +665,7 @@ pnpm typecheck  # Check TypeScript errors first
   - `PYTHON-INVENTORY-INTEGRATION.md` - Python inventory scripts
   - `DASHTAIL-SETUP-GUIDE.md` - DashTail template docs
   - `docs/DYNAMIC_MANAGER_SYSTEM.md` - Manager system (Phases 1-3)
-  - `docs/SalesDash_Rep_Ascension.md` - Rep progression system
+  - `docs/Remotive_Rep_Ascension.md` - Rep progression system
 
 **External Docs:**
 - Next.js 14: https://nextjs.org/docs
@@ -676,5 +677,5 @@ pnpm typecheck  # Check TypeScript errors first
 ---
 
 **Last Updated:** 2025-01-21
-**Current Version:** Production (mjsalesdash.com)
+**Current Version:** Production (remotivelogistics.com)
 **Recent Major Changes:** OAuth crash fix, needsJoinCode field, security improvements

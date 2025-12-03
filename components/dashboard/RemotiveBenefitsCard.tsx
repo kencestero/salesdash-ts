@@ -22,9 +22,9 @@ const benefits = [
     icon: '📄',
   },
   {
-    title: '3-Option MJ PDF',
+    title: '3-Option PDF',
     description:
-      'Send a modern MJ-themed PDF with three payment options to help you close deals.',
+      'Send a modern branded PDF with three payment options to help you close deals.',
     icon: '📑',
   },
   {
@@ -36,7 +36,7 @@ const benefits = [
   {
     title: 'Click-to-Call & Email',
     description:
-      'Call and email leads directly with a single tap in SalesDash.',
+      'Call and email leads directly with a single tap in Remotive.',
     icon: '📞',
   },
   {
@@ -47,7 +47,7 @@ const benefits = [
   },
 ];
 
-export function SalesDashBenefitsCard() {
+export function RemotiveBenefitsCard() {
   const Container: any = motion.section;
 
   return (
@@ -66,7 +66,7 @@ export function SalesDashBenefitsCard() {
     >
       <header className="mb-5">
         <p className="text-xs font-bold uppercase tracking-widest text-orange-400">
-          MJ SalesDash
+          Remotive
         </p>
         <h2 className="text-xl font-semibold">
           Dashboard Tools That Help You Sell More
@@ -100,7 +100,7 @@ export function SalesDashBenefitsCard() {
       <footer className="mt-5 border-t border-white/10 pt-3 text-xs text-gray-400">
         The Dashboard is still in development. If something is missing or needs attention,
         let us know in the Help section.{' '}
-        <span className="font-semibold text-orange-400">Happy selling, MJ'ers!</span>
+        <span className="font-semibold text-orange-400">Happy selling!</span>
       </footer>
     </Container>
   );

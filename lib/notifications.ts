@@ -6,7 +6,7 @@
 import { Resend } from 'resend';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
-const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'MJ Cargo Sales <noreply@mjsalesdash.com>';
+const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'Remotive Logistics <noreply@remotivelogistics.com>';
 
 export interface NotificationData {
   to: string;
@@ -111,7 +111,7 @@ export async function notifyNewLeadAssigned(params: {
             <hr style="border: none; border-top: 1px solid #ddd; margin: 20px 0;">
 
             <div style="text-align: center;">
-              <a href="https://mjsalesdash.com/en/crm/pipeline" class="btn">View in CRM 🚀</a>
+              <a href="[domain TBD]/en/crm/pipeline" class="btn">View in CRM 🚀</a>
             </div>
           </div>
 
@@ -141,7 +141,7 @@ Phone: ${leadPhone || 'Not provided'}
 ${leadEmail ? `Email: ${leadEmail}` : ''}
 ${trailerSize ? `Trailer: ${trailerSize}` : ''}
 
-View in CRM: https://mjsalesdash.com/en/crm/pipeline
+View in CRM: [domain TBD]/en/crm/pipeline
   `;
 
   return sendEmailNotification({
@@ -196,7 +196,7 @@ export async function notifyStatusChange(params: {
               <span class="status-badge" style="background: #E96114; color: white;">${newStatus}</span>
             </div>
             <p style="color: #666;">Changed by: ${changedBy}</p>
-            <a href="https://mjsalesdash.com/en/crm/pipeline" style="display: inline-block; background: #E96114; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin-top: 20px;">View Pipeline</a>
+            <a href="[domain TBD]/en/crm/pipeline" style="display: inline-block; background: #E96114; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin-top: 20px;">View Pipeline</a>
           </div>
         </div>
       </div>
@@ -271,7 +271,7 @@ export async function notifyStaleLeads(params: {
             </tbody>
           </table>
           <div style="text-align: center; margin-top: 20px;">
-            <a href="https://mjsalesdash.com/en/crm/dashboard" style="display: inline-block; background: #F59E0B; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px;">View Dashboard</a>
+            <a href="[domain TBD]/en/crm/dashboard" style="display: inline-block; background: #F59E0B; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px;">View Dashboard</a>
           </div>
         </div>
       </div>
@@ -363,7 +363,7 @@ export async function sendDailyDigest(params: {
           ` : ''}
 
           <div style="text-align: center; margin-top: 20px;">
-            <a href="https://mjsalesdash.com/en/crm/dashboard" style="display: inline-block; background: #E96114; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px;">View Full Dashboard</a>
+            <a href="[domain TBD]/en/crm/dashboard" style="display: inline-block; background: #E96114; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px;">View Full Dashboard</a>
           </div>
         </div>
       </div>

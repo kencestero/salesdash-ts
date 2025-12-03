@@ -254,7 +254,7 @@ export default function RegisterPage() {
         ))}
       </div>
 
-      {/* MJ Logo - Fixed at top with backdrop */}
+      {/* Remotive Logo - Fixed at top with backdrop */}
       <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[9999] pointer-events-none">
         <div className="relative">
           {/* Backdrop circle */}
@@ -263,7 +263,7 @@ export default function RegisterPage() {
           <div className="w-24 h-24 relative drop-shadow-2xl">
             <Image
               src="/images/DASH_LOGO_EYE_IN_THE_SKY.webp"
-              alt="MJ SalesDash Logo"
+              alt="Remotive Logistics Logo"
               fill
               className="object-contain"
               priority
@@ -275,7 +275,7 @@ export default function RegisterPage() {
       {/* Main Content */}
       <div className="relative z-20 min-h-screen flex items-center justify-center p-6 pt-48">
         <div className="mx-auto max-w-2xl w-full bg-black/40 backdrop-blur-[25px] rounded-3xl p-8 shadow-2xl border border-white/20">
-          <h1 className="text-3xl font-bold mb-2 text-white text-center">Join MJ Cargo Sales Team</h1>
+          <h1 className="text-3xl font-bold mb-2 text-white text-center">Join Remotive Logistics Team</h1>
           <p className="text-white/80 text-center mb-8">Enter your secret code to get started</p>
 
           {/* Secret Code Section */}

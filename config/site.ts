@@ -2,8 +2,8 @@
 
 
 export const siteConfig = {
-  name: "MJ Cargo Sales Dashboard",
-  description: "Sales training platform for MJ Cargo trailer reps",
+  name: "Remotive Logistics",
+  description: "Sales training platform for Remotive Logistics trailer reps",
   theme: "orange",
   layout: "vertical",
   // semi-box, horizontal, vertical
@@ -15,6 +15,6 @@ export const siteConfig = {
   // sticky, floating, static
   footerType: "static",
   // sticky,  static, hidden
-  sidebarBg: "/images/mjsidebar.webp", // Default MJ Cargo sidebar background
+  sidebarBg: "/images/mjsidebar.webp", // Default Remotive Logistics sidebar background
   radius: 0.75,
 };

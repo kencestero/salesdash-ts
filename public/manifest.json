@@ -1,7 +1,7 @@
 {
-  "name": "MJ Cargo Sales Dashboard",
-  "short_name": "MJ SalesDash",
-  "description": "CRM System for MJ Cargo Trailer Sales",
+  "name": "Remotive Logistics",
+  "short_name": "Remotive",
+  "description": "CRM System for Remotive Logistics Trailer Sales",
   "theme_color": "#ee6832",
   "background_color": "#ffffff",
   "display": "standalone",
