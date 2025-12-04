@@ -2,7 +2,6 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import GoogleProvider from "next-auth/providers/google";
 import { getServerSession } from "next-auth";
-import { cookies } from "next/headers";
 import { prisma } from "./prisma";
 import { generateUniqueSalespersonCode } from "./salespersonCode";
 import bcrypt from "bcryptjs";
@@ -143,7 +142,8 @@ export const authOptions = {
           return true;
         }
 
-        // NEW USER - Check join code
+        // NEW USER - Check join code (dynamic import for Next.js 15 compatibility)
+        const { cookies } = await import("next/headers");
         const cookieStore = await cookies();
         const joinCodeValid = cookieStore.get("join_ok")?.value;
         const joinRole = cookieStore.get("join_role")?.value || "salesperson";
