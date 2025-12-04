@@ -2,10 +2,8 @@
 
 
 const nextConfig = {
-  // Bundle @react-email packages for serverless functions
-  experimental: {
-    serverComponentsExternalPackages: ['@sparticuz/chromium', 'puppeteer-core'],
-  },
+  // External packages for serverless functions (moved from experimental in Next.js 15)
+  serverExternalPackages: ['@sparticuz/chromium', 'puppeteer-core'],
   // Ensure react-email dependencies are bundled
   transpilePackages: ['@react-email/components', '@react-email/render', '@react-email/tailwind'],
 

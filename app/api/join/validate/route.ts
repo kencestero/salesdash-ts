@@ -77,7 +77,7 @@ export async function POST(req: Request) {
   resetRateLimit(ip);
 
   // Store the role in a cookie so we can assign it after Google OAuth
-  cookies().set("join_ok", "1", {
+  (await cookies()).set("join_ok", "1", {
     httpOnly: true,
     sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
     path: "/",
@@ -85,7 +85,7 @@ export async function POST(req: Request) {
     secure: process.env.NODE_ENV === 'production',
   });
 
-  cookies().set("join_role", role, {
+  (await cookies()).set("join_role", role, {
     httpOnly: true,
     sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
     path: "/",

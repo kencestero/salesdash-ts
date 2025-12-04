@@ -14,10 +14,8 @@ import { prisma } from "@/lib/prisma";
  *
  * Body: { isAvailableAsManager: boolean }
  */
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(req: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     // 1. Authentication check
     const session = await getServerSession(authOptions);

@@ -6,10 +6,8 @@ import { prisma } from "@/lib/prisma";
 export const dynamic = "force-dynamic";
 
 // PATCH /api/crm/customers/[id] - Update customer (managers+ only)
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(req: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
@@ -83,10 +81,8 @@ export async function PATCH(
 }
 
 // GET /api/crm/customers/[id] - Get single customer
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(req: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {

@@ -6,7 +6,13 @@ import Link from "next/link";
 import ProjectHeader from "./project-header";
 import PageLink from "./page-link";
 
-const singleProjectLayout = async ({ children, params }: { children: React.ReactNode; params: { id: string } }) => {
+const singleProjectLayout = async (props: { children: React.ReactNode; params: Promise<{ id: string }> }) => {
+  const params = await props.params;
+
+  const {
+    children
+  } = props;
+
   const { id } = params;
   const project = await getProject(id);
 

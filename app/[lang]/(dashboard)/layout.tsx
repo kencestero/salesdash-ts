@@ -4,7 +4,17 @@ import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { getDictionary } from "@/app/dictionaries";
 
-const layout = async ({ children, params: { lang } }: { children: React.ReactNode; params: { lang: any } }) => {
+const layout = async (props: { children: React.ReactNode; params: Promise<{ lang: any }> }) => {
+  const params = await props.params;
+
+  const {
+    lang
+  } = params;
+
+  const {
+    children
+  } = props;
+
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.email) {

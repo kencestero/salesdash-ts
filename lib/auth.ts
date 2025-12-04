@@ -2,6 +2,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import GoogleProvider from "next-auth/providers/google";
 import { getServerSession } from "next-auth";
+import { cookies } from "next/headers";
 import { prisma } from "./prisma";
 import { generateUniqueSalespersonCode } from "./salespersonCode";
 import bcrypt from "bcryptjs";
@@ -143,9 +144,9 @@ export const authOptions = {
         }
 
         // NEW USER - Check join code
-        const { cookies } = await import("next/headers");
-        const joinCodeValid = cookies().get("join_ok")?.value;
-        const joinRole = cookies().get("join_role")?.value || "salesperson";
+        const cookieStore = await cookies();
+        const joinCodeValid = cookieStore.get("join_ok")?.value;
+        const joinRole = cookieStore.get("join_role")?.value || "salesperson";
 
         // NEW USER WITHOUT JOIN CODE - Block signup
         if (!joinCodeValid) {
@@ -155,12 +156,12 @@ export const authOptions = {
         }
 
     // NEW USER WITH VALID JOIN CODE
-    const firstName = cookies().get("signup_firstName")?.value;
-    const lastName = cookies().get("signup_lastName")?.value;
-    const phone = cookies().get("signup_phone")?.value;
-    const zipcode = cookies().get("signup_zipcode")?.value;
-    const managerId = cookies().get("signup_managerId")?.value;
-    const status = cookies().get("signup_status")?.value || "employee";
+    const firstName = cookieStore.get("signup_firstName")?.value;
+    const lastName = cookieStore.get("signup_lastName")?.value;
+    const phone = cookieStore.get("signup_phone")?.value;
+    const zipcode = cookieStore.get("signup_zipcode")?.value;
+    const managerId = cookieStore.get("signup_managerId")?.value;
+    const status = cookieStore.get("signup_status")?.value || "employee";
 
     // Generate rep code
     let repCode: string;
@@ -203,14 +204,14 @@ export const authOptions = {
       },
     });
 
-    cookies().delete("join_ok");
-    cookies().delete("join_role");
-    cookies().delete("signup_firstName");
-    cookies().delete("signup_lastName");
-    cookies().delete("signup_phone");
-    cookies().delete("signup_zipcode");
-    cookies().delete("signup_managerId");
-    cookies().delete("signup_status");
+    cookieStore.delete("join_ok");
+    cookieStore.delete("join_role");
+    cookieStore.delete("signup_firstName");
+    cookieStore.delete("signup_lastName");
+    cookieStore.delete("signup_phone");
+    cookieStore.delete("signup_zipcode");
+    cookieStore.delete("signup_managerId");
+    cookieStore.delete("signup_status");
 
     console.log("✅ User created successfully");
     return true;

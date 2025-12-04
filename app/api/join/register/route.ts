@@ -37,7 +37,7 @@ export async function POST(req: Request) {
     }
 
     // 2. Check if validation cookie exists
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const joinOk = cookieStore.get("join_ok")?.value;
     const joinRole = cookieStore.get("join_role")?.value;
 

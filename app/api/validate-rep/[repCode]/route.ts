@@ -4,10 +4,8 @@ import { prisma } from "@/lib/prisma";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { repCode: string } }
-) {
+export async function GET(req: NextRequest, props: { params: Promise<{ repCode: string }> }) {
+  const params = await props.params;
   try {
     const { repCode } = params;
 

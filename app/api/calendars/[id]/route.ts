@@ -7,10 +7,8 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 // DELETE /api/calendars/[id] - Delete event
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
 
@@ -64,10 +62,8 @@ export async function DELETE(
 }
 
 // PUT /api/calendars/[id] - Update event
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(request: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
 

@@ -55,7 +55,7 @@ export async function submitRequest(
   const repName = parsed.data.fullName;
   const repEmail = parsed.data.email;
 
-  const h = headers();
+  const h = await headers();
   const ip =
     h.get("x-forwarded-for")?.split(",")[0]?.trim() ||
     h.get("x-real-ip") ||

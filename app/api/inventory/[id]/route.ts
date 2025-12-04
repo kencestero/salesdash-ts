@@ -10,10 +10,8 @@ export const revalidate = 0;
  * GET /api/inventory/[id]
  * Fetch a single trailer by ID
  */
-export async function GET(
-  req: Request,
-  { params }: { params: { id: string } }
-) {
+export async function GET(req: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const trailer = await prisma.trailer.findUnique({
       where: { id: params.id },
@@ -50,10 +48,8 @@ export async function GET(
  * PATCH /api/inventory/[id]
  * Update trailer details (Directors and Owners only)
  */
-export async function PATCH(
-  req: Request,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(req: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     // 1. Authenticate user
     const session = await getServerSession(authOptions);
@@ -117,10 +113,8 @@ export async function PATCH(
  * DELETE /api/inventory/[id]
  * Delete a trailer (Owners only)
  */
-export async function DELETE(
-  req: Request,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(req: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     // 1. Authenticate user
     const session = await getServerSession(authOptions);
