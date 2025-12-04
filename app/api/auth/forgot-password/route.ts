@@ -49,9 +49,9 @@ export async function POST(req: NextRequest) {
 
     // Send email with simple HTML
     await resend.emails.send({
-      from: process.env.RESEND_FROM_EMAIL?.replace(/^["']|["']$/g, '') || 'MJ Cargo Sales <noreply@mjsalesdash.com>',
+      from: process.env.RESEND_FROM_EMAIL?.replace(/^["']|["']$/g, '') || 'Remotive Logistics <noreply@remotivelogistics.com>',
       to: user.email!,
-      subject: 'Reset Your MJ SalesDash Password',
+      subject: 'Reset Your Remotive Portal Password',
       html: `
         <!DOCTYPE html>
         <html>
@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
                     <!-- Header -->
                     <tr>
                       <td style="background-color: #E96114; padding: 30px; text-align: center;">
-                        <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: bold; letter-spacing: 1px;">MJ CARGO TRAILERS</h1>
+                        <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: bold; letter-spacing: 1px;">REMOTIVE LOGISTICS</h1>
                       </td>
                     </tr>
 
@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
                     <tr>
                       <td style="padding: 40px 30px;">
                         <h2 style="color: #1a1a1a; font-size: 24px; font-weight: bold; margin: 0 0 16px 0;">Hi ${user.name || 'there'}! 🔐</h2>
-                        <p style="color: #525252; font-size: 16px; line-height: 24px; margin: 0 0 16px 0;">We received a request to reset your password for your MJ SalesDash account.</p>
+                        <p style="color: #525252; font-size: 16px; line-height: 24px; margin: 0 0 16px 0;">We received a request to reset your password for your Remotive Portal account.</p>
                         <p style="color: #525252; font-size: 16px; line-height: 24px; margin: 0 0 24px 0;">Click the button below to create a new password:</p>
 
                         <!-- CTA Button -->
@@ -96,7 +96,7 @@ export async function POST(req: NextRequest) {
                     <!-- Footer -->
                     <tr>
                       <td style="background-color: #f9fafb; padding: 24px 30px; border-top: 1px solid: #e6ebf1;">
-                        <p style="color: #525252; font-size: 14px; line-height: 20px; margin: 0 0 8px 0; text-align: center;"><strong>MJ Cargo Trailers</strong></p>
+                        <p style="color: #525252; font-size: 14px; line-height: 20px; margin: 0 0 8px 0; text-align: center;"><strong>Remotive Logistics</strong> | Haverstraw, NY 10927</p>
                         <p style="color: #8b8b8b; font-size: 12px; line-height: 16px; margin: 0; text-align: center;">This is an automated email. Please do not reply to this message.</p>
                       </td>
                     </tr>
