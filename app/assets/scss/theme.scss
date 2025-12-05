@@ -1137,3 +1137,120 @@
   --default-100: 217.2 32.6% 17.5%;
   --default-50: 222.2 47.4% 11.2%;
 }
+
+/* Remotive Logistics Theme - #E96614 (orange) + #09213C (dark blue) */
+.theme-remotive {
+  --background: 0 0% 100%;
+  --foreground: 212 78% 14%;
+
+  --muted: 212 30% 95%;
+  --muted-foreground: 212 20% 45%;
+
+  --popover: 0 0% 100%;
+  --popover-foreground: 212 78% 14%;
+
+  --card: 0 0% 100%;
+  --card-foreground: 212 78% 14%;
+
+  --border: 212 30% 88%;
+  --input: 212 30% 88%;
+
+  --primary-50: 22 100% 97%;
+  --primary-100: 22 100% 93%;
+  --primary-200: 22 96% 85%;
+  --primary-300: 22 94% 73%;
+  --primary-400: 22 92% 60%;
+  --primary-500: 22 90% 49%;
+  --primary-600: 22 92% 42%;
+  --primary-700: 22 88% 35%;
+  --primary-800: 22 80% 28%;
+  --primary-900: 22 75% 22%;
+  --primary-950: 22 85% 12%;
+  --primary: 22 90% 49%;
+  --primary-foreground: 0 0% 100%;
+
+  --secondary: 212 30% 95%;
+  --secondary-foreground: 212 78% 14%;
+
+  --accent: 212 30% 95%;
+  --accent-foreground: 212 78% 14%;
+
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 0 0% 98%;
+
+  --success: 142.1 76.2% 36.3%;
+  --success-foreground: 0 0% 100%;
+
+  --warning: 45 93% 47%;
+  --warning-foreground: 212 78% 14%;
+
+  --info: 199 89% 48%;
+  --info-foreground: 0 0% 100%;
+
+  --ring: 22 90% 49%;
+
+  --default-50: 212 30% 98%;
+  --default-100: 212 30% 95%;
+  --default-200: 212 30% 88%;
+  --default-300: 212 25% 78%;
+  --default-400: 212 20% 60%;
+  --default-500: 212 20% 45%;
+  --default-600: 212 25% 35%;
+  --default-700: 212 40% 25%;
+  --default-800: 212 60% 18%;
+  --default-900: 212 78% 14%;
+  --default-950: 212 85% 8%;
+
+  --radius: 0.5rem;
+}
+
+.dark .theme-remotive {
+  --background: 212 78% 8%;
+  --foreground: 0 0% 98%;
+
+  --muted: 212 50% 14%;
+  --muted-foreground: 212 20% 65%;
+
+  --popover: 212 78% 10%;
+  --popover-foreground: 0 0% 98%;
+
+  --card: 212 60% 12%;
+  --card-foreground: 0 0% 98%;
+
+  --border: 212 40% 20%;
+  --input: 212 50% 14%;
+
+  --primary: 22 90% 49%;
+  --primary-foreground: 0 0% 100%;
+
+  --secondary: 212 40% 20%;
+  --secondary-foreground: 0 0% 98%;
+
+  --accent: 212 50% 14%;
+  --accent-foreground: 0 0% 98%;
+
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 98%;
+
+  --success: 142.1 70.6% 45.3%;
+  --success-foreground: 0 0% 100%;
+
+  --warning: 45 93% 47%;
+  --warning-foreground: 212 78% 14%;
+
+  --info: 199 89% 48%;
+  --info-foreground: 0 0% 100%;
+
+  --ring: 22 90% 49%;
+
+  --default-950: 0 0% 98%;
+  --default-900: 212 20% 92%;
+  --default-800: 212 25% 82%;
+  --default-700: 212 20% 70%;
+  --default-600: 212 20% 55%;
+  --default-500: 212 20% 45%;
+  --default-300: 212 30% 30%;
+  --default-200: 212 40% 20%;
+  --default-100: 212 50% 14%;
+  --default-50: 212 78% 8%;
+}

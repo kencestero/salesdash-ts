@@ -4,7 +4,7 @@
 export const siteConfig = {
   name: "Remotive Logistics",
   description: "Sales training platform for Remotive Logistics trailer reps",
-  theme: "orange",
+  theme: "remotive",
   layout: "vertical",
   // semi-box, horizontal, vertical
   hideSideBar: false,

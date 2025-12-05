@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { Icon } from "@iconify/react";
 import { Button } from "@/components/ui/button";
@@ -75,15 +75,6 @@ export default function RegisterPage() {
     fetchManagers();
   }, []);
 
-  const stars = useMemo(() => {
-    return Array.from({ length: 45 }, (_, i) => ({
-      id: i,
-      left: `${Math.random() * 100}%`,
-      top: `${Math.random() * 100}%`,
-      size: Math.random() * 3 + 1,
-      delay: Math.random() * 3
-    }));
-  }, []);
 
   async function validateCode() {
     if (!code.trim()) {
@@ -194,19 +185,14 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-black">
+    <div className="h-screen w-screen fixed inset-0 overflow-auto bg-[#0a1628]">
       <style jsx>{`
-        @keyframes aurora {
-          0%, 100% { opacity: 0.5; transform: translateY(0) scale(1); }
-          50% { opacity: 0.8; transform: translateY(-20px) scale(1.1); }
+        @keyframes subtle-glow {
+          0%, 100% { filter: drop-shadow(0 0 15px rgba(255, 60, 20, 0.5)); }
+          50% { filter: drop-shadow(0 0 25px rgba(255, 60, 20, 0.65)); }
         }
-        @keyframes rotate {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-        @keyframes twinkle {
-          0%, 100% { opacity: 0.3; transform: scale(1); }
-          50% { opacity: 1; transform: scale(1.2); }
+        .logo-glow {
+          animation: subtle-glow 8s ease-in-out infinite;
         }
         @keyframes rainbow {
           0% { background-position: 0% center; }
@@ -215,102 +201,76 @@ export default function RegisterPage() {
       `}</style>
 
       {/* Background Image */}
-      <Image
-        src="/images/final_increased_login_bg.jpg"
-        alt="Starry Background"
-        fill
-        className="object-cover opacity-70"
-        priority
-        quality={90}
-      />
-
-      {/* Aurora Effects */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-[120px]" style={{ animation: 'aurora 8s ease-in-out infinite' }} />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-[120px]" style={{ animation: 'aurora 10s ease-in-out infinite 2s' }} />
-        <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-purple-500/10 rounded-full blur-[120px]" style={{ animation: 'aurora 12s ease-in-out infinite 4s' }} />
+      <div className="absolute inset-0 z-0">
+        <Image
+          src="/images/remotive-bg.webp"
+          alt="Remotive Dashboard"
+          fill
+          className="object-cover"
+          priority
+          quality={90}
+        />
       </div>
 
-      {/* Rotating Gradient Overlay */}
-      <div className="absolute inset-0 opacity-30 pointer-events-none" style={{
-        background: 'conic-gradient(from 0deg at 50% 50%, transparent 0deg, rgba(233, 97, 20, 0.1) 90deg, transparent 180deg, rgba(59, 130, 246, 0.1) 270deg, transparent 360deg)',
-        animation: 'rotate 20s linear infinite'
-      }} />
-
-      {/* Twinkling Stars */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {stars.map(star => (
-          <div
-            key={star.id}
-            className="absolute bg-white rounded-full"
-            style={{
-              left: star.left,
-              top: star.top,
-              width: `${star.size}px`,
-              height: `${star.size}px`,
-              animation: `twinkle ${2 + Math.random() * 2}s ease-in-out infinite ${star.delay}s`
-            }}
-          />
-        ))}
-      </div>
-
-      {/* Remotive Logo - Fixed at top with backdrop */}
-      <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[9999] pointer-events-none">
-        <div className="relative">
-          {/* Backdrop circle */}
-          <div className="absolute inset-0 w-28 h-28 -left-2 -top-2 bg-gradient-to-br from-black/60 to-black/40 backdrop-blur-md rounded-full" />
-          {/* Logo */}
-          <div className="w-24 h-24 relative drop-shadow-2xl">
-            <Image
-              src="/images/DASH_LOGO_EYE_IN_THE_SKY.webp"
-              alt="Remotive Logistics Logo"
-              fill
-              className="object-contain"
-              priority
-            />
-          </div>
-        </div>
-      </div>
+      {/* Dark gradient overlay - reduced opacity for more vibrant background */}
+      <div className="absolute inset-0 bg-gradient-to-b from-[#0a1628]/60 via-[#0a1628]/40 to-[#0a1628]/70 z-[1]" />
 
       {/* Main Content */}
-      <div className="relative z-20 min-h-screen flex items-center justify-center p-6 pt-48">
-        <div className="mx-auto max-w-2xl w-full bg-black/40 backdrop-blur-[25px] rounded-3xl p-8 shadow-2xl border border-white/20">
-          <h1 className="text-3xl font-bold mb-2 text-white text-center">Join Remotive Logistics Team</h1>
-          <p className="text-white/80 text-center mb-8">Enter your secret code to get started</p>
+      <div className="relative z-10 h-full flex items-center justify-center py-8">
+        <div className="w-full max-w-2xl px-6">
+          <div className="rounded-2xl p-8 relative overflow-hidden backdrop-blur-xl bg-white/10 border border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
+            {/* R Logo with Glow */}
+            <div className="flex justify-center mb-6">
+              <Image
+                src="/images/logo/remotive-r.png"
+                alt="Remotive"
+                width={95}
+                height={95}
+                className="logo-glow"
+                priority
+              />
+            </div>
+
+            <div className="text-center mb-6">
+              <h3 className="text-white text-xl font-semibold tracking-wide uppercase mb-2">
+                Join Remotive Logistics
+              </h3>
+              <p className="text-white/50 text-sm">
+                Enter your secret code to get started
+              </p>
+            </div>
 
           {/* Secret Code Section */}
-          <div className="mb-8 relative">
-            <Label className="text-white font-semibold mb-2 block">Secret Code *</Label>
+          <div className="mb-6 relative">
+            <label className="text-white/70 text-xs font-medium tracking-wide block mb-2">
+              Secret Code *
+            </label>
             <div className="flex gap-3">
               <input
                 value={code}
                 onChange={(e) => setCode(e.target.value.toUpperCase().trim())}
                 placeholder="ABC123" maxLength={6} autoCapitalize="characters" inputMode="text"
                 disabled={codeValidated}
-                className="flex-1 bg-white/90 backdrop-blur-sm border-0 rounded-xl px-4 py-3 text-center text-lg font-mono tracking-wider focus:ring-2 focus:ring-primary focus:outline-none disabled:opacity-50 disabled:bg-green-100 text-orange-600 placeholder:text-gray-400"
+                className="flex-1 rounded-lg px-4 py-3 text-center text-lg font-mono tracking-wider text-white bg-black/30 border border-white/10 outline-none transition-all placeholder:text-white/30 focus:border-[#E96614] focus:ring-1 focus:ring-[#E96614]/50 focus:bg-black/40 disabled:opacity-50 disabled:bg-green-900/20 disabled:border-green-500/30"
               />
               {!codeValidated && (
-                <Button
+                <button
+                  type="button"
                   onClick={validateCode}
                   disabled={validatingCode}
-                  className="bg-primary/90 hover:bg-primary px-6"
+                  className="text-white font-semibold py-3 px-6 rounded-lg bg-gradient-to-b from-[#ff3a3a] via-[#cc2020] to-[#8a1010] shadow-[0_4px_20px_rgba(255,58,58,0.4),inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-2px_4px_rgba(0,0,0,0.3)] text-sm tracking-wide border border-[#ff4444]/30 cursor-pointer transition-all hover:shadow-[0_6px_30px_rgba(255,58,58,0.6)] hover:brightness-110 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {validatingCode ? "Validating..." : "Validate"}
-                </Button>
+                  {validatingCode ? "..." : "Validate"}
+                </button>
               )}
               {codeValidated && (
-                <div className="flex items-center gap-2 bg-green-500/20 backdrop-blur-sm px-4 rounded-xl">
-                  <Icon icon="heroicons:check-circle" className="text-green-400 w-6 h-6" />
-                  <span className="text-green-300 font-semibold">Verified</span>
+                <div className="flex items-center gap-2 bg-green-500/20 px-4 rounded-lg border border-green-500/30">
+                  <Icon icon="heroicons:check-circle" className="text-green-400 w-5 h-5" />
+                  <span className="text-green-300 font-medium text-sm">Verified</span>
                 </div>
               )}
             </div>
-            {err && <p className="text-red-300 text-sm mt-2 bg-red-500/20 backdrop-blur-sm rounded-lg py-2 px-3">{err}</p>}
-            {!codeValidated && !err && process.env.NODE_ENV !== "production" && (
-              <p className="text-xs text-white/70 mt-2">
-                Don't have a code? Try: <b className="text-white">OWNER1</b>, <b className="text-white">MGR001</b>, or <b className="text-white">REP001</b>
-              </p>
-            )}
+            {err && <p className="text-red-400 text-sm mt-2 bg-red-500/10 border border-red-500/20 rounded-lg py-2 px-3">{err}</p>}
 
             {/* Arrow pointing up */}
             {showArrow && !codeValidated && (
@@ -722,31 +682,33 @@ export default function RegisterPage() {
               </div>
 
               {/* Submit Button */}
-              <Button
+              <button
                 type="submit"
                 disabled={!acceptedTerms}
-                className="w-full bg-primary/90 hover:bg-primary text-primary-foreground rounded-xl py-6 font-semibold text-lg transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full text-white font-semibold py-3.5 px-6 rounded-lg bg-gradient-to-b from-[#ff3a3a] via-[#cc2020] to-[#8a1010] shadow-[0_4px_20px_rgba(255,58,58,0.4),inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-2px_4px_rgba(0,0,0,0.3)] text-sm tracking-wide border border-[#ff4444]/30 cursor-pointer transition-all hover:shadow-[0_6px_30px_rgba(255,58,58,0.6),inset_0_1px_0_rgba(255,255,255,0.25),inset_0_-2px_4px_rgba(0,0,0,0.4)] hover:brightness-110 active:scale-[0.98] active:shadow-[0_2px_10px_rgba(255,58,58,0.4),inset_0_2px_4px_rgba(0,0,0,0.4)] disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Create Account
-              </Button>
+              </button>
             </form>
           )}
 
           {/* Already have account */}
-          <div className="mt-6 text-center text-white/80">
-            Already have an account?{" "}
-            <a href={`/${DEFAULT_LANG}/auth/login`} className="text-primary-foreground font-semibold hover:underline">
-              Sign In
-            </a>
+          <div className="mt-5 text-center">
+            <p className="text-white/40 text-xs">
+              Already have an account?{" "}
+              <a href={`/${DEFAULT_LANG}/auth/login`} className="text-[#E96614] hover:text-[#ff7a3d] transition-colors font-medium">
+                Sign In
+              </a>
+            </p>
+          </div>
+
+          <div className="mt-6 pt-5 border-t border-white/10 text-center">
+            <p className="text-white/25 text-xs">
+              © 2025 Remotive Logistics • Haverstraw, NY
+            </p>
+          </div>
           </div>
         </div>
-      </div>
-
-      {/* Brand Logos Footer */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 flex items-center gap-6">
-        <Image src="/images/diamondcargoorangeloco.png" alt="Diamond Cargo" width={80} height={40} className="object-contain opacity-70 hover:opacity-100 transition-opacity" />
-        <Image src="/images/pantherorange.png" alt="Panther Cargo" width={80} height={40} className="object-contain opacity-70 hover:opacity-100 transition-opacity" />
-        <Image src="/images/qualitylogoorange.png" alt="Quality Cargo" width={80} height={40} className="object-contain opacity-70 hover:opacity-100 transition-opacity" />
       </div>
     </div>
   );
