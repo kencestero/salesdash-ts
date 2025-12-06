@@ -187,7 +187,7 @@ if (!["owner", "director"].includes(currentUser.profile.role)) {
 
 ### Inventory & Uploads
 - **UploadReport** - Tracks inventory uploads (manufacturer bulk imports)
-- **Trailer** - Inventory with automatic pricing formula: Cost × 1.0125 OR Cost + $1,400 (minimum $1,400 profit)
+- **Trailer** - Inventory with automatic pricing formula: Cost × 1.015 OR Cost + $2,000 (minimum $2,000 profit)
 - **Bulk Import API** - `/api/inventory/bulk-import` accepts trailer data and auto-calculates prices
 
 ## Rep Tracking System
@@ -414,13 +414,13 @@ toast({
 
 **Pricing Formula (Kenneth's Formula):**
 ```
-Price = MAX(Cost × 1.0125, Cost + $1,400)
-Minimum profit: $1,400
+Price = MAX(Cost × 1.015, Cost + $2,000)
+Minimum profit: $2,000
 ```
 
 **Example:**
-- Cost: $5,000 → Price: $6,400 (adds $1,400)
-- Cost: $100,000 → Price: $101,250 (1.25% markup)
+- Cost: $5,000 → Price: $7,000 (adds $2,000)
+- Cost: $150,000 → Price: $152,250 (1.50% markup)
 
 ## Environment Variables
 

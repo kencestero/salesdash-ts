@@ -153,13 +153,13 @@ Extract the following fields for each trailer:
 PRICE EXTRACTION RULES - CRITICAL FOR DIAMOND CARGO:
 Column structure is ALWAYS: [VIN #] [MODEL] [EXT COLOR] [REAR] [FRONT] [HT] [PRICE] [NEW DISC'D PRICE] [FINISH DATE] [NOTES/OPTIONS]
 
-PRICING LOGIC ($1,500 MINIMUM PROFIT RULE):
+PRICING LOGIC ($2,000 MINIMUM PROFIT RULE):
 1. **COST field**: ALWAYS extract from "PRICE" column (column 7) - this is the wholesale cost in yellow
 2. **NEW DISC'D PRICE column** (column 8): Check if it says "MAKE OFFER" or has a numeric value
-3. **Calculate desired salePrice using MINIMUM $1,500 PROFIT RULE**:
-   - First calculate: standardPrice = cost × 1.25
+3. **Calculate desired salePrice using MINIMUM $2,000 PROFIT RULE**:
+   - First calculate: standardPrice = cost × 1.015 (1.50% markup)
    - Then calculate profit: profit = standardPrice - cost
-   - IF profit < $1,500 THEN salePrice = cost + $1,500
+   - IF profit < $2,000 THEN salePrice = cost + $2,000
    - ELSE salePrice = standardPrice
 4. If column 8 = "MAKE OFFER":
    - Set "makeOffer": true
@@ -169,9 +169,9 @@ PRICING LOGIC ($1,500 MINIMUM PROFIT RULE):
    - Ignore the calculated price, use the value from column 8 as salePrice
 
 EXAMPLES:
-- PRICE=$4,568: standardPrice=$5,710, profit=$1,142 (<$1,500) → salePrice=$6,068 ($4,568+$1,500)
-- PRICE=$12,904: standardPrice=$16,130, profit=$3,226 (>$1,500) → salePrice=$16,130 (use 1.25×)
-- VIN 96193: PRICE=$10,230, NEW DISC'D PRICE="MAKE OFFER" → cost=$10,230, makeOffer=true, salePrice=$12,787.50
+- PRICE=$4,568: standardPrice=$4,636.52, profit=$68.52 (<$2,000) → salePrice=$6,568 ($4,568+$2,000)
+- PRICE=$150,000: standardPrice=$152,250, profit=$2,250 (>$2,000) → salePrice=$152,250 (use 1.50%)
+- VIN 96193: PRICE=$10,230, NEW DISC'D PRICE="MAKE OFFER" → cost=$10,230, makeOffer=true, salePrice=$12,230
 - VIN 116315: PRICE=$7,115, NEW DISC'D PRICE=$7,115 → cost=$7,115, salePrice=$7,115 (from column 8), makeOffer=false
 
 NEVER extract cost from any column other than "PRICE" column!

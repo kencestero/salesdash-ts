@@ -9,8 +9,8 @@
  * 3. Panther Cargo (Dumps) - Oct 14 - "panther cargo open stock"
  *
  * Pricing Formula:
- * - Base: Cost + 1.25%
- * - If profit < $1400, use: Cost + $1400
+ * - Base: Cost + 1.50%
+ * - If profit < $2000, use: Cost + $2000
  * - Add notes/options to each trailer
  *
  * Gmail Account: kencestero@gmail.com
@@ -51,13 +51,13 @@ async function main() {
 
   // Pricing formula helper
   function calculatePrice(cost) {
-    const markup = cost * 0.0125; // 1.25%
+    const markup = cost * 0.015; // 1.50%
     const priceWithMarkup = cost + markup;
     const profitWithMarkup = priceWithMarkup - cost;
 
-    if (profitWithMarkup < 1400) {
-      // Cap at $1400 profit
-      return cost + 1400;
+    if (profitWithMarkup < 2000) {
+      // Minimum $2000 profit
+      return cost + 2000;
     }
 
     return priceWithMarkup;
@@ -67,7 +67,7 @@ async function main() {
   console.log('💰 Pricing Formula Examples:');
   console.log('Cost: $50,000 → Price:', calculatePrice(50000).toFixed(2));
   console.log('Cost: $100,000 → Price:', calculatePrice(100000).toFixed(2));
-  console.log('Cost: $120,000 → Price:', calculatePrice(120000).toFixed(2));
+  console.log('Cost: $150,000 → Price:', calculatePrice(150000).toFixed(2));
 }
 
 main()
