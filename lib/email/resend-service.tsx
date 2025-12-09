@@ -171,16 +171,16 @@ export async function sendVerificationEmail(
             <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
               <!-- Header -->
               <tr>
-                <td style="background-color: #1a3a52; padding: 30px 40px; text-align: center;">
-                  <h1 style="color: #f5a623; margin: 0; font-size: 28px; font-weight: bold;">MJ Cargo Sales Dashboard</h1>
+                <td style="background-color: #09213C; padding: 30px 40px; text-align: center;">
+                  <h1 style="color: #E96114; margin: 0; font-size: 28px; font-weight: bold;">Remotive Logistics</h1>
                 </td>
               </tr>
               <!-- Content -->
               <tr>
                 <td style="padding: 40px;">
-                  <h2 style="color: #1a3a52; margin: 0 0 20px 0; font-size: 24px;">Welcome ${userName}! 🎉</h2>
+                  <h2 style="color: #09213C; margin: 0 0 20px 0; font-size: 24px;">Welcome ${userName}! 🎉</h2>
                   <p style="color: #333333; font-size: 16px; line-height: 1.6; margin: 0 0 20px 0;">
-                    Thank you for creating an account with MJ Cargo Sales Dashboard!
+                    Thank you for signing up with Remotive Logistics!
                   </p>
                   <p style="color: #333333; font-size: 16px; line-height: 1.6; margin: 0 0 30px 0;">
                     To complete your registration and access your account, please verify your email address by clicking the button below:
@@ -190,7 +190,7 @@ export async function sendVerificationEmail(
                     <tr>
                       <td align="center" style="padding: 20px 0;">
                         <a href="${verificationLink}"
-                           style="background-color: #1a3a52; color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 6px; font-size: 16px; font-weight: bold; display: inline-block;">
+                           style="background-color: #E96114; color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 6px; font-size: 16px; font-weight: bold; display: inline-block;">
                           Verify Email Address
                         </a>
                       </td>
@@ -201,13 +201,13 @@ export async function sendVerificationEmail(
                     This verification link will expire in <strong>${expiresInHours} hours</strong>.
                   </p>
                   <p style="color: #666666; font-size: 14px; line-height: 1.6; margin: 10px 0 0 0;">
-                    If you didn't create an account with MJ Cargo, you can safely ignore this email.
+                    If you didn't create an account with Remotive Logistics, you can safely ignore this email.
                   </p>
                   <!-- Alternative Link -->
                   <p style="color: #666666; font-size: 12px; line-height: 1.6; margin: 30px 0 0 0;">
                     If the button doesn't work, copy and paste this link into your browser:
                   </p>
-                  <p style="color: #1a3a52; font-size: 12px; word-break: break-all; margin: 5px 0 0 0;">
+                  <p style="color: #E96114; font-size: 12px; word-break: break-all; margin: 5px 0 0 0;">
                     ${verificationLink}
                   </p>
                 </td>
@@ -220,7 +220,7 @@ export async function sendVerificationEmail(
                     If you need assistance, contact your system administrator.
                   </p>
                   <p style="color: #999999; font-size: 12px; margin: 10px 0 0 0; text-align: center;">
-                    © ${new Date().getFullYear()} MJ Cargo. All rights reserved.
+                    © ${new Date().getFullYear()} Remotive Logistics. All rights reserved.
                   </p>
                 </td>
               </tr>
@@ -236,7 +236,7 @@ export async function sendVerificationEmail(
     const { data, error } = await resend.emails.send({
       from: DEFAULT_FROM,
       to: email,
-      subject: 'Verify Your Email - MJ Cargo Sales Dashboard',
+      subject: 'Verify Your Email - Remotive Logistics',
       html,
       tags: [
         { name: 'category', value: 'email-verification' },
