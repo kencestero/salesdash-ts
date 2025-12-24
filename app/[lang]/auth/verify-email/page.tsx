@@ -97,7 +97,7 @@ function VerifyEmailContent() {
               />
               <span className="text-2xl font-bold text-white">Remotive Logistics</span>
             </div>
-            <p className="text-sm text-[#E96114]">Fast. Simple. Remote</p>
+            <p className="text-sm text-[#E94235]">Fast. Simple. Remote</p>
           </div>
 
           {/* Content */}
@@ -123,7 +123,7 @@ function VerifyEmailContent() {
                   <button
                     onClick={handleResend}
                     disabled={resending}
-                    className="w-full bg-[#E96114] hover:bg-[#d55610] text-white text-lg font-semibold py-4 rounded-xl transition-all hover:scale-[1.02] disabled:opacity-50"
+                    className="w-full bg-[#E94235] hover:bg-[#D63A2E] text-white text-lg font-semibold py-4 rounded-xl transition-all hover:scale-[1.02] disabled:opacity-50"
                   >
                     {resending ? "Sending..." : "Resend Verification Email"}
                   </button>
@@ -148,7 +148,7 @@ function VerifyEmailContent() {
                 {/* Open Email Button */}
                 <Button
                   onClick={handleOpenEmail}
-                  className="w-full bg-[#E96114] hover:bg-[#d55610] text-white text-lg font-semibold py-6 rounded-xl mb-6 transition-all hover:scale-[1.02]"
+                  className="w-full bg-[#E94235] hover:bg-[#D63A2E] text-white text-lg font-semibold py-6 rounded-xl mb-6 transition-all hover:scale-[1.02]"
                 >
                   Open email
                 </Button>
@@ -158,7 +158,7 @@ function VerifyEmailContent() {
                   <button
                     onClick={handleResend}
                     disabled={resending}
-                    className="text-[#E96114] font-semibold text-base hover:underline disabled:opacity-50"
+                    className="text-[#E94235] font-semibold text-base hover:underline disabled:opacity-50"
                   >
                     {resending ? "Sending..." : "Resend email verification"}
                   </button>
@@ -175,7 +175,7 @@ function VerifyEmailContent() {
         {/* Email sent to */}
         {email && (
           <p className="text-center text-gray-400 mt-6">
-            Verification email sent to: <a href={`mailto:${email}`} className="text-[#E96114] underline">{email}</a>
+            Verification email sent to: <a href={`mailto:${email}`} className="text-[#E94235] underline">{email}</a>
           </p>
         )}
 
@@ -183,7 +183,7 @@ function VerifyEmailContent() {
         <div className="text-center mt-6">
           <a
             href={`/${DEFAULT_LANG}/auth/login`}
-            className="text-[#E96114] hover:underline font-semibold"
+            className="text-[#E94235] hover:underline font-semibold"
           >
             Back to Login
           </a>
@@ -201,10 +201,10 @@ export default function VerifyEmailPage() {
           <div className="bg-[#1a1a1a]/90 backdrop-blur-xl rounded-2xl shadow-2xl overflow-hidden border border-white/10">
             <div className="px-8 py-6 text-center border-b border-white/10">
               <div className="flex items-center justify-center gap-3 mb-2">
-                <div className="w-10 h-10 bg-[#E96114]/20 rounded-lg animate-pulse" />
+                <div className="w-10 h-10 bg-[#E94235]/20 rounded-lg animate-pulse" />
                 <span className="text-2xl font-bold text-white">Remotive Logistics</span>
               </div>
-              <p className="text-sm text-[#E96114]">Fast. Simple. Remote</p>
+              <p className="text-sm text-[#E94235]">Fast. Simple. Remote</p>
             </div>
             <div className="px-8 py-10 text-center">
               <h2 className="text-3xl font-bold text-white mb-4">
