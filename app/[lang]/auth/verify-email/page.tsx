@@ -10,7 +10,7 @@ function VerifyEmailContent() {
   const email = searchParams.get("email");
   const error = searchParams.get("error");
   const details = searchParams.get("details");
-  const [countdown, setCountdown] = useState(120); // 2 minutes in seconds
+  const [countdown, setCountdown] = useState(300); // 5 minutes in seconds
   const [canResend, setCanResend] = useState(false);
   const [resending, setResending] = useState(false);
 
@@ -63,7 +63,7 @@ function VerifyEmailContent() {
 
       if (res.ok) {
         alert(data.message || "Verification email sent!");
-        setCountdown(120);
+        setCountdown(300);
         setCanResend(false);
       } else {
         alert(data.message || "Failed to resend email");
@@ -81,28 +81,38 @@ function VerifyEmailContent() {
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center p-6 bg-gradient-to-br from-primary/20 to-primary/5">
+    <main className="min-h-screen flex items-center justify-center p-6 bg-[#0a0a0a]">
       <div className="max-w-md w-full">
-        {/* Card with MJ SalesDash branding */}
-        <div className="bg-gradient-to-b from-[#1a3a52] to-[#0d1f2d] rounded-3xl shadow-2xl overflow-hidden border-4 border-[#1a3a52]">
-          {/* Header */}
-          <div className="bg-[#1a3a52] text-[#f5a623] px-8 py-6 text-center">
-            <h1 className="text-3xl font-bold">MJ SalesDash</h1>
+        {/* Remotive Logistics Card */}
+        <div className="bg-[#1a1a1a]/90 backdrop-blur-xl rounded-2xl shadow-2xl overflow-hidden border border-white/10">
+          {/* Header with Logo */}
+          <div className="px-8 py-6 text-center border-b border-white/10">
+            <div className="flex items-center justify-center gap-3 mb-2">
+              <Image
+                src="/images/logo/remotive-r.png"
+                alt="Remotive"
+                width={40}
+                height={40}
+                className="w-10 h-10"
+              />
+              <span className="text-2xl font-bold text-white">Remotive Logistics</span>
+            </div>
+            <p className="text-sm text-[#E96114]">Fast. Simple. Remote</p>
           </div>
 
           {/* Content */}
-          <div className="bg-[#f5a623] px-8 py-10 text-center">
+          <div className="px-8 py-10 text-center">
             {errorMessage ? (
               <>
                 {/* Error State */}
-                <h2 className="text-4xl font-bold text-red-700 mb-4">
+                <h2 className="text-3xl font-bold text-red-500 mb-4">
                   Verification Error
                 </h2>
-                <p className="text-lg text-[#0d1f2d] leading-relaxed mb-6">
+                <p className="text-base text-gray-300 leading-relaxed mb-6">
                   {errorMessage}
                 </p>
                 {details && (
-                  <div className="bg-red-100 border border-red-400 text-red-800 px-4 py-3 rounded-lg mb-6 text-left">
+                  <div className="bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-lg mb-6 text-left">
                     <p className="font-semibold text-sm mb-1">Technical Details:</p>
                     <p className="text-xs font-mono break-all">{decodeURIComponent(details)}</p>
                   </div>
@@ -113,7 +123,7 @@ function VerifyEmailContent() {
                   <button
                     onClick={handleResend}
                     disabled={resending}
-                    className="w-full bg-[#1a3a52] hover:bg-[#0d1f2d] text-white text-xl font-semibold py-8 rounded-2xl transition-all hover:scale-105 disabled:opacity-50"
+                    className="w-full bg-[#E96114] hover:bg-[#d55610] text-white text-lg font-semibold py-4 rounded-xl transition-all hover:scale-[1.02] disabled:opacity-50"
                   >
                     {resending ? "Sending..." : "Resend Verification Email"}
                   </button>
@@ -122,38 +132,38 @@ function VerifyEmailContent() {
             ) : (
               <>
                 {/* Normal State - Waiting for verification */}
-                <h2 className="text-4xl font-bold text-[#0d1f2d] mb-4">
+                <h2 className="text-3xl font-bold text-white mb-4">
                   Verify Your Email!
                 </h2>
-                <p className="text-lg text-[#0d1f2d] leading-relaxed mb-6">
+                <p className="text-base text-gray-400 leading-relaxed mb-8">
                   We sent you a verification link via email. Please click it to verify your email
                   address. If you don&apos;t see the email, please check your SPAM folder.
                 </p>
 
+                {/* Countdown */}
+                <div className="text-6xl font-bold text-white mb-6 font-mono tracking-wider">
+                  {formatTime(countdown)}
+                </div>
+
                 {/* Open Email Button */}
                 <Button
                   onClick={handleOpenEmail}
-                  className="w-full bg-[#1a3a52] hover:bg-[#0d1f2d] text-white text-xl font-semibold py-8 rounded-2xl mb-6 transition-all hover:scale-105"
+                  className="w-full bg-[#E96114] hover:bg-[#d55610] text-white text-lg font-semibold py-6 rounded-xl mb-6 transition-all hover:scale-[1.02]"
                 >
                   Open email
                 </Button>
-
-                {/* Countdown */}
-                <div className="text-6xl font-bold text-[#0d1f2d] mb-3">
-                  {formatTime(countdown)}
-                </div>
 
                 {/* Resend Button */}
                 {canResend ? (
                   <button
                     onClick={handleResend}
                     disabled={resending}
-                    className="text-[#0d1f2d] font-semibold text-lg underline hover:no-underline disabled:opacity-50"
+                    className="text-[#E96114] font-semibold text-base hover:underline disabled:opacity-50"
                   >
                     {resending ? "Sending..." : "Resend email verification"}
                   </button>
                 ) : (
-                  <p className="text-[#0d1f2d] font-semibold text-lg">
+                  <p className="text-gray-500 font-medium text-base">
                     Resend email verification
                   </p>
                 )}
@@ -164,8 +174,8 @@ function VerifyEmailContent() {
 
         {/* Email sent to */}
         {email && (
-          <p className="text-center text-default-600 mt-4">
-            Verification email sent to: <span className="font-semibold">{email}</span>
+          <p className="text-center text-gray-400 mt-6">
+            Verification email sent to: <a href={`mailto:${email}`} className="text-[#E96114] underline">{email}</a>
           </p>
         )}
 
@@ -173,7 +183,7 @@ function VerifyEmailContent() {
         <div className="text-center mt-6">
           <a
             href={`/${DEFAULT_LANG}/auth/login`}
-            className="text-primary hover:underline font-semibold"
+            className="text-[#E96114] hover:underline font-semibold"
           >
             Back to Login
           </a>
@@ -186,14 +196,18 @@ function VerifyEmailContent() {
 export default function VerifyEmailPage() {
   return (
     <Suspense fallback={
-      <main className="min-h-screen flex items-center justify-center p-6 bg-gradient-to-br from-primary/20 to-primary/5">
+      <main className="min-h-screen flex items-center justify-center p-6 bg-[#0a0a0a]">
         <div className="max-w-md w-full">
-          <div className="bg-gradient-to-b from-[#1a3a52] to-[#0d1f2d] rounded-3xl shadow-2xl overflow-hidden border-4 border-[#1a3a52]">
-            <div className="bg-[#1a3a52] text-[#f5a623] px-8 py-6 text-center">
-              <h1 className="text-3xl font-bold">MJ SalesDash</h1>
+          <div className="bg-[#1a1a1a]/90 backdrop-blur-xl rounded-2xl shadow-2xl overflow-hidden border border-white/10">
+            <div className="px-8 py-6 text-center border-b border-white/10">
+              <div className="flex items-center justify-center gap-3 mb-2">
+                <div className="w-10 h-10 bg-[#E96114]/20 rounded-lg animate-pulse" />
+                <span className="text-2xl font-bold text-white">Remotive Logistics</span>
+              </div>
+              <p className="text-sm text-[#E96114]">Fast. Simple. Remote</p>
             </div>
-            <div className="bg-[#f5a623] px-8 py-10 text-center">
-              <h2 className="text-4xl font-bold text-[#0d1f2d] mb-4">
+            <div className="px-8 py-10 text-center">
+              <h2 className="text-3xl font-bold text-white mb-4">
                 Loading...
               </h2>
             </div>
