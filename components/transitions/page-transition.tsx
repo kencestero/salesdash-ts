@@ -1,4 +1,4 @@
-// Page Transition Component for MJ Cargo CRM
+// Page Transition Component for Remotive Logistics CRM
 // Professional fade + slide animation with stagger effect
 
 import { motion, AnimatePresence } from 'framer-motion';
@@ -149,8 +149,8 @@ export function SharedElement({
   );
 }
 
-// MJ Cargo Branded Loading Transition
-export function MJLoadingTransition() {
+// Remotive Logistics Branded Loading Transition
+export function RemotiveLoadingTransition() {
   return (
     <motion.div
       className="fixed inset-0 z-50 flex items-center justify-center bg-[#0f1117]"
@@ -171,7 +171,7 @@ export function MJLoadingTransition() {
         className="relative"
       >
         <div className="w-20 h-20 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center">
-          <span className="text-white font-bold text-2xl">MJ</span>
+          <span className="text-white font-bold text-2xl">RL</span>
         </div>
         <motion.div
           className="absolute inset-0 rounded-lg bg-orange-500"
@@ -218,7 +218,7 @@ export default function LoginPage() {
     <PageTransition isLogin={true}>
       <div className="login-container">
         <ContentItem delay={0.1}>
-          <h1>Welcome to MJ Cargo</h1>
+          <h1>Welcome to Remotive Logistics</h1>
         </ContentItem>
         <ContentItem delay={0.2}>
           <LoginForm />

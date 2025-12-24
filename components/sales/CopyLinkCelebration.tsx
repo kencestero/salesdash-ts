@@ -125,7 +125,7 @@ export function CopyLinkCelebration({
       icon: FileText,
       title: "Submit Customer to CRM",
       description:
-        "Add them to MJ SALESDASH CRM NOW and leave DETAILED notes about your conversation",
+        "Add them to Remotive CRM NOW and leave DETAILED notes about your conversation",
       color: "text-blue-500",
       bgColor: "bg-blue-500/10",
     },

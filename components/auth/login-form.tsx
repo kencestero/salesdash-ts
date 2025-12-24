@@ -78,7 +78,7 @@ const LogInForm = () => {
         Game Time 🚀
       </div>
       <div className="2xl:text-lg text-base text-default-600 2xl:mt-2 leading-6">
-        MJ Cargo Sales Command Center
+        Remotive Logistics Command Center
       </div>
       <div className="text-sm text-default-500 mt-1">
         Your AI-powered virtual desk where deals get done. Latest tools. Real-time data. Zero limits.

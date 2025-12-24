@@ -90,10 +90,10 @@ const CargoGame = () => {
       ctx.lineWidth = 3;
       ctx.strokeRect(x, y, 30, 30);
 
-      // MJ text on box
+      // RL text on box (Remotive Logistics)
       ctx.fillStyle = "#1e3a8a";
       ctx.font = "bold 14px monospace";
-      ctx.fillText("MJ", x + 6, y + 20);
+      ctx.fillText("RL", x + 5, y + 20);
     };
 
     // Draw heart
@@ -171,7 +171,7 @@ const CargoGame = () => {
       ctx.stroke();
       ctx.setLineDash([]);
 
-      // Draw floating blimp with MJ logo
+      // Draw floating blimp with Remotive logo
       state.blimpX += 2;
       if (state.blimpX > canvas.width + 200) {
         state.blimpX = -200;

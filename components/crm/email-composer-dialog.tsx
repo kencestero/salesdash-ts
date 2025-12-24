@@ -64,7 +64,7 @@ I wanted to follow up regarding your interest in our trailers. Do you have any q
 Looking forward to hearing from you!
 
 Best regards,
-MJ Cargo Sales Team`,
+Remotive Logistics Sales Team`,
   },
   quote: {
     name: "Quote Request",
@@ -76,11 +76,11 @@ Thank you for your interest! I'm putting together a quote for you based on your 
 I'll have this ready for you shortly. In the meantime, please let me know if you have any specific questions.
 
 Best regards,
-MJ Cargo Sales Team`,
+Remotive Logistics Sales Team`,
   },
   welcome: {
     name: "Welcome Email",
-    subject: "Welcome to MJ Cargo!",
+    subject: "Welcome to Remotive Logistics!",
     body: `Hello,
 
 Welcome! We're excited to help you find the perfect trailer.
@@ -90,7 +90,7 @@ Our team is here to answer any questions and guide you through the process.
 Feel free to reach out anytime or reply to this email.
 
 Best regards,
-MJ Cargo Sales Team`,
+Remotive Logistics Sales Team`,
   },
   financing: {
     name: "Financing Information",
@@ -106,7 +106,7 @@ I wanted to share our financing options with you. We offer:
 Would you like to discuss which option works best for your situation?
 
 Best regards,
-MJ Cargo Sales Team`,
+Remotive Logistics Sales Team`,
   },
   custom: {
     name: "Custom Email",

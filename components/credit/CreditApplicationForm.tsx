@@ -63,9 +63,9 @@ interface CreditApplicationFormProps {
   onSubmitSuccess?: (appNumber: string) => void;
 }
 
-const LEGAL_TEXT = `I hereby authorize MJ Cargo Sales to obtain credit information and reports from credit bureaus and other sources for the purpose of evaluating this credit application. I certify that all information provided in this application is true and complete to the best of my knowledge. I understand that any false or misleading information may result in denial of credit or termination of any credit agreement.
+const LEGAL_TEXT = `I hereby authorize Remotive Logistics to obtain credit information and reports from credit bureaus and other sources for the purpose of evaluating this credit application. I certify that all information provided in this application is true and complete to the best of my knowledge. I understand that any false or misleading information may result in denial of credit or termination of any credit agreement.
 
-I authorize MJ Cargo Sales to verify my employment, income, and any other information provided in this application. I understand that this application does not obligate MJ Cargo Sales to extend credit, and final approval is subject to credit review and verification of all information provided.
+I authorize Remotive Logistics to verify my employment, income, and any other information provided in this application. I understand that this application does not obligate Remotive Logistics to extend credit, and final approval is subject to credit review and verification of all information provided.
 
 By signing below, I acknowledge that I have read, understand, and agree to these terms and conditions.`;
 
@@ -164,14 +164,14 @@ export function CreditApplicationForm({ shareToken, onSubmitSuccess }: CreditApp
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="max-w-5xl mx-auto space-y-8">
-      {/* MJ Cargo Logo Header */}
+      {/* Remotive Logistics Logo Header */}
       <div className="text-center mb-8">
         <div className="inline-block relative">
           <div className="absolute inset-0 bg-gradient-to-r from-[#E96114]/20 to-[#09213C]/20 blur-3xl"></div>
           <div className="relative bg-white rounded-2xl shadow-2xl p-6 border-2 border-[#E96114]/30">
             <Image
               src="/images/mjctfc.webp"
-              alt="MJ Cargo Trailers Finance Center"
+              alt="Remotive Logistics Finance Center"
               width={400}
               height={120}
               className="h-24 w-auto object-contain"

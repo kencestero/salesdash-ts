@@ -47,20 +47,20 @@ export function QuickActions({
     {
       id: "intro",
       name: "Introduction",
-      subject: "Welcome to MJ Cargo - Let's Find Your Perfect Trailer",
-      body: `Hi ${customerName},\n\nThank you for your interest in MJ Cargo! I'm excited to help you find the perfect trailer for your needs.\n\nCould you tell me a bit more about:\n- What you'll be hauling\n- Your preferred trailer size\n- Your budget range\n\nI'm here to answer any questions you have. Feel free to call me at [YOUR PHONE] or reply to this email.\n\nLooking forward to working with you!\n\nBest regards,\n[YOUR NAME]\nMJ Cargo Sales`,
+      subject: "Welcome to Remotive Logistics - Let's Find Your Perfect Trailer",
+      body: `Hi ${customerName},\n\nThank you for your interest in Remotive Logistics! I'm excited to help you find the perfect trailer for your needs.\n\nCould you tell me a bit more about:\n- What you'll be hauling\n- Your preferred trailer size\n- Your budget range\n\nI'm here to answer any questions you have. Feel free to call me at [YOUR PHONE] or reply to this email.\n\nLooking forward to working with you!\n\nBest regards,\n[YOUR NAME]\nRemotive Logistics Sales`,
     },
     {
       id: "followup",
       name: "Follow-Up",
       subject: "Following Up on Your Trailer Inquiry",
-      body: `Hi ${customerName},\n\nI wanted to follow up on your trailer inquiry. Have you had a chance to think about what you're looking for?\n\nI'd love to help answer any questions and show you our current inventory.\n\nWhen would be a good time for a quick call?\n\nBest regards,\n[YOUR NAME]\nMJ Cargo Sales`,
+      body: `Hi ${customerName},\n\nI wanted to follow up on your trailer inquiry. Have you had a chance to think about what you're looking for?\n\nI'd love to help answer any questions and show you our current inventory.\n\nWhen would be a good time for a quick call?\n\nBest regards,\n[YOUR NAME]\nRemotive Logistics Sales`,
     },
     {
       id: "pricing",
       name: "Pricing Information",
       subject: "Pricing for [TRAILER SIZE] Trailer",
-      body: `Hi ${customerName},\n\nThank you for your patience! Here's the pricing information you requested:\n\n[TRAILER DETAILS]\nPrice: $[PRICE]\n\nThis includes:\n- [FEATURE 1]\n- [FEATURE 2]\n- [FEATURE 3]\n\nWe also offer financing options if you're interested. Would you like me to send you a financing quote?\n\nLet me know if you have any questions!\n\nBest regards,\n[YOUR NAME]\nMJ Cargo Sales`,
+      body: `Hi ${customerName},\n\nThank you for your patience! Here's the pricing information you requested:\n\n[TRAILER DETAILS]\nPrice: $[PRICE]\n\nThis includes:\n- [FEATURE 1]\n- [FEATURE 2]\n- [FEATURE 3]\n\nWe also offer financing options if you're interested. Would you like me to send you a financing quote?\n\nLet me know if you have any questions!\n\nBest regards,\n[YOUR NAME]\nRemotive Logistics Sales`,
     },
   ];
 
@@ -69,7 +69,7 @@ export function QuickActions({
     {
       id: "intro",
       name: "Quick Introduction",
-      body: `Hi ${customerName}, this is [YOUR NAME] from MJ Cargo. Thanks for your interest! When's a good time to chat about trailers? Reply anytime!`,
+      body: `Hi ${customerName}, this is [YOUR NAME] from Remotive Logistics. Thanks for your interest! When's a good time to chat about trailers? Reply anytime!`,
     },
     {
       id: "followup",

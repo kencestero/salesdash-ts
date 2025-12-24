@@ -238,7 +238,7 @@ export default function EmailSender({ type, defaultData = {}, onSuccess }: Email
           Send {type.charAt(0).toUpperCase() + type.slice(1).replace("-", " ")} Email
         </CardTitle>
         <CardDescription>
-          This email will use the MJ Cargo branded template with orange styling
+          This email will use the Remotive Logistics branded template with orange styling
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
