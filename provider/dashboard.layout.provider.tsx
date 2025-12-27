@@ -29,7 +29,7 @@ function SessionTimeout() {
       clearTimeout(timeout);
       timeout = setTimeout(() => {
         signOut({ callbackUrl: '/auth/login' });
-      }, 30 * 60 * 1000); // 30 minutes
+      }, 10 * 60 * 1000); // 10 minutes
     };
 
     const events = ['mousedown', 'keydown', 'scroll', 'touchstart'];

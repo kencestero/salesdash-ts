@@ -70,9 +70,9 @@ export async function POST(req: NextRequest) {
       const resend = new Resend(process.env.RESEND_API_KEY);
 
       await resend.emails.send({
-        from: process.env.RESEND_FROM_EMAIL?.replace(/^["']|["']$/g, '') || 'MJ Cargo Sales <noreply@mjsalesdash.com>',
+        from: process.env.RESEND_FROM_EMAIL?.replace(/^["']|["']$/g, '') || 'Remotive Logistics <noreply@remotivelogistics.com>',
         to: user.email!,
-        subject: "Your MJ SalesDash Password Has Been Changed",
+        subject: "Your Remotive SalesHub Password Has Been Changed",
         html: `
           <!DOCTYPE html>
           <html>
@@ -87,13 +87,13 @@ export async function POST(req: NextRequest) {
                     <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border: 1px solid #e6ebf1; border-radius: 8px;">
                       <tr>
                         <td style="background-color: #E96114; padding: 30px; text-align: center;">
-                          <h1 style="color: #ffffff; margin: 0; font-size: 24px;">MJ CARGO TRAILERS</h1>
+                          <h1 style="color: #ffffff; margin: 0; font-size: 24px;">REMOTIVE LOGISTICS</h1>
                         </td>
                       </tr>
                       <tr>
                         <td style="padding: 40px 30px;">
                           <h2 style="color: #1a1a1a; font-size: 24px; margin: 0 0 16px 0;">Hi ${user.name || 'there'}! 🔐</h2>
-                          <p style="color: #525252; font-size: 16px; line-height: 24px;">Your password for MJ SalesDash has been successfully changed.</p>
+                          <p style="color: #525252; font-size: 16px; line-height: 24px;">Your password for Remotive SalesHub has been successfully changed.</p>
                           <p style="color: #666; font-size: 14px; margin-top: 16px;"><strong>Time:</strong> ${changeTime}</p>
                           <p style="color: #666; font-size: 14px;">If you made this change, you can safely ignore this email.</p>
                           <div style="background-color: #fef2f2; border-left: 4px solid #dc2626; padding: 16px; margin-top: 24px;">
@@ -102,7 +102,7 @@ export async function POST(req: NextRequest) {
                           <table width="100%" cellpadding="0" cellspacing="0" style="margin-top: 30px;">
                             <tr>
                               <td align="center">
-                                <a href="${process.env.NEXTAUTH_URL}/en/auth/login" style="background-color: #E96114; color: #ffffff; text-decoration: none; padding: 12px 32px; border-radius: 6px; font-size: 16px; font-weight: bold; display: inline-block;">Login to SalesDash</a>
+                                <a href="${process.env.NEXTAUTH_URL}/en/auth/login" style="background-color: #E96114; color: #ffffff; text-decoration: none; padding: 12px 32px; border-radius: 6px; font-size: 16px; font-weight: bold; display: inline-block;">Login to SalesHub</a>
                               </td>
                             </tr>
                           </table>
