@@ -414,7 +414,7 @@ export default function InventoryPage() {
             onDrop={handleDrop}
           />
           {mounted && canUploadPDF && (
-            <Link href="/inventory/history">
+            <Link href="/en/inventory/history">
               <Button
                 variant="outline"
                 className="border-gray-600 text-gray-300 hover:bg-[#1a1d29] hover:text-white text-base px-6"
@@ -1114,7 +1114,7 @@ export default function InventoryPage() {
                   )}
 
                   <div className="flex gap-2">
-                    <Link href="/inventory/history" className="flex-1">
+                    <Link href="/en/inventory/history" className="flex-1">
                       <Button
                         variant="outline"
                         className="w-full border-gray-600 text-gray-300 hover:bg-[#0f1117]"

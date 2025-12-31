@@ -24,7 +24,13 @@
     },
     {
       "path": "/api/cron/import-email-inventory",
-      "schedule": "0 12 * * *"
+      "schedule": "0 16 * * *",
+      "comment": "11:00 AM EST (4:00 PM UTC) - Morning inventory check"
+    },
+    {
+      "path": "/api/cron/import-email-inventory",
+      "schedule": "0 21 * * *",
+      "comment": "4:00 PM EST (9:00 PM UTC) - Afternoon inventory check"
     },
     {
       "path": "/api/cron/daily-digest",
