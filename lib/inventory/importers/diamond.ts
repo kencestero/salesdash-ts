@@ -39,7 +39,7 @@ export function detectDiamond(sheetHeaders: string[]): boolean {
  */
 export function normalizeDiamond(row: RawRow): NormalizedTrailer | null {
   // Accept VIN or VIN #; Diamond "VIN #" is often a stock number (6 digits)
-  const stock = alias(row, ["VIN #", "VIN#", "Vin #", "Stock #", "STOCK #", "STK #"]);
+  const stock = alias(row, ["VIN #", "VIN#", "Vin #", "VIN", "Vin", "Stock #", "STOCK #", "STK #"]);
   if (!stock) return null;
 
   // Check for real VIN first (length >= 8), else synthesize DC-<stock>
