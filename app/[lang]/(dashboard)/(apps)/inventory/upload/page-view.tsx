@@ -27,8 +27,8 @@ export default function UploadPageView({ session }: UploadPageViewProps) {
       const formData = new FormData();
       formData.append("file", file);
 
-      // Send supplier as query param
-      const response = await fetch(`/api/inventory/import?supplier=${supplier}`, {
+      // Send supplier and mode as query params (mode=sync deletes items not in new list)
+      const response = await fetch(`/api/inventory/import?supplier=${supplier}&mode=sync`, {
         method: "POST",
         body: formData,
       });
@@ -36,9 +36,10 @@ export default function UploadPageView({ session }: UploadPageViewProps) {
       const result = await response.json();
 
       if (response.ok) {
+        const deletedMsg = result.deleted > 0 ? `, deleted ${result.deleted} old items` : '';
         toast({
           title: "✅ Upload Successful!",
-          description: `Imported ${result.upserts || 0} trailers from ${manufacturer} (skipped: ${result.skipped || 0})`,
+          description: `Imported ${result.upserts || 0} trailers from ${manufacturer} (skipped: ${result.skipped || 0}${deletedMsg})`,
         });
       } else {
         toast({

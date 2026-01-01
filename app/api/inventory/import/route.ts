@@ -57,9 +57,10 @@ export async function POST(req: Request) {
       return new Response("Too Many Requests", { status: 429 });
     }
 
-    // Extract supplier query param
+    // Extract query params
     const url = new URL(req.url);
     const supplierParam = url.searchParams.get('supplier'); // 'diamond', 'quality', or 'panther'
+    const modeParam = url.searchParams.get('mode') || 'upsert'; // 'sync' or 'upsert' (default)
 
     // Validate supplier param if provided
     if (supplierParam) {
@@ -143,8 +144,9 @@ export async function POST(req: Request) {
     }
 
     let upserts = 0, skipped = 0;
+    const importedVins = new Set<string>(); // Track VINs in this import for sync mode
 
-    console.log(`[inventory/import] Processing ${rows.length} rows from ${manufacturer}`);
+    console.log(`[inventory/import] Processing ${rows.length} rows from ${manufacturer} (mode: ${modeParam})`);
     console.log(`[inventory/import] First row headers:`, Object.keys(rows[0]));
     console.log(`[inventory/import] Sample first row:`, rows[0]);
 
@@ -229,10 +231,27 @@ export async function POST(req: Request) {
         },
       });
 
+      importedVins.add(t.vin); // Track this VIN
       upserts++;
     }
 
-    return NextResponse.json({ ok:true, manufacturer, upserts, skipped });
+    // SYNC MODE: Delete items from this manufacturer not in new list
+    let deleted = 0;
+    if (modeParam === 'sync') {
+      console.log(`[inventory/import] SYNC mode: Deleting ${manufacturer} items not in new list...`);
+      const deleteResult = await prisma.trailer.deleteMany({
+        where: {
+          manufacturer: manufacturer,
+          vin: {
+            notIn: Array.from(importedVins)
+          }
+        }
+      });
+      deleted = deleteResult.count;
+      console.log(`[inventory/import] Deleted ${deleted} items from ${manufacturer}`);
+    }
+
+    return NextResponse.json({ ok:true, manufacturer, upserts, skipped, deleted, mode: modeParam });
   } catch (err:any) {
     console.error('[inventory/import] failed', err);
     return NextResponse.json({ ok:false, error: String(err?.message || err) }, { status: 500 });
