@@ -38,12 +38,8 @@ export default function RegisterPage() {
 
   // Hardcoded fallback manager list
   const fallbackManagers = [
-    { id: "fallback-1", name: "Brian Jonczy", role: "manager" },
-    { id: "fallback-2", name: "Nathan Wiese", role: "manager" },
-    { id: "fallback-3", name: "Conrad Centeno", role: "manager" },
-    { id: "fallback-4", name: "Calvin M", role: "manager" },
-    { id: "fallback-5", name: "Max Butler", role: "manager" },
-    { id: "fallback-6", name: "Tony Ross", role: "manager" },
+    { id: "fallback-1", name: "Kenneth Cestero", role: "owner" },
+    { id: "fallback-2", name: "Danielle Diggle", role: "manager" },
   ];
 
   // Fetch available managers dynamically and combine with fallback
