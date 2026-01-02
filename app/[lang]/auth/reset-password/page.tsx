@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, useRef, Suspense } from 'react';
+import React, { useState, Suspense } from 'react';
 import Image from 'next/image';
 import { useSearchParams, useRouter } from 'next/navigation';
+import { Icon } from "@iconify/react";
 
 function ResetPasswordForm() {
   const searchParams = useSearchParams();
@@ -11,97 +12,19 @@ function ResetPasswordForm() {
 
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [showForm, setShowForm] = useState(false);
-  const [eyeDirection, setEyeDirection] = useState('center');
+  const [passwordType, setPasswordType] = useState('password');
+  const [confirmPasswordType, setConfirmPasswordType] = useState('password');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
-  const logoRef = useRef<HTMLDivElement>(null);
 
-  // Spring physics for smooth cursor following
-  const targetPos = useRef({ x: 0, y: 0 });
-  const currentPos = useRef({ x: 0, y: 0 });
-
-  const starPositions = useMemo(() => {
-    return [...Array(45)].map(() => ({
-      top: `${Math.random() * 100}%`,
-      left: `${Math.random() * 100}%`,
-      width: `${Math.random() * 1.5 + 0.5}px`,
-      height: `${Math.random() * 1.5 + 0.5}px`,
-      animationDelay: `${Math.random() * 4}s`,
-    }));
-  }, []);
-
-  const getEyeImage = () => {
-    switch(eyeDirection) {
-      case 'left': return '/images/left_side_side.webp';
-      case 'right': return '/images/right side.webp';
-      case 'up': return '/images/looking_up.webp';
-      case 'down': return '/images/looking_down.webp';
-      default: return '/images/DASH_LOGO_EYE_IN_THE_SKY.webp';
-    }
+  const togglePasswordType = () => {
+    setPasswordType(passwordType === 'password' ? 'text' : 'password');
   };
 
-  useEffect(() => {
-    if (!token) {
-      setError('Invalid or missing reset token');
-      return;
-    }
-
-    setTimeout(() => setShowForm(true), 200);
-
-    const handleMouseMove = (e: MouseEvent) => {
-      targetPos.current = {
-        x: (e.clientX - window.innerWidth / 2) * 0.05,
-        y: (e.clientY - 150) * 0.05
-      };
-
-      if (logoRef.current) {
-        const rect = logoRef.current.getBoundingClientRect();
-        const centerX = rect.left + rect.width / 2;
-        const centerY = rect.top + rect.height / 2;
-
-        const dx = e.clientX - centerX;
-        const dy = e.clientY - centerY;
-        const angle = Math.atan2(dy, dx) * 180 / Math.PI;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-
-        if (distance > 50) {
-          if (angle > -45 && angle <= 45) {
-            setEyeDirection('right');
-          } else if (angle > 45 && angle <= 135) {
-            setEyeDirection('down');
-          } else if (angle > 135 || angle <= -135) {
-            setEyeDirection('left');
-          } else {
-            setEyeDirection('up');
-          }
-        } else {
-          setEyeDirection('center');
-        }
-      }
-    };
-
-    let animationId: number;
-    const animate = () => {
-      currentPos.current.x += (targetPos.current.x - currentPos.current.x) * 0.1;
-      currentPos.current.y += (targetPos.current.y - currentPos.current.y) * 0.1;
-
-      if (logoRef.current) {
-        logoRef.current.style.transform = `translate(calc(-50% + ${currentPos.current.x}px), ${currentPos.current.y}px)`;
-      }
-
-      animationId = requestAnimationFrame(animate);
-    };
-
-    animate();
-    window.addEventListener('mousemove', handleMouseMove);
-
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      cancelAnimationFrame(animationId);
-    };
-  }, [token]);
+  const toggleConfirmPasswordType = () => {
+    setConfirmPasswordType(confirmPasswordType === 'password' ? 'text' : 'password');
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -144,218 +67,187 @@ function ResetPasswordForm() {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-black">
+    <div className="h-screen w-screen fixed inset-0 overflow-auto bg-[#0a1628]">
       <style jsx>{`
-        @keyframes aurora {
-          0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.3; }
-          50% { transform: translate(20px, -20px) scale(1.05); opacity: 0.5; }
+        @keyframes subtle-glow {
+          0%, 100% { filter: drop-shadow(0 0 15px rgba(255, 60, 20, 0.5)); }
+          50% { filter: drop-shadow(0 0 25px rgba(255, 60, 20, 0.65)); }
         }
-
-        @keyframes rotate {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
+        .logo-glow {
+          animation: subtle-glow 8s ease-in-out infinite;
         }
-
-        @keyframes twinkle {
-          0%, 100% { opacity: 0.3; }
-          50% { opacity: 1; }
-        }
-
-        @keyframes pulse {
+        @keyframes pulse-success {
           0%, 100% { transform: scale(1); }
           50% { transform: scale(1.05); }
         }
-
-        .aurora {
-          position: absolute;
-          border-radius: 50%;
-          mix-blend-mode: screen;
-          animation: aurora 15s ease-in-out infinite;
-          filter: blur(80px);
-        }
-
-        .star {
-          position: absolute;
-          background: white;
-          border-radius: 50%;
-          animation: twinkle 4s ease-in-out infinite;
-        }
-
-        .rotating {
-          animation: rotate 15s linear infinite;
-        }
-
         .pulse-success {
-          animation: pulse 2s ease-in-out infinite;
+          animation: pulse-success 2s ease-in-out infinite;
         }
       `}</style>
 
       {/* Background Image */}
       <div className="absolute inset-0 z-0">
         <Image
-          src="/images/final_increased_login_bg.jpg"
-          alt="Starry Night Trailer"
+          src="/images/remotive-bg.webp"
+          alt="Remotive Dashboard"
           fill
-          className="object-cover object-[75%_center]"
+          className="object-cover"
           priority
-          quality={85}
+          quality={90}
         />
       </div>
 
-      <div className="absolute inset-0 bg-black/30 z-[1]" />
+      {/* Dark gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-b from-[#0a1628]/60 via-[#0a1628]/40 to-[#0a1628]/70 z-[1]" />
 
-      {/* Aurora Effects */}
-      <div className="absolute inset-0 z-[2] pointer-events-none">
-        <div className="aurora" style={{
-          width: '600px',
-          height: '400px',
-          background: 'radial-gradient(circle, rgba(251, 146, 60, 0.15) 0%, transparent 70%)',
-          top: '-10%',
-          left: '-10%'
-        }}></div>
-        <div className="aurora" style={{
-          width: '500px',
-          height: '500px',
-          background: 'radial-gradient(circle, rgba(253, 186, 116, 0.1) 0%, transparent 70%)',
-          bottom: '-10%',
-          right: '-10%',
-          animationDelay: '7s'
-        }}></div>
-
-        {starPositions.map((star, i) => (
-          <div key={i} className="star" style={star} />
-        ))}
-      </div>
-
-      {/* Floating AI Eyeball Logo */}
-      <div
-        ref={logoRef}
-        className="fixed top-8 left-1/2 -translate-x-1/2 z-50 will-change-transform"
-        style={{ transition: 'none' }}
-      >
-        <div className="relative w-[180px] h-[180px]">
-          <div className="absolute inset-5 rounded-full bg-gradient-radial from-orange-500/20 to-transparent blur-xl" />
-
-          <svg className="rotating absolute inset-0 w-full h-full" viewBox="0 0 180 180">
-            <defs>
-              <path id="circle" d="M 90,90 m -70,0 a 70,70 0 1,1 140,0 a 70,70 0 1,1 -140,0" />
-            </defs>
-            <text className="text-[11px] font-light tracking-[0.3em] fill-white/90 uppercase">
-              <textPath href="#circle">MJ SALESDASH AI • MJ SALESDASH AI • MJ SALESDASH AI •</textPath>
-            </text>
-          </svg>
-
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="relative w-24 h-24">
+      {/* Main Content */}
+      <div className="relative z-10 h-full flex items-center justify-center py-8">
+        <div className="w-full max-w-md px-6">
+          <div className="rounded-2xl p-8 relative overflow-hidden backdrop-blur-xl bg-white/10 border border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
+            {/* R Logo with Glow */}
+            <div className="flex justify-center mb-6">
               <Image
-                src={getEyeImage()}
-                alt="MJ AI Eye"
-                width={96}
-                height={96}
-                className="transition-opacity duration-200"
+                src="/images/logo/remotive-r.png"
+                alt="Remotive"
+                width={95}
+                height={95}
+                className="logo-glow"
+                priority
               />
             </div>
-          </div>
-        </div>
-      </div>
 
-      {/* Reset Password Form */}
-      <div className="relative z-10 flex min-h-screen items-center justify-center pt-32">
-        <div className="w-full max-w-[28rem] px-6">
-          <div
-            className={`transition-all duration-700 ${
-              showForm ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
-            }`}
-          >
-            <div className="rounded-3xl p-10 relative overflow-hidden backdrop-blur-[25px] backdrop-saturate-150 bg-black/40 border border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.6),0_0_40px_rgba(251,146,60,0.7)]">
+            {!success ? (
+              <>
+                <div className="text-center mb-6">
+                  <h3 className="text-white text-xl font-semibold tracking-wide uppercase mb-2">
+                    Create New Password
+                  </h3>
+                  <p className="text-white/50 text-sm">
+                    Enter a strong password to secure your account
+                  </p>
+                </div>
 
-              {!success ? (
-                <>
-                  <div className="text-center mb-8">
-                    <h3 className="text-white/95 text-2xl font-light mb-3 drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)]">
-                      Create New Password
-                    </h3>
-                    <p className="text-white/60 text-sm">
-                      Enter a strong password to secure your account
-                    </p>
+                {!token && (
+                  <div className="text-red-400 text-sm text-center bg-red-500/10 border border-red-500/20 rounded-lg py-3 px-4 mb-4">
+                    Invalid or missing reset token. Please request a new password reset link.
                   </div>
+                )}
 
-                  <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-                    <div>
-                      <label className="text-white/60 text-xs font-light tracking-wider uppercase block mb-2">
-                        New Password
-                      </label>
+                <form onSubmit={handleSubmit} className="space-y-5">
+                  {/* New Password */}
+                  <div>
+                    <label className="text-white/70 text-xs font-medium tracking-wide block mb-2">
+                      New Password *
+                    </label>
+                    <div className="relative">
                       <input
-                        type="password"
+                        type={passwordType}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="w-full rounded-xl px-5 py-4 text-white bg-black/20 border border-white/10 backdrop-blur-sm text-sm outline-none transition-all shadow-[inset_0_2px_4px_rgba(0,0,0,0.3),inset_0_-1px_2px_rgba(255,255,255,0.05)] focus:border-orange-500/60 focus:shadow-[0_0_20px_rgba(251,146,60,0.2),inset_0_2px_6px_rgba(0,0,0,0.4)] focus:bg-black/30"
+                        className="w-full rounded-lg px-4 py-3 text-white bg-black/30 border border-white/10 outline-none transition-all placeholder:text-white/30 focus:border-[#E96614] focus:ring-1 focus:ring-[#E96614]/50 focus:bg-black/40 pr-10"
                         placeholder="Minimum 8 characters"
                         required
                         autoFocus
                         minLength={8}
                         disabled={loading || !token}
                       />
+                      <div
+                        className="absolute top-1/2 -translate-y-1/2 right-3 cursor-pointer"
+                        onClick={togglePasswordType}
+                      >
+                        {passwordType === 'password' ? (
+                          <Icon icon="heroicons:eye" className="w-5 h-5 text-white/40 hover:text-white/60" />
+                        ) : (
+                          <Icon icon="heroicons:eye-slash" className="w-5 h-5 text-white/40 hover:text-white/60" />
+                        )}
+                      </div>
                     </div>
+                  </div>
 
-                    <div>
-                      <label className="text-white/60 text-xs font-light tracking-wider uppercase block mb-2">
-                        Confirm Password
-                      </label>
+                  {/* Confirm Password */}
+                  <div>
+                    <label className="text-white/70 text-xs font-medium tracking-wide block mb-2">
+                      Confirm Password *
+                    </label>
+                    <div className="relative">
                       <input
-                        type="password"
+                        type={confirmPasswordType}
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
-                        className="w-full rounded-xl px-5 py-4 text-white bg-black/20 border border-white/10 backdrop-blur-sm text-sm outline-none transition-all shadow-[inset_0_2px_4px_rgba(0,0,0,0.3),inset_0_-1px_2px_rgba(255,255,255,0.05)] focus:border-orange-500/60 focus:shadow-[0_0_20px_rgba(251,146,60,0.2),inset_0_2px_6px_rgba(0,0,0,0.4)] focus:bg-black/30"
+                        className="w-full rounded-lg px-4 py-3 text-white bg-black/30 border border-white/10 outline-none transition-all placeholder:text-white/30 focus:border-[#E96614] focus:ring-1 focus:ring-[#E96614]/50 focus:bg-black/40 pr-10"
                         placeholder="Re-enter your password"
                         required
                         minLength={8}
                         disabled={loading || !token}
                       />
-                    </div>
-
-                    {error && (
-                      <div className="text-red-400 text-sm text-center bg-red-500/10 border border-red-500/20 rounded-lg py-3 px-4">
-                        {error}
+                      <div
+                        className="absolute top-1/2 -translate-y-1/2 right-3 cursor-pointer"
+                        onClick={toggleConfirmPasswordType}
+                      >
+                        {confirmPasswordType === 'password' ? (
+                          <Icon icon="heroicons:eye" className="w-5 h-5 text-white/40 hover:text-white/60" />
+                        ) : (
+                          <Icon icon="heroicons:eye-slash" className="w-5 h-5 text-white/40 hover:text-white/60" />
+                        )}
                       </div>
+                    </div>
+                    {confirmPassword && password !== confirmPassword && (
+                      <p className="text-xs text-red-300 mt-1">Passwords must match</p>
                     )}
-
-                    <button
-                      type="submit"
-                      disabled={loading || !token}
-                      className="w-full text-black font-semibold py-4 px-6 rounded-xl bg-gradient-to-br from-amber-300 to-orange-500 shadow-[0_4px_20px_rgba(251,191,36,0.4)] text-sm uppercase tracking-wider border-none cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_30px_rgba(251,191,36,0.6)] active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {loading ? 'Resetting Password...' : 'Reset Password'}
-                    </button>
-                  </form>
-
-                  <div className="mt-6 text-center">
-                    <button
-                      onClick={() => router.push('/en/auth/login')}
-                      className="text-white/50 text-xs uppercase tracking-wider hover:text-orange-500/90 transition-colors"
-                    >
-                      Back to Login
-                    </button>
+                    {confirmPassword && password === confirmPassword && (
+                      <p className="text-xs text-green-300 mt-1">✓ Passwords match</p>
+                    )}
                   </div>
-                </>
-              ) : (
-                <div className="text-center py-4">
-                  <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-amber-300 to-orange-500 flex items-center justify-center pulse-success">
-                    <svg className="w-10 h-10 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                    </svg>
-                  </div>
-                  <h3 className="text-white/95 text-2xl font-light mb-3">
-                    Password Reset Successful!
-                  </h3>
-                  <p className="text-white/70 text-sm mb-2">
-                    Your password has been updated successfully.
-                  </p>
-                  <p className="text-white/50 text-xs">
-                    Redirecting to login page...
+
+                  {error && (
+                    <div className="text-red-400 text-sm text-center bg-red-500/10 border border-red-500/20 rounded-lg py-3 px-4">
+                      {error}
+                    </div>
+                  )}
+
+                  {/* Submit Button */}
+                  <button
+                    type="submit"
+                    disabled={loading || !token}
+                    className="w-full text-white font-semibold py-3.5 px-6 rounded-lg bg-gradient-to-b from-[#ff3a3a] via-[#cc2020] to-[#8a1010] shadow-[0_4px_20px_rgba(255,58,58,0.4),inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-2px_4px_rgba(0,0,0,0.3)] text-sm tracking-wide border border-[#ff4444]/30 cursor-pointer transition-all hover:shadow-[0_6px_30px_rgba(255,58,58,0.6),inset_0_1px_0_rgba(255,255,255,0.25),inset_0_-2px_4px_rgba(0,0,0,0.4)] hover:brightness-110 active:scale-[0.98] active:shadow-[0_2px_10px_rgba(255,58,58,0.4),inset_0_2px_4px_rgba(0,0,0,0.4)] disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {loading ? 'Resetting Password...' : 'Reset Password'}
+                  </button>
+                </form>
+
+                {/* Back to Login */}
+                <div className="mt-5 text-center">
+                  <p className="text-white/40 text-xs">
+                    Remember your password?{" "}
+                    <a href="/en/auth/login" className="text-[#E96614] hover:text-[#ff7a3d] transition-colors font-medium">
+                      Sign In
+                    </a>
                   </p>
                 </div>
-              )}
+              </>
+            ) : (
+              /* Success State */
+              <div className="text-center py-4">
+                <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-b from-[#22c55e] to-[#16a34a] flex items-center justify-center pulse-success shadow-[0_4px_20px_rgba(34,197,94,0.4)]">
+                  <Icon icon="heroicons:check" className="w-10 h-10 text-white" />
+                </div>
+                <h3 className="text-white text-xl font-semibold mb-3">
+                  Password Reset Successful!
+                </h3>
+                <p className="text-white/70 text-sm mb-2">
+                  Your password has been updated successfully.
+                </p>
+                <p className="text-white/50 text-xs">
+                  Redirecting to login page...
+                </p>
+              </div>
+            )}
+
+            {/* Footer */}
+            <div className="mt-6 pt-5 border-t border-white/10 text-center">
+              <p className="text-white/25 text-xs">
+                © 2025 Remotive Logistics • Haverstraw, NY
+              </p>
             </div>
           </div>
         </div>
@@ -367,7 +259,7 @@ function ResetPasswordForm() {
 export default function ResetPasswordPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="min-h-screen bg-[#0a1628] flex items-center justify-center">
         <div className="text-white/60 text-sm">Loading...</div>
       </div>
     }>
