@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Loader2, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,6 +23,16 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/use-toast";
 
+interface Salesperson {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  repCode: string | null;
+  managerId: string | null;
+  managerName: string | null;
+}
+
 interface AddCustomerDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -35,6 +45,8 @@ export function AddCustomerDialog({
   onSuccess,
 }: AddCustomerDialogProps) {
   const [submitting, setSubmitting] = useState(false);
+  const [salespeople, setSalespeople] = useState<Salesperson[]>([]);
+  const [loadingSalespeople, setLoadingSalespeople] = useState(false);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -46,18 +58,61 @@ export function AddCustomerDialog({
     zipcode: "",
     companyName: "",
     businessType: "individual",
-    source: "website",
+    source: "remotive-website",
     status: "lead",
     notes: "",
-    salesRepName: "",      // Sales Rep assignment
-    assignedToName: "",    // Manager assignment
+    salesRepName: "",
+    assignedToName: "",
+    assignedToId: "",
   });
+
+  // Fetch salespeople when dialog opens
+  useEffect(() => {
+    if (open) {
+      fetchSalespeople();
+    }
+  }, [open]);
+
+  const fetchSalespeople = async () => {
+    try {
+      setLoadingSalespeople(true);
+      const res = await fetch("/api/salespeople");
+      const data = await res.json();
+      if (data.salespeople) {
+        setSalespeople(data.salespeople);
+      }
+    } catch (error) {
+      console.error("Error fetching salespeople:", error);
+    } finally {
+      setLoadingSalespeople(false);
+    }
+  };
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // Handle sales rep selection - auto-populate manager
+  const handleSalesRepChange = (salesRepId: string) => {
+    const selectedRep = salespeople.find((sp) => sp.id === salesRepId);
+    if (selectedRep) {
+      setFormData((prev) => ({
+        ...prev,
+        salesRepName: selectedRep.name,
+        assignedToId: selectedRep.id,
+        assignedToName: selectedRep.managerName || "",
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        salesRepName: "",
+        assignedToId: "",
+        assignedToName: "",
+      }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -110,11 +165,12 @@ export function AddCustomerDialog({
         zipcode: "",
         companyName: "",
         businessType: "individual",
-        source: "website",
+        source: "remotive-website",
         status: "lead",
         notes: "",
         salesRepName: "",
         assignedToName: "",
+        assignedToId: "",
       });
       onOpenChange(false);
       onSuccess();
@@ -128,6 +184,9 @@ export function AddCustomerDialog({
       setSubmitting(false);
     }
   };
+
+  // Find currently selected rep for the Select component
+  const selectedRepId = salespeople.find((sp) => sp.name === formData.salesRepName)?.id || "";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -204,41 +263,6 @@ export function AddCustomerDialog({
           </div>
 
           <div className="space-y-4">
-            <h3 className="font-semibold text-sm text-muted-foreground">Company Information (Optional)</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="companyName">Company Name</Label>
-                <Input
-                  id="companyName"
-                  name="companyName"
-                  value={formData.companyName}
-                  onChange={handleInputChange}
-                  placeholder="Acme Inc"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="businessType">Business Type</Label>
-                <Select
-                  value={formData.businessType}
-                  onValueChange={(value) =>
-                    setFormData((prev) => ({ ...prev, businessType: value }))
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="individual">Individual</SelectItem>
-                    <SelectItem value="business">Business</SelectItem>
-                    <SelectItem value="contractor">Contractor</SelectItem>
-                    <SelectItem value="dealer">Dealer</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-4">
             <h3 className="font-semibold text-sm text-muted-foreground">Address (Optional)</h3>
             <div className="space-y-2">
               <Label htmlFor="street">Street Address</Label>
@@ -299,12 +323,13 @@ export function AddCustomerDialog({
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="website">Website</SelectItem>
-                    <SelectItem value="phone">Phone Call</SelectItem>
-                    <SelectItem value="email">Email</SelectItem>
+                    <SelectItem value="facebook-marketplace">Facebook Marketplace</SelectItem>
+                    <SelectItem value="facebook-ads">Facebook Ads</SelectItem>
+                    <SelectItem value="youtube">YouTube</SelectItem>
+                    <SelectItem value="remotive-website">Main Remotive Website</SelectItem>
                     <SelectItem value="referral">Referral</SelectItem>
-                    <SelectItem value="walk-in">Walk-in</SelectItem>
-                    <SelectItem value="social">Social Media</SelectItem>
+                    <SelectItem value="google-search">Google Search</SelectItem>
+                    <SelectItem value="instagram">Instagram</SelectItem>
                     <SelectItem value="other">Other</SelectItem>
                   </SelectContent>
                 </Select>
@@ -335,23 +360,34 @@ export function AddCustomerDialog({
             <h3 className="font-semibold text-sm text-muted-foreground">Assignment</h3>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="salesRepName">Sales Rep (Salesperson)</Label>
-                <Input
-                  id="salesRepName"
-                  name="salesRepName"
-                  value={formData.salesRepName}
-                  onChange={handleInputChange}
-                  placeholder="Enter sales rep name"
-                />
+                <Label htmlFor="salesRep">Sales Rep</Label>
+                <Select
+                  value={selectedRepId}
+                  onValueChange={handleSalesRepChange}
+                  disabled={loadingSalespeople}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={loadingSalespeople ? "Loading..." : "Select sales rep"} />
+                  </SelectTrigger>
+                  <SelectContent className="z-[9999]">
+                    <SelectItem value="unassigned">Unassigned</SelectItem>
+                    {salespeople.map((sp) => (
+                      <SelectItem key={sp.id} value={sp.id}>
+                        {sp.name} {sp.role !== "salesperson" ? `(${sp.role})` : ""}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="assignedToName">Manager</Label>
+                <Label htmlFor="manager">Manager</Label>
                 <Input
-                  id="assignedToName"
-                  name="assignedToName"
+                  id="manager"
                   value={formData.assignedToName}
-                  onChange={handleInputChange}
-                  placeholder="Enter manager name"
+                  readOnly
+                  disabled
+                  placeholder="Auto-populated from Sales Rep"
+                  className="bg-muted/50"
                 />
               </div>
             </div>

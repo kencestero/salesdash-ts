@@ -130,6 +130,10 @@ export default function UserManagementPage() {
   const [updating, setUpdating] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
+  // Sort state
+  const [sortColumn, setSortColumn] = useState<string | null>(null);
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+
   // Edit form states
   const [editManagerId, setEditManagerId] = useState("");
   const [editRole, setEditRole] = useState("");
@@ -333,6 +337,16 @@ export default function UserManagementPage() {
     setShowDeleteDialog(true);
   };
 
+  // Sort handler
+  const handleSort = (column: string) => {
+    if (sortColumn === column) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortColumn(column);
+      setSortDirection("asc");
+    }
+  };
+
   // Filter users
   const filteredUsers = users.filter((user) => {
     const matchesSearch =
@@ -348,6 +362,67 @@ export default function UserManagementPage() {
 
     return matchesSearch && matchesRole && matchesStatus;
   });
+
+  // Sort users
+  const sortedUsers = [...filteredUsers].sort((a, b) => {
+    if (!sortColumn) return 0;
+
+    let aValue: string = "";
+    let bValue: string = "";
+
+    switch (sortColumn) {
+      case "name":
+        aValue = a.profile?.firstName || a.name || a.email || "";
+        bValue = b.profile?.firstName || b.name || b.email || "";
+        break;
+      case "email":
+        aValue = a.email || "";
+        bValue = b.email || "";
+        break;
+      case "repCode":
+        aValue = a.profile?.repCode || "";
+        bValue = b.profile?.repCode || "";
+        break;
+      case "role":
+        aValue = a.profile?.role || "";
+        bValue = b.profile?.role || "";
+        break;
+      case "status":
+        aValue = a.profile?.status || "";
+        bValue = b.profile?.status || "";
+        break;
+      case "account":
+        aValue = a.profile?.accountStatus || "";
+        bValue = b.profile?.accountStatus || "";
+        break;
+      case "manager":
+        aValue = a.profile?.managerName || "";
+        bValue = b.profile?.managerName || "";
+        break;
+    }
+
+    const comparison = aValue.toLowerCase().localeCompare(bValue.toLowerCase());
+    return sortDirection === "asc" ? comparison : -comparison;
+  });
+
+  // Sortable header component
+  const SortableHeader = ({ column, label }: { column: string; label: string }) => (
+    <th
+      className="text-left py-3 px-4 font-semibold text-sm cursor-pointer hover:bg-muted/50 select-none transition-colors"
+      onClick={() => handleSort(column)}
+    >
+      <div className="flex items-center gap-1">
+        {label}
+        <span className="text-xs text-muted-foreground">
+          {sortColumn === column ? (
+            sortDirection === "asc" ? "▲" : "▼"
+          ) : (
+            <span className="opacity-30">▼</span>
+          )}
+        </span>
+      </div>
+    </th>
+  );
 
   // Get list of managers for dropdown
   const managers = users.filter((u) => u.profile?.role === "manager");
@@ -623,18 +698,18 @@ export default function UserManagementPage() {
             <table className="w-full">
               <thead>
                 <tr className="border-b">
-                  <th className="text-left py-3 px-4 font-semibold text-sm">Name</th>
-                  <th className="text-left py-3 px-4 font-semibold text-sm">Email</th>
-                  <th className="text-left py-3 px-4 font-semibold text-sm">Rep Code</th>
-                  <th className="text-left py-3 px-4 font-semibold text-sm">Role</th>
-                  <th className="text-left py-3 px-4 font-semibold text-sm">Status</th>
-                  <th className="text-left py-3 px-4 font-semibold text-sm">Account</th>
-                  <th className="text-left py-3 px-4 font-semibold text-sm">Manager</th>
+                  <SortableHeader column="name" label="Name" />
+                  <SortableHeader column="email" label="Email" />
+                  <SortableHeader column="repCode" label="Rep Code" />
+                  <SortableHeader column="role" label="Role" />
+                  <SortableHeader column="status" label="Status" />
+                  <SortableHeader column="account" label="Account" />
+                  <SortableHeader column="manager" label="Manager" />
                   <th className="text-left py-3 px-4 font-semibold text-sm">Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredUsers.map((user) => (
+                {sortedUsers.map((user) => (
                   <tr key={user.id} className="border-b hover:bg-muted/50">
                     <td className="py-3 px-4">
                       <div>
@@ -703,7 +778,7 @@ export default function UserManagementPage() {
               </tbody>
             </table>
 
-            {filteredUsers.length === 0 && (
+            {sortedUsers.length === 0 && (
               <div className="text-center py-12">
                 <Users className="w-12 h-12 text-muted-foreground mx-auto mb-2" />
                 <p className="text-muted-foreground">No users found</p>
