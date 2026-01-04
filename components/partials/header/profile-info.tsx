@@ -17,10 +17,12 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Icon } from "@iconify/react";
 import Link from "next/link";
+import { WelcomeHelpDialog } from "@/components/dashboard/WelcomeHelpDialog";
 
 const ProfileInfo = () => {
   const { data: session } = useSession();
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [showWelcomeDialog, setShowWelcomeDialog] = useState(false);
 
   // Fetch user's uploaded avatar from profile
   useEffect(() => {
@@ -58,6 +60,7 @@ const ProfileInfo = () => {
   const displayAvatar = avatarUrl || session?.user?.image || undefined;
 
   return (
+    <>
     <DropdownMenu>
       <DropdownMenuTrigger asChild className="cursor-pointer">
         <div className="flex items-center">
@@ -113,17 +116,34 @@ const ProfileInfo = () => {
               icon: "heroicons:key",
               href:"/secret-code-instructions"
             },
+            {
+              name: "Welcome Help",
+              icon: "heroicons:sparkles",
+              href: "#",
+              onClick: () => setShowWelcomeDialog(true)
+            },
           ].map((item, index) => (
-            <Link
-              href={item.href}
-              key={`info-menu-${index}`}
-              className="cursor-pointer"
-            >
-              <DropdownMenuItem className="flex items-center gap-2 text-sm font-medium text-default-600 capitalize px-3 py-1.5 dark:hover:bg-background cursor-pointer">
+            item.onClick ? (
+              <DropdownMenuItem
+                key={`info-menu-${index}`}
+                onSelect={item.onClick}
+                className="flex items-center gap-2 text-sm font-medium text-default-600 capitalize px-3 py-1.5 dark:hover:bg-background cursor-pointer"
+              >
                 <Icon icon={item.icon} className="w-4 h-4" />
                 {item.name}
               </DropdownMenuItem>
-            </Link>
+            ) : (
+              <Link
+                href={item.href}
+                key={`info-menu-${index}`}
+                className="cursor-pointer"
+              >
+                <DropdownMenuItem className="flex items-center gap-2 text-sm font-medium text-default-600 capitalize px-3 py-1.5 dark:hover:bg-background cursor-pointer">
+                  <Icon icon={item.icon} className="w-4 h-4" />
+                  {item.name}
+                </DropdownMenuItem>
+              </Link>
+            )
           ))}
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
@@ -210,6 +230,14 @@ const ProfileInfo = () => {
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
+
+    {/* Welcome Help Dialog */}
+    <WelcomeHelpDialog
+      open={showWelcomeDialog}
+      onOpenChange={setShowWelcomeDialog}
+      manualTrigger
+    />
+    </>
   );
 };
 export default ProfileInfo;
