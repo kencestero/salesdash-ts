@@ -48,6 +48,7 @@ import { toast } from "@/components/ui/use-toast";
 import Link from "next/link";
 import { EmailComposerDialog } from "@/components/crm/email-composer-dialog";
 import { EmailViewerDialog } from "@/components/crm/email-viewer-dialog";
+import { calculateResponseTimer, type ResponseTimerResult, getBackgroundColorClass } from "@/lib/response-timer";
 import { LeadStatusManager } from "@/components/crm/lead-status-manager";
 
 interface Customer {
@@ -125,6 +126,7 @@ export default function CustomerProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
   const [notes, setNotes] = useState("");
   const [leadAge, setLeadAge] = useState("");
+  const [responseTimer, setResponseTimer] = useState<ResponseTimerResult | null>(null);
   const [showLogCallDialog, setShowLogCallDialog] = useState(false);
   const [callNotes, setCallNotes] = useState("");
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -434,6 +436,24 @@ export default function CustomerProfilePage() {
     }
   }, [customer]);
 
+  // Calculate and auto-refresh response timer every 30 seconds
+  useEffect(() => {
+    if (customer?.createdAt) {
+      const updateResponseTimer = () => {
+        const timer = calculateResponseTimer(
+          new Date(customer.createdAt),
+          customer.lastContactedAt ? new Date(customer.lastContactedAt) : null
+        );
+        setResponseTimer(timer);
+      };
+
+      updateResponseTimer();
+      // Refresh every 30 seconds for live updates
+      const interval = setInterval(updateResponseTimer, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [customer?.createdAt, customer?.lastContactedAt]);
+
   const handleLogCall = async () => {
     if (!customer || !callNotes.trim()) {
       toast({
@@ -689,6 +709,7 @@ export default function CustomerProfilePage() {
                       id="firstName"
                       value={editForm.firstName}
                       onChange={(e) => setEditForm({...editForm, firstName: e.target.value})}
+                      onFocus={(e) => e.target.select()}
                       placeholder="First name"
                     />
                   </div>
@@ -698,6 +719,7 @@ export default function CustomerProfilePage() {
                       id="lastName"
                       value={editForm.lastName}
                       onChange={(e) => setEditForm({...editForm, lastName: e.target.value})}
+                      onFocus={(e) => e.target.select()}
                       placeholder="Last name"
                     />
                   </div>
@@ -711,6 +733,7 @@ export default function CustomerProfilePage() {
                     type="email"
                     value={editForm.email}
                     onChange={(e) => setEditForm({...editForm, email: e.target.value})}
+                    onFocus={(e) => e.target.select()}
                     placeholder="email@example.com"
                   />
                 </div>
@@ -720,6 +743,7 @@ export default function CustomerProfilePage() {
                     id="phone"
                     value={editForm.phone}
                     onChange={(e) => setEditForm({...editForm, phone: e.target.value})}
+                    onFocus={(e) => e.target.select()}
                     placeholder="(555) 123-4567"
                   />
                 </div>
@@ -731,6 +755,7 @@ export default function CustomerProfilePage() {
                     id="companyName"
                     value={editForm.companyName}
                     onChange={(e) => setEditForm({...editForm, companyName: e.target.value})}
+                    onFocus={(e) => e.target.select()}
                     placeholder="Company name (optional)"
                   />
                 </div>
@@ -742,6 +767,7 @@ export default function CustomerProfilePage() {
                     id="street"
                     value={editForm.street}
                     onChange={(e) => setEditForm({...editForm, street: e.target.value})}
+                    onFocus={(e) => e.target.select()}
                     placeholder="123 Main St"
                   />
                 </div>
@@ -752,6 +778,7 @@ export default function CustomerProfilePage() {
                       id="city"
                       value={editForm.city}
                       onChange={(e) => setEditForm({...editForm, city: e.target.value})}
+                      onFocus={(e) => e.target.select()}
                       placeholder="City"
                     />
                   </div>
@@ -761,6 +788,7 @@ export default function CustomerProfilePage() {
                       id="state"
                       value={editForm.state}
                       onChange={(e) => setEditForm({...editForm, state: e.target.value})}
+                      onFocus={(e) => e.target.select()}
                       placeholder="TX"
                     />
                   </div>
@@ -770,6 +798,7 @@ export default function CustomerProfilePage() {
                       id="zipcode"
                       value={editForm.zipcode}
                       onChange={(e) => setEditForm({...editForm, zipcode: e.target.value})}
+                      onFocus={(e) => e.target.select()}
                       placeholder="77001"
                     />
                   </div>
@@ -782,6 +811,7 @@ export default function CustomerProfilePage() {
                     id="source"
                     value={editForm.source}
                     onChange={(e) => setEditForm({...editForm, source: e.target.value})}
+                    onFocus={(e) => e.target.select()}
                     placeholder="Website, Referral, etc."
                   />
                 </div>
@@ -794,6 +824,7 @@ export default function CustomerProfilePage() {
                       id="trailerSize"
                       value={editForm.trailerSize}
                       onChange={(e) => setEditForm({...editForm, trailerSize: e.target.value})}
+                      onFocus={(e) => e.target.select()}
                       placeholder="6x12"
                     />
                   </div>
@@ -803,6 +834,7 @@ export default function CustomerProfilePage() {
                       id="trailerType"
                       value={editForm.trailerType}
                       onChange={(e) => setEditForm({...editForm, trailerType: e.target.value})}
+                      onFocus={(e) => e.target.select()}
                       placeholder="Enclosed"
                     />
                   </div>
@@ -815,6 +847,7 @@ export default function CustomerProfilePage() {
                       id="financingType"
                       value={editForm.financingType}
                       onChange={(e) => setEditForm({...editForm, financingType: e.target.value})}
+                      onFocus={(e) => e.target.select()}
                       placeholder="Cash"
                     />
                   </div>
@@ -824,6 +857,7 @@ export default function CustomerProfilePage() {
                       id="stockNumber"
                       value={editForm.stockNumber}
                       onChange={(e) => setEditForm({...editForm, stockNumber: e.target.value})}
+                      onFocus={(e) => e.target.select()}
                       placeholder="Stock #"
                     />
                   </div>
@@ -886,14 +920,18 @@ export default function CustomerProfilePage() {
                 </span>
               </div>
 
-              {customer.salesRepName && (
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Sales Rep</span>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Sales Rep</span>
+                {customer.salesRepName ? (
                   <Badge variant="outline" className="bg-blue-500/20 text-blue-600 dark:text-blue-400 border-blue-500/30">
                     {customer.salesRepName}
                   </Badge>
-                </div>
-              )}
+                ) : (
+                  <Badge variant="outline" className="bg-amber-500/20 text-amber-600 dark:text-amber-400 border-amber-500/30">
+                    No Rep Assigned
+                  </Badge>
+                )}
+              </div>
 
               {customer.assignedToName && (
                 <div className="flex items-center justify-between">
@@ -966,6 +1004,23 @@ export default function CustomerProfilePage() {
                   {formatDate(customer.lastContactedAt, true)}
                 </span>
               </div>
+
+              {/* Response Timer Badge */}
+              {responseTimer && (
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">Response Time</span>
+                  <Badge
+                    variant="outline"
+                    className={`${getBackgroundColorClass(responseTimer.status)} ${responseTimer.isPulsating ? 'animate-pulse' : ''}`}
+                  >
+                    <Clock className="w-3 h-3 mr-1" />
+                    {responseTimer.status === 'contacted'
+                      ? responseTimer.label
+                      : `${responseTimer.formattedTime} - ${responseTimer.label}`
+                    }
+                  </Badge>
+                </div>
+              )}
             </div>
 
             {customer.tags && customer.tags.length > 0 && (
