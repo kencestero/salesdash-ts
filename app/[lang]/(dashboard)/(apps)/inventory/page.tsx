@@ -684,9 +684,9 @@ export default function InventoryPage() {
 
                             case 'size':
                               return (
-                                <TableCell key={column.id} className="text-white font-bold text-3xl">
-                                  {trailer.length}' × {trailer.width}'
-                                  {trailer.height && <div className="text-sm text-gray-400 font-normal">H: {trailer.height}'</div>}
+                                <TableCell key={column.id} className="text-white font-bold text-lg">
+                                  {trailer.width}'x{trailer.length}'
+                                  {trailer.height && <div className="text-xs text-gray-400 font-normal">H: {trailer.height}'</div>}
                                 </TableCell>
                               );
 
