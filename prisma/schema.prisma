@@ -283,6 +283,23 @@ model Customer {
   linkSentStatus  String   @default("not_sent") // "applied", "link_sent", "not_sent"
   approvalStatus  String   @default("status") // "status", "approved", "pending", "need_docs", "denied"
 
+  // Pre-Qualification Router Data (from website form)
+  creditRange     String?  // "excellent_780_plus", "good_700_779", "fair_650_699", "below_average_620_649", "rebuilding_below_620"
+  recommendedPath String?  // "rock_solid", "lease_to_own"
+  sourcePage      String?  // "/get-approved", etc.
+  ctaClicked      String?  // Which CTA button customer clicked
+  repCode         String?  // Rep code from the link (for tracking)
+
+  // Duplicate Lead Handling
+  duplicateStatus String   @default("none") // "none", "pending_review", "resolved"
+  duplicateOfId   String?  // ID of original lead if this is a duplicate
+  lockedForReview Boolean  @default(false)  // Prevents edits until manager reviews
+  lockedAt        DateTime?
+  lockReason      String?  // "duplicate", "fraud_check", etc.
+  reviewedByUserId String? // Manager who reviewed the duplicate
+  reviewDecision  String?  // "keep_original", "reassign_to_new", "merge"
+  reviewedAt      DateTime?
+
   // Tags for segmentation
   tags            String[]
 
@@ -317,6 +334,9 @@ model Customer {
   @@index([syncStatus])
   @@index([assignedToId, status]) // Composite: for rep's pipeline view
   @@index([temperature, leadScore]) // Composite: for hot leads dashboard
+  @@index([duplicateStatus])        // For finding leads pending review
+  @@index([lockedForReview])        // For finding locked leads
+  @@index([repCode])                // For tracking leads by rep code
 }
 
 // Delivery Records - Track actual delivered trailers
