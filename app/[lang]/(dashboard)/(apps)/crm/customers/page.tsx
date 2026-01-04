@@ -41,6 +41,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "@/components/ui/use-toast";
 import Link from "next/link";
 import { AddCustomerDialog } from "./add-customer-dialog";
+import { calculateResponseTimer, getBackgroundColorClass } from "@/lib/response-timer";
 
 interface Customer {
   id: string;
@@ -525,22 +526,44 @@ export default function CustomersPage() {
                             </div>
 
                             {/* Rep and Manager Assignments */}
-                            {(customer.salesRepName || customer.assignedToName) && (
-                              <div className="flex items-center gap-3 mt-3">
-                                {customer.salesRepName && (
-                                  <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-                                    <Users className="w-3 h-3 mr-1" />
-                                    Rep: {customer.salesRepName}
+                            <div className="flex items-center gap-3 mt-3 flex-wrap">
+                              {customer.salesRepName ? (
+                                <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                                  <Users className="w-3 h-3 mr-1" />
+                                  Rep: {customer.salesRepName}
+                                </Badge>
+                              ) : (
+                                <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+                                  <AlertCircle className="w-3 h-3 mr-1" />
+                                  No Rep Assigned
+                                </Badge>
+                              )}
+                              {customer.assignedToName && (
+                                <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
+                                  <Users className="w-3 h-3 mr-1" />
+                                  Manager: {customer.assignedToName}
+                                </Badge>
+                              )}
+                              {/* Response Timer Badge */}
+                              {(() => {
+                                const timer = calculateResponseTimer(
+                                  new Date(customer.createdAt),
+                                  customer.lastContactedAt ? new Date(customer.lastContactedAt) : null
+                                );
+                                return (
+                                  <Badge
+                                    variant="outline"
+                                    className={`${getBackgroundColorClass(timer.status)} ${timer.isPulsating ? 'animate-pulse' : ''}`}
+                                  >
+                                    <Clock className="w-3 h-3 mr-1" />
+                                    {timer.status === 'contacted'
+                                      ? timer.label
+                                      : `${timer.formattedTime} - ${timer.label}`
+                                    }
                                   </Badge>
-                                )}
-                                {customer.assignedToName && (
-                                  <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
-                                    <Users className="w-3 h-3 mr-1" />
-                                    Manager: {customer.assignedToName}
-                                  </Badge>
-                                )}
-                              </div>
-                            )}
+                                );
+                              })()}
+                            </div>
 
                             {/* Activity Summary */}
                             <div className="flex items-center gap-4 mt-3 text-xs text-muted-foreground">
