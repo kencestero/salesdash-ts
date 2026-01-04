@@ -8,18 +8,26 @@ function SidebarLogo({ hovered }: { hovered?: boolean; }) {
     <div className="px-4 py-4">
       <div className="flex items-center">
         <div className="flex flex-1 items-center gap-x-3">
-          <Image
-            src="/images/logo/remotive-r.png"
-            alt="Remotive"
-            width={36}
-            height={36}
-            priority
-            className="drop-shadow-[0_0_8px_rgba(233,97,20,0.5)]"
-          />
-          {(!collapsed || hovered) && (
-            <div className="flex-1 text-lg font-semibold">
-              <span className="text-[#E96614]">Remotive</span>
-            </div>
+          {collapsed && !hovered ? (
+            // Show just the R icon when collapsed
+            <Image
+              src="/images/logo/remotive-r.png"
+              alt="Remotive"
+              width={36}
+              height={36}
+              priority
+              className="drop-shadow-[0_0_8px_rgba(233,97,20,0.5)]"
+            />
+          ) : (
+            // Show full logo when expanded
+            <Image
+              src="/images/Remotivesaleshublogo.webp"
+              alt="Remotive SalesHub"
+              width={180}
+              height={40}
+              priority
+              className="drop-shadow-[0_0_8px_rgba(233,97,20,0.3)]"
+            />
           )}
         </div>
         {sidebarType === "classic" && (!collapsed || hovered) && (

@@ -15,6 +15,6 @@ export const siteConfig = {
   // sticky, floating, static
   footerType: "static",
   // sticky,  static, hidden
-  sidebarBg: "/images/mjsidebar.webp", // Default Remotive Logistics sidebar background
+  sidebarBg: "/images/Rsidebadbackground.webp", // Default Remotive Logistics sidebar background
   radius: 0.75,
 };

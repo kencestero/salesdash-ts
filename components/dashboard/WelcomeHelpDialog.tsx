@@ -130,26 +130,26 @@ export function WelcomeHelpDialog({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent
-        className="w-[90vw] max-w-[1100px] aspect-video max-h-[90vh] overflow-y-auto p-0 bg-[#131313] border-white/10"
+        className="w-[95vw] max-w-[1200px] p-0 bg-[#131313] border-white/10"
         style={{
           backgroundImage:
             'radial-gradient(circle at top, rgba(233, 97, 20, 0.15), transparent 50%)',
         }}
       >
-        <div className="px-10 py-8 h-full flex flex-col">
-          <DialogHeader className="mb-8">
+        <div className="px-8 py-6 md:px-12 md:py-8">
+          <DialogHeader className="mb-6 md:mb-8">
             <p className="text-sm font-bold uppercase tracking-widest text-orange-400">
               Remotive
             </p>
-            <DialogTitle className="text-3xl font-semibold text-white mt-2">
+            <DialogTitle className="text-2xl md:text-3xl font-semibold text-white mt-2">
               Dashboard Tools That Help You Sell More
             </DialogTitle>
-            <p className="mt-2 text-base text-gray-400">
+            <p className="mt-2 text-sm md:text-base text-gray-400">
               Everything you need in one place.
             </p>
           </DialogHeader>
 
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 flex-1">
+          <div className="grid grid-cols-2 gap-3 md:gap-5 lg:grid-cols-4">
             {benefits.map((item, index) => (
               <motion.div
                 key={item.title}
@@ -158,33 +158,33 @@ export function WelcomeHelpDialog({
                 transition={{ delay: index * 0.03 }}
                 className="
                   flex flex-col items-center text-center rounded-xl border border-white/10 bg-black/20
-                  p-5 transition-all hover:border-orange-500/60 hover:bg-orange-500/10
+                  p-4 md:p-5 transition-all hover:border-orange-500/60 hover:bg-orange-500/10
                 "
               >
-                <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-orange-500/30 mb-3">
-                  <Icon icon={item.icon} className="w-7 h-7 text-orange-400" />
+                <div className="flex h-12 w-12 md:h-14 md:w-14 items-center justify-center rounded-xl bg-orange-500/30 mb-2 md:mb-3">
+                  <Icon icon={item.icon} className="w-6 h-6 md:w-7 md:h-7 text-orange-400" />
                 </div>
-                <h3 className="text-sm font-semibold text-white leading-tight">{item.title}</h3>
-                <p className="text-xs text-gray-400 mt-2 leading-relaxed">{item.description}</p>
+                <h3 className="text-xs md:text-sm font-semibold text-white leading-tight">{item.title}</h3>
+                <p className="text-[10px] md:text-xs text-gray-400 mt-1 md:mt-2 leading-relaxed">{item.description}</p>
               </motion.div>
             ))}
           </div>
 
-          <footer className="mt-8 border-t border-white/10 pt-6">
+          <footer className="mt-6 md:mt-8 border-t border-white/10 pt-5 md:pt-6">
             <div className="flex items-center justify-between">
-              <label className="flex items-center gap-3 cursor-pointer">
+              <label className="flex items-center gap-2 md:gap-3 cursor-pointer">
                 <Checkbox
                   checked={dontShowAgain}
                   onCheckedChange={(checked) => setDontShowAgain(checked === true)}
-                  className="border-white/30 data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500 h-5 w-5"
+                  className="border-white/30 data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500 h-4 w-4 md:h-5 md:w-5"
                 />
-                <span className="text-sm text-gray-400">Don't show this again</span>
+                <span className="text-xs md:text-sm text-gray-400">Don't show this again</span>
               </label>
 
               <Button
                 onClick={handleClose}
                 size="lg"
-                className="bg-orange-500 hover:bg-orange-600 text-white px-8"
+                className="bg-orange-500 hover:bg-orange-600 text-white px-6 md:px-8"
               >
                 Got it!
               </Button>
