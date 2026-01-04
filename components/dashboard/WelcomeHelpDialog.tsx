@@ -17,45 +17,43 @@ const COOKIE_NAME = 'remotive_welcome_dismissed';
 const benefits = [
   {
     title: 'Live Trailer Inventory',
-    description:
-      'See live inventory, filter, share, price out, and download option lists for your leads.',
-    icon: '🚚',
+    description: 'Filter, share, price out, and download option lists.',
+    icon: 'heroicons:truck',
   },
   {
-    title: 'Customizable Finance Quotes',
-    description:
-      'Build clean finance quotes in seconds with multiple export and share options.',
-    icon: '💳',
+    title: 'Finance Quotes',
+    description: 'Build quotes in seconds with export options.',
+    icon: 'heroicons:credit-card',
   },
   {
-    title: 'Lease-to-Own Payments',
-    description:
-      'Generate clear lease-to-own payment structures with ease.',
-    icon: '📄',
+    title: 'Lease-to-Own',
+    description: 'Generate clear payment structures.',
+    icon: 'heroicons:document-text',
   },
   {
     title: '3-Option PDF',
-    description:
-      'Send a modern branded PDF with three payment options to help you close deals.',
-    icon: '📑',
+    description: 'Branded PDF with three payment options.',
+    icon: 'heroicons:document-duplicate',
   },
   {
-    title: 'Simple & Secure CRM',
-    description:
-      'Easy-to-use CRM with lead privacy for every rep.',
-    icon: '🧩',
+    title: 'Secure CRM',
+    description: 'Lead privacy for every rep.',
+    icon: 'heroicons:shield-check',
   },
   {
-    title: 'Click-to-Call & Email',
-    description:
-      'Call and email leads directly with a single tap in Remotive.',
-    icon: '📞',
+    title: 'Click-to-Call',
+    description: 'Call and email with a single tap.',
+    icon: 'heroicons:phone',
   },
   {
     title: 'Team Chat',
-    description:
-      'Chat with colleagues inside the built-in Chat section.',
-    icon: '💬',
+    description: 'Chat with colleagues inside the app.',
+    icon: 'heroicons:chat-bubble-left-right',
+  },
+  {
+    title: 'Response Timer',
+    description: 'Track lead response times live.',
+    icon: 'heroicons:clock',
   },
 ];
 
@@ -132,10 +130,10 @@ export function WelcomeHelpDialog({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent
-        className="max-w-2xl max-h-[90vh] overflow-y-auto p-0 bg-[#131313] border-white/10"
+        className="max-w-3xl max-h-[90vh] overflow-y-auto p-0 bg-[#131313] border-white/10"
         style={{
           backgroundImage:
-            'radial-gradient(circle at top, rgba(233, 97, 20, 0.18), transparent 60%), radial-gradient(circle at bottom, rgba(255, 140, 0, 0.18), transparent 60%)',
+            'radial-gradient(circle at top, rgba(233, 97, 20, 0.12), transparent 50%)',
         }}
       >
         <div className="px-6 py-5">
@@ -151,37 +149,28 @@ export function WelcomeHelpDialog({
             </p>
           </DialogHeader>
 
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
             {benefits.map((item, index) => (
               <motion.div
                 key={item.title}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.05 }}
+                transition={{ delay: index * 0.03 }}
                 className="
-                  flex gap-3 rounded-lg border border-white/10 bg-black/20
+                  flex flex-col items-center text-center rounded-lg border border-white/10 bg-black/20
                   p-3 transition-all hover:border-orange-500/60 hover:bg-orange-500/10
                 "
               >
-                <div className="flex h-9 w-9 items-center justify-center rounded-md bg-orange-500/30 text-lg shrink-0">
-                  {item.icon}
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-500/30 mb-2">
+                  <Icon icon={item.icon} className="w-5 h-5 text-orange-400" />
                 </div>
-
-                <div>
-                  <h3 className="text-sm font-semibold text-white">{item.title}</h3>
-                  <p className="text-xs text-gray-400">{item.description}</p>
-                </div>
+                <h3 className="text-xs font-semibold text-white leading-tight">{item.title}</h3>
+                <p className="text-[10px] text-gray-400 mt-1 leading-tight">{item.description}</p>
               </motion.div>
             ))}
           </div>
 
-          <footer className="mt-5 border-t border-white/10 pt-4">
-            <p className="text-xs text-gray-400 mb-4">
-              The Dashboard is still in development. If something is missing or needs attention,
-              let us know in the Help section.{' '}
-              <span className="font-semibold text-orange-400">Happy selling!</span>
-            </p>
-
+          <footer className="mt-4 border-t border-white/10 pt-4">
             <div className="flex items-center justify-between">
               <label className="flex items-center gap-2 cursor-pointer">
                 <Checkbox
