@@ -147,7 +147,6 @@ export default function CustomerProfilePage() {
     state: "",
     zipcode: "",
     companyName: "",
-    businessType: "",
     source: "",
     trailerSize: "",
     trailerType: "",
@@ -187,7 +186,6 @@ export default function CustomerProfilePage() {
         state: data.customer.state || "",
         zipcode: data.customer.zipcode || "",
         companyName: data.customer.companyName || "",
-        businessType: data.customer.businessType || "",
         source: data.customer.source || "",
         trailerSize: data.customer.trailerSize || "",
         trailerType: data.customer.trailerType || "",
@@ -275,7 +273,6 @@ export default function CustomerProfilePage() {
         state: customer.state || "",
         zipcode: customer.zipcode || "",
         companyName: customer.companyName || "",
-        businessType: customer.businessType || "",
         source: customer.source || "",
         trailerSize: customer.trailerSize || "",
         trailerType: customer.trailerType || "",
@@ -384,14 +381,23 @@ export default function CustomerProfilePage() {
     }
   };
 
-  const formatDate = (dateStr?: string) => {
+  const formatDate = (dateStr?: string, includeTime = false) => {
     if (!dateStr) return "Never";
     const date = new Date(dateStr);
-    return date.toLocaleDateString("en-US", {
+    const dateFormatted = date.toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
       year: "numeric",
     });
+    if (includeTime) {
+      const timeFormatted = date.toLocaleTimeString("en-US", {
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
+      });
+      return `${dateFormatted} at ${timeFormatted}`;
+    }
+    return dateFormatted;
   };
 
   const calculateLeadAge = () => {
@@ -403,8 +409,14 @@ export default function CustomerProfilePage() {
     const diffMins = Math.floor(diffMs / 60000);
     const diffHours = Math.floor(diffMs / 3600000);
     const diffDays = Math.floor(diffMs / 86400000);
+    const diffMonths = Math.floor(diffDays / 30);
+    const diffYears = Math.floor(diffDays / 365);
 
-    if (diffDays > 0) {
+    if (diffYears > 0) {
+      setLeadAge(`${diffYears} year${diffYears > 1 ? 's' : ''}`);
+    } else if (diffMonths > 0) {
+      setLeadAge(`${diffMonths} month${diffMonths > 1 ? 's' : ''}`);
+    } else if (diffDays > 0) {
       setLeadAge(`${diffDays} day${diffDays > 1 ? 's' : ''}`);
     } else if (diffHours > 0) {
       setLeadAge(`${diffHours} hour${diffHours > 1 ? 's' : ''}`);
@@ -666,8 +678,8 @@ export default function CustomerProfilePage() {
           <CardContent className="space-y-4">
             {/* Contact Information */}
             {isEditing ? (
-              <div className="space-y-4 p-4 bg-blue-50 rounded-lg border-2 border-blue-200">
-                <p className="text-sm font-semibold text-blue-900">Edit Mode Active</p>
+              <div className="space-y-4 p-4 bg-muted/50 dark:bg-muted/20 rounded-lg border-2 border-primary/30">
+                <p className="text-sm font-semibold text-primary">Edit Mode Active</p>
 
                 {/* Name Fields */}
                 <div className="grid grid-cols-2 gap-3">
@@ -763,26 +775,15 @@ export default function CustomerProfilePage() {
                   </div>
                 </div>
 
-                {/* Business Details */}
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <Label htmlFor="businessType">Business Type</Label>
-                    <Input
-                      id="businessType"
-                      value={editForm.businessType}
-                      onChange={(e) => setEditForm({...editForm, businessType: e.target.value})}
-                      placeholder="Individual"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="source">Source</Label>
-                    <Input
-                      id="source"
-                      value={editForm.source}
-                      onChange={(e) => setEditForm({...editForm, source: e.target.value})}
-                      placeholder="referral"
-                    />
-                  </div>
+                {/* Lead Source */}
+                <div>
+                  <Label htmlFor="source">Source</Label>
+                  <Input
+                    id="source"
+                    value={editForm.source}
+                    onChange={(e) => setEditForm({...editForm, source: e.target.value})}
+                    placeholder="Website, Referral, etc."
+                  />
                 </div>
 
                 {/* Trailer Details */}
@@ -879,13 +880,6 @@ export default function CustomerProfilePage() {
 
             <div className="border-t pt-4 space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Business Type</span>
-                <span className="text-sm font-medium">
-                  {customer.businessType || "Individual"}
-                </span>
-              </div>
-
-              <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">Source</span>
                 <span className="text-sm font-medium">
                   {customer.source || "Unknown"}
@@ -895,7 +889,7 @@ export default function CustomerProfilePage() {
               {customer.salesRepName && (
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">Sales Rep</span>
-                  <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                  <Badge variant="outline" className="bg-blue-500/20 text-blue-600 dark:text-blue-400 border-blue-500/30">
                     {customer.salesRepName}
                   </Badge>
                 </div>
@@ -904,7 +898,7 @@ export default function CustomerProfilePage() {
               {customer.assignedToName && (
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">Manager</span>
-                  <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
+                  <Badge variant="outline" className="bg-purple-500/20 text-purple-600 dark:text-purple-400 border-purple-500/30">
                     {customer.assignedToName}
                   </Badge>
                 </div>
@@ -934,7 +928,7 @@ export default function CustomerProfilePage() {
               {customer.isFactoryOrder && (
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">Order Type</span>
-                  <Badge variant="outline" className="bg-purple-50 text-purple-700">
+                  <Badge variant="outline" className="bg-purple-500/20 text-purple-600 dark:text-purple-400 border-purple-500/30">
                     Factory Order
                   </Badge>
                 </div>
@@ -956,22 +950,20 @@ export default function CustomerProfilePage() {
 
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">Created</span>
-                <span className="text-sm font-medium">
-                  {formatDate(customer.createdAt)}
-                </span>
-              </div>
-
-              {leadAge && (
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Lead Age</span>
-                  <span className="text-sm font-medium">{leadAge} old</span>
+                <div className="text-right">
+                  <span className="text-sm font-medium block">
+                    {formatDate(customer.createdAt, true)}
+                  </span>
+                  {leadAge && (
+                    <span className="text-xs text-muted-foreground">({leadAge} ago)</span>
+                  )}
                 </div>
-              )}
+              </div>
 
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">Last Contacted</span>
                 <span className="text-sm font-medium">
-                  {formatDate(customer.lastContactedAt)}
+                  {formatDate(customer.lastContactedAt, true)}
                 </span>
               </div>
             </div>
