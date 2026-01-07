@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,6 +21,9 @@ export type RTOMatrixProps = {
   }) => void;
   onSaveQuote?: () => void;
   onCopySMS?: () => void;
+  // Callbacks to expose internal state to parent
+  onDownPaymentsChange?: (downPayments: number[]) => void;
+  onVisibleTermsChange?: (visibleTerms: number[]) => void;
 };
 
 const DEFAULT_DOWN_PAYMENTS = [0, 1000, 2500, 5000];
@@ -35,6 +38,8 @@ export function RTOMatrix({
   onSelectPayment,
   onSaveQuote,
   onCopySMS,
+  onDownPaymentsChange,
+  onVisibleTermsChange,
 }: RTOMatrixProps) {
   // Editable down payments (start with defaults)
   const [downPayments, setDownPayments] = useState<number[]>(downPaymentOptions);
@@ -50,6 +55,17 @@ export function RTOMatrix({
     36: true,
     48: true,
   });
+
+  // Notify parent when down payments change
+  useEffect(() => {
+    onDownPaymentsChange?.(downPayments);
+  }, [downPayments, onDownPaymentsChange]);
+
+  // Notify parent when visible terms change
+  useEffect(() => {
+    const activeTerms = RTO_TERMS.filter(term => visibleTerms[term]);
+    onVisibleTermsChange?.(activeTerms);
+  }, [visibleTerms, onVisibleTermsChange]);
 
   // Toggle term visibility
   const toggleTerm = (term: number) => {

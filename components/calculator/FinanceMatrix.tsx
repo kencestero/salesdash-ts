@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Plus, X } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
@@ -27,6 +27,9 @@ export type FinanceMatrixProps = {
   }) => void;
   onSaveQuote?: () => void;
   onCopySMS?: () => void;
+  // Callbacks to expose internal state to parent
+  onDownPaymentsChange?: (downPayments: number[]) => void;
+  onVisibleTermsChange?: (visibleTerms: number[]) => void;
 };
 
 const DEFAULT_DOWN_PAYMENTS = [0, 1000, 2000, 3000];
@@ -41,6 +44,8 @@ export function FinanceMatrix({
   onSelectPayment,
   onSaveQuote,
   onCopySMS,
+  onDownPaymentsChange,
+  onVisibleTermsChange,
 }: FinanceMatrixProps) {
   // Editable down payments (start with defaults)
   const [downPayments, setDownPayments] = useState<number[]>(downPaymentOptions);
@@ -71,6 +76,17 @@ export function FinanceMatrix({
     const terms = [...DEFAULT_TERMS, ...customTerms].sort((a, b) => a - b);
     return Array.from(new Set(terms)); // Remove duplicates
   }, [customTerms]);
+
+  // Notify parent when down payments change
+  useEffect(() => {
+    onDownPaymentsChange?.(downPayments);
+  }, [downPayments, onDownPaymentsChange]);
+
+  // Notify parent when visible terms change
+  useEffect(() => {
+    const activeTerms = allTerms.filter(term => visibleTerms[term]);
+    onVisibleTermsChange?.(activeTerms);
+  }, [visibleTerms, allTerms, onVisibleTermsChange]);
 
   // Toggle term visibility
   const toggleTerm = (term: number) => {

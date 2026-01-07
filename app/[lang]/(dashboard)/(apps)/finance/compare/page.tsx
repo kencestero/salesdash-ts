@@ -82,12 +82,17 @@ export default function FinanceComparePage() {
   const [includeRTO, setIncludeRTO] = useState(true);
   const [includeCash, setIncludeCash] = useState(true);
 
-  // Finance terms (which rows to include)
-  const [financeTerms] = useState([24, 36, 48, 60]);
-  const [rtoTerms] = useState([24, 36, 48]);
+  // Default values for initial render
+  const DEFAULT_FINANCE_DOWN_PAYMENTS = [0, 1000, 2000, 3000];
+  const DEFAULT_RTO_DOWN_PAYMENTS = [0, 1000, 2500, 5000];
+  const DEFAULT_FINANCE_TERMS = [24, 36, 48, 60];
+  const DEFAULT_RTO_TERMS = [24, 36, 48];
 
-  // Down payment options (configurable)
-  const downPaymentOptions = [0, 1000, 2000, 3000];
+  // State from child matrix components (tracked via callbacks)
+  const [financeDownPayments, setFinanceDownPayments] = useState<number[]>(DEFAULT_FINANCE_DOWN_PAYMENTS);
+  const [financeVisibleTerms, setFinanceVisibleTerms] = useState<number[]>(DEFAULT_FINANCE_TERMS);
+  const [rtoDownPayments, setRtoDownPayments] = useState<number[]>(DEFAULT_RTO_DOWN_PAYMENTS);
+  const [rtoVisibleTerms, setRtoVisibleTerms] = useState<number[]>(DEFAULT_RTO_TERMS);
 
   // Zipcode to tax rate mapping
   const getTaxRateFromZip = (zip: string): number => {
@@ -200,12 +205,12 @@ export default function FinanceComparePage() {
       : "Cargo Trailer";
   };
 
-  // Calculate all finance payments for export
+  // Calculate all finance payments for export (uses dynamic values from child component)
   const calculateFinanceMatrix = useMemo(() => {
     const payments: Record<number, Record<number, number>> = {};
-    financeTerms.forEach(term => {
+    financeVisibleTerms.forEach(term => {
       payments[term] = {};
-      downPaymentOptions.forEach(down => {
+      financeDownPayments.forEach(down => {
         const result = calculateFinance({
           price,
           down,
@@ -217,15 +222,15 @@ export default function FinanceComparePage() {
         payments[term][down] = result.monthlyPayment;
       });
     });
-    return { terms: financeTerms, downPayments: downPaymentOptions, payments, apr };
-  }, [price, taxPct, fees, apr, financeTerms, downPaymentOptions]);
+    return { terms: financeVisibleTerms, downPayments: financeDownPayments, payments, apr };
+  }, [price, taxPct, fees, apr, financeVisibleTerms, financeDownPayments]);
 
-  // Calculate all RTO payments for export
+  // Calculate all RTO payments for export (uses dynamic values from child component)
   const calculateRTOMatrix = useMemo(() => {
     const payments: Record<number, Record<number, number>> = {};
-    rtoTerms.forEach(term => {
+    rtoVisibleTerms.forEach(term => {
       payments[term] = {};
-      downPaymentOptions.forEach(down => {
+      rtoDownPayments.forEach(down => {
         const result = calculateRTO({
           price,
           down,
@@ -235,8 +240,8 @@ export default function FinanceComparePage() {
         payments[term][down] = result.monthlyTotal;
       });
     });
-    return { terms: rtoTerms, downPayments: downPaymentOptions, payments };
-  }, [price, taxPct, rtoTerms, downPaymentOptions]);
+    return { terms: rtoVisibleTerms, downPayments: rtoDownPayments, payments };
+  }, [price, taxPct, rtoVisibleTerms, rtoDownPayments]);
 
   // Calculate cash data for export
   const cashData = useMemo(() => {
@@ -360,35 +365,39 @@ export default function FinanceComparePage() {
     window.print();
   };
 
-  // Copy all scenarios as text
+  // Copy all scenarios as text (uses dynamic values from child components)
   const handleCopyAllText = async () => {
     let allText = `REMOTIVE LOGISTICS - Finance Quote\n`;
     allText += `Customer: ${customerName}\n`;
     allText += `Unit: ${getUnitDescription()} - $${price.toLocaleString()}\n`;
     allText += `Date: ${new Date().toLocaleDateString()}\n\n`;
 
-    if (includeFinance) {
+    if (includeFinance && financeVisibleTerms.length > 0) {
       allText += `=== FINANCE OPTIONS (${apr}% APR) ===\n`;
-      financeTerms.forEach(term => {
+      financeVisibleTerms.forEach(term => {
         allText += `${term} months: `;
-        downPaymentOptions.forEach((down, i) => {
-          const payment = calculateFinanceMatrix.payments[term][down];
-          allText += `$${down} down = $${payment.toFixed(2)}/mo`;
-          if (i < downPaymentOptions.length - 1) allText += ` | `;
+        financeDownPayments.forEach((down, i) => {
+          const payment = calculateFinanceMatrix.payments[term]?.[down];
+          if (payment !== undefined) {
+            allText += `$${down.toLocaleString()} down = $${payment.toFixed(2)}/mo`;
+            if (i < financeDownPayments.length - 1) allText += ` | `;
+          }
         });
         allText += `\n`;
       });
       allText += `\n`;
     }
 
-    if (includeRTO) {
+    if (includeRTO && rtoVisibleTerms.length > 0) {
       allText += `=== RENT-TO-OWN OPTIONS ===\n`;
-      rtoTerms.forEach(term => {
+      rtoVisibleTerms.forEach(term => {
         allText += `${term} months: `;
-        downPaymentOptions.forEach((down, i) => {
-          const payment = calculateRTOMatrix.payments[term][down];
-          allText += `$${down} down = $${payment.toFixed(2)}/mo`;
-          if (i < downPaymentOptions.length - 1) allText += ` | `;
+        rtoDownPayments.forEach((down, i) => {
+          const payment = calculateRTOMatrix.payments[term]?.[down];
+          if (payment !== undefined) {
+            allText += `$${down.toLocaleString()} down = $${payment.toFixed(2)}/mo`;
+            if (i < rtoDownPayments.length - 1) allText += ` | `;
+          }
         });
         allText += `\n`;
       });
@@ -449,8 +458,8 @@ export default function FinanceComparePage() {
       taxPercent: taxPct,
       fees,
       apr,
-      downPayments: downPaymentOptions,
-      terms: financeTerms,
+      downPayments: financeDownPayments,
+      terms: financeVisibleTerms,
       payments: calculateFinanceMatrix.payments,
     });
 
@@ -476,8 +485,8 @@ export default function FinanceComparePage() {
       unitPrice: price,
       taxPercent: taxPct,
       fees,
-      downPayments: downPaymentOptions,
-      terms: rtoTerms,
+      downPayments: rtoDownPayments,
+      terms: rtoVisibleTerms,
       payments: calculateRTOMatrix.payments,
     });
 
@@ -752,8 +761,10 @@ export default function FinanceComparePage() {
               taxPct={taxPct}
               fees={fees}
               apr={apr}
-              downPaymentOptions={downPaymentOptions}
+              downPaymentOptions={DEFAULT_FINANCE_DOWN_PAYMENTS}
               onCopySMS={handleCopyFinanceSMS}
+              onDownPaymentsChange={setFinanceDownPayments}
+              onVisibleTermsChange={setFinanceVisibleTerms}
             />
           </CardContent>
         </Card>
@@ -764,8 +775,10 @@ export default function FinanceComparePage() {
             <RTOMatrix
               price={price}
               taxPct={taxPct}
-              downPaymentOptions={downPaymentOptions}
+              downPaymentOptions={DEFAULT_RTO_DOWN_PAYMENTS}
               onCopySMS={handleCopyRTOSMS}
+              onDownPaymentsChange={setRtoDownPayments}
+              onVisibleTermsChange={setRtoVisibleTerms}
             />
           </CardContent>
         </Card>
