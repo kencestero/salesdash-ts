@@ -1143,6 +1143,17 @@ export default function CustomerProfilePage() {
               Create Quote
             </Button>
             <Button
+              className="w-full justify-start bg-primary/10 hover:bg-primary/20 border-primary/30"
+              variant="outline"
+              onClick={() => {
+                // Open Finance Calculator in a new tab with customer ID
+                window.open(`/en/finance/compare?customerId=${customer.id}`, '_blank');
+              }}
+            >
+              <DollarSign className="w-4 h-4 mr-2 text-primary" />
+              Run Finance Numbers
+            </Button>
+            <Button
               className="w-full justify-start"
               variant="outline"
               onClick={() => router.push("/en/credit-applications")}

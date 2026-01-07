@@ -353,22 +353,12 @@ export function FinanceMatrix({
         Uncheck terms to hide. Add custom terms 1-140 months. Click any payment to save as quote.
       </p>
 
-      {/* Action Buttons */}
-      {(onSaveQuote || onCopySMS) && (
-        <div className="mt-6 flex gap-3">
-          {onSaveQuote && (
-            <Button
-              onClick={onSaveQuote}
-              className="flex-1 bg-green-600 hover:bg-green-700 text-white"
-            >
-              ✅ Click to add Finance scenario to Quote to share
-            </Button>
-          )}
-          {onCopySMS && (
-            <Button variant="outline" onClick={onCopySMS} className="flex-1">
-              📋 Copy SMS Text
-            </Button>
-          )}
+      {/* SMS Copy Button */}
+      {onCopySMS && (
+        <div className="mt-6">
+          <Button variant="outline" onClick={onCopySMS} className="w-full sm:w-auto">
+            📋 Copy Finance Options as SMS Text
+          </Button>
         </div>
       )}
     </div>

@@ -104,20 +104,14 @@ export function CashSummary({
           </div>
         </div>
 
-        {/* Action buttons */}
-        <div className="mt-6 flex gap-3">
-          <Button
-            onClick={() => onSaveQuote?.({ totalCash: cashData.totalCash, mode: "CASH" })}
-            className="flex-1 bg-green-600 hover:bg-green-700 text-white"
-          >
-            ✅ Click to add Cash scenario to Quote to share
-          </Button>
-          {onShare && (
-            <Button variant="outline" onClick={onShare} className="flex-1">
-              📋 Copy SMS Text
+        {/* SMS Copy Button */}
+        {onShare && (
+          <div className="mt-6">
+            <Button variant="outline" onClick={onShare} className="w-full sm:w-auto">
+              📋 Copy Cash Quote as SMS Text
             </Button>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       {/* Info card */}

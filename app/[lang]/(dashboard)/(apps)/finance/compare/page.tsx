@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { DollarSign, User, Phone, Mail } from "lucide-react";
-import Image from "next/image";
+import { useSearchParams } from "next/navigation";
+import { DollarSign, User, FileDown, Printer, Copy, Image as ImageIcon } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -18,12 +19,12 @@ import { RTOMatrix } from "@/components/calculator/RTOMatrix";
 import { CashSummary } from "@/components/calculator/CashSummary";
 import { toast } from "@/components/ui/use-toast";
 import { useSession } from "next-auth/react";
-import { generateQuote, type SelectedPaymentOption, type ExportFormat } from "@/lib/finance/pdf-generator-v2";
+import { generateQuoteV2, type QuoteDataV2, type ExportFormat } from "@/lib/finance/pdf-generator-v2";
 import { Button } from "@/components/ui/button";
-import { FileDown, Check } from "lucide-react";
 import { generateCashSnippet, generateFinanceSnippet, generateRTOSnippet, copyToClipboard } from "@/lib/finance/sms-snippets";
 import { calculateFinance } from "@/lib/finance/finance-calc";
 import { calculateRTO } from "@/lib/finance/rto-calc";
+import { calculateCash } from "@/lib/finance/cash-calc";
 import { getLocationByZip } from "@/lib/data/zip-tax-map";
 
 // Dynamic build info
@@ -40,8 +41,21 @@ interface Trailer {
   status: string;
 }
 
+interface Customer {
+  id: string;
+  firstName: string;
+  lastName: string;
+  phone: string;
+  email: string;
+  zipcode?: string;
+}
+
 export default function FinanceComparePage() {
   const { data: session } = useSession();
+  const searchParams = useSearchParams();
+
+  // CRM Integration: Get customerId from URL params
+  const customerId = searchParams.get("customerId");
 
   // Trailers from database
   const [trailers, setTrailers] = useState<Trailer[]>([]);
@@ -51,6 +65,8 @@ export default function FinanceComparePage() {
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
+  const [loadedFromCRM, setLoadedFromCRM] = useState(false);
+  const [crmCustomerId, setCrmCustomerId] = useState<string | null>(null);
 
   // Input states
   const [selectedUnit, setSelectedUnit] = useState("");
@@ -60,11 +76,55 @@ export default function FinanceComparePage() {
   const [fees, setFees] = useState(125);
   const [apr, setApr] = useState(8.99);
 
-  // Zipcode to tax rate mapping (centralized in lib/data/zip-tax-map.ts)
+  // Export options
+  const [showAPRInPDF, setShowAPRInPDF] = useState(true);
+  const [includeFinance, setIncludeFinance] = useState(true);
+  const [includeRTO, setIncludeRTO] = useState(true);
+  const [includeCash, setIncludeCash] = useState(true);
+
+  // Finance terms (which rows to include)
+  const [financeTerms] = useState([24, 36, 48, 60]);
+  const [rtoTerms] = useState([24, 36, 48]);
+
+  // Down payment options (configurable)
+  const downPaymentOptions = [0, 1000, 2000, 3000];
+
+  // Zipcode to tax rate mapping
   const getTaxRateFromZip = (zip: string): number => {
     const location = getLocationByZip(zip);
     return location.taxRate;
   };
+
+  // Fetch customer data if customerId is provided
+  useEffect(() => {
+    const fetchCustomer = async () => {
+      if (!customerId) return;
+
+      try {
+        const res = await fetch(`/api/crm/customers/${customerId}`);
+        if (res.ok) {
+          const customer: Customer = await res.json();
+          setCustomerName(`${customer.firstName} ${customer.lastName}`.trim());
+          setCustomerPhone(customer.phone || "");
+          setCustomerEmail(customer.email || "");
+          if (customer.zipcode) {
+            setZipcode(customer.zipcode);
+            const newTaxRate = getTaxRateFromZip(customer.zipcode);
+            setTaxPct(newTaxRate);
+          }
+          setLoadedFromCRM(true);
+          setCrmCustomerId(customerId);
+          toast({
+            title: "Customer Loaded",
+            description: `Loaded ${customer.firstName} ${customer.lastName} from CRM`,
+          });
+        }
+      } catch (error) {
+        console.error("Failed to fetch customer:", error);
+      }
+    };
+    fetchCustomer();
+  }, [customerId]);
 
   // Fetch trailers on mount
   useEffect(() => {
@@ -124,215 +184,10 @@ export default function FinanceComparePage() {
     if (value.length === 5) {
       const newTaxRate = getTaxRateFromZip(value);
       setTaxPct(newTaxRate);
-      if (newTaxRate !== taxPct) {
-        toast({
-          title: "Tax Rate Updated",
-          description: `Tax rate set to ${newTaxRate}% based on ZIP code`,
-          variant: "default",
-        });
-      }
-    }
-  };
-
-  // Down payment options (configurable)
-  const downPaymentOptions = [0, 1000, 2000, 3000];
-
-  // Selected payment options for PDF
-  const [selectedOptions, setSelectedOptions] = useState<SelectedPaymentOption[]>([]);
-
-  // Export format selector
-  const [exportFormat, setExportFormat] = useState<ExportFormat>("pdf");
-
-  // Handle payment selection
-  const handleSelectPayment = (payment: {
-    down: number;
-    term: number;
-    monthly: number;
-    mode: "FINANCE" | "RTO" | "CASH";
-  }) => {
-    // Check if already selected
-    const existingIndex = selectedOptions.findIndex(
-      (opt) =>
-        opt.mode === payment.mode &&
-        opt.down === payment.down &&
-        opt.term === payment.term
-    );
-
-    if (existingIndex >= 0) {
-      // Remove if already selected
-      setSelectedOptions((prev) => prev.filter((_, i) => i !== existingIndex));
       toast({
-        title: "Option Removed",
-        description: `${payment.mode} option deselected`,
+        title: "Tax Rate Updated",
+        description: `Tax rate set to ${newTaxRate}% based on ZIP code`,
         variant: "default",
-      });
-    } else if (selectedOptions.length < 3) {
-      // Add if less than 3 selected
-      const newOption: SelectedPaymentOption = {
-        mode: payment.mode,
-        label: `${payment.mode} - ${payment.term} months`,
-        amount: payment.monthly,
-        term: payment.term,
-        down: payment.down,
-        details: payment.mode === "FINANCE" ? `APR ${apr.toFixed(2)}%` : undefined,
-      };
-      setSelectedOptions((prev) => [...prev, newOption]);
-      toast({
-        title: "Option Added",
-        description: `${payment.mode}: $${payment.monthly.toFixed(2)}/mo added to quote`,
-        variant: "default",
-      });
-    } else {
-      toast({
-        title: "Maximum Reached",
-        description: "You can select up to 3 payment options",
-        variant: "destructive",
-      });
-    }
-  };
-
-  // Handle finance quote save - adds best option (lowest down, longest term)
-  const handleSaveFinanceQuote = () => {
-    // Find best finance option (60 months, lowest down payment)
-    const bestTerm = 60; // Most popular term
-    const bestDown = downPaymentOptions[0]; // Lowest down payment
-    const result = calculateFinance({
-      price,
-      down: bestDown,
-      taxPct,
-      fees,
-      aprPercent: apr,
-      termMonths: bestTerm,
-    });
-
-    const payment = {
-      down: bestDown,
-      term: bestTerm,
-      monthly: result.monthlyPayment,
-      mode: "FINANCE" as const,
-    };
-
-    handleSelectPayment(payment);
-  };
-
-  // Handle RTO quote save - adds best option (lowest down, longest term)
-  const handleSaveRTOQuote = () => {
-    // Find best RTO option (48 months, lowest down payment)
-    const bestTerm = 48; // Most popular RTO term
-    const bestDown = downPaymentOptions[0]; // Lowest down payment
-    const result = calculateRTO({
-      price,
-      down: bestDown,
-      taxPct,
-      termMonths: bestTerm,
-    });
-
-    const payment = {
-      down: bestDown,
-      term: bestTerm,
-      monthly: result.monthlyTotal,
-      mode: "RTO" as const,
-    };
-
-    handleSelectPayment(payment);
-  };
-
-  // Handle cash quote save
-  const handleSaveCashQuote = (quote: { totalCash: number; mode: "CASH" }) => {
-    const existingIndex = selectedOptions.findIndex((opt) => opt.mode === "CASH");
-
-    if (existingIndex >= 0) {
-      // Remove cash option if already selected
-      setSelectedOptions((prev) => prev.filter((_, i) => i !== existingIndex));
-      toast({
-        title: "Cash Option Removed",
-        variant: "default",
-      });
-    } else if (selectedOptions.length < 3) {
-      // Add cash option
-      const newOption: SelectedPaymentOption = {
-        mode: "CASH",
-        label: "Cash Payment",
-        amount: quote.totalCash,
-        details: "Pay in full - No monthly payments",
-      };
-      setSelectedOptions((prev) => [...prev, newOption]);
-      toast({
-        title: "Cash Option Added",
-        description: `Total: $${quote.totalCash.toFixed(2)}`,
-        variant: "default",
-      });
-    } else {
-      toast({
-        title: "Maximum Reached",
-        description: "You can select up to 3 payment options",
-        variant: "destructive",
-      });
-    }
-  };
-
-  // Generate Quote (PDF/JPEG/PNG)
-  const handleGeneratePDF = async () => {
-    if (!customerName.trim()) {
-      toast({
-        title: "Customer Name Required",
-        description: "Please enter customer name before generating quote",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (selectedOptions.length === 0) {
-      toast({
-        title: "No Options Selected",
-        description: "Please select at least one payment option",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const repId =
-      session?.user?.role && ["REP", "SMA", "DIR", "VIP"].includes(session.user.role)
-        ? `${session.user.role}#${session.user.id?.slice(0, 6).toUpperCase()}`
-        : session?.user?.name || session?.user?.email || "Remotive Logistics Rep";
-
-    // Get selected trailer details for quote
-    const selectedTrailer = trailers.find(t => t.id === selectedUnit);
-    const unitDescription = selectedTrailer
-      ? `${selectedTrailer.year} ${selectedTrailer.manufacturer} ${selectedTrailer.model} (${selectedTrailer.stockNumber})`
-      : "Cargo Trailer";
-
-    try {
-      await generateQuote({
-        customerName,
-        customerPhone,
-        customerEmail,
-        repId,
-        repName: session?.user?.name || "Remotive Logistics Rep",
-        repEmail: session?.user?.email || "",
-        unitDescription,
-        unitPrice: price,
-        taxPercent: taxPct,
-        fees,
-        selectedOptions,
-        quoteDate: new Date().toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "2-digit",
-          day: "2-digit",
-        }),
-      }, exportFormat);
-
-      toast({
-        title: `${exportFormat.toUpperCase()} Generated!`,
-        description: `Quote for ${customerName} has been downloaded`,
-        variant: "default",
-      });
-    } catch (error) {
-      console.error("Error generating quote:", error);
-      toast({
-        title: "Generation Failed",
-        description: "There was an error generating the quote. Please try again.",
-        variant: "destructive",
       });
     }
   };
@@ -343,6 +198,222 @@ export default function FinanceComparePage() {
     return selectedTrailer
       ? `${selectedTrailer.year} ${selectedTrailer.manufacturer} ${selectedTrailer.model}`
       : "Cargo Trailer";
+  };
+
+  // Calculate all finance payments for export
+  const calculateFinanceMatrix = useMemo(() => {
+    const payments: Record<number, Record<number, number>> = {};
+    financeTerms.forEach(term => {
+      payments[term] = {};
+      downPaymentOptions.forEach(down => {
+        const result = calculateFinance({
+          price,
+          down,
+          taxPct,
+          fees,
+          aprPercent: apr,
+          termMonths: term
+        });
+        payments[term][down] = result.monthlyPayment;
+      });
+    });
+    return { terms: financeTerms, downPayments: downPaymentOptions, payments, apr };
+  }, [price, taxPct, fees, apr, financeTerms, downPaymentOptions]);
+
+  // Calculate all RTO payments for export
+  const calculateRTOMatrix = useMemo(() => {
+    const payments: Record<number, Record<number, number>> = {};
+    rtoTerms.forEach(term => {
+      payments[term] = {};
+      downPaymentOptions.forEach(down => {
+        const result = calculateRTO({
+          price,
+          down,
+          taxPct,
+          termMonths: term
+        });
+        payments[term][down] = result.monthlyTotal;
+      });
+    });
+    return { terms: rtoTerms, downPayments: downPaymentOptions, payments };
+  }, [price, taxPct, rtoTerms, downPaymentOptions]);
+
+  // Calculate cash data for export
+  const cashData = useMemo(() => {
+    const result = calculateCash({ price, taxPct, fees });
+    return {
+      basePrice: result.basePrice,
+      fees: result.fees,
+      taxes: result.taxes,
+      totalCash: result.totalCash,
+    };
+  }, [price, taxPct, fees]);
+
+  // Save quote to CRM activity timeline
+  const saveQuoteToActivity = async () => {
+    if (!crmCustomerId) return;
+
+    try {
+      // Create a summary of the quote
+      const financeExample = calculateFinanceMatrix.payments[60]?.[0];
+      const rtoExample = calculateRTOMatrix.payments[48]?.[0];
+
+      let description = `Quote for $${price.toLocaleString()} ${getUnitDescription()}`;
+      if (includeFinance && financeExample) {
+        description += ` - Finance: $${financeExample.toFixed(2)}/mo (60mo)`;
+      }
+      if (includeRTO && rtoExample) {
+        description += ` - RTO: $${rtoExample.toFixed(2)}/mo (48mo)`;
+      }
+      if (includeCash) {
+        description += ` - Cash: $${cashData.totalCash.toFixed(2)}`;
+      }
+
+      await fetch('/api/crm/activities', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customerId: crmCustomerId,
+          type: 'quote',
+          subject: 'Finance Quote Generated',
+          description,
+        }),
+      });
+
+      toast({
+        title: "Quote Saved to Timeline",
+        description: "Quote activity has been logged in the customer's timeline",
+      });
+    } catch (error) {
+      console.error("Failed to save quote to activity:", error);
+    }
+  };
+
+  // Generate Quote with full matrices
+  const handleExportQuote = async (format: ExportFormat) => {
+    if (!customerName.trim()) {
+      toast({
+        title: "Customer Name Required",
+        description: "Please enter customer name before generating quote",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const repId =
+      session?.user?.role && ["REP", "SMA", "DIR", "VIP"].includes(session.user.role)
+        ? `${session.user.role}#${session.user.id?.slice(0, 6).toUpperCase()}`
+        : session?.user?.name || session?.user?.email || "Remotive Logistics Rep";
+
+    const selectedTrailer = trailers.find(t => t.id === selectedUnit);
+    const unitDescription = selectedTrailer
+      ? `${selectedTrailer.year} ${selectedTrailer.manufacturer} ${selectedTrailer.model} (${selectedTrailer.stockNumber})`
+      : "Cargo Trailer";
+
+    const quoteData: QuoteDataV2 = {
+      customerName,
+      customerPhone,
+      customerEmail,
+      repId,
+      repName: session?.user?.name || "Remotive Logistics Rep",
+      repEmail: session?.user?.email || "",
+      unitDescription,
+      unitPrice: price,
+      taxPercent: taxPct,
+      fees,
+      financeMatrix: includeFinance ? calculateFinanceMatrix : undefined,
+      rtoMatrix: includeRTO ? calculateRTOMatrix : undefined,
+      cashData: includeCash ? cashData : undefined,
+      showAPR: showAPRInPDF,
+      quoteDate: new Date().toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      }),
+    };
+
+    try {
+      await generateQuoteV2(quoteData, format);
+
+      toast({
+        title: `${format.toUpperCase()} Generated!`,
+        description: `Quote for ${customerName} has been downloaded`,
+        variant: "default",
+      });
+
+      // Save to CRM activity if customer was loaded from CRM
+      if (crmCustomerId) {
+        await saveQuoteToActivity();
+      }
+    } catch (error) {
+      console.error("Error generating quote:", error);
+      toast({
+        title: "Generation Failed",
+        description: "There was an error generating the quote. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Print handler
+  const handlePrint = () => {
+    window.print();
+  };
+
+  // Copy all scenarios as text
+  const handleCopyAllText = async () => {
+    let allText = `REMOTIVE LOGISTICS - Finance Quote\n`;
+    allText += `Customer: ${customerName}\n`;
+    allText += `Unit: ${getUnitDescription()} - $${price.toLocaleString()}\n`;
+    allText += `Date: ${new Date().toLocaleDateString()}\n\n`;
+
+    if (includeFinance) {
+      allText += `=== FINANCE OPTIONS (${apr}% APR) ===\n`;
+      financeTerms.forEach(term => {
+        allText += `${term} months: `;
+        downPaymentOptions.forEach((down, i) => {
+          const payment = calculateFinanceMatrix.payments[term][down];
+          allText += `$${down} down = $${payment.toFixed(2)}/mo`;
+          if (i < downPaymentOptions.length - 1) allText += ` | `;
+        });
+        allText += `\n`;
+      });
+      allText += `\n`;
+    }
+
+    if (includeRTO) {
+      allText += `=== RENT-TO-OWN OPTIONS ===\n`;
+      rtoTerms.forEach(term => {
+        allText += `${term} months: `;
+        downPaymentOptions.forEach((down, i) => {
+          const payment = calculateRTOMatrix.payments[term][down];
+          allText += `$${down} down = $${payment.toFixed(2)}/mo`;
+          if (i < downPaymentOptions.length - 1) allText += ` | `;
+        });
+        allText += `\n`;
+      });
+      allText += `\n`;
+    }
+
+    if (includeCash) {
+      allText += `=== CASH PURCHASE ===\n`;
+      allText += `Total: $${cashData.totalCash.toFixed(2)}\n`;
+      allText += `(Price: $${cashData.basePrice.toLocaleString()} + Tax: $${cashData.taxes.toFixed(2)} + Fees: $${cashData.fees})\n`;
+    }
+
+    const success = await copyToClipboard(allText);
+    if (success) {
+      toast({
+        title: "Copied to Clipboard",
+        description: "All payment options copied as text",
+      });
+    } else {
+      toast({
+        title: "Copy Failed",
+        description: "Please try again",
+        variant: "destructive",
+      });
+    }
   };
 
   // SMS Copy Handlers
@@ -358,12 +429,12 @@ export default function FinanceComparePage() {
     const success = await copyToClipboard(snippet);
     if (success) {
       toast({
-        title: "✅ Copied to clipboard!",
+        title: "Copied to clipboard!",
         description: "Cash deal SMS text ready to send",
       });
     } else {
       toast({
-        title: "❌ Copy failed",
+        title: "Copy failed",
         description: "Please try again",
         variant: "destructive",
       });
@@ -371,25 +442,6 @@ export default function FinanceComparePage() {
   };
 
   const handleCopyFinanceSMS = async () => {
-    // Calculate all finance payments for the matrix
-    const terms = [24, 36, 48, 60];
-    const payments: Record<number, Record<number, number>> = {};
-
-    terms.forEach(term => {
-      payments[term] = {};
-      downPaymentOptions.forEach(down => {
-        const result = calculateFinance({
-          price,
-          down,
-          taxPct,
-          fees,
-          aprPercent: apr,
-          termMonths: term
-        });
-        payments[term][down] = result.monthlyPayment;
-      });
-    });
-
     const snippet = generateFinanceSnippet({
       customerName,
       unitDescription: getUnitDescription(),
@@ -398,19 +450,19 @@ export default function FinanceComparePage() {
       fees,
       apr,
       downPayments: downPaymentOptions,
-      terms,
-      payments,
+      terms: financeTerms,
+      payments: calculateFinanceMatrix.payments,
     });
 
     const success = await copyToClipboard(snippet);
     if (success) {
       toast({
-        title: "✅ Copied to clipboard!",
+        title: "Copied to clipboard!",
         description: "Finance options SMS text ready to send",
       });
     } else {
       toast({
-        title: "❌ Copy failed",
+        title: "Copy failed",
         description: "Please try again",
         variant: "destructive",
       });
@@ -418,23 +470,6 @@ export default function FinanceComparePage() {
   };
 
   const handleCopyRTOSMS = async () => {
-    // Calculate all RTO payments for the matrix
-    const terms = [24, 36, 48];
-    const payments: Record<number, Record<number, number>> = {};
-
-    terms.forEach(term => {
-      payments[term] = {};
-      downPaymentOptions.forEach(down => {
-        const result = calculateRTO({
-          price,
-          down,
-          taxPct,
-          termMonths: term
-        });
-        payments[term][down] = result.monthlyTotal;
-      });
-    });
-
     const snippet = generateRTOSnippet({
       customerName,
       unitDescription: getUnitDescription(),
@@ -442,19 +477,19 @@ export default function FinanceComparePage() {
       taxPercent: taxPct,
       fees,
       downPayments: downPaymentOptions,
-      terms,
-      payments,
+      terms: rtoTerms,
+      payments: calculateRTOMatrix.payments,
     });
 
     const success = await copyToClipboard(snippet);
     if (success) {
       toast({
-        title: "✅ Copied to clipboard!",
+        title: "Copied to clipboard!",
         description: "RTO options SMS text ready to send",
       });
     } else {
       toast({
-        title: "❌ Copy failed",
+        title: "Copy failed",
         description: "Please try again",
         variant: "destructive",
       });
@@ -494,17 +529,17 @@ export default function FinanceComparePage() {
           )}
         </div>
 
-        {/* Remotive Logistics Trailers Finance Center Logo */}
-        <div className="relative z-10 flex justify-center mb-6">
-          <Image
-            src="/images/mjctfc.webp"
-            alt="Remotive Logistics Trailers Finance Center"
-            width={400}
-            height={120}
-            className="h-32 w-auto object-contain drop-shadow-2xl"
-            priority
-          />
-        </div>
+        {/* CRM Integration Badge */}
+        {loadedFromCRM && (
+          <div className="rounded-lg border border-green-500/30 bg-green-500/10 p-3">
+            <p className="text-sm text-green-700 dark:text-green-400 font-medium">
+              Loaded from CRM: {customerName}
+            </p>
+            <p className="text-xs text-green-600/70 dark:text-green-500/70">
+              Quote will be saved to customer's activity timeline when exported
+            </p>
+          </div>
+        )}
 
         {/* Customer Information Card */}
         <Card className="border-border bg-card">
@@ -676,14 +711,14 @@ export default function FinanceComparePage() {
                 </div>
               </div>
 
-              {/* Unit Selector - REAL 172 TRAILERS FROM DATABASE */}
+              {/* Unit Selector */}
               <div className="space-y-2">
                 <Label htmlFor="unit" className="text-foreground">
                   Select Unit from Inventory
                 </Label>
                 <Select value={selectedUnit} onValueChange={handleTrailerSelect} disabled={loadingTrailers}>
                   <SelectTrigger id="unit">
-                    <SelectValue placeholder={loadingTrailers ? "Loading inventory..." : "Choose from 172 trailers..."} />
+                    <SelectValue placeholder={loadingTrailers ? "Loading inventory..." : "Choose from inventory..."} />
                   </SelectTrigger>
                   <SelectContent className="max-h-[300px]">
                     {loadingTrailers ? (
@@ -718,8 +753,6 @@ export default function FinanceComparePage() {
               fees={fees}
               apr={apr}
               downPaymentOptions={downPaymentOptions}
-              onSelectPayment={handleSelectPayment}
-              onSaveQuote={handleSaveFinanceQuote}
               onCopySMS={handleCopyFinanceSMS}
             />
           </CardContent>
@@ -732,8 +765,6 @@ export default function FinanceComparePage() {
               price={price}
               taxPct={taxPct}
               downPaymentOptions={downPaymentOptions}
-              onSelectPayment={handleSelectPayment}
-              onSaveQuote={handleSaveRTOQuote}
               onCopySMS={handleCopyRTOSMS}
             />
           </CardContent>
@@ -746,143 +777,142 @@ export default function FinanceComparePage() {
               price={price}
               taxPct={taxPct}
               fees={fees}
-              onSaveQuote={handleSaveCashQuote}
               onShare={handleCopyCashSMS}
             />
           </CardContent>
         </Card>
 
-        {/* Selected Options & Quote Generation */}
-        {selectedOptions.length > 0 && (
-          <Card className="border-primary/30 bg-primary/5">
-            <CardHeader>
-              <div className="space-y-4">
-                <CardTitle asChild>
-                  <h2 className="flex items-center gap-2 text-foreground">
-                    <Check className="h-5 w-5 text-primary" aria-hidden="true" />
-                    Selected Payment Options ({selectedOptions.length}/3)
-                  </h2>
-                </CardTitle>
-
-                {/* Export Format Selector & Generate Button */}
-                <div className="flex items-center gap-4 flex-wrap">
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => setExportFormat("pdf")}
-                      aria-label="Export as PDF"
-                      className={`px-4 py-2 rounded-lg font-medium transition-all text-sm ${
-                        exportFormat === "pdf"
-                          ? "bg-primary text-primary-foreground shadow-md scale-105"
-                          : "bg-muted hover:bg-muted/80 text-foreground/70"
-                      }`}
-                    >
-                      📄 PDF
-                    </button>
-                    <button
-                      onClick={() => setExportFormat("jpeg")}
-                      aria-label="Export as JPEG"
-                      className={`px-4 py-2 rounded-lg font-medium transition-all text-sm ${
-                        exportFormat === "jpeg"
-                          ? "bg-primary text-primary-foreground shadow-md scale-105"
-                          : "bg-muted hover:bg-muted/80 text-foreground/70"
-                      }`}
-                    >
-                      🖼️ JPEG
-                    </button>
-                    <button
-                      onClick={() => setExportFormat("png")}
-                      aria-label="Export as PNG"
-                      className={`px-4 py-2 rounded-lg font-medium transition-all text-sm ${
-                        exportFormat === "png"
-                          ? "bg-primary text-primary-foreground shadow-md scale-105"
-                          : "bg-muted hover:bg-muted/80 text-foreground/70"
-                      }`}
-                    >
-                      🎨 PNG
-                    </button>
-                  </div>
-
-                  <Button
-                    onClick={handleGeneratePDF}
-                    disabled={!customerName.trim()}
-                    className="gap-2 flex-1 min-w-[200px]"
-                    size="lg"
-                  >
-                    <FileDown className="h-5 w-5" aria-hidden="true" />
-                    Generate {exportFormat.toUpperCase()} Quote
-                  </Button>
-                </div>
+        {/* Export Quote Section */}
+        <Card className="border-primary/30 bg-gradient-to-br from-primary/5 to-primary/10">
+          <CardHeader>
+            <CardTitle asChild>
+              <h2 className="text-foreground flex items-center gap-2">
+                <FileDown className="h-5 w-5 text-primary" />
+                Export Quote
+              </h2>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Export Options */}
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+              {/* Include Finance */}
+              <div className="flex items-center justify-between rounded-lg border border-border bg-card p-3">
+                <Label htmlFor="includeFinance" className="text-sm font-medium">
+                  Include Finance
+                </Label>
+                <Switch
+                  id="includeFinance"
+                  checked={includeFinance}
+                  onCheckedChange={setIncludeFinance}
+                />
               </div>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                {selectedOptions.map((option, index) => (
-                  <div
-                    key={index}
-                    className="relative rounded-lg border-2 border-primary/30 bg-card p-4"
-                  >
-                    <div
-                      className={`absolute right-2 top-2 rounded-full px-2 py-0.5 text-xs font-bold text-white ${
-                        option.mode === "CASH"
-                          ? "bg-green-500"
-                          : option.mode === "FINANCE"
-                          ? "bg-blue-500"
-                          : "bg-purple-500"
-                      }`}
-                    >
-                      {option.mode}
-                    </div>
-                    <div className="mt-2 text-2xl font-bold text-foreground">
-                      {option.mode === "CASH"
-                        ? `$${option.amount.toLocaleString()}`
-                        : `$${option.amount.toFixed(2)}/mo`}
-                    </div>
-                    {option.term && (
-                      <p className="text-sm text-foreground/70">
-                        {option.term} months
-                      </p>
-                    )}
-                    {option.down !== undefined && (
-                      <p className="text-sm text-foreground/70">
-                        Down: ${option.down.toLocaleString()}
-                      </p>
-                    )}
-                    {option.details && (
-                      <p className="text-xs text-foreground/70">
-                        {option.details}
-                      </p>
-                    )}
-                  </div>
-                ))}
+
+              {/* Include RTO */}
+              <div className="flex items-center justify-between rounded-lg border border-border bg-card p-3">
+                <Label htmlFor="includeRTO" className="text-sm font-medium">
+                  Include RTO
+                </Label>
+                <Switch
+                  id="includeRTO"
+                  checked={includeRTO}
+                  onCheckedChange={setIncludeRTO}
+                />
               </div>
-              {!customerName.trim() && (
-                <p className="mt-4 text-sm text-destructive">
-                  ⚠️ Please enter customer name above to generate quote
-                </p>
-              )}
-            </CardContent>
-          </Card>
-        )}
+
+              {/* Include Cash */}
+              <div className="flex items-center justify-between rounded-lg border border-border bg-card p-3">
+                <Label htmlFor="includeCash" className="text-sm font-medium">
+                  Include Cash
+                </Label>
+                <Switch
+                  id="includeCash"
+                  checked={includeCash}
+                  onCheckedChange={setIncludeCash}
+                />
+              </div>
+
+              {/* Show APR in PDF */}
+              <div className="flex items-center justify-between rounded-lg border border-border bg-card p-3">
+                <Label htmlFor="showAPR" className="text-sm font-medium">
+                  Show APR in PDF
+                </Label>
+                <Switch
+                  id="showAPR"
+                  checked={showAPRInPDF}
+                  onCheckedChange={setShowAPRInPDF}
+                />
+              </div>
+            </div>
+
+            {/* Export Buttons */}
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+              <Button
+                onClick={() => handleExportQuote("pdf")}
+                disabled={!customerName.trim()}
+                className="gap-2"
+                size="lg"
+              >
+                <FileDown className="h-5 w-5" />
+                PDF
+              </Button>
+              <Button
+                onClick={() => handleExportQuote("png")}
+                disabled={!customerName.trim()}
+                variant="secondary"
+                className="gap-2"
+                size="lg"
+              >
+                <ImageIcon className="h-5 w-5" />
+                PNG
+              </Button>
+              <Button
+                onClick={handlePrint}
+                variant="outline"
+                className="gap-2"
+                size="lg"
+              >
+                <Printer className="h-5 w-5" />
+                Print
+              </Button>
+              <Button
+                onClick={handleCopyAllText}
+                variant="outline"
+                className="gap-2"
+                size="lg"
+              >
+                <Copy className="h-5 w-5" />
+                Copy Text
+              </Button>
+            </div>
+
+            {/* Customer name warning */}
+            {!customerName.trim() && (
+              <p className="text-sm text-destructive text-center">
+                Please enter customer name above to generate quote
+              </p>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Disclaimer */}
         <div className="rounded-lg border border-yellow-500/30 bg-yellow-500/10 p-4">
           <p className="text-sm text-foreground font-medium text-center">
-            ⚠️ All quotes are subject to top tier credit approval and fees may vary depending on location of residence.
+            All quotes are subject to top tier credit approval and fees may vary depending on location of residence.
           </p>
         </div>
 
         {/* Info Footer */}
         <div className="rounded-lg border border-border bg-muted/50 p-4">
           <p className="text-sm text-foreground/80">
-            💡 <strong>Pro Tip:</strong> Click any payment amount in the matrix
-            to select it for the PDF quote (max 3 options). Uncheck terms to hide them from the display.
+            <strong>Pro Tip:</strong> Use the toggles above to customize which sections appear in your exported quote.
+            All visible payment options will be included in the PDF/PNG export.
           </p>
         </div>
       </div>
 
       {/* Version Stamp */}
       <div className="text-[10px] text-gray-500 mt-6 opacity-70">
-        FIN-COMPARE v2 • commit {COMMIT} • env:{ENV}
+        FIN-COMPARE v3 • commit {COMMIT} • env:{ENV}
       </div>
     </div>
   );

@@ -255,22 +255,12 @@ export function RTOMatrix({
         Uncheck terms to hide. Click any payment to save as quote.
       </p>
 
-      {/* Action Buttons */}
-      {(onSaveQuote || onCopySMS) && (
-        <div className="mt-6 flex gap-3">
-          {onSaveQuote && (
-            <Button
-              onClick={onSaveQuote}
-              className="flex-1 bg-green-600 hover:bg-green-700 text-white"
-            >
-              ✅ Click to add RTO Scenario to Quote to share
-            </Button>
-          )}
-          {onCopySMS && (
-            <Button variant="outline" onClick={onCopySMS} className="flex-1">
-              📋 Copy SMS Text
-            </Button>
-          )}
+      {/* SMS Copy Button */}
+      {onCopySMS && (
+        <div className="mt-6">
+          <Button variant="outline" onClick={onCopySMS} className="w-full sm:w-auto">
+            📋 Copy RTO Options as SMS Text
+          </Button>
         </div>
       )}
     </div>
