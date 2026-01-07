@@ -352,7 +352,7 @@ python3 cli/pdf_scraper.py \
 # Or scrape your internal wiki/docs site
 python3 cli/doc_scraper.py \
   --name mj-sales-procedures \
-  --url https://mjcargo.internal/docs
+  --url https://remotive.internal/docs
 ```
 
 ### Use Case 3: Framework Documentation

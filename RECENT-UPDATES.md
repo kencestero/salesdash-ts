@@ -1,4 +1,4 @@
-# Recent Updates - MJ Cargo Sales Dashboard
+# Recent Updates - Remotive Logistics Sales Dashboard
 
 ## Summary of Latest Features (2025-10-12)
 
@@ -35,9 +35,9 @@
 
 #### What was created:
 
-1. **Email Templates** (React Email + MJ Cargo Branding)
+1. **Email Templates** (React Email + Remotive Logistics Branding)
    - **Base Template** (`lib/email/templates/mj-cargo-base.tsx`)
-     - MJ Cargo orange header (#FF6B2C)
+     - Remotive Logistics orange header (#FF6B2C)
      - Professional white background
      - Mobile-responsive design
      - Footer with company info and legal links
@@ -150,8 +150,8 @@ View at: [resend.com/emails](https://resend.com/emails)
 ## 🎨 Branding
 
 All emails feature:
-- **Color**: MJ Cargo Orange (#FF6B2C)
-- **Header**: Bold "MJ CARGO TRAILERS" on orange background
+- **Color**: Remotive Logistics Orange (#FF6B2C)
+- **Header**: Bold "Remotive Logistics TRAILERS" on orange background
 - **Font**: Professional sans-serif (system fonts)
 - **CTA Button**: Orange background with white text
 - **Footer**: Company info, legal links, contact details
@@ -284,7 +284,7 @@ All changes have been:
 - Director: All teams
 - Owner: Everything
 
-### 5. Can we create email templates with MJ Cargo branding?
+### 5. Can we create email templates with Remotive Logistics branding?
 ✅ **DONE** - Complete system with orange branding, ready to use
 
 ### 6. Does it embed in the Dashboard?

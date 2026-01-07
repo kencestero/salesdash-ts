@@ -94,7 +94,7 @@ export async function submitRequest(
 
     // 2) Send email to customer
     await resend.emails.send({
-      from: `MJ SalesDash <${process.env.RESEND_FROM_EMAIL}>`,
+      from: `Remotive SalesHub <${process.env.RESEND_FROM_EMAIL}>`,
       to: [parsed.data.email],
       replyTo: `request+${logId}@mjsalesdash.com`, // thread replies map to this log
       subject: `[${parsed.data.manufacturer}] ${parsed.data.purpose}`,
@@ -106,7 +106,7 @@ export async function submitRequest(
         "",
         `Message: ${parsed.data.message}`,
         "",
-        "— MJ Cargo SalesDash",
+        "— Remotive Logistics SalesDash",
       ]
         .filter(Boolean)
         .join("\n"),

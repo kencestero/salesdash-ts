@@ -102,9 +102,9 @@ const ProfileInfo = () => {
         <DropdownMenuGroup>
           {[
             {
-              name: "profile",
+              name: "Profile",
               icon: "heroicons:user",
-              href:"/profile"
+              href:"/user-profile/settings"
             },
             {
               name: "Page Access",

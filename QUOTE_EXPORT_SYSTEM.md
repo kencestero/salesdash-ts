@@ -119,7 +119,7 @@ https://mjsalesdash.com/api/quotes/export?format=png&name=John%20Doe&zip=78701&p
 - `{{PAYMENT_TABLES_HTML}}` - Optional payment tables (dashboard-generated)
 
 **Styling**:
-- MJ Cargo color palette: `#E6840D`, `#203F55`, `#33251B`
+- Remotive Logistics color palette: `#E6840D`, `#203F55`, `#33251B`
 - Print-optimized CSS (`@media print`)
 - Shimmer animations, gradient headers, premium badge
 - Professional typography and spacing

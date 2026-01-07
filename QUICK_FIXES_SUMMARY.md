@@ -106,7 +106,7 @@ Follow **DUAL_ACCOUNT_BUG_SOLUTION.md** step by step:
 
 **Credit App:**
 - Won't load without rep code
-- Link has extra code interrupting mjcargotrailers.com
+- Link has extra code interrupting remotivetrailers.com
 - Loves the colorful "Add to CRM" popup!
 
 **Inventory:**

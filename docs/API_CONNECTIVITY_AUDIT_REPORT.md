@@ -1,7 +1,7 @@
 # SalesDash API Connectivity Audit Report
 
 **Generated:** 2025-01-31
-**Project:** MJ Cargo SalesDash
+**Project:** Remotive Logistics SalesDash
 **Auditor:** Claude Code
 **Overall Health Score:** 7.0/10
 
@@ -401,7 +401,7 @@ NEXT_PUBLIC_FIREBASE_APP_ID
 #### Configuration
 ```
 RESEND_API_KEY=your-resend-api-key
-RESEND_FROM_EMAIL=MJ Cargo Sales <noreply@mjsalesdash.com>
+RESEND_FROM_EMAIL=Remotive Logistics Sales <noreply@mjsalesdash.com>
 ```
 
 #### Files

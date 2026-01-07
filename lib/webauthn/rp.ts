@@ -27,7 +27,7 @@ export function getRp(hostHeader: string | null): RpConfig {
   const rpID = getRpIDFromHost(hostHeader);
   return {
     id: rpID || "mjsalesdash.com",
-    name: "MJ SalesDash",
+    name: "Remotive SalesHub",
     origin: `https://${rpID || "mjsalesdash.com"}`,
   };
 }

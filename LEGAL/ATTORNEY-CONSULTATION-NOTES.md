@@ -1,8 +1,8 @@
 # ATTORNEY CONSULTATION NOTES
-## For Review of MJ Cargo Trailers LLC Terms & Conditions
+## For Review of Remotive Logistics Trailers LLC Terms & Conditions
 
 **Date:** October 8, 2025
-**Company:** MJ Cargo Trailers LLC (Florida)
+**Company:** Remotive Logistics Trailers LLC (Florida)
 **Platform:** SalesDash
 **Prepared For:** Attorney Review
 
@@ -11,7 +11,7 @@
 ## BUSINESS OVERVIEW
 
 ### Company Information
-- **Legal Name:** MJ Cargo Trailers LLC
+- **Legal Name:** Remotive Logistics Trailers LLC
 - **Type:** Florida Limited Liability Company
 - **Business:** Trailer dealership and sales
 - **Operations:** Multi-state (remote sales representatives across all US states)
@@ -20,7 +20,7 @@
 ### Key Contacts
 - **Owners:**
   - kencestero@gmail.com
-  - mjcargotrailers@gmail.com
+  - remotivetrailers@gmail.com
   - Mightneedoil@gmail.com
 
 - **Managers:**
@@ -448,12 +448,12 @@ Worth the investment to:
 
 ## CONTACT INFORMATION FOR ATTORNEY
 
-**Your Attorney Friend (New York) Should Contact MJ Cargo:**
+**Your Attorney Friend (New York) Should Contact Remotive Logistics:**
 
 **Primary Contact:** Kenneth Cestero
 - Email: kencestero@gmail.com
 
-**Company Email:** mjcargotrailers@gmail.com
+**Company Email:** remotivetrailers@gmail.com
 
 **Questions/Clarifications:**
 - Platform demo available upon request
@@ -489,7 +489,7 @@ Files/Information Available:
 ---
 
 **Document Prepared By:** Claude Code AI Assistant
-**For:** MJ Cargo Trailers LLC
+**For:** Remotive Logistics Trailers LLC
 **Date:** October 8, 2025
 **Purpose:** Guide attorney review of Terms & Conditions
 

@@ -1,8 +1,8 @@
-# MJ SalesDash Database Cleanup Guide
+# Remotive SalesHub Database Cleanup Guide
 
 ## Overview
 
-This guide will help you safely clean up the MJ SalesDash database by removing all personal data, leads, and user information while preserving the system tools and infrastructure.
+This guide will help you safely clean up the Remotive SalesHub database by removing all personal data, leads, and user information while preserving the system tools and infrastructure.
 
 ## ⚠️ CRITICAL: Before You Start
 

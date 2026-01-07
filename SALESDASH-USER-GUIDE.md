@@ -1,5 +1,5 @@
 # SalesDash User Guide
-## MJ Cargo Trailers - Team Access Manual
+## Remotive Logistics Trailers - Team Access Manual
 
 ---
 
@@ -67,7 +67,7 @@ You will see up to 3 different codes depending on your role:
 
 **Example Message:**
 ```
-Welcome to MJ Cargo Trailers!
+Welcome to Remotive Logistics Trailers!
 
 To access the SalesDash system:
 1. Go to: https://salesdash-ts.vercel.app/en/auth/join
@@ -110,7 +110,7 @@ Your manager or team lead will provide you with a 6-character code.
 **Open your browser and go to:**
 - https://salesdash-ts.vercel.app/en/auth/join
 
-You should see the **"Join MJ Cargo Sales Team"** page with a secret code input field.
+You should see the **"Join Remotive Logistics Sales Team"** page with a secret code input field.
 
 ---
 
@@ -169,7 +169,7 @@ You have two options:
 
 If you signed up with email/password:
 
-1. **Check your email inbox** for verification message from MJ SalesDash
+1. **Check your email inbox** for verification message from Remotive SalesHub
 2. **Check SPAM folder** if you don't see it
 3. Click **"Open email"** button or manually check your email
 4. Click the verification link in the email
@@ -177,7 +177,7 @@ If you signed up with email/password:
 6. If expired, click **"Resend email verification"**
 
 The verification page shows:
-- MJ SalesDash branding (blue and yellow design)
+- Remotive SalesHub branding (blue and yellow design)
 - 2-minute countdown timer (00:00 format)
 - "Open email" button to launch your email client
 - Option to resend verification after countdown ends
@@ -190,7 +190,7 @@ After successful verification/sign-in:
 - You'll land on the **Dashboard** homepage
 - Your role is automatically assigned based on the secret code you used
 - Full access to features based on your role
-- Welcome to MJ Cargo Sales Team! 🚀
+- Welcome to Remotive Logistics Sales Team! 🚀
 
 ---
 
@@ -344,7 +344,7 @@ Time: 12:00 AM EST
 
 **Owners:**
 - kencestero@gmail.com
-- mjcargotrailers@gmail.com
+- remotivetrailers@gmail.com
 - Mightneedoil@gmail.com
 
 ### For Access Questions
@@ -357,7 +357,7 @@ Time: 12:00 AM EST
 
 If you cannot reach anyone above:
 1. Check your email for invite messages
-2. Contact MJ Cargo Trailers main office
+2. Contact Remotive Logistics Trailers main office
 3. Check company Slack/Teams channels
 
 ---
@@ -393,7 +393,7 @@ JOIN PROCESS:
 6. Access dashboard
 
 NEED HELP?
-Email: mjcargotrailers@gmail.com
+Email: remotivetrailers@gmail.com
 ```
 
 ---
@@ -476,7 +476,7 @@ const code = hash.slice(0, 6).toUpperCase(); // "A1B2C3"
 
 **This document is confidential and for internal use only.**
 
-© 2025 MJ Cargo Trailers
+© 2025 Remotive Logistics Trailers
 All Rights Reserved
 
 Do not distribute outside the organization without authorization.

@@ -2,7 +2,7 @@
 
 # Setup script for secret scanning with Gitleaks
 
-echo "🔐 Setting up secret scanning for MJ Cargo Sales Dashboard"
+echo "🔐 Setting up secret scanning for Remotive Logistics Sales Dashboard"
 echo ""
 
 # Check if gitleaks is installed

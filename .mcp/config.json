@@ -21,7 +21,7 @@
     }
   },
   "agents": {
-    "description": "MJ Cargo SalesDash - Next.js 14 CRM for trailer dealership",
+    "description": "Remotive Logistics SalesDash - Next.js 14 CRM for trailer dealership",
     "project_root": "./",
     "primary_docs": [
       "CLAUDE.md",

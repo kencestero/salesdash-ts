@@ -1,6 +1,6 @@
 # CSV Lead Import Script
 
-This script imports customer leads from a CSV file into the MJ Cargo SalesDash CRM system.
+This script imports customer leads from a CSV file into the Remotive Logistics SalesDash CRM system.
 
 ## Features
 

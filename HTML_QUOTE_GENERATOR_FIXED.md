@@ -12,7 +12,7 @@ EXACTAMENTE como tu template con:
 
 - 🟠 Header naranja con gradiente
 - 📊 Las 3 cajas de opciones (FINANCE/RTO/CASH)
-- 🎨 Colores de MJ Cargo
+- 🎨 Colores de Remotive Logistics
 - 📝 Toda la info del cliente
 - ⚠️ El disclaimer amarillo
 - 🔵 Footer azul profesional
@@ -30,7 +30,7 @@ EXACTAMENTE como tu template con:
 
 Cuando hagas click en "Generate Quote", va a descargar un archivo `.html` que cuando lo abras se ve:
 
-1. **Header naranja** con "MJ CARGO TRAILERS"
+1. **Header naranja** con "Remotive Logistics TRAILERS"
 2. **Info del cliente** en cajas grises
 3. **Detalles del trailer** con precios
 4. **3 CAJAS DE COLORES:**
@@ -69,7 +69,7 @@ downloadLuxuryHTML(html, "John_Doe");
 ## 📝 NOTES:
 
 - **Previous Issue:** PDF generator was ugly
-- **New Solution:** Beautiful HTML with MJ Cargo branding
+- **New Solution:** Beautiful HTML with Remotive Logistics branding
 - **Template Match:** 100% matches your design
 - **Colors:** Orange (#E96114) + Blue (#09213C)
 - **Three Options:** Finance (blue), RTO (purple), Cash (green)

@@ -20,7 +20,7 @@ This feature allows you to upload a PDF containing your trailer inventory list. 
 1. Go to [https://platform.openai.com/api-keys](https://platform.openai.com/api-keys)
 2. Sign up or log in to your account
 3. Click **"Create new secret key"**
-4. Name it something like "MJ Cargo Inventory Parser"
+4. Name it something like "Remotive Logistics Inventory Parser"
 5. Copy the key (starts with `sk-...`)
 6. **IMPORTANT**: Save it immediately - you can't view it again!
 
@@ -92,7 +92,7 @@ The modal will show:
 The AI automatically extracts:
 
 ### Required Fields
-- **manufacturer**: Trailer manufacturer (defaults to "MJ Cargo")
+- **manufacturer**: Trailer manufacturer (defaults to "Remotive Logistics")
 - **model**: Full model description (e.g., "7X16TA2 Black .080 R VN 7'")
 - **year**: Model year (defaults to current year)
 - **category**: Type (Utility, Dump, Enclosed, Gooseneck, etc.)

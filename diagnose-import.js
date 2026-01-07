@@ -89,7 +89,7 @@ async function diagnoseImport() {
       } else if (existingPhones.has(phone)) {
         categories.duplicatePhoneInDB.push(rowData);
         seenPhones.add(phone); // Still mark as seen
-      } else if (email && email.includes('@') && email !== '@leads.mjcargotrailers.com' && existingEmails.has(email)) {
+      } else if (email && email.includes('@') && email !== '@leads.remotivetrailers.com' && existingEmails.has(email)) {
         categories.duplicateEmailInDB.push(rowData);
         seenPhones.add(phone); // Mark as seen even if skipped
       } else {

@@ -1,4 +1,4 @@
-import MJCargoEmail from './mj-cargo-base';
+import remotiveEmail from './mj-cargo-base';
 
 interface QuoteEmailProps {
   customerName: string;
@@ -16,12 +16,12 @@ export default function QuoteEmail({
   quoteLink,
 }: QuoteEmailProps) {
   return (
-    <MJCargoEmail
-      preview={`Your MJ Cargo quote for ${unitDescription}`}
+    <remotiveEmail
+      preview={`Your Remotive Logistics quote for ${unitDescription}`}
       heading={`Hi ${customerName}!`}
       body={
         <>
-          <p>Thank you for your interest in MJ Cargo Trailers!</p>
+          <p>Thank you for your interest in Remotive Logistics Trailers!</p>
 
           <p>{repName} has prepared a custom quote for you:</p>
 
@@ -64,7 +64,7 @@ export default function QuoteEmail({
       }
       ctaText="View My Quote"
       ctaLink={quoteLink}
-      footerText={`This quote was prepared by ${repName} at MJ Cargo Trailers. Questions? Reply to this email or call us directly.`}
+      footerText={`This quote was prepared by ${repName} at Remotive Logistics Trailers. Questions? Reply to this email or call us directly.`}
     />
   );
 }

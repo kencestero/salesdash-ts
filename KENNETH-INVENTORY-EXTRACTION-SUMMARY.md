@@ -3,12 +3,12 @@
 ## What I Did While You Were Gone
 
 ### 1. ✅ Updated Credit App Links
-All credit application links now point to **mjcargotrailers.com** (Matt's existing site with notifications):
+All credit application links now point to **remotivetrailers.com** (Matt's existing site with notifications):
 - `/en/credit` page
 - Dashboard rep code card
 - User profile page
 
-**Link format**: `https://mjcargotrailers.com/credit-application/{YOUR_REP_CODE}`
+**Link format**: `https://remotivetrailers.com/credit-application/{YOUR_REP_CODE}`
 
 ---
 
@@ -180,7 +180,7 @@ This needs Gmail API OAuth2 setup. I can help you do this later if you want full
 
 ✅ **Pricing**: Formula is implemented and tested. Guarantees $1,400 minimum profit.
 
-✅ **Credit Apps**: All links now point to mjcargotrailers.com with Matt's notification system.
+✅ **Credit Apps**: All links now point to remotivetrailers.com with Matt's notification system.
 
 🚀 **Ready**: API is live and ready to accept trailer imports.
 

@@ -233,7 +233,7 @@ export default function TestLoginPage() {
               <path id="circle" d="M 90,90 m -70,0 a 70,70 0 1,1 140,0 a 70,70 0 1,1 -140,0" />
             </defs>
             <text className="text-[11px] font-light tracking-[0.3em] fill-white/90 uppercase">
-              <textPath href="#circle">MJ SALESDASH AI • MJ SALESDASH AI • MJ SALESDASH AI •</textPath>
+              <textPath href="#circle">Remotive SalesHub AI • Remotive SalesHub AI • Remotive SalesHub AI •</textPath>
             </text>
           </svg>
 
@@ -341,7 +341,7 @@ export default function TestLoginPage() {
                   </a>
                 </div>
                 <p className="text-white/30 text-xs text-center">
-                  © 2024 MJ Cargo Sales • Enterprise CRM Platform
+                  © 2024 Remotive Logistics Sales • Enterprise CRM Platform
                 </p>
               </div>
             </div>

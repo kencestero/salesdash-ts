@@ -9,7 +9,7 @@
 ## ✅ What Was Completed
 
 ### 1. Credit Application Links ✅
-- **Updated** all rep code links to point to `https://mjcargotrailers.com/credit-application/{REP_CODE}`
+- **Updated** all rep code links to point to `https://remotivetrailers.com/credit-application/{REP_CODE}`
 - **Fixed** in 3 locations:
   - Credit Applications page (`/en/credit`)
   - Dashboard Rep Code Card
@@ -51,9 +51,9 @@
 
 ### Commit 1: `77abaaf`
 ```
-feat: credit app links to mjcargotrailers.com + inventory pricing formula
+feat: credit app links to remotivetrailers.com + inventory pricing formula
 
-- Updated all rep code links to mjcargotrailers.com
+- Updated all rep code links to remotivetrailers.com
 - Implemented Kenneth's pricing formula in bulk import API
 - Fixed credit applications role-based filtering
 - Fixed manager dropdown
@@ -98,7 +98,7 @@ fix: move inventory to dashboard layout
 ## 📋 What's Ready to Use RIGHT NOW
 
 ### ✅ Live on Production (mjsalesdash.com)
-1. **Credit Application Links** - All point to mjcargotrailers.com
+1. **Credit Application Links** - All point to remotivetrailers.com
 2. **Celebration Modal** - Confetti explosion when copying link
 3. **Pricing Formula API** - Ready to import trailers
 4. **Manager Dropdown** - Shows all 7 managers
@@ -134,8 +134,8 @@ fix: move inventory to dashboard layout
 ## 🔑 Important Info
 
 ### API Keys (Already Configured)
-- `INVENTORY_API_KEY`: mjcargo-inventory-import-65b8353628a3a9ef530f2b628bdc2fa9
-- `CRON_SECRET`: mjcargo-sheets-sync-secure-key-2025
+- `INVENTORY_API_KEY`: remotive-inventory-import-65b8353628a3a9ef530f2b628bdc2fa9
+- `CRON_SECRET`: remotive-sheets-sync-secure-key-2025
 - `RESEND_API_KEY`: re_Pkdcn1eF_MH2diGv3oTrbc5Zz9mNR4Aoj
 
 ### Gmail Credentials (For Inventory Extraction)
@@ -160,7 +160,7 @@ Examples:
 
 | Feature | Status | Notes |
 |---------|--------|-------|
-| Credit App Links | ✅ Live | Points to mjcargotrailers.com |
+| Credit App Links | ✅ Live | Points to remotivetrailers.com |
 | Celebration Modal | ✅ Live | Confetti + sales training |
 | Pricing Formula API | ✅ Live | `/api/inventory/bulk-import` |
 | Manager Dropdown | ✅ Live | Shows all 7 managers |
@@ -178,7 +178,7 @@ Examples:
 Hey panita! Everything is pushed and deployed! 🚀
 
 **What I did while you were dropping off the kids:**
-1. ✅ Fixed all the credit app links → mjcargotrailers.com
+1. ✅ Fixed all the credit app links → remotivetrailers.com
 2. ✅ Implemented your pricing formula in the API
 3. ✅ Fixed inventory page layout issue
 4. ✅ Pushed 3 commits to GitHub

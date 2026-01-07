@@ -69,7 +69,7 @@ function generateInventoryPDF(trailers: Trailer[]): jsPDF {
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
 
-  // Colors - MJ Cargo Branding
+  // Colors - Remotive Logistics Branding
   const orangeColor: [number, number, number] = [245, 166, 35]; // #f5a623
   const darkBlue: [number, number, number] = [30, 41, 59];
   const lightGray: [number, number, number] = [240, 240, 240];
@@ -78,11 +78,11 @@ function generateInventoryPDF(trailers: Trailer[]): jsPDF {
   doc.setFillColor(...orangeColor);
   doc.rect(0, 0, pageWidth, 35, "F");
 
-  // MJ CARGO TRAILERS title
+  // Remotive Logistics TRAILERS title
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(28);
   doc.setFont("helvetica", "bold");
-  doc.text("MJ CARGO TRAILERS", pageWidth / 2, 15, { align: "center" });
+  doc.text("Remotive Logistics TRAILERS", pageWidth / 2, 15, { align: "center" });
 
   // Inventory Quote subtitle
   doc.setFontSize(14);
@@ -213,7 +213,7 @@ function generateInventoryPDF(trailers: Trailer[]): jsPDF {
       doc.setFontSize(8);
       doc.setFont("helvetica", "normal");
       doc.text(
-        "MJ Cargo Trailers - Premium Enclosed Cargo Trailers & Equipment Trailers",
+        "Remotive Logistics Trailers - Premium Enclosed Cargo Trailers & Equipment Trailers",
         pageWidth / 2,
         footerY + 5,
         { align: "center" }

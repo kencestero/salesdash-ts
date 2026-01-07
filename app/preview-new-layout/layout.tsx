@@ -3,7 +3,7 @@ import { AppSidebar } from "@/components/layout/AppSidebar";
 import { AppTopbar } from "@/components/layout/AppTopbar";
 
 export const metadata: Metadata = {
-  title: "MJ SalesDash - New Layout Preview",
+  title: "Remotive SalesHub - New Layout Preview",
 };
 
 type Props = {

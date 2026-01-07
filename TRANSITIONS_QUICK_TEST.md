@@ -119,7 +119,7 @@ transition: {
 
 ---
 
-## 🔥 **MJ CARGO RECOMMENDATIONS**
+## 🔥 **Remotive Logistics RECOMMENDATIONS**
 
 ### For Login Page:
 Use **Scale + Rotate** - Makes a strong first impression

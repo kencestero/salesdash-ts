@@ -39,9 +39,9 @@ export async function POST(req: NextRequest) {
     console.log(`🔐 Owner code requested by: ${requesterName} (${requesterEmail})`);
 
     // Create owner code email template
-    const MJCargoEmail = (await import("@/lib/email/templates/mj-cargo-base")).default;
+    const remotiveEmail = (await import("@/lib/email/templates/mj-cargo-base")).default;
 
-    const emailContent = MJCargoEmail({
+    const emailContent = remotiveEmail({
       heading: "Owner Code Request",
       body: (
         <>
@@ -115,11 +115,11 @@ export async function POST(req: NextRequest) {
           <p>If you did not expect this request, please contact the requester immediately.</p>
         </>
       ),
-      footerText: "This is an automated security notification from MJ Cargo Sales Dashboard. Owner code requests are logged for security purposes."
+      footerText: "This is an automated security notification from Remotive Logistics Sales Dashboard. Owner code requests are logged for security purposes."
     });
 
     // Send email to both owners
-    const recipients = ["mjcargotrailers@gmail.com", "kencestero@gmail.com"];
+    const recipients = ["remotivetrailers@gmail.com", "kencestero@gmail.com"];
 
     const results = await Promise.allSettled(
       recipients.map(email =>

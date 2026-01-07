@@ -1,5 +1,5 @@
 # LEGAL FOLDER
-## MJ Cargo Trailers LLC - SalesDash Terms & Conditions
+## Remotive Logistics Trailers LLC - SalesDash Terms & Conditions
 
 **Created:** October 8, 2025
 **Status:** DRAFT - Requires Attorney Review
@@ -23,7 +23,7 @@
 
 **What to do:**
 1. Send this file to your New York attorney friend
-2. Ask them to review and customize for MJ Cargo
+2. Ask them to review and customize for Remotive Logistics
 3. They should focus on:
    - Independent contractor classification compliance
    - Multi-state enforceability (especially non-compete)
@@ -159,7 +159,7 @@ Have them confirm/advise on:
 
 ## 🔒 Why This Matters
 
-### Protects MJ Cargo From:
+### Protects Remotive Logistics From:
 - **Employee lawsuits** (misclassification claims)
 - **Data breaches** (rep steals customer database)
 - **Competition** (rep goes to competitor with customer list)
@@ -214,8 +214,8 @@ Kenneth Cestero
 Email: kencestero@gmail.com
 
 **Company:**
-MJ Cargo Trailers LLC
-Email: mjcargotrailers@gmail.com
+Remotive Logistics Trailers LLC
+Email: remotivetrailers@gmail.com
 
 **Attorney (NY Friend):**
 [Add contact info when available]

@@ -20,7 +20,7 @@ self.addEventListener("push", (event) => {
   console.log("Service Worker: Push received");
 
   let notificationData = {
-    title: "MJ Cargo SalesDash",
+    title: "Remotive Logistics SalesDash",
     body: "You have a new notification",
     icon: "/icon-192x192.png",
     badge: "/badge-72x72.png",

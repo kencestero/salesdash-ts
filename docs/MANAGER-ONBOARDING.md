@@ -1,6 +1,6 @@
 # 👔 Manager Quick Start Guide
 
-Welcome to MJ SalesDash! This guide covers everything you need to manage your sales team.
+Welcome to Remotive SalesHub! This guide covers everything you need to manage your sales team.
 
 ---
 

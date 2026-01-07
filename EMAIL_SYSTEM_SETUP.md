@@ -304,7 +304,7 @@ async function sendWelcomeEmail(userEmail: string, userName: string) {
 
   await sendEmail({
     to: userEmail,
-    subject: 'Welcome to MJ Cargo!',
+    subject: 'Welcome to Remotive Logistics!',
     html: emailHtml,
     templateId: 'welcome',
   });
@@ -325,7 +325,7 @@ async function seedEmailTemplates() {
       {
         name: 'Welcome Email',
         slug: 'welcome',
-        subject: 'Welcome to MJ Cargo!',
+        subject: 'Welcome to Remotive Logistics!',
         body: '<h1>Welcome!</h1><p>Thanks for joining us.</p>',
       },
       {
@@ -391,7 +391,7 @@ export async function GET() {
   try {
     await sendEmail({
       to: 'your-email@example.com',
-      subject: 'Test Email from MJ Cargo Dashboard',
+      subject: 'Test Email from Remotive Logistics Dashboard',
       html: '<h1>Test Email</h1><p>This is a test email.</p>',
     });
 

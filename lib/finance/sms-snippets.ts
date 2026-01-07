@@ -40,10 +40,10 @@ Total:     $${totalCash.toLocaleString()}
 
 Pay in full - Own it today!
 
-Contact MJ Cargo Trailers for details.
+Contact Remotive Logistics Trailers for details.
 
 ───────────────────
-Disclaimer: All quotes are estimates only and subject to verification. MJ Cargo Trailers reserves the right to correct errors, omissions, or inaccuracies. Final pricing, taxes, fees, and financing terms are confirmed only in a signed purchase agreement.`;
+Disclaimer: All quotes are estimates only and subject to verification. Remotive Logistics Trailers reserves the right to correct errors, omissions, or inaccuracies. Final pricing, taxes, fees, and financing terms are confirmed only in a signed purchase agreement.`;
 }
 
 /**
@@ -73,10 +73,10 @@ export function generateFinanceSnippet(data: FinanceData): string {
   lines.push(``);
   lines.push(`APR: ${data.apr?.toFixed(2)}%`);
   lines.push(``);
-  lines.push(`Contact MJ Cargo Trailers for details.`);
+  lines.push(`Contact Remotive Logistics Trailers for details.`);
   lines.push(``);
   lines.push(`───────────────────`);
-  lines.push(`Disclaimer: All quotes are estimates only and subject to verification. MJ Cargo Trailers reserves the right to correct errors, omissions, or inaccuracies. Final pricing, taxes, fees, and financing terms are confirmed only in a signed purchase agreement.`);
+  lines.push(`Disclaimer: All quotes are estimates only and subject to verification. Remotive Logistics Trailers reserves the right to correct errors, omissions, or inaccuracies. Final pricing, taxes, fees, and financing terms are confirmed only in a signed purchase agreement.`);
 
   return lines.join('\n');
 }
@@ -109,10 +109,10 @@ export function generateRTOSnippet(data: RTOData): string {
   lines.push(`No credit check required!`);
   lines.push(`Own it after final payment.`);
   lines.push(``);
-  lines.push(`Contact MJ Cargo Trailers for details.`);
+  lines.push(`Contact Remotive Logistics Trailers for details.`);
   lines.push(``);
   lines.push(`───────────────────`);
-  lines.push(`Disclaimer: All quotes are estimates only and subject to verification. MJ Cargo Trailers reserves the right to correct errors, omissions, or inaccuracies. Final pricing, taxes, fees, and financing terms are confirmed only in a signed purchase agreement.`);
+  lines.push(`Disclaimer: All quotes are estimates only and subject to verification. Remotive Logistics Trailers reserves the right to correct errors, omissions, or inaccuracies. Final pricing, taxes, fees, and financing terms are confirmed only in a signed purchase agreement.`);
 
   return lines.join('\n');
 }

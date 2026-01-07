@@ -19,6 +19,7 @@ import {
 } from "@/lib/lead-scoring";
 import { notifyStatusChange } from "@/lib/notifications";
 import { onStatusChange } from "@/lib/follow-up-engine";
+import { notifyStatusChanged } from "@/lib/in-app-notifications";
 
 export const dynamic = "force-dynamic";
 
@@ -127,6 +128,7 @@ export async function PATCH(req: NextRequest, props: { params: Promise<{ id: str
       });
 
       if (assignedRep?.email && assignedRep.profile) {
+        // Send email notification
         await notifyStatusChange({
           repEmail: assignedRep.email,
           repName: assignedRep.profile.firstName || assignedRep.email,
@@ -135,6 +137,17 @@ export async function PATCH(req: NextRequest, props: { params: Promise<{ id: str
           newStatus: status,
           changedBy: context.userEmail,
         });
+
+        // Send in-app notification
+        await notifyStatusChanged({
+          userId: customer.assignedToId!,
+          customerName: `${customer.firstName} ${customer.lastName}`,
+          oldStatus: customer.status,
+          newStatus: status,
+          changedBy: context.userEmail,
+          customerId: params.id,
+        });
+
         console.log(`✅ Status change notification sent to ${assignedRep.email}`);
       }
     } catch (notifError) {

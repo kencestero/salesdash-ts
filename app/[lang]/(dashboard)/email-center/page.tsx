@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
 export const metadata = {
-  title: "Email Center - MJ Cargo Dashboard",
+  title: "Email Center - Remotive Logistics Dashboard",
   description: "Send branded emails to customers and team members",
 };
 
@@ -90,7 +90,7 @@ export default async function EmailCenterPage() {
           <EmailSender
             type="quote"
             defaultData={{
-              repName: session.user.name || "MJ Cargo Rep",
+              repName: session.user.name || "Remotive Logistics Rep",
               repEmail: session.user.email,
             }}
           />
@@ -104,7 +104,7 @@ export default async function EmailCenterPage() {
             </CardHeader>
             <CardContent>
               <ul className="text-sm space-y-2 text-muted-foreground">
-                <li>✅ MJ Cargo orange branding with professional header</li>
+                <li>✅ Remotive Logistics orange branding with professional header</li>
                 <li>✅ Unit details prominently displayed</li>
                 <li>✅ Clickable "View My Quote" button links to quote page</li>
                 <li>✅ Reply-to automatically set to your email</li>
@@ -173,7 +173,7 @@ export default async function EmailCenterPage() {
         <CardContent className="space-y-3 text-sm">
           <div>
             <strong>Base Template:</strong> <code className="bg-muted px-1 rounded">mj-cargo-base.tsx</code>
-            <p className="text-muted-foreground">Reusable base template with MJ Cargo orange branding, header, footer, and CTA button</p>
+            <p className="text-muted-foreground">Reusable base template with Remotive Logistics orange branding, header, footer, and CTA button</p>
           </div>
           <div>
             <strong>API Endpoints:</strong>

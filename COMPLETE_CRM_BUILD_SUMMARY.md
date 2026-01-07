@@ -1,6 +1,6 @@
 # COMPLETE CRM SYSTEM BUILD - Comprehensive Summary
 
-**Project:** MJ Cargo SalesDash - Complete CRM System with Rep Tracking
+**Project:** Remotive Logistics SalesDash - Complete CRM System with Rep Tracking
 **Date:** October 2025
 **Status:** ✅ 100% COMPLETE
 
@@ -21,7 +21,7 @@
 
 ## Overview
 
-This document summarizes the complete CRM system build that was implemented for MJ Cargo SalesDash. The system includes:
+This document summarizes the complete CRM system build that was implemented for Remotive Logistics SalesDash. The system includes:
 
 - **Rep tracking system** with unique rep codes
 - **Manager assignment** during signup
@@ -287,7 +287,7 @@ npx prisma db push --accept-data-loss
 - Beautiful gradient card (purple-600 to blue-600)
 - Displays rep code prominently (e.g., "REP482756")
 - Displays user's first name ("Welcome back, John!")
-- Full tracking URL shown: `mjcargotrailers.com/credit-application/REP482756`
+- Full tracking URL shown: `remotivetrailers.com/credit-application/REP482756`
 - **Copy Code** button - Copies just the rep code
 - **Copy Link** button - Copies the full URL
 - Toast notifications on copy success
@@ -474,7 +474,7 @@ if (pendingUser.status === "freelancer") {
   - Public submissions: uses looked-up rep user ID
 
 **Flow:**
-1. Customer visits `https://mjcargotrailers.com/credit-application/REP482756`
+1. Customer visits `https://remotivetrailers.com/credit-application/REP482756`
 2. Frontend validates rep code
 3. Customer fills out form
 4. Form submits with `shareToken: "REP482756"`
@@ -837,7 +837,7 @@ Reps can access their rep code from **3 locations:**
 ### 6. Customer Credit Application Flow
 
 **Steps:**
-1. Rep shares link: `https://mjcargotrailers.com/credit-application/REP482756`
+1. Rep shares link: `https://remotivetrailers.com/credit-application/REP482756`
 2. Customer clicks link
 3. Page validates rep code, shows rep's name
 4. Customer fills out credit application

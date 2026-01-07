@@ -1,5 +1,5 @@
 /**
- * MJ SalesDash Database Cleanup Script
+ * Remotive SalesHub Database Cleanup Script
  *
  * PURPOSE: Remove all personal data, leads, and user information while
  *          preserving system tools, templates, and infrastructure

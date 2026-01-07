@@ -1,5 +1,5 @@
 /**
- * MJ Cargo CRM - Google Sheets Integration
+ * Remotive Logistics CRM - Google Sheets Integration
  * Submits leads to both CRM sheets via Apps Script webhook
  */
 

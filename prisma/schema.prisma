@@ -69,6 +69,8 @@ model User {
   pushSubscriptions PushSubscription[] @relation("PushSubscriptions")
   deliveryRecords   DeliveryRecord[]   @relation("CreatedDeliveryRecords")
   dashboardVisits   DashboardVisit[]
+  notifications     Notification[]
+  notificationPreferences NotificationPreference?
 }
 
 model VerificationToken {
@@ -101,7 +103,7 @@ model PendingUser {
   @@map("pending_users")
 }
 
-// MJ Cargo SalesDash Models
+// Remotive SalesHub Models
 
 model UserProfile {
   id              String   @id @default(cuid())
@@ -1135,4 +1137,80 @@ model DashboardVisit {
 
   @@index([createdAt])
   @@index([userId, createdAt])
+}
+
+// ===========================================
+// NOTIFICATION SYSTEM
+// ===========================================
+
+enum NotificationType {
+  // CRM Notifications (Priority A-E)
+  CUSTOMER_ASSIGNED      // A - Someone assigned a customer to you
+  CREDIT_APP_SUBMITTED   // B - Customer submitted credit app
+  CREDIT_APP_APPROVED    // B - Credit app approved
+  CREDIT_APP_DECLINED    // B - Credit app declined
+  FOLLOW_UP_DUE          // C - Time to follow up with customer
+  DUPLICATE_DETECTED     // D - Someone tried to add your customer
+  STATUS_CHANGED         // E - Manager changed customer status
+
+  // System Notifications
+  SYSTEM_ANNOUNCEMENT    // News from management
+  TIP                    // Dashboard tips (complete profile, etc.)
+  MEETING                // Meeting announcements
+  NEW_FEATURE            // New tools/features available
+  WELCOME                // Welcome message for new users
+}
+
+model Notification {
+  id          String           @id @default(cuid())
+  userId      String           // Recipient
+  type        NotificationType
+  title       String
+  message     String           @db.Text
+  data        Json?            // Additional context (customerId, creditAppId, etc.)
+  read        Boolean          @default(false)
+  readAt      DateTime?
+  emailSent   Boolean          @default(false)
+  emailSentAt DateTime?
+  actionUrl   String?          // URL to navigate to when clicked
+  createdAt   DateTime         @default(now())
+
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, read])
+  @@index([userId, createdAt])
+  @@index([type])
+  @@index([createdAt])
+}
+
+model NotificationPreference {
+  id                    String   @id @default(cuid())
+  userId                String   @unique
+
+  // Channel toggles
+  inAppEnabled          Boolean  @default(true)
+  emailEnabled          Boolean  @default(true)
+
+  // CRM Notifications
+  customerAssigned      Boolean  @default(true)
+  creditAppUpdates      Boolean  @default(true)
+  followUpReminders     Boolean  @default(true)
+  duplicateAlerts       Boolean  @default(true)
+  statusChanges         Boolean  @default(true)
+
+  // System Notifications
+  systemAnnouncements   Boolean  @default(true)
+  tipsAndTricks         Boolean  @default(true)
+
+  // Quiet Hours (future enhancement)
+  quietHoursEnabled     Boolean  @default(false)
+  quietHoursStart       String?  // "22:00" format
+  quietHoursEnd         String?  // "08:00" format
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }

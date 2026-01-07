@@ -1,4 +1,4 @@
-# 🛠️ TECHNICAL SPECIFICATIONS - MJ Cargo SalesDash
+# 🛠️ TECHNICAL SPECIFICATIONS - Remotive Logistics SalesDash
 
 **For Developers / Technical Review**
 **Date:** October 10, 2025

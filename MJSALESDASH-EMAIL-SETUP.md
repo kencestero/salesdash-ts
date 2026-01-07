@@ -9,14 +9,14 @@ Set up professional emails from **mjsalesdash.com** using Resend.
 
 **Your emails will look like:**
 ```
-From: MJ Cargo <noreply@mjsalesdash.com>
-From: MJ Cargo Sales <quotes@mjsalesdash.com>
-From: MJ Cargo Support <support@mjsalesdash.com>
+From: Remotive Logistics <noreply@mjsalesdash.com>
+From: Remotive Logistics Sales <quotes@mjsalesdash.com>
+From: Remotive Logistics Support <support@mjsalesdash.com>
 ```
 
 **When customers reply, they'll email:**
 - Your actual Gmail: kencestero@gmail.com
-- Or company Gmail: mjcargotrailers@gmail.com
+- Or company Gmail: remotivetrailers@gmail.com
 
 ---
 
@@ -25,7 +25,7 @@ From: MJ Cargo Support <support@mjsalesdash.com>
 ### Step 1: Sign Up for Resend (5 minutes)
 
 1. **Go to Resend**: https://resend.com/signup
-2. **Sign up with your email**: kencestero@gmail.com (or mjcargotrailers@gmail.com)
+2. **Sign up with your email**: kencestero@gmail.com (or remotivetrailers@gmail.com)
 3. **Verify your email**: Check inbox for verification link
 4. **Complete onboarding**: Skip any optional steps
 
@@ -152,7 +152,7 @@ vercel env add RESEND_API_KEY
 
 # Add From Email
 vercel env add RESEND_FROM_EMAIL
-# When prompted, type: MJ Cargo <noreply@mjsalesdash.com>
+# When prompted, type: Remotive Logistics <noreply@mjsalesdash.com>
 # Select: Production, Preview, Development
 ```
 
@@ -200,7 +200,7 @@ Wait 2-3 minutes for deployment to complete.
 4. **Confirm** security dialog
 5. **Check emails**:
    - kencestero@gmail.com
-   - mjcargotrailers@gmail.com
+   - remotivetrailers@gmail.com
 6. **Both should receive**: Owner code email with today's code
 
 **If both emails arrive**: 🎉 COMPLETE SUCCESS!
@@ -239,13 +239,13 @@ sarah.jones@mjsalesdash.com
 
 **Customer Receives:**
 ```
-From: MJ Cargo <quotes@mjsalesdash.com>
+From: Remotive Logistics <quotes@mjsalesdash.com>
 Reply-To: kencestero@gmail.com
-Subject: Your MJ Cargo Quote: 7x16 TA Enclosed
+Subject: Your Remotive Logistics Quote: 7x16 TA Enclosed
 
 Hi Jane Smith!
 
-Thank you for your interest in MJ Cargo Trailers!
+Thank you for your interest in Remotive Logistics Trailers!
 
 [Beautiful orange-branded email with quote details]
 
@@ -281,15 +281,15 @@ After setup, your `.env` will have:
 
 ```bash
 RESEND_API_KEY=re_your_actual_key_here
-RESEND_FROM_EMAIL="MJ Cargo <noreply@mjsalesdash.com>"
+RESEND_FROM_EMAIL="Remotive Logistics <noreply@mjsalesdash.com>"
 ```
 
 Or you can use different addresses for different email types:
 
 ```bash
-RESEND_FROM_EMAIL="MJ Cargo <noreply@mjsalesdash.com>"
-RESEND_QUOTE_EMAIL="MJ Cargo Sales <quotes@mjsalesdash.com>"
-RESEND_SUPPORT_EMAIL="MJ Cargo Support <support@mjsalesdash.com>"
+RESEND_FROM_EMAIL="Remotive Logistics <noreply@mjsalesdash.com>"
+RESEND_QUOTE_EMAIL="Remotive Logistics Sales <quotes@mjsalesdash.com>"
+RESEND_SUPPORT_EMAIL="Remotive Logistics Support <support@mjsalesdash.com>"
 ```
 
 ---
@@ -372,7 +372,7 @@ Once all steps are complete:
 
 ✅ **Emails will send from**: noreply@mjsalesdash.com
 ✅ **Replies will go to**: Your Gmail (kencestero@gmail.com)
-✅ **Professional appearance**: MJ Cargo branding
+✅ **Professional appearance**: Remotive Logistics branding
 ✅ **100+ salespeople can send**: All from same account
 ✅ **Cost**: $0-90/month depending on usage
 ✅ **Owner code security**: Sent via email only

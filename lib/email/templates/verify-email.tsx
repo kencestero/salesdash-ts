@@ -2,7 +2,7 @@
  * Email Verification Template
  */
 
-import MJCargoEmail from './mj-cargo-base';
+import remotiveEmail from './mj-cargo-base';
 
 interface VerifyEmailProps {
   userName: string;
@@ -15,12 +15,12 @@ export default function VerifyEmail({
   verificationLink,
   expiresInHours = 24,
 }: VerifyEmailProps) {
-  return MJCargoEmail({
+  return remotiveEmail({
     preview: 'Verify your email address to complete registration',
     heading: `Welcome ${userName}! 🎉`,
     body: (
       <>
-        <p>Thank you for creating an account with MJ Cargo Sales Dashboard!</p>
+        <p>Thank you for creating an account with Remotive Logistics Sales Dashboard!</p>
         <p>
           To complete your registration and access your account, please verify
           your email address by clicking the button below:
@@ -29,7 +29,7 @@ export default function VerifyEmail({
           This verification link will expire in <strong>{expiresInHours} hours</strong>.
         </p>
         <p style={{ fontSize: '14px', color: '#666', marginTop: '16px' }}>
-          If you didn't create an account with MJ Cargo, you can safely ignore this email.
+          If you didn't create an account with Remotive Logistics, you can safely ignore this email.
         </p>
       </>
     ),

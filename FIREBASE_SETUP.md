@@ -20,7 +20,7 @@ The chat system uses Firebase Firestore for real-time messaging. Follow these st
 1. In Firebase Console, go to Project Settings (gear icon)
 2. Scroll down to "Your apps" section
 3. Click the web icon (`</>`) to add a web app
-4. Register your app with a nickname (e.g., "MJ Cargo Sales Dashboard")
+4. Register your app with a nickname (e.g., "Remotive Logistics Sales Dashboard")
 5. Copy the `firebaseConfig` object
 
 ## 4. Add Environment Variables

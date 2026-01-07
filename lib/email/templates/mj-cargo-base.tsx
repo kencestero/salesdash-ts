@@ -1,5 +1,5 @@
 /**
- * MJ Cargo Base Email Template (React Email)
+ * Remotive Logistics Base Email Template (React Email)
  *
  * This template uses React Email for maximum compatibility across email clients.
  * To use: npm install @react-email/components
@@ -19,7 +19,7 @@ import {
   Hr,
 } from '@react-email/components';
 
-interface MJCargoEmailProps {
+interface remotiveEmailProps {
   preview?: string;
   heading: string;
   body: React.ReactNode;
@@ -28,24 +28,24 @@ interface MJCargoEmailProps {
   footerText?: string;
 }
 
-export default function MJCargoEmail({
-  preview = "New message from MJ Cargo Trailers",
+export default function remotiveEmail({
+  preview = "New message from Remotive Logistics Trailers",
   heading,
   body,
   ctaText,
   ctaLink,
-  footerText = "This email was sent by MJ Cargo Sales Dashboard. If you received this email in error, please contact support.",
-}: MJCargoEmailProps) {
+  footerText = "This email was sent by Remotive Logistics Sales Dashboard. If you received this email in error, please contact support.",
+}: remotiveEmailProps) {
   return (
     <Html>
       <Head />
       <Body style={main}>
         <Container style={container}>
-          {/* Header with MJ Cargo Orange Banner */}
+          {/* Header with Remotive Logistics Orange Banner */}
           <Section style={header}>
             <Row>
               <Column>
-                <Text style={headerText}>MJ CARGO TRAILERS</Text>
+                <Text style={headerText}>Remotive Logistics TRAILERS</Text>
               </Column>
             </Row>
           </Section>
@@ -69,7 +69,7 @@ export default function MJCargoEmail({
           <Section style={footer}>
             <Hr style={hr} />
             <Text style={footerTextStyle}>
-              <strong>MJ Cargo Trailers</strong>
+              <strong>Remotive Logistics Trailers</strong>
             </Text>
             <Text style={footerTextStyle}>
               Premium Enclosed Cargo Trailers & Equipment Trailers
@@ -110,7 +110,7 @@ const container = {
 };
 
 const header = {
-  backgroundColor: '#FF6B2C', // MJ Cargo Orange
+  backgroundColor: '#FF6B2C', // Remotive Logistics Orange
   padding: '24px',
   textAlign: 'center' as const,
 };

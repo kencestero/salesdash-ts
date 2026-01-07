@@ -11,7 +11,7 @@
 
 **Root Cause:** `RESEND_FROM_EMAIL` in Vercel had quotes around it:
 ```
-"MJ Cargo Sales <noreply@mjsalesdash.com>"  ❌
+"Remotive Logistics Sales <noreply@mjsalesdash.com>"  ❌
 ```
 
 **Solution:** Added code to auto-strip quotes from environment variable
@@ -90,8 +90,8 @@ If you want to clean up Vercel environment variables:
 1. Go to Vercel Dashboard → salesdash-ts → Settings → Environment Variables
 2. Find `RESEND_FROM_EMAIL`
 3. Edit and remove quotes (code now handles this automatically, but cleaner without)
-4. Change from: `"MJ Cargo Sales <noreply@mjsalesdash.com>"`
-5. To: `MJ Cargo Sales <noreply@mjsalesdash.com>`
+4. Change from: `"Remotive Logistics Sales <noreply@mjsalesdash.com>"`
+5. To: `Remotive Logistics Sales <noreply@mjsalesdash.com>`
 
 **Note:** This is optional now since code auto-strips quotes!
 

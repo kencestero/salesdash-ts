@@ -84,7 +84,7 @@ export async function sendWelcomeEmail(
 
   return sendEmail({
     to: email,
-    subject: `Welcome to MJ Cargo, ${userName}!`,
+    subject: `Welcome to Remotive Logistics, ${userName}!`,
     react: WelcomeEmail({ userName, userRole, employeeNumber }),
     tags: [
       { name: 'category', value: 'welcome' },
@@ -109,7 +109,7 @@ export async function sendQuoteEmail(
 
   return sendEmail({
     to: customerEmail,
-    subject: `Your MJ Cargo Quote: ${unitDescription}`,
+    subject: `Your Remotive Logistics Quote: ${unitDescription}`,
     react: QuoteEmail({
       customerName,
       repName,
@@ -138,7 +138,7 @@ export async function sendPasswordResetEmail(
 
   return sendEmail({
     to: email,
-    subject: 'Reset Your MJ Cargo Dashboard Password',
+    subject: 'Reset Your Remotive Logistics Dashboard Password',
     react: PasswordResetEmail({ userName, resetLink, expiresInMinutes }),
     tags: [
       { name: 'category', value: 'password-reset' },
@@ -260,21 +260,21 @@ export async function sendVerificationEmail(
  * Test email service (for development)
  */
 export async function testEmailService(testEmail: string) {
-  const MJCargoEmail = (await import('./templates/mj-cargo-base')).default;
+  const remotiveEmail = (await import('./templates/mj-cargo-base')).default;
 
   return sendEmail({
     to: testEmail,
-    subject: 'MJ Cargo Email Service Test',
-    react: MJCargoEmail({
+    subject: 'Remotive Logistics Email Service Test',
+    react: remotiveEmail({
       heading: 'Email Service Test',
       body: (
         <>
-          <p>This is a test email from the MJ Cargo Sales Dashboard.</p>
+          <p>This is a test email from the Remotive Logistics Sales Dashboard.</p>
           <p>If you're seeing this, your email service is configured correctly! 🎉</p>
           <ul>
             <li>✅ Resend API is working</li>
             <li>✅ React Email templates are rendering</li>
-            <li>✅ MJ Cargo branding is applied</li>
+            <li>✅ Remotive Logistics branding is applied</li>
           </ul>
           <p>You're all set to send emails from the dashboard!</p>
         </>

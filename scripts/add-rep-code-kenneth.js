@@ -44,7 +44,7 @@ async function main() {
   
   console.log('\n✅ SUCCESS! Rep code added!');
   console.log('\n🎉 Your Credit Application Link:');
-  console.log(`https://mjcargotrailers.com/credit-application/${newRepCode}`);
+  console.log(`https://remotivetrailers.com/credit-application/${newRepCode}`);
   console.log('\nShare this link with customers to track applications!');
 }
 

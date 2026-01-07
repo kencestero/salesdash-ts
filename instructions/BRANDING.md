@@ -9,10 +9,10 @@
 ## Brand Identity
 
 ### Previous Names (DO NOT USE)
-- ~~MJ Cargo~~
-- ~~MJ Cargo Sales~~
+- ~~Remotive Logistics~~
+- ~~Remotive Logistics Sales~~
 - ~~SalesDash~~
-- ~~MJ SalesDash~~
+- ~~Remotive SalesHub~~
 - ~~MJ Sales Dash~~
 
 ### Current Names (USE THESE)
@@ -93,13 +93,13 @@ Haverstraw, NY 10927
 When rebranding codebase, replace:
 | Old | New |
 |-----|-----|
-| MJ Cargo | Remotive Logistics |
-| MJ Cargo Sales | Remotive Logistics |
-| MJCargo | Remotive |
-| mjcargo | remotive |
+| Remotive Logistics | Remotive Logistics |
+| Remotive Logistics Sales | Remotive Logistics |
+| remotive | Remotive |
+| remotive | remotive |
 | SalesDash | Remotive |
 | salesdash | remotive |
-| MJ SalesDash | Remotive |
+| Remotive SalesHub | Remotive |
 | MJ Sales Dash | Remotive |
 | mjsalesdash | remotive |
 

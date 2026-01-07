@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { nanoid } from "nanoid";
+import { notifyCreditAppUpdate } from "@/lib/in-app-notifications";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -243,8 +244,20 @@ export async function POST(req: Request) {
       },
     });
 
-    // TODO: Send email notification to dealer
-    // TODO: Send confirmation email to customer
+    // Send in-app notification to the rep who owns this credit app
+    if (createdByUserId && isPublicSubmission) {
+      try {
+        await notifyCreditAppUpdate({
+          userId: createdByUserId,
+          applicantName: `${firstName} ${lastName}`,
+          status: "submitted",
+          applicationId: application.id,
+        });
+        console.log(`✅ Credit app notification sent to rep for ${application.appNumber}`);
+      } catch (notifError) {
+        console.error("Failed to send credit app notification (non-blocking):", notifError);
+      }
+    }
 
     return NextResponse.json({
       success: true,

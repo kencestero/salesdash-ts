@@ -1,4 +1,4 @@
-# ✅ MJ CARGO CRM - ACTIVATION CHECKLIST
+# ✅ Remotive Logistics CRM - ACTIVATION CHECKLIST
 
 ## ALREADY WORKING (Just Test These):
 - [x] Customer names are orange and clickable

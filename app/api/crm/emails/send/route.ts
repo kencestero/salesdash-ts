@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
-const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || "MJ Cargo Sales <noreply@mjsalesdash.com>";
+const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || "Remotive Logistics Sales <noreply@mjsalesdash.com>";
 
 export async function POST(req: NextRequest) {
   try {

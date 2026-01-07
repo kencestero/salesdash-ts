@@ -192,7 +192,7 @@ This runs **daily at midnight**.
 pnpm dev
 
 # In another terminal, test the cron endpoint
-curl http://localhost:3000/api/cron/import-email-inventory -H "Authorization: Bearer mjcargo-sheets-sync-secure-key-2025"
+curl http://localhost:3000/api/cron/import-email-inventory -H "Authorization: Bearer remotive-sheets-sync-secure-key-2025"
 ```
 
 ---
@@ -235,7 +235,7 @@ The cron job will only process emails from these addresses.
 
 ```bash
 curl https://mjsalesdash.com/api/cron/import-email-inventory \
-  -H "Authorization: Bearer mjcargo-sheets-sync-secure-key-2025"
+  -H "Authorization: Bearer remotive-sheets-sync-secure-key-2025"
 ```
 
 ### Test 3: Check Inventory

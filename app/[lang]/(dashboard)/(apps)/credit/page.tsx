@@ -80,7 +80,7 @@ export default function CreditApplicationsPage() {
       return;
     }
 
-    const url = `https://mjcargotrailers.com/credit-application/${repCode}`;
+    const url = `https://remotivetrailers.com/credit-application/${repCode}`;
     navigator.clipboard.writeText(url);
 
     toast.success("✅ Link Copied!", {
@@ -143,7 +143,7 @@ export default function CreditApplicationsPage() {
               <div className="flex gap-2">
                 <Input
                   readOnly
-                  value={`https://mjcargotrailers.com/credit-application/${repCode}`}
+                  value={`https://remotivetrailers.com/credit-application/${repCode}`}
                   className="flex-1 font-mono text-sm"
                 />
                 <Button onClick={handleCopyLink} size="lg" className="gap-2">
@@ -151,7 +151,7 @@ export default function CreditApplicationsPage() {
                   Copy Link
                 </Button>
                 <Button variant="outline" asChild>
-                  <Link href={`https://mjcargotrailers.com/credit-application/${repCode}`} target="_blank">
+                  <Link href={`https://remotivetrailers.com/credit-application/${repCode}`} target="_blank">
                     <ExternalLink className="h-4 w-4" />
                   </Link>
                 </Button>

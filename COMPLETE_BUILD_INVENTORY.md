@@ -1,6 +1,6 @@
 # COMPLETE BUILD INVENTORY - Everything Built & Deployed
 
-**Project:** MJ Cargo SalesDash
+**Project:** Remotive Logistics SalesDash
 **Production URL:** https://mjsalesdash.com
 **Status:** ✅ PRODUCTION READY
 **Last Updated:** October 31, 2025
@@ -161,7 +161,7 @@
 - ✅ E-signature capture
 - ✅ Auto-assignment to sales rep
 - ✅ Credit app list (users see only their own, owners see all)
-- ✅ Rep code links point to mjcargotrailers.com (external site)
+- ✅ Rep code links point to remotivetrailers.com (external site)
 
 #### Database Model:
 - `CreditApplication` - Complete application with e-signature
@@ -173,7 +173,7 @@
 
 #### Recent Fixes:
 - ✅ Rep code card domain updated to mjsalesdash.com
-- ✅ Credit app links to mjcargotrailers.com (Matt's notification system)
+- ✅ Credit app links to remotivetrailers.com (Matt's notification system)
 
 ---
 
@@ -420,7 +420,7 @@
 
 #### Configuration:
 - `RESEND_API_KEY` - API authentication
-- `RESEND_FROM_EMAIL` - "MJ Cargo Sales <noreply@mjsalesdash.com>"
+- `RESEND_FROM_EMAIL` - "Remotive Logistics Sales <noreply@mjsalesdash.com>"
 
 #### Files:
 - `lib/email.ts` - Email service wrapper

@@ -67,7 +67,7 @@ Leave empty to import from ALL emails with attachments.
 
 **Link:** https://console.cloud.google.com/apis/credentials
 
-**Project:** MJ Cargo Dashboard
+**Project:** Remotive Logistics Dashboard
 **OAuth Client:** SalesDash Gmail Import
 
 #### To Create New Client Secret:

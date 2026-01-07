@@ -2,7 +2,7 @@
  * Password Reset Email Template
  */
 
-import MJCargoEmail from './mj-cargo-base';
+import remotiveEmail from './mj-cargo-base';
 
 interface ResetPasswordEmailProps {
   userName: string;
@@ -15,12 +15,12 @@ export default function ResetPasswordEmail({
   resetLink,
   expiresInHours = 1,
 }: ResetPasswordEmailProps) {
-  return MJCargoEmail({
-    preview: 'Reset your MJ SalesDash password',
+  return remotiveEmail({
+    preview: 'Reset your Remotive SalesHub password',
     heading: `Hi ${userName}! 🔐`,
     body: (
       <>
-        <p>We received a request to reset your password for your MJ SalesDash account.</p>
+        <p>We received a request to reset your password for your Remotive SalesHub account.</p>
         <p>
           Click the button below to create a new password:
         </p>

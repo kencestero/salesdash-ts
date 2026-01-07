@@ -1,4 +1,4 @@
-import MJCargoEmail from './mj-cargo-base';
+import remotiveEmail from './mj-cargo-base';
 
 interface PasswordResetProps {
   userName: string;
@@ -12,14 +12,14 @@ export default function PasswordResetEmail({
   expiresInMinutes = 60,
 }: PasswordResetProps) {
   return (
-    <MJCargoEmail
-      preview="Reset your MJ Cargo Dashboard password"
+    <remotiveEmail
+      preview="Reset your Remotive Logistics Dashboard password"
       heading="Password Reset Request"
       body={
         <>
           <p>Hi {userName},</p>
 
-          <p>We received a request to reset your password for the MJ Cargo Sales Dashboard.</p>
+          <p>We received a request to reset your password for the Remotive Logistics Sales Dashboard.</p>
 
           <p>Click the button below to choose a new password:</p>
 

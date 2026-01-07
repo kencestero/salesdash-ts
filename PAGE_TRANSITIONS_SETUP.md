@@ -1,8 +1,8 @@
-# 🎬 MJ CARGO PAGE TRANSITIONS - SETUP GUIDE
+# 🎬 Remotive Logistics PAGE TRANSITIONS - SETUP GUIDE
 
 ## 🏆 **CHOSEN TRANSITION: Orchestrated Fade + Slide**
 
-### Why This is Perfect for MJ Cargo:
+### Why This is Perfect for Remotive Logistics:
 - ✅ **Professional** - Not childish or distracting
 - ✅ **Fast** - 0.3s won't annoy busy salespeople
 - ✅ **Smooth** - Gives premium feel to the CRM
@@ -87,12 +87,12 @@ export default function SignInPage() {
     <PageTransition isLogin={true}>
       <div className="login-container">
         <ContentItem delay={0.1}>
-          <img src="/logo.png" alt="MJ Cargo" className="w-32 mx-auto" />
+          <img src="/logo.png" alt="Remotive Logistics" className="w-32 mx-auto" />
         </ContentItem>
         
         <ContentItem delay={0.2}>
           <h1 className="text-3xl font-bold text-center">
-            Welcome to MJ Cargo Sales
+            Welcome to Remotive Logistics Sales
           </h1>
         </ContentItem>
         

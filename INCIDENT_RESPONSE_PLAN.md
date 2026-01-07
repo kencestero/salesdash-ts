@@ -1,6 +1,6 @@
 # 🚨 Security Incident Response Plan
 
-**For:** MJ Cargo Sales Dashboard
+**For:** Remotive Logistics Sales Dashboard
 **Last Updated:** 2025-10-10
 **Review:** Quarterly
 

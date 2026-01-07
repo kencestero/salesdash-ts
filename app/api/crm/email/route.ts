@@ -8,18 +8,18 @@ export async function POST(req: Request) {
     const { to, subject, customerName, message } = await req.json();
     
     const data = await resend.emails.send({
-      from: 'MJ Cargo Sales <sales@mjcargo.com>',
+      from: 'Remotive Logistics Sales <sales@remotivelogistics.com>',
       to: [to],
-      subject: subject || `Follow up from MJ Cargo Trailer Sales`,
+      subject: subject || `Follow up from Remotive Logistics Trailer Sales`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 10px 10px 0 0;">
-            <h1 style="color: white; margin: 0;">MJ Cargo Trailer Sales</h1>
+            <h1 style="color: white; margin: 0;">Remotive Logistics Trailer Sales</h1>
           </div>
           <div style="padding: 30px; background: white; border: 1px solid #e5e7eb; border-radius: 0 0 10px 10px;">
             <h2 style="color: #1f2937;">Hi ${customerName},</h2>
             <p style="color: #4b5563; line-height: 1.6;">
-              ${message || 'Thank you for your interest in MJ Cargo Trailers!'}
+              ${message || 'Thank you for your interest in Remotive Logistics Trailers!'}
             </p>
             <p style="color: #4b5563; line-height: 1.6;">
               I wanted to follow up on your inquiry about our trailers. We have some great options available that might be perfect for your needs.
@@ -30,9 +30,9 @@ export async function POST(req: Request) {
             <br/>
             <p style="color: #4b5563;">
               Best regards,<br/>
-              <strong>MJ Cargo Sales Team</strong><br/>
+              <strong>Remotive Logistics Sales Team</strong><br/>
               📞 Call us: 1-800-TRAILERS<br/>
-              📧 Email: sales@mjcargo.com
+              📧 Email: sales@remotivelogistics.com
             </p>
           </div>
         </div>

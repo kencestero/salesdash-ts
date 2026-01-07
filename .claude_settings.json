@@ -1,0 +1,34 @@
+{
+  "sandbox": {
+    "enabled": true,
+    "autoAllowBashIfSandboxed": true
+  },
+  "permissions": {
+    "defaultMode": "acceptEdits",
+    "allow": [
+      "Read(./**)",
+      "Write(./**)",
+      "Edit(./**)",
+      "Glob(./**)",
+      "Grep(./**)",
+      "Read(C:\\Users\\kence\\salesdash-ts/**)",
+      "Write(C:\\Users\\kence\\salesdash-ts/**)",
+      "Edit(C:\\Users\\kence\\salesdash-ts/**)",
+      "Glob(C:\\Users\\kence\\salesdash-ts/**)",
+      "Grep(C:\\Users\\kence\\salesdash-ts/**)",
+      "Read(C:\\Users\\kence\\salesdash-ts\\.auto-claude\\specs\\002-audit-in-app-notification-endpoints-and-chat-ux-pl/**)",
+      "Write(C:\\Users\\kence\\salesdash-ts\\.auto-claude\\specs\\002-audit-in-app-notification-endpoints-and-chat-ux-pl/**)",
+      "Edit(C:\\Users\\kence\\salesdash-ts\\.auto-claude\\specs\\002-audit-in-app-notification-endpoints-and-chat-ux-pl/**)",
+      "Bash(*)",
+      "WebFetch(*)",
+      "WebSearch(*)",
+      "mcp__context7__resolve-library-id(*)",
+      "mcp__context7__get-library-docs(*)",
+      "mcp__graphiti-memory__search_nodes(*)",
+      "mcp__graphiti-memory__search_facts(*)",
+      "mcp__graphiti-memory__add_episode(*)",
+      "mcp__graphiti-memory__get_episodes(*)",
+      "mcp__graphiti-memory__get_entity_edge(*)"
+    ]
+  }
+}

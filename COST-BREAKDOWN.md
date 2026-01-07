@@ -1,4 +1,4 @@
-# 💰 MJ CARGO SALESDASH - COST BREAKDOWN & ROI ANALYSIS
+# 💰 Remotive Logistics SALESDASH - COST BREAKDOWN & ROI ANALYSIS
 
 **Date:** October 10, 2025
 **Purpose:** Detailed financial analysis for Matt (Owner) to understand infrastructure costs and return on investment

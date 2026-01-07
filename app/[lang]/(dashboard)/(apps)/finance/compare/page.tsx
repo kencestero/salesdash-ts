@@ -294,7 +294,7 @@ export default function FinanceComparePage() {
     const repId =
       session?.user?.role && ["REP", "SMA", "DIR", "VIP"].includes(session.user.role)
         ? `${session.user.role}#${session.user.id?.slice(0, 6).toUpperCase()}`
-        : session?.user?.name || session?.user?.email || "MJ Cargo Rep";
+        : session?.user?.name || session?.user?.email || "Remotive Logistics Rep";
 
     // Get selected trailer details for quote
     const selectedTrailer = trailers.find(t => t.id === selectedUnit);
@@ -308,7 +308,7 @@ export default function FinanceComparePage() {
         customerPhone,
         customerEmail,
         repId,
-        repName: session?.user?.name || "MJ Cargo Rep",
+        repName: session?.user?.name || "Remotive Logistics Rep",
         repEmail: session?.user?.email || "",
         unitDescription,
         unitPrice: price,
@@ -494,11 +494,11 @@ export default function FinanceComparePage() {
           )}
         </div>
 
-        {/* MJ Cargo Trailers Finance Center Logo */}
+        {/* Remotive Logistics Trailers Finance Center Logo */}
         <div className="relative z-10 flex justify-center mb-6">
           <Image
             src="/images/mjctfc.webp"
-            alt="MJ Cargo Trailers Finance Center"
+            alt="Remotive Logistics Trailers Finance Center"
             width={400}
             height={120}
             className="h-32 w-auto object-contain drop-shadow-2xl"

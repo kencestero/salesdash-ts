@@ -8,6 +8,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { buildPermissionContext, checkCRMPermission } from "@/lib/crm-permissions";
+import { notifyCustomerAssigned } from "@/lib/in-app-notifications";
 
 export const dynamic = "force-dynamic";
 
@@ -83,6 +84,28 @@ export async function PATCH(req: NextRequest) {
         })
       )
     );
+
+    // Send in-app notifications for each reassigned customer
+    try {
+      const customers = await prisma.customer.findMany({
+        where: { id: { in: customerIds } },
+        select: { id: true, firstName: true, lastName: true },
+      });
+
+      await Promise.all(
+        customers.map((customer) =>
+          notifyCustomerAssigned({
+            userId: assignedToId,
+            customerName: `${customer.firstName} ${customer.lastName}`,
+            customerId: customer.id,
+            assignedBy: context.userEmail,
+          })
+        )
+      );
+      console.log(`✅ In-app notifications sent for ${customers.length} reassigned leads`);
+    } catch (notifError) {
+      console.error("Failed to send in-app notifications (non-blocking):", notifError);
+    }
 
     console.log(`✅ Bulk reassign: ${result.count} leads assigned to ${targetUser.email}`);
 

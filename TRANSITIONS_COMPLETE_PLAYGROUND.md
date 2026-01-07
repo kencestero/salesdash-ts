@@ -1,4 +1,4 @@
-# 🎬 MJ CARGO - COMPLETE PAGE TRANSITIONS PLAYGROUND
+# 🎬 Remotive Logistics - COMPLETE PAGE TRANSITIONS PLAYGROUND
 
 ## 📚 **TABLE OF CONTENTS**
 1. [Installation & Setup](#installation--setup)
@@ -219,7 +219,7 @@ export function SharedLogo() {
         damping: 30
       }}
     >
-      <img src="/logo.png" alt="MJ Cargo" />
+      <img src="/logo.png" alt="Remotive Logistics" />
     </motion.div>
   );
 }
@@ -370,7 +370,7 @@ export default function TransitionPlayground() {
           className="p-8 bg-gradient-to-r from-orange-400 to-orange-600 rounded-lg text-white"
           style={{ transformOrigin: 'center center' }}
         >
-          <h2 className="text-2xl font-bold mb-4">MJ Cargo CRM</h2>
+          <h2 className="text-2xl font-bold mb-4">Remotive Logistics CRM</h2>
           <p>This box will animate with: {selectedTransition}</p>
           <div className="mt-4 grid grid-cols-3 gap-4">
             <div className="bg-white/20 p-4 rounded">Card 1</div>
@@ -673,5 +673,5 @@ This guide has EVERYTHING you need to experiment with transitions! Play around, 
 ---
 
 *Last Updated: October 2024*
-*For: Kenneth @ MJ Cargo*
+*For: Kenneth @ Remotive Logistics*
 *By: Claude Opus*

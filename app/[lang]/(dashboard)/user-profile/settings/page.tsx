@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PersonalDetails from "./personal-details"
 import ChangePassword from "./change-password"
 import CommingSoon from "./comming-soon";
+import NotificationSettings from "./notification-settings";
 
 const Settings = () => {
   const tabs: {
@@ -19,6 +20,10 @@ const Settings = () => {
       {
         label: "Change Password",
         value: "password"
+      },
+      {
+        label: "Notifications",
+        value: "notifications"
       },
       {
         label: "Others",
@@ -54,6 +59,9 @@ const Settings = () => {
           </TabsContent>
           <TabsContent value="password" className="mt-0">
             <ChangePassword />
+          </TabsContent>
+          <TabsContent value="notifications" className="mt-0">
+            <NotificationSettings />
           </TabsContent>
           <TabsContent value="others" className="mt-0">
             <CommingSoon />

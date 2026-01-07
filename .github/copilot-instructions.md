@@ -1,7 +1,7 @@
-# MJ SalesDash - AI Development Guide
+# Remotive SalesHub - AI Development Guide
 
 ## 🎯 Project Overview
-**MJ SalesDash** is a professional admin portal for remote trailer sales reps at MJ Cargo, built on the DashTail template with Next.js 14, TypeScript, and TailwindCSS. Uses dark mode branding with #E96114 (orange) + #09213C (dark blue).
+**Remotive SalesHub** is a professional admin portal for remote trailer sales reps at Remotive Logistics, built on the DashTail template with Next.js 14, TypeScript, and TailwindCSS. Uses dark mode branding with #E96114 (orange) + #09213C (dark blue).
 
 ## 🏗️ Architecture Patterns
 
@@ -38,7 +38,7 @@ app/[lang]/
 
 ### Access Control Features
 - Email allowlist system via `ACCESS_ALLOWLIST_ENABLED` env var
-- Domain-based access (`@mjcargo.com`, `@obscurerides.com`)
+- Domain-based access (`@remotivelogistics.com`, `@obscurerides.com`)
 - Individual email whitelisting support
 
 ## 🎨 UI System & Theming

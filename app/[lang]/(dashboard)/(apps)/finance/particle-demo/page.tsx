@@ -351,7 +351,7 @@ export default function ParticleDemo() {
         animate={{ opacity: 1, y: 0 }}
       >
         <h1 className="text-5xl font-bold text-white mb-4">
-          🎆 MJ Cargo Particle Effects Showcase 🎆
+          🎆 Remotive Logistics Particle Effects Showcase 🎆
         </h1>
         <p className="text-xl text-slate-400">
           Click any effect to see it in action! These can be added to trailer cards.

@@ -39,7 +39,7 @@ export function generateQuotePDF(data: QuoteData): void {
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
 
-  // Colors - MJ Cargo Branding
+  // Colors - Remotive Logistics Branding
   const orangeColor: [number, number, number] = [238, 104, 50]; // #ee6832
   const darkBlue: [number, number, number] = [30, 41, 59]; // Dark blue from logo
   const lightGray: [number, number, number] = [240, 240, 240];
@@ -49,11 +49,11 @@ export function generateQuotePDF(data: QuoteData): void {
   doc.setFillColor(...orangeColor);
   doc.rect(0, 0, pageWidth, 35, "F");
 
-  // MJ CARGO TRAILERS title - WHITE ON ORANGE, BOLD, LARGE
+  // Remotive Logistics TRAILERS title - WHITE ON ORANGE, BOLD, LARGE
   doc.setTextColor(255, 255, 255); // White color
   doc.setFontSize(28); // Larger font
   doc.setFont("helvetica", "bold");
-  doc.text("MJ CARGO TRAILERS", pageWidth / 2, 15, { align: "center" });
+  doc.text("Remotive Logistics TRAILERS", pageWidth / 2, 15, { align: "center" });
 
   // Finance Calculator subtitle - White, medium bold
   doc.setFontSize(14);
@@ -270,7 +270,7 @@ export function generateQuotePDF(data: QuoteData): void {
   doc.setFontSize(8);
   doc.setFont("helvetica", "normal");
   doc.text(
-    "MJ Cargo Trailers - Premium Enclosed Cargo Trailers & Equipment Trailers",
+    "Remotive Logistics Trailers - Premium Enclosed Cargo Trailers & Equipment Trailers",
     pageWidth / 2,
     footerY + 5,
     { align: "center" }

@@ -146,7 +146,7 @@ python3 cli/pdf_scraper.py \
 # Company wiki
 python3 cli/doc_scraper.py \
   --name mj-procedures \
-  --url https://mjcargo.internal/wiki
+  --url https://remotive.internal/wiki
 ```
 
 ### Use Case 4: OAuth Fix Workflow
@@ -270,7 +270,7 @@ python3 cli/pdf_scraper.py --pdf doc.pdf --name skill --parallel --workers 8
 3. **Create skills for supplier APIs** (Diamond, Quality, Panther Cargo)
 4. **Use git worktrees** for parallel dev (OAuth fix + new features)
 5. **Enable TDD skill** - It'll save you from 3 AM debugging
-6. **Create internal MJ Cargo skill** - Company knowledge in every chat
+6. **Create internal Remotive Logistics skill** - Company knowledge in every chat
 7. **Use `--enhance-local`** - No API costs!
 8. **Set up MCP** - Use Skill Seekers from Claude Code naturally
 

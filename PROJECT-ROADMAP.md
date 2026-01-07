@@ -1,4 +1,4 @@
-# 🚀 MJ Cargo SalesDash - Project Roadmap
+# 🚀 Remotive Logistics SalesDash - Project Roadmap
 
 **Vision:** Build the "Uber of Trailer Sales" - A scalable, data-driven workforce management platform for high-volume remote sales operations.
 
@@ -24,7 +24,7 @@
 
 ## 🎯 EXECUTIVE SUMMARY
 
-MJ Cargo is building a revolutionary sales management platform to manage 90-400+ remote sales representatives selling cargo trailers. The platform provides real-time performance monitoring, automated alerts, hierarchical team management, and workforce analytics.
+Remotive Logistics is building a revolutionary sales management platform to manage 90-400+ remote sales representatives selling cargo trailers. The platform provides real-time performance monitoring, automated alerts, hierarchical team management, and workforce analytics.
 
 **Key Differentiators:**
 - ✅ Real-time activity monitoring (hours online, leads added, meetings attended)
@@ -509,10 +509,10 @@ will be escalated to RED status and may be reviewed for termination.
 
 Log in now: https://salesdash-ts.vercel.app
 
-Questions? Contact your manager: matt@mjcargo.com
+Questions? Contact your manager: matt@remotivelogistics.com
 
 Best regards,
-MJ Cargo Sales Team
+Remotive Logistics Sales Team
 ```
 
 **Red Alert:**
@@ -542,7 +542,7 @@ Log in immediately: https://salesdash-ts.vercel.app
 
 This is your final warning.
 
-MJ Cargo Sales Team
+Remotive Logistics Sales Team
 ```
 
 ---
@@ -718,7 +718,7 @@ Questions? Reply to this email or message Matt in SalesDash.
 Log in to SalesDash: https://salesdash-ts.vercel.app
 
 Best regards,
-MJ Cargo Sales Team
+Remotive Logistics Sales Team
 
 ---
 💡 TIP: Top performers this month get bonus commissions!
@@ -769,13 +769,13 @@ Your manager (Matt Smith) is available to help:
 - Review your sales approach
 - Troubleshoot CRM issues
 
-Contact Matt: matt@mjcargo.com | (555) 999-1234
+Contact Matt: matt@remotivelogistics.com | (555) 999-1234
 
 Log in now: https://salesdash-ts.vercel.app
 
 This is your warning. Take action immediately.
 
-MJ Cargo Sales Team
+Remotive Logistics Sales Team
 ```
 
 ---
@@ -1227,7 +1227,7 @@ MJ Cargo Sales Team
    - Set up privacy policy page
 
 5. **Branding Decision** 🎨
-   - Finalize company name (MJ Cargo? MJ SalesDash?)
+   - Finalize company name (Remotive Logistics? Remotive SalesHub?)
    - Choose logo/colors
    - Order business cards for Matt
 
@@ -1273,7 +1273,7 @@ MJ Cargo Sales Team
 
 ## 🏁 CONCLUSION
 
-This roadmap outlines a **world-class workforce management platform** designed to scale from 90 to 1,000+ employees. With automated tracking, intelligent alerts, and hierarchical team management, MJ Cargo will have the tools to compete with industry giants like Uber.
+This roadmap outlines a **world-class workforce management platform** designed to scale from 90 to 1,000+ employees. With automated tracking, intelligent alerts, and hierarchical team management, Remotive Logistics will have the tools to compete with industry giants like Uber.
 
 **Key Takeaways:**
 - ✅ System is designed for massive scale (1,000+ employees)

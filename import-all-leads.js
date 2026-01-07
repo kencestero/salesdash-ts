@@ -105,7 +105,7 @@ async function importAllLeads() {
       }
 
       // Priority 2: Check email duplicates (if no phone or invalid phone)
-      if (!skipReason && email && email.includes('@') && email !== '@leads.mjcargotrailers.com') {
+      if (!skipReason && email && email.includes('@') && email !== '@leads.remotivetrailers.com') {
         if (seenEmails.has(email)) {
           skipReason = 'duplicate_email';
           skippedDuplicateEmail++;
@@ -144,7 +144,7 @@ async function importAllLeads() {
           data: {
             firstName,
             lastName,
-            email: (email && email.includes('@') && email !== '@leads.mjcargotrailers.com') ? email : null,
+            email: (email && email.includes('@') && email !== '@leads.remotivetrailers.com') ? email : null,
             phone,  // Store ANY phone value, including "Na", "Unknown", etc.
             source: 'google_sheets',
             status,

@@ -89,3 +89,6 @@ public/uploads/avatars/*
 google-credentials.json
 google-credentials.json.json
 scripts/import-from-sheet.ts
+
+# Auto Claude data directory
+.auto-claude/

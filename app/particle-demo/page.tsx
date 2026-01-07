@@ -121,7 +121,7 @@ export default function ParticleDemo() {
           color: "white",
           marginBottom: "16px"
         }}>
-          🎆 MJ Cargo Particle Effects 🎆
+          🎆 Remotive Logistics Particle Effects 🎆
         </h1>
         <p style={{ fontSize: "20px", color: "#94a3b8" }}>
           Click any effect to see it in action!

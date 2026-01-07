@@ -285,7 +285,7 @@ async function processBatch(customers: any[]): Promise<ImportResult> {
 async function main() {
   try {
     console.log('═══════════════════════════════════════════');
-    console.log('  📊 MJ Cargo SalesDash - CSV Lead Import');
+    console.log('  📊 Remotive Logistics SalesDash - CSV Lead Import');
     console.log('═══════════════════════════════════════════\n');
 
     const startTime = Date.now();

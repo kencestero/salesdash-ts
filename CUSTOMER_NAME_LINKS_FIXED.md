@@ -27,7 +27,7 @@ Customer names in the CRM list are now **clickable links** that navigate to the 
 ## 🎨 NEW FEATURES:
 
 ### Visual Improvements:
-- **Orange Color** (`text-orange-600`) - Matches MJ Cargo brand
+- **Orange Color** (`text-orange-600`) - Matches Remotive Logistics brand
 - **Hover Effect** - Darker orange + underline on hover
 - **Cursor Pointer** - Shows clickable cursor
 - **Same Destination** - Goes to `/en/crm/customers/${customer.id}`
@@ -76,7 +76,7 @@ Customer names in the CRM list are now **clickable links** that navigate to the 
 2. **Faster Navigation** - Bigger click target
 3. **Consistent** - Same behavior as View button
 4. **Visual Feedback** - Orange color + hover effects
-5. **Brand Aligned** - Uses MJ Cargo orange (#ee6832)
+5. **Brand Aligned** - Uses Remotive Logistics orange (#ee6832)
 
 ## 📝 NOTES:
 

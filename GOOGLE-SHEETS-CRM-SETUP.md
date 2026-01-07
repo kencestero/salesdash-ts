@@ -1,7 +1,7 @@
 # Google Sheets CRM Integration Setup
 
 ## Overview
-This guide will help you connect your MJ Cargo Sales Dashboard to your Google Sheets CRM system, enabling real-time data sync between your dashboard and your existing Google Sheets.
+This guide will help you connect your Remotive Logistics Sales Dashboard to your Google Sheets CRM system, enabling real-time data sync between your dashboard and your existing Google Sheets.
 
 ---
 
@@ -10,7 +10,7 @@ This guide will help you connect your MJ Cargo Sales Dashboard to your Google Sh
 ### 1.1 Create Google Cloud Project
 1. Go to [Google Cloud Console](https://console.cloud.google.com)
 2. Click **"Create Project"**
-3. Name it: **"MJ Cargo CRM Integration"**
+3. Name it: **"Remotive Logistics CRM Integration"**
 4. Click **Create**
 
 ### 1.2 Enable Google Sheets API
@@ -22,7 +22,7 @@ This guide will help you connect your MJ Cargo Sales Dashboard to your Google Sh
 1. Go to **"APIs & Services" → "Credentials"**
 2. Click **"Create Credentials" → "Service Account"**
 3. Name: **"salesdash-crm-sync"**
-4. Description: **"MJ Cargo Sales Dashboard CRM Sync"**
+4. Description: **"Remotive Logistics Sales Dashboard CRM Sync"**
 5. Click **"Create and Continue"**
 6. Role: Select **"Editor"** (or create custom role)
 7. Click **"Done"**

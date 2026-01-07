@@ -1,5 +1,5 @@
 #!/bin/bash
-# MJ CARGO - INVENTORY FEATURES SETUP
+# Remotive Logistics - INVENTORY FEATURES SETUP
 
 echo "🚀 SETTING UP INVENTORY FEATURES"
 echo "================================="

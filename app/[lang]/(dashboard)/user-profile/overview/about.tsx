@@ -32,7 +32,7 @@ const About = ({ session, userProfile }: AboutProps) => {
       <CardContent>
         <div className="text-sm text-default-600 mb-3">
           Hi I&apos;m {session?.user?.name || 'there'}, welcome to my profile!
-          I&apos;m part of the MJ Cargo sales team, working to provide the best trailer solutions for our customers.
+          I&apos;m part of the Remotive Logistics sales team, working to provide the best trailer solutions for our customers.
           As a {userProfile?.role || 'team member'}, I focus on delivering exceptional service and building lasting relationships.
         </div>
         <div className="text-sm text-default-600">

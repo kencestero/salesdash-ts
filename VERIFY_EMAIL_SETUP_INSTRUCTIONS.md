@@ -10,7 +10,7 @@ The email verification was not working because:
 
 ## What Was Fixed (Code Changes)
 ✅ Installed `resend` package  
-✅ Created verification email template with MJ Cargo branding  
+✅ Created verification email template with Remotive Logistics branding  
 ✅ Implemented `sendVerificationEmail()` function  
 ✅ Added email sending to registration flow  
 
@@ -51,7 +51,7 @@ vercel env add RESEND_API_KEY
 vercel env add RESEND_FROM_EMAIL
 
 # When prompted:
-# 1. Type: MJ Cargo <noreply@mjsalesdash.com>
+# 1. Type: Remotive Logistics <noreply@mjsalesdash.com>
 # 2. Select ALL environments
 # 3. Press Enter
 ```
@@ -69,7 +69,7 @@ vercel env add RESEND_FROM_EMAIL
    - Click "Save"
 7. **Second Variable:**
    - Key: `RESEND_FROM_EMAIL`
-   - Value: `MJ Cargo <noreply@mjsalesdash.com>`
+   - Value: `Remotive Logistics <noreply@mjsalesdash.com>`
    - Environments: Check ALL
    - Click "Save"
 
@@ -90,7 +90,7 @@ This will automatically trigger a deployment on Vercel (takes 2-3 minutes).
 
 ---
 
-### Step 4: Test with MJCARGOTRAILERS@GMAIL.COM
+### Step 4: Test with remotiveTRAILERS@GMAIL.COM
 
 After deployment completes:
 
@@ -100,9 +100,9 @@ After deployment completes:
    - Fill out the registration form
    - **This time, the email WILL be sent!**
 
-2. Check the email inbox: **MJCARGOTRAILERS@GMAIL.COM**
-   - Look for email from: **MJ Cargo <noreply@mjsalesdash.com>**
-   - Subject: **"Verify Your Email - MJ Cargo Sales Dashboard"**
+2. Check the email inbox: **remotiveTRAILERS@GMAIL.COM**
+   - Look for email from: **Remotive Logistics <noreply@mjsalesdash.com>**
+   - Subject: **"Verify Your Email - Remotive Logistics Sales Dashboard"**
    - Check spam folder if not in inbox
 
 3. Click the "Verify Email Address" button in the email
@@ -124,8 +124,8 @@ After deployment completes:
 8. User can now sign in and access dashboard
 
 ### Email Template:
-The verification email uses the MJ Cargo branded template:
-- Orange header with "MJ CARGO TRAILERS" logo
+The verification email uses the Remotive Logistics branded template:
+- Orange header with "Remotive Logistics TRAILERS" logo
 - Professional welcome message
 - Clear "Verify Email Address" button (orange)
 - 24-hour expiration notice
@@ -170,7 +170,7 @@ The verification email uses the MJ Cargo branded template:
 
 ## What Happens to Existing Unverified User?
 
-If MJCARGOTRAILERS@GMAIL.COM already has an account but hasn't verified:
+If remotiveTRAILERS@GMAIL.COM already has an account but hasn't verified:
 
 **Option 1: Delete the old account** (easiest for testing)
 You'll need to manually delete from database, or wait for automatic cleanup.
@@ -190,7 +190,7 @@ After deployment, check these logs to confirm it's working:
 1. **Registration Logs** (in Vercel or terminal):
    ```
    === Registration Request ===
-   Email: mjcargotrailers@gmail.com
+   Email: remotivetrailers@gmail.com
    Name: [Owner Name]
    ✅ User created: [user-id]
    ✅ UserProfile created
@@ -202,7 +202,7 @@ After deployment, check these logs to confirm it's working:
 2. **Resend Dashboard**:
    - New email should appear in "Emails" list
    - Status: Delivered
-   - To: mjcargotrailers@gmail.com
+   - To: remotivetrailers@gmail.com
 
 ---
 
@@ -217,7 +217,7 @@ After deployment, check these logs to confirm it's working:
 1. ⚠️ Add RESEND_API_KEY to Vercel (5 minutes)
 2. ⚠️ Add RESEND_FROM_EMAIL to Vercel (1 minute)
 3. ⚠️ Push code changes and redeploy (3 minutes)
-4. ✅ Test registration with MJCARGOTRAILERS@GMAIL.COM
+4. ✅ Test registration with remotiveTRAILERS@GMAIL.COM
 
 **Time Required:** ~10 minutes total
 

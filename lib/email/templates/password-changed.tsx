@@ -2,7 +2,7 @@
  * Password Changed Confirmation Email Template
  */
 
-import MJCargoEmail from './mj-cargo-base';
+import remotiveEmail from './mj-cargo-base';
 
 interface PasswordChangedEmailProps {
   userName: string;
@@ -15,12 +15,12 @@ export default function PasswordChangedEmail({
   changeTime,
   loginLink,
 }: PasswordChangedEmailProps) {
-  return MJCargoEmail({
-    preview: 'Your MJ SalesDash password has been changed',
+  return remotiveEmail({
+    preview: 'Your Remotive SalesHub password has been changed',
     heading: `Hi ${userName}! 🔐`,
     body: (
       <>
-        <p>Your password for MJ SalesDash has been successfully changed.</p>
+        <p>Your password for Remotive SalesHub has been successfully changed.</p>
         <p style={{ fontSize: '14px', color: '#666', marginTop: '16px' }}>
           <strong>Time:</strong> {changeTime}
         </p>

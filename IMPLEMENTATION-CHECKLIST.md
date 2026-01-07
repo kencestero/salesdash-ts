@@ -4,7 +4,7 @@
 **Goal:** Replace Outseta with FREE Google Sheets-based CRM
 
 ### Phase 1.1: Google Sheets Setup
-- [ ] Create "MJ Cargo CRM" Google Sheet with tabs:
+- [ ] Create "Remotive Logistics CRM" Google Sheet with tabs:
   - [ ] `Leads` - New potential customers
   - [ ] `Customers` - Converted leads
   - [ ] `Activities` - Sales activities log
@@ -112,7 +112,7 @@ model UserProfile {
 
 **Current values:**
 ```
-OWNERS=kencestero@gmail.com,mjcargotrailers@gmail.com,Mightneedoil@gmail.com
+OWNERS=kencestero@gmail.com,remotivetrailers@gmail.com,Mightneedoil@gmail.com
 MANAGERS=brianjtrailers@gmail.com,danmjtrailers@gmail.com
 ```
 
@@ -256,10 +256,10 @@ const activities = await prisma.activity.findMany({
 
 ## 🤖 BONUS: "Jennyfer" Bot Idea
 
-**Your idea:** "Dress her with MJ Cargo logo and call her bot"
+**Your idea:** "Dress her with Remotive Logistics logo and call her bot"
 
 Love this! Here's how:
-- [ ] Create MJ Cargo avatar image
+- [ ] Create Remotive Logistics avatar image
 - [ ] Add chatbot component
 - [ ] Use Jennyfer as helpful sales assistant
 - [ ] Answer common questions

@@ -52,7 +52,7 @@ export default function DemoTrailerCard() {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          MJ Cargo Trailer Card Demo 🔥
+          Remotive Logistics Trailer Card Demo 🔥
         </motion.h1>
         <p className="text-slate-400">
           Hover, click, and change colors to see the animations!

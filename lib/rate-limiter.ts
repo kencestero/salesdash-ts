@@ -113,7 +113,7 @@ export async function sendRateLimitAlert(ip: string, attempts: number): Promise<
     });
 
     await resend.emails.send({
-      from: process.env.RESEND_FROM_EMAIL?.replace(/^["']|["']$/g, "") || "MJ Cargo Sales <noreply@mjsalesdash.com>",
+      from: process.env.RESEND_FROM_EMAIL?.replace(/^["']|["']$/g, "") || "Remotive Logistics Sales <noreply@mjsalesdash.com>",
       to: ["kenneth@mjsalesdash.com", "matt@mjsalesdash.com"], // Kenneth and Matt
       subject: "🚨 Security Alert: Multiple Failed Login Code Attempts",
       html: `
@@ -177,7 +177,7 @@ export async function sendRateLimitAlert(ip: string, attempts: number): Promise<
 
                   <tr><td style="background-color: #f9fafb; padding: 20px 30px; border-top: 1px solid #e5e7eb;">
                     <p style="margin: 0; color: #6b7280; font-size: 12px; text-align: center;">
-                      This is an automated security alert from MJ SalesDash<br/>
+                      This is an automated security alert from Remotive SalesHub<br/>
                       If you have questions, contact your system administrator
                     </p>
                   </td></tr>

@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import UploadPageView from "./page-view";
 
 export const metadata: Metadata = {
-  title: "Upload Inventory - MJ Cargo SalesDash",
+  title: "Upload Inventory - Remotive Logistics SalesDash",
   description: "Upload trailer inventory from manufacturers",
 };
 

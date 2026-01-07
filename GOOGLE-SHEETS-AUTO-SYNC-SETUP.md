@@ -48,7 +48,7 @@ Automatically syncs leads from your Google Sheets CRM to SalesDash database **ev
 ### Step 1: Create Google Cloud Service Account
 
 1. Go to [Google Cloud Console](https://console.cloud.google.com)
-2. Create new project: "MJ Cargo CRM Sync"
+2. Create new project: "Remotive Logistics CRM Sync"
 3. Enable **Google Sheets API**
 4. Create Service Account:
    - Name: `salesdash-sheets-sync`

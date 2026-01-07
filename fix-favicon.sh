@@ -1,8 +1,8 @@
 #!/bin/bash
-# MJ CARGO FAVICON FIX SCRIPT
+# Remotive Logistics FAVICON FIX SCRIPT
 # This script fixes the favicon issue once and for all!
 
-echo "🔧 MJ CARGO FAVICON FIXER"
+echo "🔧 Remotive Logistics FAVICON FIXER"
 echo "========================="
 echo ""
 

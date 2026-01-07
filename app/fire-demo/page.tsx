@@ -236,7 +236,7 @@ export default function FireAnimationShowcase() {
               MJ Orange 🧡
             </h2>
             <p style={{ color: '#94a3b8', fontSize: '16px', marginBottom: '30px' }}>
-              Branded MJ Cargo color
+              Branded Remotive Logistics color
             </p>
 
             <div className="fire-orange">

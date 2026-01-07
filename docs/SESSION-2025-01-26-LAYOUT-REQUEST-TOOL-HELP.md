@@ -275,7 +275,7 @@ When user says "populate help center":
 **Current Setup:**
 - Service: Resend API
 - From Email: `noreply@mjsalesdash.com`
-- Env Variable: `RESEND_FROM_EMAIL="MJ Cargo Sales <noreply@mjsalesdash.com>"`
+- Env Variable: `RESEND_FROM_EMAIL="Remotive Logistics Sales <noreply@mjsalesdash.com>"`
 
 **Question Raised:**
 Should request emails come from:

@@ -332,7 +332,7 @@ I can immediately:
 - AUTH_GOOGLE_SECRET
 - DATABASE_URL (Prisma PostgreSQL)
 - FIREBASE_* (All chat credentials)
-- OWNERS (kencestero@gmail.com, mjcargotrailers@gmail.com)
+- OWNERS (kencestero@gmail.com, remotivetrailers@gmail.com)
 - MANAGERS (brianjtrailers@gmail.com, danmjtrailers@gmail.com)
 - INVITE_CODE (MY-CODE-2025)
 

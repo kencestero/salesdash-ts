@@ -62,9 +62,9 @@ export function generateCompleteFinanceQuoteHTML({
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MJ Cargo Trailers - Complete Finance Quote #${quoteInfo.quoteNumber}</title>
+    <title>Remotive Logistics Trailers - Complete Finance Quote #${quoteInfo.quoteNumber}</title>
     <style>
-        /* MJ Cargo Official Colors */
+        /* Remotive Logistics Official Colors */
         :root {
             --mj-orange: #E6840D;
             --mj-navy: #203F55;
@@ -476,7 +476,7 @@ export function generateCompleteFinanceQuoteHTML({
         <!-- HEADER -->
         <div class="header">
             <div class="header-content">
-                <h1>MJ CARGO TRAILERS</h1>
+                <h1>Remotive Logistics TRAILERS</h1>
                 <div class="subtitle">Your Premium Trailer Finance Quote</div>
                 <div class="quote-info-bar">
                     <span>📅 ${quoteInfo.date}</span>
@@ -500,7 +500,7 @@ export function generateCompleteFinanceQuoteHTML({
                 </div>
                 <div class="info-item">
                     <div class="info-label">Email Address</div>
-                    <div class="info-value">${customerInfo.email || 'customer@mjcargo.com'}</div>
+                    <div class="info-value">${customerInfo.email || 'customer@remotivelogistics.com'}</div>
                 </div>
             </div>
         </div>
@@ -645,7 +645,7 @@ export function generateCompleteFinanceQuoteHTML({
 
         <!-- FOOTER -->
         <div class="footer">
-            <div class="footer-logo">MJ CARGO TRAILERS</div>
+            <div class="footer-logo">Remotive Logistics TRAILERS</div>
             <div class="footer-text">
                 Premium Enclosed Cargo Trailers & Equipment Trailers<br>
                 We offer delivery service and deliver for free subject to distance from our location<br>
@@ -655,7 +655,7 @@ export function generateCompleteFinanceQuoteHTML({
                 <strong>Ready to Get Your Trailer?</strong><br>
                 📞 ${quoteInfo.salesRepPhone} |
                 ✉️ <a href="mailto:${quoteInfo.salesRepEmail}">${quoteInfo.salesRepEmail}</a><br>
-                © 2024 MJ Cargo Trailers. All rights reserved.
+                © 2024 Remotive Logistics Trailers. All rights reserved.
             </div>
         </div>
     </div>

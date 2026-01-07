@@ -1,6 +1,6 @@
 # 🎯 Sales Rep Quick Start Guide
 
-Welcome to MJ SalesDash! This guide will get you up and running in 5 minutes.
+Welcome to Remotive SalesHub! This guide will get you up and running in 5 minutes.
 
 ---
 

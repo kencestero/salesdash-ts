@@ -1,4 +1,4 @@
-# 📚 MJ CARGO CRM - DOCUMENTATION INDEX
+# 📚 Remotive Logistics CRM - DOCUMENTATION INDEX
 
 ## 🔥 **ACTIVATION GUIDES** (Start Here!)
 
@@ -129,6 +129,6 @@ Test these URLs after activation:
 ---
 
 **Created: October 25, 2024**
-**By: Claude Opus 4.1 for Kenneth @ MJ Cargo**
+**By: Claude Opus 4.1 for Kenneth @ Remotive Logistics**
 
 ¡VÁMONOS HERMANO! Everything you need is here! 🔥🚀💪

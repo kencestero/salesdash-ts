@@ -174,7 +174,7 @@
 - [ ] Verify displays full repCode (e.g., "REP482756")
 - [ ] Verify "Copy Link" button copies credit app URL
 - [ ] Click "Copy Link" → verify confetti celebration modal appears
-- [ ] Verify copied link format: `https://mjcargotrailers.com/credit-application/{repCode}`
+- [ ] Verify copied link format: `https://remotivetrailers.com/credit-application/{repCode}`
 
 ### Public Credit Application
 - [ ] Open credit app link in incognito browser (no auth)

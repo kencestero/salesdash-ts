@@ -199,7 +199,7 @@ export default function ApplicationStatusPage() {
                 Applied on {new Date(application.createdAt).toLocaleDateString()}
               </p>
               <p className="text-xs text-gray-500 mt-1">
-                Questions? Contact us at info@mjcargosales.com
+                Questions? Contact us at info@remotivesales.com
               </p>
             </div>
           </CardContent>

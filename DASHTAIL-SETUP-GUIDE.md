@@ -1,11 +1,11 @@
 # DashTail Template - Official Setup Guide
-## MJ Cargo SalesDash Project Documentation
+## Remotive Logistics SalesDash Project Documentation
 
 ---
 
 ## 📚 About DashTail
 
-**DashTail** is a Tailwind, React Next.js Admin Dashboard Template that serves as the foundation for the MJ Cargo SalesDash CRM system.
+**DashTail** is a Tailwind, React Next.js Admin Dashboard Template that serves as the foundation for the Remotive Logistics SalesDash CRM system.
 
 Thank you for choosing DashTail. This documentation covers starter guides and API documentation tailored to DashTail's unique layouts, apps, pages, components, and more.
 
@@ -225,7 +225,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ---
 
-## 🛠️ MJ Cargo SalesDash Customizations
+## 🛠️ Remotive Logistics SalesDash Customizations
 
 ### Current Stack
 
@@ -364,7 +364,7 @@ vercel --prod
 - **Support**: Contact template provider
 - **Updates**: Check for template updates regularly
 
-### MJ Cargo Project Links
+### Remotive Logistics Project Links
 - **Repository**: [Your GitHub Repo]
 - **Production**: [Your Vercel URL]
 - **Staging**: [Your Staging URL if applicable]
@@ -415,7 +415,7 @@ For template-related issues:
 - Check official documentation
 - Contact DashTail support
 
-For MJ Cargo SalesDash issues:
+For Remotive Logistics SalesDash issues:
 - Contact Kenneth Cestero (Project Lead)
 - Check internal documentation
 
@@ -423,7 +423,7 @@ For MJ Cargo SalesDash issues:
 
 ## 📄 License
 
-DashTail Template - Licensed to MJ Cargo
+DashTail Template - Licensed to Remotive Logistics
 - Lifetime updates included
 - Single project license
 - Source code access via GitHub
@@ -444,7 +444,7 @@ DashTail Template - Licensed to MJ Cargo
 
 ## 📝 Notes
 
-This documentation is maintained for the MJ Cargo SalesDash project. Keep this file updated as new features are added or configurations change.
+This documentation is maintained for the Remotive Logistics SalesDash project. Keep this file updated as new features are added or configurations change.
 
 **Last Updated**: October 20, 2025
 **Maintained By**: Kenneth Cestero & Development Team

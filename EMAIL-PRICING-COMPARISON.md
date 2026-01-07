@@ -1,4 +1,4 @@
-# Email Service Pricing Comparison for MJ Cargo Dashboard
+# Email Service Pricing Comparison for Remotive Logistics Dashboard
 
 ## 🎯 Your Scenario: 100 Salespeople Sending Emails
 
@@ -184,7 +184,7 @@
 
 ---
 
-## 🏆 Recommendation for MJ Cargo
+## 🏆 Recommendation for Remotive Logistics
 
 ### **Use Resend - Here's Why:**
 

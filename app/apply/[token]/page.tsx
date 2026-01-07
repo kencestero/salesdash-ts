@@ -41,7 +41,7 @@ export default function PublicCreditApplicationPage() {
                 Application Submitted Successfully!
               </CardTitle>
               <CardDescription className="text-lg mt-2">
-                Thank you for choosing MJ Cargo Trailers Finance Center
+                Thank you for choosing Remotive Logistics Trailers Finance Center
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-8 pt-8">
@@ -122,7 +122,7 @@ export default function PublicCreditApplicationPage() {
           <div className="max-w-2xl mx-auto p-6 bg-white/80 backdrop-blur rounded-xl border border-[#E96114]/20 shadow-lg">
             <p className="text-sm text-gray-600 leading-relaxed">
               🔒 <strong>Your information is secure</strong> and will only be used to process your credit
-              application. By submitting this form, you authorize MJ Cargo Trailers to
+              application. By submitting this form, you authorize Remotive Logistics Trailers to
               perform a credit check. All data is encrypted and handled in accordance with federal privacy laws.
             </p>
           </div>

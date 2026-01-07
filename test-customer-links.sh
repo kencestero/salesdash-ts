@@ -1,5 +1,5 @@
 #!/bin/bash
-# MJ CARGO - TEST CUSTOMER NAME LINKS
+# Remotive Logistics - TEST CUSTOMER NAME LINKS
 
 echo "🔗 TESTING CUSTOMER NAME LINKS"
 echo "=============================="

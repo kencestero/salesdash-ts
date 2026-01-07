@@ -82,7 +82,7 @@ T  → state
 **Vercel (Production):**
 - ✅ `GOOGLE_SHEETS_CLIENT_EMAIL` = salesdash-sheets-sync@mj-cargo-dashboard.iam.gserviceaccount.com
 - ✅ `GOOGLE_SHEETS_PRIVATE_KEY` = (Service Account private key)
-- ✅ `CRON_SECRET` = mjcargo-sheets-sync-secure-key-2025
+- ✅ `CRON_SECRET` = remotive-sheets-sync-secure-key-2025
 
 **Local (.env):**
 - ✅ Same variables added
@@ -194,7 +194,7 @@ T  → state
 ### Manual Sync Test
 ```bash
 curl https://salesdash-ts.vercel.app/api/cron/sync-sheets \
-  -H "Authorization: Bearer mjcargo-sheets-sync-secure-key-2025"
+  -H "Authorization: Bearer remotive-sheets-sync-secure-key-2025"
 ```
 
 ---

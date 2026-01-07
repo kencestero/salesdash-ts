@@ -1,4 +1,4 @@
-# 🚀 MJ Cargo SalesDash Ascension Path
+# 🚀 Remotive Logistics SalesDash Ascension Path
 
 Welcome to **The SalesDash Growth Track** — a simple, motivational system that shows every rep exactly where they stand, what's next, and how far they can go.
 Five clear levels. One mission: **build yourself into a 6-figure closer and respected leader.**
@@ -10,7 +10,7 @@ Five clear levels. One mission: **build yourself into a 6-figure closer and resp
 **Goal:** Understand your role, the product, and the tools.
 
 ### Core Skills
-- How MJ Cargo operates and pays
+- How Remotive Logistics operates and pays
 - Trailer basics (sizes · materials · colors · axles)
 - Using the CRM and leads properly
 - Understanding customer flow
@@ -67,7 +67,7 @@ Five clear levels. One mission: **build yourself into a 6-figure closer and resp
 
 ## 🏆 Stage 5 — Legacy: "The Director's Summit"
 **Theme:** Vision · Systems · Legacy
-**Goal:** Manage multiple teams and shape the future of MJ Cargo.
+**Goal:** Manage multiple teams and shape the future of Remotive Logistics.
 
 ### Core Skills
 - Multi-team strategy and analytics
@@ -84,7 +84,7 @@ Five clear levels. One mission: **build yourself into a 6-figure closer and resp
 Use rotating messages across the dashboard, training screens, and pop-ups:
 
 - "Every rep starts at zero — every legend starts with one sale."
-- "Pressure creates diamonds. Welcome to MJ Cargo."
+- "Pressure creates diamonds. Welcome to Remotive Logistics."
 - "No excuses. No luck. Just discipline."
 - "Your paycheck is a reflection of your follow-up."
 - "Be comfortable being uncomfortable."

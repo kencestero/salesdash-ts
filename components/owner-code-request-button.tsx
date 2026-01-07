@@ -16,7 +16,7 @@ export default function OwnerCodeRequestButton() {
       "⚠️ SECURITY CONFIRMATION\n\n" +
       "You are about to request the Owner code, which grants FULL SYSTEM ACCESS.\n\n" +
       "The code will be sent via email to:\n" +
-      "• mjcargotrailers@gmail.com\n" +
+      "• remotivetrailers@gmail.com\n" +
       "• kencestero@gmail.com\n\n" +
       "Your request will be logged for security purposes.\n\n" +
       "Do you want to proceed?"
@@ -83,7 +83,7 @@ export default function OwnerCodeRequestButton() {
           <Mail className="h-4 w-4 text-green-600" />
           <AlertDescription className="text-green-800 text-xs">
             Owner code has been sent to:<br />
-            • mjcargotrailers@gmail.com<br />
+            • remotivetrailers@gmail.com<br />
             • kencestero@gmail.com
           </AlertDescription>
         </Alert>

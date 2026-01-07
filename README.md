@@ -1,4 +1,4 @@
-# MJ Cargo Sales Dashboard
+# Remotive Logistics Sales Dashboard
 
 A comprehensive sales management system built with Next.js 14, TypeScript, Prisma, and Firebase for trailer dealerships.
 
@@ -81,7 +81,7 @@ AUTH_GITHUB_SECRET=your-github-client-secret
 
 # Access Control (Optional)
 ACCESS_ALLOWLIST_ENABLED=false
-ACCESS_ALLOWLIST=@mjcargo.com,@obscurerides.com,user@gmail.com
+ACCESS_ALLOWLIST=@remotivelogistics.com,@obscurerides.com,user@gmail.com
 
 # Firebase (for Chat)
 NEXT_PUBLIC_FIREBASE_API_KEY=your-api-key
@@ -282,7 +282,7 @@ Or use the Vercel dashboard for easier management.
 
 ## 📄 License
 
-This project is private and proprietary to MJ Cargo.
+This project is private and proprietary to Remotive Logistics.
 
 ## 🆘 Support
 
@@ -304,4 +304,4 @@ For issues and questions:
 
 ---
 
-**Built with ❤️ for MJ Cargo**
+**Built with ❤️ for Remotive Logistics**

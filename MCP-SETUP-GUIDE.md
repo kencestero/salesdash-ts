@@ -266,4 +266,4 @@ If you encounter issues:
 
 **Last Updated**: 2025-01-24
 **Compatible With**: Claude Desktop (Windows)
-**Project**: MJ Cargo SalesDash
+**Project**: Remotive Logistics SalesDash

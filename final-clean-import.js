@@ -110,7 +110,7 @@ async function finalImport() {
         data: {
           firstName,
           lastName,
-          email: (email && email.includes('@') && email !== '@leads.mjcargotrailers.com') ? email : null,
+          email: (email && email.includes('@') && email !== '@leads.remotivetrailers.com') ? email : null,
           phone,
           source: 'google_sheets',
           status,

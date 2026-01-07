@@ -1,12 +1,12 @@
-# MJ Cargo Email Integration Guide
+# Remotive Logistics Email Integration Guide
 
 ## 🎯 Overview
 
-The MJ Cargo Sales Dashboard now includes a complete email system with professional, branded templates using Resend and React Email.
+The Remotive Logistics Sales Dashboard now includes a complete email system with professional, branded templates using Resend and React Email.
 
 ## ✨ Features
 
-- **MJ Cargo Orange Branding**: All emails feature the signature orange color (#FF6B2C)
+- **Remotive Logistics Orange Branding**: All emails feature the signature orange color (#FF6B2C)
 - **Professional Templates**: Welcome emails, quote emails, password resets
 - **Mobile Responsive**: Beautiful on all devices
 - **Email Analytics**: Track opens, clicks, and delivery with Resend
@@ -54,7 +54,7 @@ pnpm add resend @react-email/components
 
 1. Go to Resend dashboard: [resend.com/api-keys](https://resend.com/api-keys)
 2. Click "Create API Key"
-3. Name it: `MJ Cargo SalesDash`
+3. Name it: `Remotive Logistics SalesDash`
 4. Copy the API key (starts with `re_`)
 
 ### Step 4: Add to Environment Variables
@@ -62,7 +62,7 @@ pnpm add resend @react-email/components
 **Local Development (.env.local):**
 ```bash
 RESEND_API_KEY=re_xxxxxxxxxxxxxxxxxxxxx
-RESEND_FROM_EMAIL="MJ Cargo <noreply@yourdomain.com>"
+RESEND_FROM_EMAIL="Remotive Logistics <noreply@yourdomain.com>"
 ```
 
 **Vercel Production:**
@@ -71,7 +71,7 @@ vercel env add RESEND_API_KEY
 # Paste your API key when prompted
 
 vercel env add RESEND_FROM_EMAIL
-# Enter: MJ Cargo <noreply@yourdomain.com>
+# Enter: Remotive Logistics <noreply@yourdomain.com>
 ```
 
 ### Step 5: Domain Verification (Optional but Recommended)
@@ -83,7 +83,7 @@ vercel env add RESEND_FROM_EMAIL
 
 1. Go to [resend.com/domains](https://resend.com/domains)
 2. Click "Add Domain"
-3. Enter your domain: `mjcargo.com` (or your actual domain)
+3. Enter your domain: `remotive.com` (or your actual domain)
 4. Add DNS records provided by Resend:
    - **SPF**: TXT record for email authentication
    - **DKIM**: TXT record for email signing
@@ -92,7 +92,7 @@ vercel env add RESEND_FROM_EMAIL
 5. Wait 24-48 hours for DNS propagation
 6. Update `RESEND_FROM_EMAIL` to use your domain:
    ```bash
-   RESEND_FROM_EMAIL="MJ Cargo <noreply@mjcargo.com>"
+   RESEND_FROM_EMAIL="Remotive Logistics <noreply@remotivelogistics.com>"
    ```
 
 ### Step 6: Test Email Service
@@ -100,7 +100,7 @@ vercel env add RESEND_FROM_EMAIL
 1. Navigate to: `/en/email-center`
 2. Click "Send Test Email" button
 3. Check your inbox (and spam folder)
-4. Verify the email has MJ Cargo orange branding
+4. Verify the email has Remotive Logistics orange branding
 
 Or use API directly:
 ```bash
@@ -150,7 +150,7 @@ await sendQuoteEmail(
   '7x16 TA Enclosed',        // Unit description
   8500,                      // Unit price
   'https://salesdash.com/quote/abc123',  // Quote link
-  'bob@mjcargo.com'          // Rep email (optional, for reply-to)
+  'bob@remotivelogistics.com'          // Rep email (optional, for reply-to)
 );
 ```
 
@@ -177,7 +177,7 @@ await sendPasswordResetEmail(
 
 ## 🎨 Customizing Templates
 
-All templates extend the base MJ Cargo template. To customize:
+All templates extend the base Remotive Logistics template. To customize:
 
 ### Edit Base Template
 Location: `lib/email/templates/mj-cargo-base.tsx`
@@ -185,7 +185,7 @@ Location: `lib/email/templates/mj-cargo-base.tsx`
 **Change colors**:
 ```typescript
 const header = {
-  backgroundColor: '#FF6B2C',  // MJ Cargo orange
+  backgroundColor: '#FF6B2C',  // Remotive Logistics orange
   // Change to your color
 };
 
@@ -198,7 +198,7 @@ const button = {
 **Update company info**:
 ```typescript
 <Text style={footerTextStyle}>
-  📍 Your Location • 📞 (555) 123-4567 • 📧 info@mjcargo.com
+  📍 Your Location • 📞 (555) 123-4567 • 📧 info@remotivelogistics.com
 </Text>
 ```
 
@@ -338,7 +338,7 @@ curl https://salesdash-ts.vercel.app/api/email/test
 
 1. **Verify your domain** (see Step 5 above)
 2. **Add SPF/DKIM/DMARC records**
-3. **Use professional sender name**: `MJ Cargo <noreply@mjcargo.com>`
+3. **Use professional sender name**: `Remotive Logistics <noreply@remotivelogistics.com>`
 4. **Avoid spam trigger words** in subject/body
 5. **Include unsubscribe link** for marketing emails
 

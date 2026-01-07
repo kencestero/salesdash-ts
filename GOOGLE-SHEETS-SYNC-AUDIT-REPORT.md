@@ -165,7 +165,7 @@ model Customer {
 ### Step 1: Create Google Cloud Service Account (5 min)
 
 1. Go to [Google Cloud Console](https://console.cloud.google.com)
-2. Create project: "MJ Cargo CRM Sync"
+2. Create project: "Remotive Logistics CRM Sync"
 3. Enable **Google Sheets API**
 4. Create Service Account:
    - Name: `salesdash-sheets-sync`

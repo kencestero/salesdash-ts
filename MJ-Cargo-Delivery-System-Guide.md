@@ -1,4 +1,4 @@
-# MJ Cargo SalesDash - Delivery Records System
+# Remotive Logistics SalesDash - Delivery Records System
 ## PowerPoint Presentation Guide
 ### Track Your Trailer Deliveries & Financial Performance
 
@@ -13,11 +13,11 @@
 # Delivery Records System
 ## Track Your Trailer Deliveries & Financial Performance
 
-**For**: MJ Cargo Sales Team  
+**For**: Remotive Logistics Sales Team  
 **Date**: November 13, 2025  
 **System**: SalesDash CRM
 
-[VISUAL: Company logo, trailer icon, professional background with MJ Cargo brand colors (#E96114 orange, #09213C dark blue)]
+[VISUAL: Company logo, trailer icon, professional background with Remotive Logistics brand colors (#E96114 orange, #09213C dark blue)]
 
 **Speaker Notes**: This presentation will guide you through the new Delivery Records system, designed to give you instant visibility into your trailer deliveries, commission earnings, and profit margins. The system replaces manual tracking and provides real-time business analytics.
 
@@ -410,8 +410,8 @@ Tell us how to improve this system - we're constantly refining based on your inp
 ## Color Scheme
 
 ### Primary Colors
-- **Primary Orange**: `#E96114` - MJ Cargo brand color (use for headers, accents, buttons)
-- **Dark Blue**: `#09213C` - MJ Cargo brand color (use for text, backgrounds)
+- **Primary Orange**: `#E96114` - Remotive Logistics brand color (use for headers, accents, buttons)
+- **Dark Blue**: `#09213C` - Remotive Logistics brand color (use for text, backgrounds)
 
 ### Accent Colors
 - **Success Green**: `#10B981` - For positive metrics, commission amounts
@@ -580,7 +580,7 @@ Use realistic sample data for screenshots:
    - Add screenshots where `[SCREENSHOT]` placeholders indicated
    - Apply formatting guidelines (colors, fonts)
    - Add speaker notes from "Speaker Notes" sections
-4. Apply MJ Cargo brand colors to theme
+4. Apply Remotive Logistics brand colors to theme
 5. Add company logo to master slide (bottom right)
 6. Number slides in footer
 7. Review and test presentation flow
@@ -597,7 +597,7 @@ Use realistic sample data for screenshots:
 1. Open Google Slides
 2. Create new presentation
 3. Go to **Slide** > **Edit Theme**
-4. Apply MJ Cargo brand colors to theme:
+4. Apply Remotive Logistics brand colors to theme:
    - Primary: #E96114
    - Secondary: #09213C
 5. Follow same manual process as PowerPoint option
@@ -664,7 +664,7 @@ MJ-Cargo-Delivery-System-Guide-v2.0.pptx (major updates)
 
 3. 🎨 **Create PowerPoint presentation**
    - Choose conversion method (manual recommended for first version)
-   - Apply MJ Cargo branding
+   - Apply Remotive Logistics branding
    - Insert screenshots in appropriate slides
    - Add speaker notes
 
@@ -704,7 +704,7 @@ This presentation is designed for **non-technical** users:
 
 # CONCLUSION
 
-This markdown document provides a complete PowerPoint presentation outline for the MJ Cargo SalesDash Delivery Records system.
+This markdown document provides a complete PowerPoint presentation outline for the Remotive Logistics SalesDash Delivery Records system.
 
 **Total Slides**: 16  
 **Estimated Presentation Time**: 20-25 minutes  

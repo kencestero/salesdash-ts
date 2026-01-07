@@ -1,5 +1,5 @@
 🛠 PROJECT CONTEXT:
-You're collaborating with me on a Sales Dashboard project called “MJ SalesDash” — built with Next.js 14, TailwindCSS, TypeScript, and using the DashTail template. The goal is to launch a professional admin portal for remote trailer sales reps at MJ Cargo. The branding is dark mode with #E96114 (orange) + dark blue (#09213C).
+You're collaborating with me on a Sales Dashboard project called “Remotive SalesHub” — built with Next.js 14, TailwindCSS, TypeScript, and using the DashTail template. The goal is to launch a professional admin portal for remote trailer sales reps at Remotive Logistics. The branding is dark mode with #E96114 (orange) + dark blue (#09213C).
 
 💡 DEV GUIDELINES:
 - Don’t make large sweeping changes unless I ask.

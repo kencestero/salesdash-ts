@@ -1,19 +1,19 @@
 # TERMS AND CONDITIONS - SALES REPRESENTATIVE AGREEMENT
-## MJ Cargo Trailers LLC - SalesDash Platform
+## Remotive Logistics Trailers LLC - SalesDash Platform
 
 **DRAFT FOR LEGAL REVIEW**
 **Created:** October 8, 2025
 **Status:** Requires attorney review before implementation
-**Prepared for:** MJ Cargo Trailers LLC (Florida)
+**Prepared for:** Remotive Logistics Trailers LLC (Florida)
 
 ---
 
 ## ⚠️ IMPORTANT NOTICE TO ATTORNEY
 
-This is a DRAFT document prepared for MJ Cargo Trailers LLC, a Florida-based trailer dealership with remote sales representatives operating across multiple US states.
+This is a DRAFT document prepared for Remotive Logistics Trailers LLC, a Florida-based trailer dealership with remote sales representatives operating across multiple US states.
 
 **Key Business Context:**
-- Company: MJ Cargo Trailers LLC (Florida LLC)
+- Company: Remotive Logistics Trailers LLC (Florida LLC)
 - Platform: SalesDash (web-based sales management system)
 - Users: Independent contractor sales representatives
 - Operations: Multi-state (remote sales across all US states)
@@ -38,7 +38,7 @@ This is a DRAFT document prepared for MJ Cargo Trailers LLC, a Florida-based tra
 By accessing and using the SalesDash platform ("Platform"), you ("User," "Sales Representative," or "you") agree to be bound by these Terms and Conditions ("Agreement"). If you do not agree to these terms, you must not access or use the Platform.
 
 This Agreement is entered into between:
-- **MJ Cargo Trailers LLC** ("Company," "MJ Cargo," "we," or "us"), a Florida Limited Liability Company
+- **Remotive Logistics Trailers LLC** ("Company," "Remotive Logistics," "we," or "us"), a Florida Limited Liability Company
 - **You**, the individual sales representative
 
 **Effective Date:** The date you accept these terms during registration.
@@ -49,16 +49,16 @@ This Agreement is entered into between:
 
 #### 2.1 Independent Contractor Status
 You acknowledge and agree that:
-- You are an **independent contractor**, NOT an employee of MJ Cargo Trailers LLC
+- You are an **independent contractor**, NOT an employee of Remotive Logistics Trailers LLC
 - You are not entitled to employee benefits (health insurance, retirement, paid leave, etc.)
 - You are responsible for your own taxes, including self-employment tax
 - You will receive IRS Form 1099 for tax reporting purposes
 - You maintain control over your own work schedule and methods
 
 #### 2.2 No Agency Relationship
-- You do not have authority to bind MJ Cargo to any contracts or obligations
-- You may not make promises or guarantees on behalf of MJ Cargo beyond authorized scope
-- You represent MJ Cargo products but are not a legal agent of the company
+- You do not have authority to bind Remotive Logistics to any contracts or obligations
+- You may not make promises or guarantees on behalf of Remotive Logistics beyond authorized scope
+- You represent Remotive Logistics products but are not a legal agent of the company
 
 ---
 
@@ -80,7 +80,7 @@ You agree to:
 - **NOT take screenshots, photographs, or copies** of customer data
 - **NOT use customer information** for personal benefit or side businesses
 - **NOT share login credentials** with any third party
-- Maintain strict confidentiality during and after your relationship with MJ Cargo
+- Maintain strict confidentiality during and after your relationship with Remotive Logistics
 - Immediately report any suspected data breaches or unauthorized access
 
 #### 3.3 Data Protection Compliance
@@ -105,7 +105,7 @@ You expressly agree NOT to:
 #### 4.1 Professional Behavior
 You agree to:
 - Conduct yourself professionally and ethically at all times
-- Accurately represent MJ Cargo products and services
+- Accurately represent Remotive Logistics products and services
 - Provide honest and truthful information to customers
 - Respond to customer inquiries promptly and courteously
 - Maintain professional communication in all customer interactions
@@ -120,9 +120,9 @@ You agree NOT to:
 - Engage in fraudulent activities or misrepresentation
 
 #### 4.3 Brand Representation
-- You may represent MJ Cargo only as authorized
+- You may represent Remotive Logistics only as authorized
 - You may not alter or misuse company logos, trademarks, or branding
-- Social media posts about MJ Cargo must be professional and accurate
+- Social media posts about Remotive Logistics must be professional and accurate
 - You must not disparage the company, products, or competitors
 
 ---
@@ -130,17 +130,17 @@ You agree NOT to:
 ### 5. NON-COMPETE AND NON-SOLICITATION
 
 #### 5.1 During Employment
-During your active relationship with MJ Cargo, you agree NOT to:
+During your active relationship with Remotive Logistics, you agree NOT to:
 - Work for competing trailer dealerships or manufacturers
 - Sell competing products or services
-- Solicit MJ Cargo customers for other businesses
-- Recruit other MJ Cargo sales representatives to competitors
+- Solicit Remotive Logistics customers for other businesses
+- Recruit other Remotive Logistics sales representatives to competitors
 
 #### 5.2 Post-Termination (Recommended: 6-12 months - Attorney to advise on enforceability by state)
 For [DURATION TO BE SPECIFIED BY ATTORNEY] after termination, you agree NOT to:
-- Directly solicit customers you serviced while at MJ Cargo
-- Use confidential information to compete with MJ Cargo
-- Recruit current MJ Cargo employees or contractors
+- Directly solicit customers you serviced while at Remotive Logistics
+- Use confidential information to compete with Remotive Logistics
+- Recruit current Remotive Logistics employees or contractors
 
 **Note to Attorney:** Non-compete enforceability varies by state. Please review and adjust duration/scope for multi-state compliance.
 
@@ -149,7 +149,7 @@ For [DURATION TO BE SPECIFIED BY ATTORNEY] after termination, you agree NOT to:
 ### 6. INTELLECTUAL PROPERTY
 
 #### 6.1 Company Property
-You acknowledge that all of the following are the exclusive property of MJ Cargo:
+You acknowledge that all of the following are the exclusive property of Remotive Logistics:
 - SalesDash platform and all software code
 - Training materials and documentation
 - Sales scripts and presentations
@@ -160,10 +160,10 @@ You acknowledge that all of the following are the exclusive property of MJ Cargo
 #### 6.2 No License Granted
 - Access to the Platform does not grant you ownership or license rights
 - You may use company materials solely for authorized sales activities
-- All rights, title, and interest remain with MJ Cargo
+- All rights, title, and interest remain with Remotive Logistics
 
 #### 6.3 Work Product
-Any sales materials, customer lists, or work product created during your engagement belongs exclusively to MJ Cargo.
+Any sales materials, customer lists, or work product created during your engagement belongs exclusively to Remotive Logistics.
 
 ---
 
@@ -173,7 +173,7 @@ Any sales materials, customer lists, or work product created during your engagem
 You are responsible for:
 - Maintaining the confidentiality of your login credentials
 - All activities that occur under your account
-- Immediately notifying MJ Cargo of any unauthorized access
+- Immediately notifying Remotive Logistics of any unauthorized access
 - Using strong, unique passwords
 - Not sharing your account with others
 
@@ -194,7 +194,7 @@ You may NOT:
 - Use the Platform to violate any laws
 
 #### 7.4 Monitoring
-MJ Cargo reserves the right to monitor Platform usage for security, compliance, and quality assurance purposes.
+Remotive Logistics reserves the right to monitor Platform usage for security, compliance, and quality assurance purposes.
 
 ---
 
@@ -208,11 +208,11 @@ MJ Cargo reserves the right to monitor Platform usage for security, compliance, 
 #### 8.2 No Guaranteed Income
 - You acknowledge there is NO guaranteed minimum income
 - Earnings depend on sales performance
-- MJ Cargo makes no promises or guarantees about potential earnings
+- Remotive Logistics makes no promises or guarantees about potential earnings
 
 #### 8.3 Expense Responsibility
 - You are responsible for your own business expenses
-- MJ Cargo is not obligated to reimburse expenses unless agreed in writing
+- Remotive Logistics is not obligated to reimburse expenses unless agreed in writing
 
 ---
 
@@ -220,15 +220,15 @@ MJ Cargo reserves the right to monitor Platform usage for security, compliance, 
 
 #### 9.1 At-Will Relationship
 - Either party may terminate this Agreement at any time, with or without cause
-- MJ Cargo may immediately suspend or terminate your access for violations of this Agreement
+- Remotive Logistics may immediately suspend or terminate your access for violations of this Agreement
 
 #### 9.2 Obligations Upon Termination
 Upon termination, you must immediately:
 - Return all company property and materials
 - Cease using company trademarks, branding, and materials
 - Delete all customer data and confidential information in your possession
-- Cease representing yourself as affiliated with MJ Cargo
-- Complete any pending customer obligations or transfer them to MJ Cargo
+- Cease representing yourself as affiliated with Remotive Logistics
+- Complete any pending customer obligations or transfer them to Remotive Logistics
 
 #### 9.3 Survival
 Confidentiality, non-disclosure, non-compete, and indemnification obligations survive termination.
@@ -242,9 +242,9 @@ THE PLATFORM IS PROVIDED "AS IS" WITHOUT WARRANTIES OF ANY KIND, EXPRESS OR IMPL
 
 #### 10.2 Liability Limitations
 TO THE MAXIMUM EXTENT PERMITTED BY LAW:
-- MJ Cargo is not liable for indirect, incidental, or consequential damages
+- Remotive Logistics is not liable for indirect, incidental, or consequential damages
 - Total liability is limited to amounts paid to you in the 3 months prior to the claim
-- MJ Cargo is not liable for Platform downtime, data loss, or technical issues
+- Remotive Logistics is not liable for Platform downtime, data loss, or technical issues
 
 #### 10.3 User Responsibility
 You are solely responsible for:
@@ -257,7 +257,7 @@ You are solely responsible for:
 
 ### 11. INDEMNIFICATION
 
-You agree to indemnify, defend, and hold harmless MJ Cargo Trailers LLC, its officers, directors, employees, and agents from any claims, damages, losses, liabilities, and expenses (including attorney fees) arising from:
+You agree to indemnify, defend, and hold harmless Remotive Logistics Trailers LLC, its officers, directors, employees, and agents from any claims, damages, losses, liabilities, and expenses (including attorney fees) arising from:
 - Your violation of this Agreement
 - Your violation of any laws or regulations
 - Your negligence or willful misconduct
@@ -302,10 +302,10 @@ You must respect customer rights to:
 - Opt-out of data sharing
 - Correct inaccurate information
 
-All such requests must be immediately forwarded to MJ Cargo compliance team.
+All such requests must be immediately forwarded to Remotive Logistics compliance team.
 
 #### 13.3 Data Breach Notification
-You must immediately (within 24 hours) report any suspected data breach, unauthorized access, or loss of customer data to MJ Cargo.
+You must immediately (within 24 hours) report any suspected data breach, unauthorized access, or loss of customer data to Remotive Logistics.
 
 ---
 
@@ -325,7 +325,7 @@ You agree to comply with all applicable federal, state, and local laws, includin
 ### 15. MODIFICATIONS TO TERMS
 
 #### 15.1 Right to Modify
-MJ Cargo reserves the right to modify these Terms and Conditions at any time.
+Remotive Logistics reserves the right to modify these Terms and Conditions at any time.
 
 #### 15.2 Notice
 - Material changes will be communicated via email or Platform notification
@@ -346,14 +346,14 @@ If any provision is found unenforceable, the remaining provisions remain in full
 Failure to enforce any provision does not constitute a waiver of that provision.
 
 #### 16.4 Assignment
-You may not assign this Agreement without written consent from MJ Cargo.
+You may not assign this Agreement without written consent from Remotive Logistics.
 
 #### 16.5 Force Majeure
 Neither party is liable for delays caused by circumstances beyond reasonable control (natural disasters, pandemics, government actions, etc.).
 
 #### 16.6 Notices
 All notices must be sent to:
-- **For MJ Cargo:** [COMPANY ADDRESS AND EMAIL TO BE ADDED]
+- **For Remotive Logistics:** [COMPANY ADDRESS AND EMAIL TO BE ADDED]
 - **For You:** The email address provided during registration
 
 #### 16.7 Headings
@@ -383,8 +383,8 @@ By checking the "I accept" box during registration, you acknowledge that:
 
 If you have questions about these Terms and Conditions, please contact:
 
-**MJ Cargo Trailers LLC**
-Email: mjcargotrailers@gmail.com
+**Remotive Logistics Trailers LLC**
+Email: remotivetrailers@gmail.com
 [Additional contact information to be added]
 
 ---
@@ -428,6 +428,6 @@ Email: mjcargotrailers@gmail.com
 
 **Document Version:** 1.0 DRAFT
 **Prepared By:** Claude Code AI Assistant
-**For:** MJ Cargo Trailers LLC
+**For:** Remotive Logistics Trailers LLC
 **Date:** October 8, 2025
 **Status:** ⚠️ NOT LEGAL ADVICE - REQUIRES ATTORNEY REVIEW

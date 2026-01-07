@@ -135,7 +135,7 @@ export async function POST(req: Request) {
 Your task is to parse the provided inventory list and extract structured data for each trailer.
 
 Extract the following fields for each trailer:
-- manufacturer: string (look for "Diamond Cargo", "Quality Cargo", or default to "MJ Cargo" if not specified)
+- manufacturer: string (look for "Diamond Cargo", "Quality Cargo", or default to "Remotive Logistics" if not specified)
 - model: string (the full model description, e.g., "7X16TA2 Black .080 R VN 7'")
 - year: number (default to current year if not specified)
 - category: string (one of: "Utility", "Dump", "Enclosed", "Gooseneck", "Flatbed", "Car Hauler", "Concession", "Motorcycle")

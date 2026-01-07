@@ -1,4 +1,4 @@
-import MJCargoEmail from './mj-cargo-base';
+import remotiveEmail from './mj-cargo-base';
 
 interface WelcomeEmailProps {
   userName: string;
@@ -8,12 +8,12 @@ interface WelcomeEmailProps {
 
 export default function WelcomeEmail({ userName, userRole, employeeNumber }: WelcomeEmailProps) {
   return (
-    <MJCargoEmail
-      preview="Welcome to MJ Cargo Sales Dashboard!"
+    <remotiveEmail
+      preview="Welcome to Remotive Logistics Sales Dashboard!"
       heading={`Welcome to the Team, ${userName}!`}
       body={
         <>
-          <p>We're excited to have you join MJ Cargo Trailers as a <strong>{userRole}</strong>.</p>
+          <p>We're excited to have you join Remotive Logistics Trailers as a <strong>{userRole}</strong>.</p>
 
           <p>Your account has been successfully created with the following details:</p>
 
@@ -40,7 +40,7 @@ export default function WelcomeEmail({ userName, userRole, employeeNumber }: Wel
           <p>If you have any questions, reach out to your manager or contact our support team.</p>
 
           <p style={{ marginTop: '24px' }}>Welcome aboard!</p>
-          <p><strong>MJ Cargo Team</strong></p>
+          <p><strong>Remotive Logistics Team</strong></p>
         </>
       }
       ctaText="Access Dashboard"

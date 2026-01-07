@@ -60,7 +60,7 @@ When you're ready, show me the spreadsheet and I'll format it for you. Or use th
 2. URL: `http://localhost:3000/api/inventory/bulk-import`
 3. Headers:
    - `Content-Type: application/json`
-   - `X-API-Key: mjcargo-inventory-import-65b8353628a3a9ef530f2b628bdc2fa9`
+   - `X-API-Key: remotive-inventory-import-65b8353628a3a9ef530f2b628bdc2fa9`
 4. Body: Paste your JSON
 5. Send!
 
@@ -68,7 +68,7 @@ When you're ready, show me the spreadsheet and I'll format it for you. Or use th
 ```bash
 curl -X POST http://localhost:3000/api/inventory/bulk-import \
   -H "Content-Type: application/json" \
-  -H "X-API-Key: mjcargo-inventory-import-65b8353628a3a9ef530f2b628bdc2fa9" \
+  -H "X-API-Key: remotive-inventory-import-65b8353628a3a9ef530f2b628bdc2fa9" \
   -d @trailers.json
 ```
 
@@ -126,7 +126,7 @@ Just drop the Excel files in chat or show me screenshots and I'll extract the da
 ## API Key (for reference)
 
 ```
-INVENTORY_API_KEY=mjcargo-inventory-import-65b8353628a3a9ef530f2b628bdc2fa9
+INVENTORY_API_KEY=remotive-inventory-import-65b8353628a3a9ef530f2b628bdc2fa9
 ```
 
 This is already in your `.env.local` file!

@@ -180,5 +180,5 @@ To automate this process:
 ---
 
 **Created**: Oct 20, 2025
-**For**: Kenneth Cestero (Manager, MJ Cargo SalesDash)
+**For**: Kenneth Cestero (Manager, Remotive Logistics SalesDash)
 **Purpose**: Extract inventory from 3 supplier emails and update pricing

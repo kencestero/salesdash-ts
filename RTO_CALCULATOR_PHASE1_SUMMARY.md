@@ -37,7 +37,7 @@
    ```
 
 2. **State Fee Map (RTO_FEE_MAP):**
-   - **Southeast States** (Priority - MJ Cargo's main market):
+   - **Southeast States** (Priority - Remotive Logistics's main market):
      - GA (Georgia): 100% deposit, $25 state fee
      - FL (Florida): 75% deposit, $45 state fee
      - AL, SC, NC, TN, MS, LA: Placeholder fees

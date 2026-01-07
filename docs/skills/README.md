@@ -1,7 +1,7 @@
 # 🧠 Essential Skills Package for Claude
 
 **Curated by: Skill Digger**
-**For: Kenneth Cestero @ MJ Cargo Trailer Sales**
+**For: Kenneth Cestero @ Remotive Logistics Trailer Sales**
 **Date: November 2025**
 
 ---
@@ -80,7 +80,7 @@ Teaches Claude **WHAT** to know:
 - Scrape GitHub repositories
 - Combine multiple sources
 
-**Perfect for**: Next.js, Prisma, supplier APIs, internal MJ Cargo documentation
+**Perfect for**: Next.js, Prisma, supplier APIs, internal Remotive Logistics documentation
 
 ---
 
@@ -114,7 +114,7 @@ Use Superpowers for every feature:
 **Result**: Ship features faster with fewer bugs
 
 ### Use Case 4: Company Knowledge
-Convert MJ Cargo internal docs to skills:
+Convert Remotive Logistics internal docs to skills:
 - Sales procedures
 - Product specifications
 - Role definitions (REP, SMR, RDIR, RVAP)

@@ -1,4 +1,4 @@
-# MJ Cargo — Build Context (READ FIRST, EVERY SESSION)
+# Remotive Logistics — Build Context (READ FIRST, EVERY SESSION)
 
 ## Business Context
 
@@ -94,7 +94,7 @@
 - Big inputs, plain English labels, inline validation, no dead-ends.
 - Clear primary action per screen.
 - Save-as-you-go; recover drafts.
-- Theme: MJ Cargo colors only; consistent cards, rounded-2xl, soft shadows.
+- Theme: Remotive Logistics colors only; consistent cards, rounded-2xl, soft shadows.
 
 ## Deliverables Definition of Done (per feature)
 

@@ -454,7 +454,7 @@ def parse_diamond_cargo(excel_file):
 
 def main():
     print("═══════════════════════════════════════════")
-    print("  MJ Cargo Inventory Import to SalesDash")
+    print("  Remotive Logistics Inventory Import to SalesDash")
     print("═══════════════════════════════════════════\n")
 
     # Import Diamond Cargo

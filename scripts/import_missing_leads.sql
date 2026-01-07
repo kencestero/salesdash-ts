@@ -1,4 +1,4 @@
--- MJ CARGO: IMPORT MISSING 289 LEADS
+-- Remotive Logistics: IMPORT MISSING 289 LEADS
 -- Execute this to reach 762 total leads
 
 -- Current count: 473

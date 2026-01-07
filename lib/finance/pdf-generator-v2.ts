@@ -1,5 +1,5 @@
 /**
- * MJ Cargo Quote PDF/Image Generator V2
+ * Remotive Logistics Quote PDF/Image Generator V2
  * Matches Ken's exact design from the HTML template
  * Supports: PDF, JPEG, PNG export
  *
@@ -72,9 +72,9 @@ function generateQuoteHTML(data: QuoteData): string {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MJ Cargo Quote - Luxury</title>
+  <title>Remotive Logistics Quote - Luxury</title>
   <style>
-    /* Official MJ Cargo Color Palette */
+    /* Official Remotive Logistics Color Palette */
     :root {
       --mj-orange-gold: #E6840D;
       --mj-deep-navy: #203F55;
@@ -426,7 +426,7 @@ function generateQuoteHTML(data: QuoteData): string {
       <div class="logo-container">
         <div class="logo">MJ</div>
         <div style="flex: 1;">
-          <h1>MJ CARGO TRAILERS</h1>
+          <h1>Remotive Logistics TRAILERS</h1>
           <h2>Finance Calculator</h2>
         </div>
         <div class="logo">MJ</div>
@@ -545,11 +545,11 @@ function generateQuoteHTML(data: QuoteData): string {
 
     <!-- Footer -->
     <div class="footer">
-      <div class="footer-logo">MJ CARGO TRAILERS</div>
+      <div class="footer-logo">Remotive Logistics TRAILERS</div>
       <div class="footer-tagline">Premium Enclosed Cargo & Equipment Trailers</div>
       <div class="footer-info">
         Free Delivery Available | Flexible Financing | Contact Your Representative<br>
-        www.mjcargotrailers.com | Prices subject to change | Rep: ${data.repName} | ${data.repEmail}
+        www.remotivetrailers.com | Prices subject to change | Rep: ${data.repName} | ${data.repEmail}
       </div>
     </div>
   </div>

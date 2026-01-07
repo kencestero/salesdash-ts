@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
 
     // 5) Send email reply via Resend with threading
     await resend.emails.send({
-      from: `MJ SalesDash <${process.env.RESEND_FROM_EMAIL}>`,
+      from: `Remotive SalesHub <${process.env.RESEND_FROM_EMAIL}>`,
       to: [requestLog.email],
       reply_to: `request+${requestLog.id}@mjsalesdash.com`, // Thread replies
       subject: `Re: [${requestLog.manufacturer}] ${requestLog.purpose}`,
@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
         "",
         message.trim(),
         "",
-        "— MJ Cargo SalesDash",
+        "— Remotive Logistics SalesDash",
         "",
         `(Reply to Request ID: ${requestLog.id})`,
       ].join("\n"),

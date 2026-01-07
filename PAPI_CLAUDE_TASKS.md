@@ -1,5 +1,5 @@
 # PAPI CLAUDE - COMPLETE TASK LIST
-**Project:** MJ Cargo SalesDash (Next.js 14 CRM)
+**Project:** Remotive Logistics SalesDash (Next.js 14 CRM)
 **Location:** c:\Users\kence\salesdash-ts
 **Date:** October 22, 2025
 
@@ -37,14 +37,14 @@
 **Problem:**
 - Won't load without rep number
 - Even with rep number, link has extra code interrupting connection
-- Must connect to Matt's Webflow site: mjcargotrailers.com
+- Must connect to Matt's Webflow site: remotivetrailers.com
 
 **What Works:**
 - ✅ Kenneth LOVES the colorful "Add to CRM" popup - KEEP THIS!
 
 **Fix Required:**
 - Fix rep code link generation
-- Remove extra code interrupting mjcargotrailers.com connection
+- Remove extra code interrupting remotivetrailers.com connection
 - Ensure credit apps load when rep number exists
 - Make sure rep tracking works end-to-end
 
@@ -98,7 +98,7 @@
 ## 🎨 NEW FEATURE: LUXURY QUOTE THEME (REQUIRED!)
 
 ### Overview
-Add luxury-themed quote download feature to Finance Calculator with premium styling matching MJ Cargo branding.
+Add luxury-themed quote download feature to Finance Calculator with premium styling matching Remotive Logistics branding.
 
 ### Design Requirements
 **Color Scheme:**
@@ -107,12 +107,12 @@ Add luxury-themed quote download feature to Finance Calculator with premium styl
 - Clean white backgrounds with professional spacing
 
 **Header Section:**
-- Trophy icon + "MJ CARGO FINANCE CALCULATOR - Luxury Configuration"
+- Trophy icon + "Remotive Logistics FINANCE CALCULATOR - Luxury Configuration"
 - Toggle checkboxes for: Finance Options | Lease/Rent-To-Own | Cash Purchase
 - Orange background with dark blue accents
 
 **Main Content:**
-- Large "MJ CARGO TRAILERS" header with orange background
+- Large "Remotive Logistics TRAILERS" header with orange background
 - "FINANCE CALCULATOR" subtitle
 - "Rugged Quality, Smooth Financing" tagline
 - Quote date, representative name, quote number
@@ -148,7 +148,7 @@ Add luxury-themed quote download feature to Finance Calculator with premium styl
 
 **Footer:**
 - Authorization & Agreement section with signature lines
-- MJ Cargo Trailers branding
+- Remotive Logistics Trailers branding
 - "Premium Enclosed Cargo & Equipment Trailers"
 - Contact info and website
 
@@ -179,7 +179,7 @@ app/[lang]/(dashboard)/(apps)/finance-calculator/page.tsx - Add luxury theme opt
 - Use existing Quote model data structure
 - Responsive design for print/digital
 - High-quality PDF rendering support
-- Ensure all MJ Cargo branding matches existing theme
+- Ensure all Remotive Logistics branding matches existing theme
 
 **Libraries to use:**
 - `html2canvas` for image export
@@ -319,7 +319,7 @@ After each fix, verify:
 - [ ] Role-based access works correctly
 - [ ] Database operations succeed
 - [ ] Email notifications send (if applicable)
-- [ ] UI matches MJ Cargo branding
+- [ ] UI matches Remotive Logistics branding
 
 ---
 
@@ -332,7 +332,7 @@ Kenneth is available if clarification needed on any requirements!
 - Kenneth's main account: Check Google OAuth login
 
 **External Sites:**
-- Credit Applications: https://mjcargotrailers.com
+- Credit Applications: https://remotivetrailers.com
 - Production: https://mjsalesdash.com
 
 ---

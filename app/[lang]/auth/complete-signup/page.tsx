@@ -59,7 +59,7 @@ export default function CompleteSignupPage() {
         <CardHeader>
           <CardTitle className="text-2xl">Complete Your Signup</CardTitle>
           <CardDescription>
-            You need a join code to access MJ Cargo SalesDash. Get one from your manager.
+            You need a join code to access Remotive Logistics SalesDash. Get one from your manager.
           </CardDescription>
         </CardHeader>
         <CardContent>

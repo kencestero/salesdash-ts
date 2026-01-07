@@ -8,7 +8,7 @@ import VerticalHeader from "./vertical-header";
 import HorizontalHeader from "./horizontal-header";
 import Inbox from "./inbox";
 import HorizontalMenu from "./horizontal-menu";
-import NotificationMessage from "./notification-message";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 
 import Language from "./language";
 import { useMediaQuery } from "@/hooks/use-media-query";
@@ -24,7 +24,7 @@ const NavTools = ({ isDesktop, isMobile, sidebarType }: { isDesktop: boolean; is
 
       <ThemeButton />
       <Inbox />
-      <NotificationMessage />
+      <NotificationBell />
 
       <div className="ltr:pl-2 rtl:pr-2">
         <ProfileInfo />

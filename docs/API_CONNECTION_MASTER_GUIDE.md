@@ -1,7 +1,7 @@
 # API Connection Master Guide
 ## Complete Step-by-Step Instructions for Connecting All SalesDash APIs
 
-**Project:** MJ Cargo SalesDash
+**Project:** Remotive Logistics SalesDash
 **Last Updated:** 2025-01-31
 **Author:** Claude Code
 **Purpose:** Comprehensive guide for connecting frontend components to backend APIs and database
@@ -146,7 +146,7 @@ NEXT_PUBLIC_FIREBASE_APP_ID="your-app-id"
 
 # Email Service (For Resend - Optional)
 RESEND_API_KEY="your-resend-api-key"
-RESEND_FROM_EMAIL="MJ Cargo Sales <noreply@mjsalesdash.com>"
+RESEND_FROM_EMAIL="Remotive Logistics Sales <noreply@mjsalesdash.com>"
 
 # Inventory (Optional)
 INVENTORY_API_KEY="your-secret-api-key"
