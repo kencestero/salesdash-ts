@@ -19,17 +19,31 @@ import { PasskeyPrompt } from "@/components/passkey-prompt";
 
 function SessionTimeout() {
   const { data: session } = useSession();
+  const [showWarning, setShowWarning] = React.useState(false);
 
   useEffect(() => {
     if (!session) return;
 
-    let timeout: NodeJS.Timeout;
+    let inactivityTimeout: NodeJS.Timeout;
+    let warningTimeout: NodeJS.Timeout;
+
+    const INACTIVITY_TIME = 20 * 60 * 1000; // 20 minutes until warning
+    const WARNING_TIME = 7 * 60 * 1000; // 7 minutes to respond to warning
 
     const resetTimer = () => {
-      clearTimeout(timeout);
-      timeout = setTimeout(() => {
-        signOut({ callbackUrl: '/auth/login' });
-      }, 10 * 60 * 1000); // 10 minutes
+      clearTimeout(inactivityTimeout);
+      clearTimeout(warningTimeout);
+      setShowWarning(false);
+
+      inactivityTimeout = setTimeout(() => {
+        // Show warning dialog
+        setShowWarning(true);
+
+        // Start countdown to auto-logout
+        warningTimeout = setTimeout(() => {
+          signOut({ callbackUrl: '/en/auth/login' });
+        }, WARNING_TIME);
+      }, INACTIVITY_TIME);
     };
 
     const events = ['mousedown', 'keydown', 'scroll', 'touchstart'];
@@ -38,12 +52,58 @@ function SessionTimeout() {
     resetTimer();
 
     return () => {
-      clearTimeout(timeout);
+      clearTimeout(inactivityTimeout);
+      clearTimeout(warningTimeout);
       events.forEach(event => document.removeEventListener(event, resetTimer));
     };
   }, [session]);
 
-  return null;
+  const handleStayActive = () => {
+    setShowWarning(false);
+    // Trigger a fake event to reset timer
+    document.dispatchEvent(new Event('mousedown'));
+  };
+
+  const handleLogout = () => {
+    signOut({ callbackUrl: '/en/auth/login' });
+  };
+
+  if (!showWarning) return null;
+
+  return (
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50">
+      <div className="mx-4 w-full max-w-md rounded-lg bg-background p-6 shadow-lg">
+        <div className="mb-4 flex items-center gap-3">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-warning/10">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-warning" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold">Are you still active?</h3>
+            <p className="text-sm text-muted-foreground">You will be logged out for inactivity.</p>
+          </div>
+        </div>
+        <div className="flex flex-col gap-2">
+          <button
+            onClick={handleStayActive}
+            className="w-full rounded-md bg-primary px-4 py-2.5 font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+          >
+            Yes, still working
+          </button>
+          <button
+            onClick={handleLogout}
+            className="w-full rounded-md border border-input bg-background px-4 py-2.5 font-medium transition-colors hover:bg-accent hover:text-accent-foreground"
+          >
+            No, log me out
+          </button>
+        </div>
+        <p className="mt-4 text-center text-xs text-muted-foreground">
+          You will be automatically logged out in 7 minutes if no action is taken.
+        </p>
+      </div>
+    </div>
+  );
 }
 
 const DashBoardLayoutProvider = ({ children, trans }: { children: React.ReactNode, trans: any }) => {
