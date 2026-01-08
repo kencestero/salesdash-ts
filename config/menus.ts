@@ -1724,6 +1724,16 @@ export const menusConfig = {
         href: "/user-management",
       },
       {
+        title: "CRM Settings",
+        icon: Stacks2,
+        href: "/settings/crm",
+      },
+      {
+        title: "Audit Log",
+        icon: ClipBoard,
+        href: "/audit-log",
+      },
+      {
         title: "chat",
         icon: Messages,
         href: "/chat",

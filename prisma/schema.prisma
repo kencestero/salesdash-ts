@@ -1360,3 +1360,46 @@ model Message {
   @@index([createdAt])
   @@index([threadId, createdAt])  // For message history ordering
 }
+
+// =============================================================================
+// CRM SETTINGS & AUDIT LOG (Batch 3)
+// =============================================================================
+
+// CRM Settings - Database-backed configuration for governance
+model CRMSetting {
+  id          String   @id @default(cuid())
+  key         String   @unique  // e.g., "require_rep_for_contacted", "sla_new_lead_seconds"
+  value       Json                // Flexible value storage
+  category    String              // "assignment" | "sla" | "required_fields" | "import" | "dedupe"
+  description String?             // Human-readable description
+  updatedAt   DateTime @updatedAt
+  updatedBy   String?             // User ID who last changed this setting
+
+  @@index([category])
+}
+
+// Audit Log - Track all CRM changes for governance/policing
+model AuditLog {
+  id          String   @id @default(cuid())
+  userId      String              // Who performed the action
+  userEmail   String              // Denormalized for easy display
+  userName    String?             // Denormalized for easy display
+
+  action      String              // "assignment_change" | "status_change" | "delete" | "settings_change" | "bulk_action"
+  entityType  String              // "Customer" | "CRMSetting" | "User" | "SavedView"
+  entityId    String              // ID of the affected entity
+
+  oldValue    Json?               // State before change
+  newValue    Json?               // State after change
+
+  ipAddress   String?             // Request IP for security audit
+  userAgent   String?             // Browser/client info
+
+  createdAt   DateTime @default(now())
+
+  @@index([entityType, entityId])
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+  @@index([entityType, createdAt])  // For filtering by entity type + time range
+}

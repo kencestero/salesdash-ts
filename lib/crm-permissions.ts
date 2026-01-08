@@ -24,6 +24,7 @@ export interface PermissionContext {
   userId: string;
   userEmail: string;
   role: UserRole;
+  canAdminCRM: boolean; // CRM Admin: can view all, manage imports, settings, audit logs
   managerId?: string | null;
   teamMemberIds?: string[]; // For managers - their team's user IDs
 }
@@ -52,6 +53,12 @@ export async function checkCRMPermission(
     if (action === "delete") {
       return { allowed: false, reason: "Only owners can delete customers" };
     }
+    return { allowed: true };
+  }
+
+  // CRM Admins can view ALL customers, edit, reassign, and do bulk actions
+  // They can also delete (like owners) for intake management
+  if (context.canAdminCRM) {
     return { allowed: true };
   }
 
@@ -278,6 +285,7 @@ export async function buildPermissionContext(userEmail: string): Promise<Permiss
         select: {
           role: true,
           managerId: true,
+          canAdminCRM: true,
         },
       },
     },
@@ -291,6 +299,7 @@ export async function buildPermissionContext(userEmail: string): Promise<Permiss
     userId: user.id,
     userEmail: user.email!,
     role: user.profile.role as UserRole,
+    canAdminCRM: user.profile.canAdminCRM ?? false,
     managerId: user.profile.managerId,
   };
 
@@ -314,6 +323,11 @@ export function applyPermissionFilter(
 ): any {
   // Owners and Directors see everything
   if (context.role === "owner" || context.role === "director") {
+    return {};
+  }
+
+  // CRM Admins see everything (full visibility for intake/policing)
+  if (context.canAdminCRM) {
     return {};
   }
 
@@ -364,4 +378,63 @@ export async function canReassignTo(
   }
 
   return { allowed: true };
+}
+
+/**
+ * Check if user can access CRM Settings page
+ * Owner + CRM Admin can edit, Director can view only
+ */
+export function canAccessCRMSettings(context: PermissionContext): { canView: boolean; canEdit: boolean } {
+  // Owners can view and edit
+  if (context.role === "owner") {
+    return { canView: true, canEdit: true };
+  }
+
+  // CRM Admins can view and edit
+  if (context.canAdminCRM) {
+    return { canView: true, canEdit: true };
+  }
+
+  // Directors can view only
+  if (context.role === "director") {
+    return { canView: true, canEdit: false };
+  }
+
+  // Others cannot access
+  return { canView: false, canEdit: false };
+}
+
+/**
+ * Check if user can access Audit Log
+ * Owner, Director, and CRM Admin can view
+ */
+export function canAccessAuditLog(context: PermissionContext): boolean {
+  return (
+    context.role === "owner" ||
+    context.role === "director" ||
+    context.canAdminCRM
+  );
+}
+
+/**
+ * Check if user can manage imports
+ * Owner, Director, and CRM Admin can manage
+ */
+export function canManageImports(context: PermissionContext): boolean {
+  return (
+    context.role === "owner" ||
+    context.role === "director" ||
+    context.canAdminCRM
+  );
+}
+
+/**
+ * Check if user has full CRM visibility (can see all leads)
+ */
+export function hasFullCRMVisibility(context: PermissionContext): boolean {
+  return (
+    context.role === "owner" ||
+    context.role === "director" ||
+    context.canAdminCRM
+  );
 }

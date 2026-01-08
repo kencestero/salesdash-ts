@@ -46,24 +46,25 @@ export async function PATCH(req: NextRequest, props: { params: Promise<{ id: str
     }
 
     const userRole = currentUser.profile.role;
+    const isCRMAdmin = currentUser.profile.canAdminCRM ?? false;
     const isOwnerOrDirector = ["owner", "director"].includes(userRole);
     const isManager = userRole === "manager";
-    const isSalesperson = userRole === "salesperson";
+    const isSalesperson = userRole === "salesperson" && !isCRMAdmin;
 
     // === BATCH 1: Assignment permission enforcement ===
     const isAssignmentChange = body.assignedToId !== undefined || body.managerId !== undefined;
 
     if (isAssignmentChange) {
-      // Salesperson cannot change assignments - server-side enforcement
-      if (isSalesperson) {
+      // Salesperson cannot change assignments - server-side enforcement (CRM Admins bypass)
+      if (isSalesperson && !isCRMAdmin) {
         return NextResponse.json(
           { error: "Salespeople cannot reassign leads" },
           { status: 403 }
         );
       }
 
-      // Manager can only reassign within their team
-      if (isManager && body.assignedToId) {
+      // Manager can only reassign within their team (CRM Admins bypass)
+      if (isManager && !isCRMAdmin && body.assignedToId) {
         const teamMemberIds = await getTeamMemberIds(currentUser.id);
         // Include self in team for edge cases
         teamMemberIds.push(currentUser.id);
@@ -78,8 +79,8 @@ export async function PATCH(req: NextRequest, props: { params: Promise<{ id: str
       }
     }
 
-    // Non-manager/director/owner editing restrictions
-    if (isSalesperson) {
+    // Non-manager/director/owner editing restrictions (CRM Admins bypass this)
+    if (isSalesperson && !isCRMAdmin) {
       // Salespeople can only edit their own leads' notes
       if (existingCustomer.assignedToId !== currentUser.id) {
         return NextResponse.json(
