@@ -229,7 +229,7 @@ export function AdvancedFilters({
     async function fetchUsers() {
       setLoadingUsers(true);
       try {
-        const response = await fetch("/api/users");
+        const response = await fetch("/api/users?includeSelf=true");
         if (response.ok) {
           const data = await response.json();
           setUsers(data.users || []);
@@ -288,7 +288,7 @@ export function AdvancedFilters({
           )}
         </Button>
       </SheetTrigger>
-      <SheetContent side="right" className="w-[400px] sm:w-[450px] overflow-y-auto">
+      <SheetContent side="right" className="w-[400px] sm:w-[450px] overflow-y-auto !bg-background border-default-200">
         <SheetHeader className="space-y-1">
           <div className="flex items-center justify-between">
             <SheetTitle className="flex items-center gap-2">

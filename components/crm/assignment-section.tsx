@@ -87,7 +87,7 @@ export function AssignmentSection({
   useEffect(() => {
     async function fetchUsers() {
       try {
-        const response = await fetch("/api/users");
+        const response = await fetch("/api/users?includeSelf=true");
         if (response.ok) {
           const data = await response.json();
           setUsers(data.users || []);
@@ -137,7 +137,7 @@ export function AssignmentSection({
       toast({
         title: "Permission Denied",
         description: "You don't have permission to reassign leads",
-        variant: "destructive",
+        color: "destructive",
       });
       return;
     }
@@ -183,7 +183,7 @@ export function AssignmentSection({
       toast({
         title: "Error",
         description: error.message || "Failed to update lead assignment",
-        variant: "destructive",
+        color: "destructive",
       });
     } finally {
       setSaving(false);
