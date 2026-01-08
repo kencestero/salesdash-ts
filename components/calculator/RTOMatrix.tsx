@@ -72,10 +72,10 @@ export function RTOMatrix({
     setVisibleTerms((prev) => ({ ...prev, [term]: !prev[term] }));
   };
 
-  // Handle down payment edit
+  // Handle down payment edit - clear field on click for fresh input
   const startEditingDown = (index: number, value: number) => {
     setEditingDownIndex(index);
-    setEditDownValue(value.toString());
+    setEditDownValue("");  // Clear field so user can type fresh
   };
 
   const saveEditingDown = (index: number) => {
