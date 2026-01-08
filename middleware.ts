@@ -17,6 +17,7 @@ export async function middleware(req: NextRequest) {
   const publicPaths = [
     "/en/auth",
     "/auth",
+    "/session-expired",
     "/api/health",
     "/api/auth",
     "/api/join",

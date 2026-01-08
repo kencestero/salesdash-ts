@@ -41,7 +41,7 @@ function SessionTimeout() {
 
         // Start countdown to auto-logout
         warningTimeout = setTimeout(() => {
-          signOut({ callbackUrl: '/en/auth/login' });
+          signOut({ callbackUrl: '/session-expired' });
         }, WARNING_TIME);
       }, INACTIVITY_TIME);
     };
