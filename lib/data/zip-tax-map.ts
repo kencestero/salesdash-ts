@@ -136,17 +136,43 @@ export const ZIP_TAX_MAP: Record<string, LocationData> = {
 /**
  * Get location data (city, state, tax rate) for a given ZIP code
  * @param zipcode - 5-digit ZIP code (can include dashes or spaces, will be cleaned)
- * @returns LocationData if found, or default KY base rate (6%) if not in map
+ * @returns LocationData if found, or US state-based rate, or default 6%
  */
 export function getLocationByZip(zipcode: string): LocationData {
   // Clean the zipcode (remove non-numeric characters)
   const cleanZip = zipcode.replace(/\D/g, '').slice(0, 5);
 
-  // Return mapped data or default to KY base tax (6%)
-  return ZIP_TAX_MAP[cleanZip] || {
+  // First check the specific KY ZIP map for exact matches
+  if (ZIP_TAX_MAP[cleanZip]) {
+    return ZIP_TAX_MAP[cleanZip];
+  }
+
+  // Fall back to US state-based tax lookup
+  const { getTaxRateByZip } = require('./us-sales-tax');
+  const taxInfo = getTaxRateByZip(cleanZip);
+
+  if (taxInfo.stateCode && taxInfo.rate > 0) {
+    return {
+      city: 'Unknown',
+      state: taxInfo.stateCode,
+      taxRate: taxInfo.rate,
+    };
+  }
+
+  // If state has no sales tax, return 0
+  if (taxInfo.stateCode && taxInfo.rate === 0) {
+    return {
+      city: 'Unknown',
+      state: taxInfo.stateCode,
+      taxRate: 0,
+    };
+  }
+
+  // Default fallback (unknown ZIP)
+  return {
     city: 'Unknown',
-    state: 'KY',
-    taxRate: 6.0,
+    state: 'Unknown',
+    taxRate: 6.0, // Conservative default
   };
 }
 

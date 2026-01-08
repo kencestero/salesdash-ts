@@ -15,6 +15,7 @@ const NOTIFICATION_PREFERENCE_MAP: Record<NotificationType, keyof NotificationPr
   FOLLOW_UP_DUE: "followUpReminders",
   DUPLICATE_DETECTED: "duplicateAlerts",
   STATUS_CHANGED: "statusChanges",
+  CUSTOMER_REPLY: "customerReplies",
   SYSTEM_ANNOUNCEMENT: "systemAnnouncements",
   TIP: "tipsAndTricks",
   MEETING: "systemAnnouncements",
@@ -152,4 +153,26 @@ export async function markAsRead(notificationId: string, userId: string): Promis
 export async function markAllAsRead(userId: string): Promise<number> {
   const r = await prisma.notification.updateMany({ where: { userId, read: false }, data: { read: true, readAt: new Date() } });
   return r.count;
+}
+
+// Reply Portal Notification
+export async function notifyCustomerReply(p: {
+  recipientUserId: string;
+  customerId: string;
+  customerName: string;
+  threadId: string;
+  messagePreview: string;
+}): Promise<NotificationResult> {
+  const preview = p.messagePreview.length > 100
+    ? p.messagePreview.substring(0, 100) + "..."
+    : p.messagePreview;
+
+  return createNotification({
+    userId: p.recipientUserId,
+    type: "CUSTOMER_REPLY",
+    title: "New Customer Reply",
+    message: `${p.customerName} sent you a message: "${preview}"`,
+    data: { customerId: p.customerId, threadId: p.threadId, customerName: p.customerName },
+    actionUrl: `/en/crm/messages?thread=${p.threadId}`
+  });
 }

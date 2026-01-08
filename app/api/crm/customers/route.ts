@@ -17,28 +17,166 @@ export async function GET(req: NextRequest) {
 
     // Get query parameters for filtering
     const { searchParams } = new URL(req.url);
-    const statuses = searchParams.getAll("status"); // Support multiple status filters
-    const assignedTo = searchParams.get("assignedTo");
-    const search = searchParams.get("search"); // Search name/email/phone
+
+    // Basic filters
+    const search = searchParams.get("search");
+
+    // People & Assignment filters
+    const assignedToId = searchParams.get("assignedToId");
+    const managerId = searchParams.get("managerId");
+    const unassignedOnly = searchParams.get("unassignedOnly") === "true";
+    const assignedTo = searchParams.get("assignedTo"); // Legacy support
+
+    // Status filters (multi-select)
+    const statuses = searchParams.getAll("status");
+    const temperatures = searchParams.getAll("temperature");
+    const priorities = searchParams.getAll("priority");
+    const lostReason = searchParams.get("lostReason");
+
+    // Financing filters
+    const financingType = searchParams.get("financingType");
+    const rtoApprovalStatus = searchParams.get("rtoApprovalStatus");
+    const financeApprovalStatus = searchParams.get("financeApprovalStatus");
+    const applied = searchParams.get("applied");
+
+    // Location filters
+    const state = searchParams.get("state");
+    const city = searchParams.get("city");
+    const zipcode = searchParams.get("zipcode");
+
+    // Trailer filters
+    const trailerType = searchParams.get("trailerType");
+    const trailerSize = searchParams.get("trailerSize");
+    const stockNumber = searchParams.get("stockNumber");
+    const vin = searchParams.get("vin");
+
+    // Time filters
+    const createdAfter = searchParams.get("createdAfter");
+    const createdBefore = searchParams.get("createdBefore");
+    const lastContactedAfter = searchParams.get("lastContactedAfter");
+    const lastContactedBefore = searchParams.get("lastContactedBefore");
+
+    // Quick toggles
+    const neverContacted = searchParams.get("neverContacted") === "true";
+    const followUpOverdue = searchParams.get("followUpOverdue") === "true";
 
     // Build where clause
     const where: any = {};
 
-    // Handle multi-select status filter
-    if (statuses && statuses.length > 0) {
-      if (statuses.length === 1) {
-        // Single status - direct equality
-        where.status = statuses[0];
-      } else {
-        // Multiple statuses - use "in" operator for OR logic
-        where.status = { in: statuses };
+    // === People & Assignment ===
+    if (unassignedOnly) {
+      where.assignedToId = null;
+    } else {
+      if (assignedToId) {
+        where.assignedToId = assignedToId;
+      }
+      if (managerId) {
+        where.managerId = managerId;
       }
     }
 
+    // Legacy support
     if (assignedTo) {
       where.assignedTo = assignedTo;
     }
 
+    // === Status filters ===
+    if (statuses && statuses.length > 0) {
+      where.status = statuses.length === 1 ? statuses[0] : { in: statuses };
+    }
+
+    if (temperatures && temperatures.length > 0) {
+      where.temperature = temperatures.length === 1 ? temperatures[0] : { in: temperatures };
+    }
+
+    if (priorities && priorities.length > 0) {
+      where.priority = priorities.length === 1 ? priorities[0] : { in: priorities };
+    }
+
+    if (lostReason) {
+      where.lostReason = lostReason;
+    }
+
+    // === Financing filters ===
+    if (financingType) {
+      where.financingType = financingType;
+    }
+
+    if (rtoApprovalStatus) {
+      where.rtoApprovalStatus = rtoApprovalStatus;
+    }
+
+    if (financeApprovalStatus) {
+      where.financeApprovalStatus = financeApprovalStatus;
+    }
+
+    if (applied === "true") {
+      where.applied = true;
+    } else if (applied === "false") {
+      where.applied = false;
+    }
+
+    // === Location filters ===
+    if (state) {
+      where.state = { equals: state, mode: "insensitive" };
+    }
+
+    if (city) {
+      where.city = { contains: city, mode: "insensitive" };
+    }
+
+    if (zipcode) {
+      where.zipcode = { startsWith: zipcode };
+    }
+
+    // === Trailer filters ===
+    if (trailerType) {
+      where.trailerType = { contains: trailerType, mode: "insensitive" };
+    }
+
+    if (trailerSize) {
+      where.trailerSize = { contains: trailerSize, mode: "insensitive" };
+    }
+
+    if (stockNumber) {
+      where.stockNumber = { contains: stockNumber, mode: "insensitive" };
+    }
+
+    if (vin) {
+      where.vin = { contains: vin.toUpperCase(), mode: "insensitive" };
+    }
+
+    // === Time filters ===
+    if (createdAfter || createdBefore) {
+      where.createdAt = {};
+      if (createdAfter) {
+        where.createdAt.gte = new Date(createdAfter);
+      }
+      if (createdBefore) {
+        where.createdAt.lte = new Date(createdBefore + "T23:59:59.999Z");
+      }
+    }
+
+    if (lastContactedAfter || lastContactedBefore) {
+      where.lastContactedAt = {};
+      if (lastContactedAfter) {
+        where.lastContactedAt.gte = new Date(lastContactedAfter);
+      }
+      if (lastContactedBefore) {
+        where.lastContactedAt.lte = new Date(lastContactedBefore + "T23:59:59.999Z");
+      }
+    }
+
+    // === Quick toggles ===
+    if (neverContacted) {
+      where.lastContactedAt = null;
+    }
+
+    if (followUpOverdue) {
+      where.nextFollowUpDate = { lt: new Date() };
+    }
+
+    // === Text search (OR across multiple fields) ===
     if (search) {
       where.OR = [
         { firstName: { contains: search, mode: "insensitive" } },
@@ -46,6 +184,8 @@ export async function GET(req: NextRequest) {
         { email: { contains: search, mode: "insensitive" } },
         { phone: { contains: search } },
         { companyName: { contains: search, mode: "insensitive" } },
+        { vin: { contains: search.toUpperCase(), mode: "insensitive" } },
+        { stockNumber: { contains: search, mode: "insensitive" } },
       ];
     }
 
@@ -80,6 +220,14 @@ export async function GET(req: NextRequest) {
         trailerType: true,
         financingType: true,
         applied: true,
+        stockNumber: true,
+        vin: true,
+        managerId: true,
+        lostReason: true,
+        lostReasonNotes: true,
+        rtoApprovalStatus: true,
+        financeApprovalStatus: true,
+        assignmentMethod: true,
         nextFollowUpDate: true,
         lastContactedAt: true,
         createdAt: true,
@@ -185,23 +333,77 @@ export async function POST(req: NextRequest) {
       status,
       tags,
       notes,
-      salesRepName,      // Sales Rep assignment
-      assignedToName,    // Manager assignment
+      repCode,  // Rep code for auto-assignment
     } = validation.data;
 
-    // Check if customer already exists
-    const existing = await prisma.customer.findUnique({
-      where: { email },
-    });
+    // Check if customer already exists (only if email provided)
+    if (email) {
+      const existing = await prisma.customer.findUnique({
+        where: { email },
+      });
 
-    if (existing) {
-      return NextResponse.json(
-        { error: "Customer with this email already exists" },
-        { status: 400 }
-      );
+      if (existing) {
+        return NextResponse.json(
+          { error: "Customer with this email already exists" },
+          { status: 400 }
+        );
+      }
     }
 
-    // Create customer
+    // === BATCH 1: Auto-assignment logic ===
+    let assignedToId: string | null = null;
+    let assignedToName: string | null = null;
+    let salesRepName: string | null = null;
+    let managerId: string | null = null;
+    let assignmentMethod: string = "manual";
+
+    // Normalize VIN if provided
+    const normalizedVin = body.vin?.trim().toUpperCase() || null;
+
+    if (repCode) {
+      // RepCode route: Find rep by repCode and assign to them + their manager
+      const rep = await prisma.userProfile.findFirst({
+        where: { repCode },
+        include: { user: true },
+      });
+
+      if (rep) {
+        assignedToId = rep.userId;
+        assignedToName = rep.user.name || `${rep.firstName || ''} ${rep.lastName || ''}`.trim() || rep.user.email || null;
+        salesRepName = assignedToName;
+        managerId = rep.managerId;
+        assignmentMethod = "repCode";
+
+        // If rep has a manager, get manager's name
+        if (rep.managerId) {
+          const manager = await prisma.userProfile.findFirst({
+            where: { userId: rep.managerId },
+            include: { user: true },
+          });
+          if (manager) {
+            // assignedToName is the manager for display purposes in some contexts
+            // Keep salesRepName as the actual rep
+          }
+        }
+      }
+    } else {
+      // Intake route: Assign to first available CRM Admin
+      const crmAdmin = await prisma.userProfile.findFirst({
+        where: { canAdminCRM: true, isActive: true },
+        include: { user: true },
+        orderBy: { createdAt: "asc" }, // Deterministic order - oldest first
+      });
+
+      if (crmAdmin) {
+        assignedToId = crmAdmin.userId;
+        assignedToName = crmAdmin.user.name || `${crmAdmin.firstName || ''} ${crmAdmin.lastName || ''}`.trim() || crmAdmin.user.email || null;
+        salesRepName = assignedToName;
+        managerId = crmAdmin.managerId;
+        assignmentMethod = "intake";
+      }
+    }
+
+    // Create customer with auto-assignment
     const customer = await prisma.customer.create({
       data: {
         firstName,
@@ -216,12 +418,18 @@ export async function POST(req: NextRequest) {
         businessType: businessType || "individual",
         source: source || "website",
         assignedTo,
-        status: status || "lead",
+        assignedToId,
+        assignedToName,
+        salesRepName,
+        managerId,
+        assignmentMethod,
+        repCode: repCode || null,
+        vin: normalizedVin,
+        status: status || "new",
         tags: tags || [],
         notes,
-        salesRepName,
-        assignedToName,
-        lastContactedAt: new Date(),
+        // lastContactedAt intentionally NOT set on creation
+        // Will be set when actual contact happens (call/email/message logged)
       },
     });
 
@@ -232,7 +440,7 @@ export async function POST(req: NextRequest) {
         userId: session.user.id,
         type: "note",
         subject: "Customer Created",
-        description: `New customer added to CRM by ${session.user.name || session.user.email}`,
+        description: `New customer added to CRM by ${session.user.name || session.user.email}${assignmentMethod !== "manual" ? ` (Auto-assigned via ${assignmentMethod})` : ""}`,
         status: "completed",
         completedAt: new Date(),
       },

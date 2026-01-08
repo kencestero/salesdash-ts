@@ -58,7 +58,7 @@ export default async function RootLayout(props: { children: React.ReactNode; par
   } = props;
 
   return (
-    <html lang={lang}>
+    <html lang={lang} suppressHydrationWarning>
       <AuthProvider>
         <TanstackProvider>
           <Providers>

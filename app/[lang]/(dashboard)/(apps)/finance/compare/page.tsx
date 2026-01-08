@@ -108,7 +108,8 @@ export default function FinanceComparePage() {
       try {
         const res = await fetch(`/api/crm/customers/${customerId}`);
         if (res.ok) {
-          const customer: Customer = await res.json();
+          const data = await res.json();
+          const customer: Customer = data.customer;
           setCustomerName(`${customer.firstName} ${customer.lastName}`.trim());
           setCustomerPhone(customer.phone || "");
           setCustomerEmail(customer.email || "");
@@ -160,7 +161,17 @@ export default function FinanceComparePage() {
         try {
           const res = await fetch(`/api/tax?zip=${zipcode.slice(0, 5)}`);
           const data = await res.json();
-          setTaxPct(data.rate || 0);
+          // Only update if we got a valid rate (don't set to 0 for unknown ZIPs)
+          if (data.rate !== undefined && data.rate !== null) {
+            setTaxPct(data.rate);
+            // Show toast with state info if available
+            if (data.location?.state && data.location.state !== 'Unknown') {
+              toast({
+                title: "Tax Rate Updated",
+                description: `${data.location.state} sales tax: ${data.rate}%`,
+              });
+            }
+          }
         } catch (error) {
           console.error("Failed to fetch tax rate:", error);
         }

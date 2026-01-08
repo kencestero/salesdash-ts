@@ -14,7 +14,7 @@ export async function GET(req: Request) {
 
   // Use existing ZIP tax map
   const location = getLocationByZip(zip);
-  const rate = location?.tax ?? 0;
+  const rate = location?.taxRate ?? 0;
 
-  return NextResponse.json({ rate });
+  return NextResponse.json({ rate, location });
 }

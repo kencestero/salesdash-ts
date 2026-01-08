@@ -1710,6 +1710,11 @@ export const menusConfig = {
         href: "/crm/customers",
       },
       {
+        title: "Messages",
+        icon: Messages,
+        href: "/crm/messages",
+      },
+      {
         isHeader: true,
         title: "Application",
       },

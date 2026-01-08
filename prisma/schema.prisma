@@ -141,6 +141,7 @@ model UserProfile {
   canAccessCalendar   Boolean @default(true)
   canAccessReports    Boolean @default(false) // Advanced reports
   canManageUsers      Boolean @default(false) // Only for owners/directors
+  canAdminCRM         Boolean @default(false) // CRM Admin: intake team, can manage imports, settings, audit logs
 
   // Manager System Controls
   isAvailableAsManager Boolean @default(false) // Can appear in manager dropdown during signup
@@ -282,8 +283,10 @@ model Customer {
   creditAppStatus String?  // "not_applied", "applied", "approved", "declined"
   applied         Boolean @default(false) // Google Sheets Column H - Applied status
   dateApplied     DateTime? // Google Sheets Column I - Date Applied
-  linkSentStatus  String   @default("not_sent") // "applied", "link_sent", "not_sent"
-  approvalStatus  String   @default("status") // "status", "approved", "pending", "need_docs", "denied"
+  linkSentStatus  String   @default("not_sent") // "applied", "not_applied", "not_sent", "cash_deal"
+  approvalStatus  String   @default("status") // "status", "approved", "pending", "need_docs", "denied" (legacy)
+  rtoApprovalStatus     String?  // "approved", "pending", "need_stips", "declined" - RTO specific
+  financeApprovalStatus String?  // "approved", "pending", "need_stips", "declined" - Regular financing specific
 
   // Pre-Qualification Router Data (from website form)
   creditRange     String?  // "excellent_780_plus", "good_700_779", "fair_650_699", "below_average_620_649", "rebuilding_below_620"
@@ -301,6 +304,17 @@ model Customer {
   reviewedByUserId String? // Manager who reviewed the duplicate
   reviewDecision  String?  // "keep_original", "reassign_to_new", "merge"
   reviewedAt      DateTime?
+
+  // Trailer Identification (Batch 1 - CRM Enhancement)
+  vin               String?  // Free text VIN, trim + uppercase on save
+
+  // Lost Lead Tracking (Batch 1 - CRM Enhancement)
+  lostReason        String?  // "price" | "no_credit" | "bought_elsewhere" | "no_response" | "other"
+  lostReasonNotes   String?  // Required when lostReason = "other"
+
+  // Assignment Tracking (Batch 1 - CRM Enhancement)
+  managerId         String?  // Explicit manager tracking (manager's userId)
+  assignmentMethod  String?  // "repCode" | "intake" | "manual" | "bulk_reassign"
 
   // Tags for segmentation
   tags            String[]
@@ -321,7 +335,9 @@ model Customer {
   activities      Activity[]
   emails          Email[]
   quotes          Quote[]
-  leadNotes       LeadNote[]  // NEW RELATION
+  leadNotes       LeadNote[]
+  interests       CustomerInterest[]  // Batch 2D: Customer interest in specific trailers
+  messageThreads  MessageThread[]     // Reply Portal: Messaging threads with this customer
 
   @@index([email])
   @@index([status])
@@ -339,6 +355,9 @@ model Customer {
   @@index([duplicateStatus])        // For finding leads pending review
   @@index([lockedForReview])        // For finding locked leads
   @@index([repCode])                // For tracking leads by rep code
+  @@index([vin])                    // For VIN search (Batch 1)
+  @@index([lostReason])             // For lost reason filtering (Batch 1)
+  @@index([managerId])              // For manager assignment queries (Batch 1)
 }
 
 // Delivery Records - Track actual delivered trailers
@@ -1152,6 +1171,7 @@ enum NotificationType {
   FOLLOW_UP_DUE          // C - Time to follow up with customer
   DUPLICATE_DETECTED     // D - Someone tried to add your customer
   STATUS_CHANGED         // E - Manager changed customer status
+  CUSTOMER_REPLY         // Customer sent a reply via portal
 
   // System Notifications
   SYSTEM_ANNOUNCEMENT    // News from management
@@ -1197,6 +1217,7 @@ model NotificationPreference {
   followUpReminders     Boolean  @default(true)
   duplicateAlerts       Boolean  @default(true)
   statusChanges         Boolean  @default(true)
+  customerReplies       Boolean  @default(true)  // Reply portal messages
 
   // System Notifications
   systemAnnouncements   Boolean  @default(true)
@@ -1213,4 +1234,129 @@ model NotificationPreference {
   user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+}
+
+// CRM Saved Views - User-defined filter presets (Batch 2C)
+model SavedView {
+  id          String   @id @default(cuid())
+  name        String
+  filters     Json     // Serialized FilterState object
+  userId      String?  // null = global/shared view
+  isGlobal    Boolean  @default(false)
+  isDefault   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@index([isGlobal])
+}
+
+// Customer Interest - Track customer interest in specific trailers (Batch 2D)
+model CustomerInterest {
+  id          String   @id @default(cuid())
+  customerId  String
+  stockNumber String?
+  vin         String?
+  notes       String?  @db.Text
+  createdAt   DateTime @default(now())
+
+  customer    Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@index([customerId])
+  @@index([stockNumber])
+  @@index([vin])
+}
+
+// ===========================================
+// REPLY PORTAL - Customer Messaging System
+// ===========================================
+
+// Direction of message flow
+enum MessageDirection {
+  INBOUND   // Customer -> Rep
+  OUTBOUND  // Rep -> Customer
+}
+
+// Channel the message came through
+enum MessageChannel {
+  PORTAL    // Customer reply portal (tokenized link)
+  EMAIL     // Traditional email
+  SYSTEM    // System-generated (auto-replies, etc.)
+}
+
+// Thread containing messages between rep and customer
+model MessageThread {
+  id              String    @id @default(cuid())
+  customerId      String
+  assignedToId    String    // Primary sales rep (User.id)
+  managerId       String?   // Manager for visibility (User.id)
+
+  // Thread metadata
+  subject         String?   // Optional subject line
+
+  // Thread state
+  lastMessageAt     DateTime  @default(now())
+  lastMessagePreview String?  @db.VarChar(200) // First 200 chars of last message
+  unreadForRep      Boolean   @default(false)  // Rep has unread messages
+  unreadForManager  Boolean   @default(false)  // Manager has unread messages
+
+  // Token for customer portal access
+  portalToken       String    @unique @default(cuid()) // Unique token for customer to access thread
+  portalTokenExpiry DateTime? // Optional expiration for extra security
+
+  // Timestamps
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relations
+  customer        Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  messages        Message[]
+
+  @@index([customerId])
+  @@index([assignedToId])
+  @@index([managerId])
+  @@index([portalToken])
+  @@index([lastMessageAt])
+  @@index([assignedToId, unreadForRep])   // For rep inbox query
+  @@index([managerId, unreadForManager])  // For manager oversight
+}
+
+// Individual message in a thread
+model Message {
+  id          String           @id @default(cuid())
+  threadId    String
+  customerId  String           // Denormalized for easier queries
+
+  // Direction and channel
+  direction   MessageDirection
+  channel     MessageChannel
+
+  // Sender/receiver info
+  fromName    String?
+  fromEmail   String?
+  toName      String?
+  toEmail     String?
+
+  // Message content
+  bodyText    String           @db.Text
+  bodyHtml    String?          @db.Text  // For rich email content
+
+  // Metadata
+  metadata    Json?            // Additional context (IP, user agent for portal, email headers, etc.)
+
+  // Timestamps
+  createdAt   DateTime         @default(now())
+
+  // Read tracking
+  readByRepAt     DateTime?    // When rep read this message
+  readByManagerAt DateTime?    // When manager read this message
+
+  // Relations
+  thread      MessageThread    @relation(fields: [threadId], references: [id], onDelete: Cascade)
+
+  @@index([threadId])
+  @@index([customerId])
+  @@index([direction])
+  @@index([createdAt])
+  @@index([threadId, createdAt])  // For message history ordering
 }

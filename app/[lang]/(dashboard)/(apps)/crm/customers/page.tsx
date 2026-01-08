@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import {
   Users,
   Phone,
@@ -42,6 +42,15 @@ import { toast } from "@/components/ui/use-toast";
 import Link from "next/link";
 import { AddCustomerDialog } from "./add-customer-dialog";
 import { calculateResponseTimer, getBackgroundColorClass } from "@/lib/response-timer";
+import {
+  AdvancedFilters,
+  FilterState,
+  DEFAULT_FILTERS,
+  filtersToSearchParams,
+  searchParamsToFilters,
+} from "@/components/crm/advanced-filters";
+import { FilterChips } from "@/components/crm/filter-chips";
+import { SavedViewsSelect } from "@/components/crm/saved-views-select";
 
 interface Customer {
   id: string;
@@ -54,9 +63,12 @@ interface Customer {
   companyName?: string;
   city?: string;
   state?: string;
+  zipcode?: string;
   assignedTo?: string;
   salesRepName?: string | null;      // Sales Rep from Google Sheets
   assignedToName?: string | null;    // Manager from Google Sheets
+  vin?: string | null;
+  stockNumber?: string | null;
   createdAt: string;
   lastContactedAt?: string;
   _count: {
@@ -97,6 +109,7 @@ const statusIcons: Record<string, any> = {
 export default function CustomersPage() {
   const { data: session } = useSession();
   const searchParams = useSearchParams();
+  const router = useRouter();
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<string[]>(["all"]);
@@ -105,29 +118,41 @@ export default function CustomersPage() {
   const [importing, setImporting] = useState(false);
   const [importMessage, setImportMessage] = useState("");
 
+  // Advanced filters state - initialize from URL
+  const [advancedFilters, setAdvancedFilters] = useState<FilterState>(() => {
+    if (typeof window !== "undefined") {
+      return searchParamsToFilters(searchParams);
+    }
+    return DEFAULT_FILTERS;
+  });
+
   // Check if we should auto-open the add dialog
   useEffect(() => {
     const action = searchParams.get('action');
     if (action === 'add') {
       setShowAddDialog(true);
     }
+    // Also restore filters from URL on mount
+    setAdvancedFilters(searchParamsToFilters(searchParams));
   }, [searchParams]);
 
-  // Fetch customers
+  // Fetch customers with all filters
   const fetchCustomers = async () => {
     try {
       setLoading(true);
-      const params = new URLSearchParams();
 
-      // Handle multi-select status filter
+      // Build params from advanced filters
+      const params = filtersToSearchParams(advancedFilters);
+
+      // Also add legacy status filter if used
       const hasAllSelected = statusFilter.includes("all");
-      if (!hasAllSelected && statusFilter.length > 0) {
-        // Add each selected status as a separate query param
+      if (!hasAllSelected && statusFilter.length > 0 && advancedFilters.statuses.length === 0) {
         statusFilter.forEach(status => {
           params.append("status", status);
         });
       }
 
+      // Add search query
       if (searchQuery) {
         params.append("search", searchQuery);
       }
@@ -150,6 +175,50 @@ export default function CustomersPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Apply filters and update URL
+  const applyFilters = () => {
+    const params = filtersToSearchParams(advancedFilters);
+    if (searchQuery) {
+      params.set("search", searchQuery);
+    }
+    router.push(`?${params.toString()}`);
+    fetchCustomers();
+  };
+
+  // Clear all filters
+  const clearFilters = () => {
+    setAdvancedFilters(DEFAULT_FILTERS);
+    setStatusFilter(["all"]);
+    setSearchQuery("");
+    router.push("?");
+    // Fetch will be triggered by useEffect
+  };
+
+  // Clear a specific filter (for filter chips)
+  const clearFilter = (key: keyof FilterState, value?: string) => {
+    const newFilters = { ...advancedFilters };
+
+    // Handle array fields (multi-select)
+    if (key === "statuses" && value) {
+      newFilters.statuses = advancedFilters.statuses.filter((s) => s !== value);
+    } else if (key === "temperatures" && value) {
+      newFilters.temperatures = advancedFilters.temperatures.filter((t) => t !== value);
+    } else if (key === "priorities" && value) {
+      newFilters.priorities = advancedFilters.priorities.filter((p) => p !== value);
+    } else if (key === "unassignedOnly") {
+      newFilters.unassignedOnly = false;
+    } else if (key === "neverContacted") {
+      newFilters.neverContacted = false;
+    } else if (key === "followUpOverdue") {
+      newFilters.followUpOverdue = false;
+    } else {
+      // Handle string fields
+      (newFilters as any)[key] = "";
+    }
+
+    setAdvancedFilters(newFilters);
   };
 
   const importGoogleLeads = async () => {
@@ -231,7 +300,7 @@ export default function CustomersPage() {
   // Fetch on mount and when filters change
   useEffect(() => {
     fetchCustomers();
-  }, [statusFilter]);
+  }, [statusFilter, advancedFilters]);
 
   // Search with debounce
   useEffect(() => {
@@ -379,17 +448,17 @@ export default function CustomersPage() {
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
-                placeholder="Search by name, email, phone, or company..."
+                placeholder="Search by name, email, phone, VIN, or stock #..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10"
               />
             </div>
 
-            {/* Status Filter - Multi-Select with Checkboxes */}
+            {/* Quick Status Filter - Multi-Select with Checkboxes */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="w-full md:w-[220px] justify-start">
+                <Button variant="outline" className="w-full md:w-[180px] justify-start">
                   <Filter className="w-4 h-4 mr-2" />
                   {getFilterLabel()}
                 </Button>
@@ -428,9 +497,35 @@ export default function CustomersPage() {
                 </DropdownMenuCheckboxItem>
               </DropdownMenuContent>
             </DropdownMenu>
+
+            {/* Advanced Filters Button */}
+            <AdvancedFilters
+              filters={advancedFilters}
+              onFiltersChange={setAdvancedFilters}
+              onApply={applyFilters}
+              onClear={clearFilters}
+            />
+
+            {/* Saved Views Selector */}
+            <SavedViewsSelect
+              currentFilters={advancedFilters}
+              onViewSelect={(filters) => {
+                setAdvancedFilters(filters);
+                // Also clear legacy status filter when loading a view
+                setStatusFilter(["all"]);
+              }}
+              onViewClear={clearFilters}
+            />
           </div>
         </CardContent>
       </Card>
+
+      {/* Active Filter Chips */}
+      <FilterChips
+        filters={advancedFilters}
+        onClearFilter={clearFilter}
+        onClearAll={clearFilters}
+      />
 
       {/* Customer List */}
       <Card>
@@ -511,12 +606,23 @@ export default function CustomersPage() {
                                   {customer.phone}
                                 </a>
                               </div>
-                              {(customer.city || customer.state) && (
+                              {(customer.city || customer.state || customer.zipcode) && (
                                 <div className="flex items-center gap-2">
                                   <MapPin className="w-4 h-4" />
-                                  {customer.city && customer.state
-                                    ? `${customer.city}, ${customer.state}`
-                                    : customer.city || customer.state}
+                                  {/* Format: City, ST ZIP */}
+                                  {(() => {
+                                    const parts = [];
+                                    if (customer.city) parts.push(customer.city);
+                                    if (customer.state) {
+                                      if (customer.city) {
+                                        parts[parts.length - 1] += `, ${customer.state}`;
+                                      } else {
+                                        parts.push(customer.state);
+                                      }
+                                    }
+                                    if (customer.zipcode) parts.push(customer.zipcode);
+                                    return parts.join(" ");
+                                  })()}
                                 </div>
                               )}
                               <div className="flex items-center gap-2">

@@ -21,6 +21,7 @@ import {
   Clock,
   TrendingUp,
   XCircle,
+  ArrowRightLeft,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -50,6 +51,8 @@ import { EmailComposerDialog } from "@/components/crm/email-composer-dialog";
 import { EmailViewerDialog } from "@/components/crm/email-viewer-dialog";
 import { calculateResponseTimer, type ResponseTimerResult, getBackgroundColorClass } from "@/lib/response-timer";
 import { LeadStatusManager } from "@/components/crm/lead-status-manager";
+import { AssignmentSection } from "@/components/crm/assignment-section";
+import { InterestedUnits } from "@/components/crm/interested-units";
 
 interface Customer {
   id: string;
@@ -85,6 +88,17 @@ interface Customer {
   temperature?: string;
   linkSentStatus?: string;
   approvalStatus?: string;
+  rtoApprovalStatus?: string;
+  financeApprovalStatus?: string;
+  // Manager assignment
+  assignedToId?: string;
+  // BATCH 1: New fields
+  managerId?: string;
+  managerName?: string;
+  assignmentMethod?: string;
+  vin?: string;
+  lostReason?: string;
+  lostReasonNotes?: string;
   _count: {
     deals: number;
     activities: number;
@@ -963,6 +977,14 @@ export default function CustomerProfilePage() {
                 </div>
               )}
 
+              {/* BATCH 1: VIN Field */}
+              {customer.vin && (
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">VIN</span>
+                  <span className="text-sm font-medium font-mono">{customer.vin}</span>
+                </div>
+              )}
+
               {customer.isFactoryOrder && (
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">Order Type</span>
@@ -1039,16 +1061,39 @@ export default function CustomerProfilePage() {
           </CardContent>
         </Card>
 
-        {/* Middle Column - Lead Status Management (takes 1 column) */}
-        <div className="lg:col-span-1">
+        {/* Middle Column - Lead Status Management + Assignment (takes 1 column) */}
+        <div className="lg:col-span-1 space-y-6">
           <LeadStatusManager
             customerId={customer.id}
+            customerName={`${customer.firstName} ${customer.lastName}`}
             currentTemperature={customer.temperature}
             currentLinkStatus={customer.linkSentStatus}
             currentApprovalStatus={customer.approvalStatus}
+            currentRtoApproval={customer.rtoApprovalStatus}
+            currentFinanceApproval={customer.financeApprovalStatus}
+            assignedManagerId={customer.assignedToId}
+            assignedManagerName={customer.assignedToName || undefined}
+            userRole="owner" // TODO: Get from session
+            // BATCH 1: Lost reason props
+            currentLostReason={customer.lostReason}
+            currentLostReasonNotes={customer.lostReasonNotes}
+            onUpdate={fetchCustomer}
+          />
+
+          {/* BATCH 1: Assignment Section */}
+          <AssignmentSection
+            customerId={customer.id}
+            currentAssignedToId={customer.assignedToId}
+            currentAssignedToName={customer.assignedToName}
+            currentManagerId={customer.managerId}
+            currentManagerName={customer.managerName}
+            currentAssignmentMethod={customer.assignmentMethod}
             userRole="owner" // TODO: Get from session
             onUpdate={fetchCustomer}
           />
+
+          {/* BATCH 2D: Interested Units */}
+          <InterestedUnits customerId={customer.id} />
         </div>
 
         {/* Right Column - Actions (takes 1 column) */}
@@ -1143,14 +1188,14 @@ export default function CustomerProfilePage() {
               Create Quote
             </Button>
             <Button
-              className="w-full justify-start bg-primary/10 hover:bg-primary/20 border-primary/30"
+              className="w-full justify-start"
               variant="outline"
               onClick={() => {
                 // Open Finance Calculator in a new tab with customer ID
                 window.open(`/en/finance/compare?customerId=${customer.id}`, '_blank');
               }}
             >
-              <DollarSign className="w-4 h-4 mr-2 text-primary" />
+              <DollarSign className="w-4 h-4 mr-2" />
               Run Finance Numbers
             </Button>
             <Button
@@ -1191,6 +1236,8 @@ export default function CustomerProfilePage() {
                       return { icon: Calendar, bg: 'bg-purple-100', color: 'text-purple-600' };
                     case 'note':
                       return { icon: FileText, bg: 'bg-yellow-100', color: 'text-yellow-600' };
+                    case 'assignment_change':
+                      return { icon: ArrowRightLeft, bg: 'bg-indigo-100', color: 'text-indigo-600' };
                     default:
                       return { icon: Activity, bg: 'bg-gray-100', color: 'text-gray-600' };
                   }
@@ -1199,6 +1246,17 @@ export default function CustomerProfilePage() {
                 const { icon: Icon, bg, color } = getActivityIcon(activity.type);
 
                 const isEmailActivity = activity.type === 'email' && activity.emailId;
+                const isAssignmentChange = activity.type === 'assignment_change';
+
+                // Parse assignment change data if available
+                let assignmentData: any = null;
+                if (isAssignmentChange && activity.description) {
+                  try {
+                    assignmentData = JSON.parse(activity.description);
+                  } catch (e) {
+                    // Not JSON, use as plain text
+                  }
+                }
 
                 return (
                   <div
@@ -1219,17 +1277,41 @@ export default function CustomerProfilePage() {
                       <div className="flex items-center gap-2 flex-wrap">
                         <p className="text-sm font-semibold">{activity.subject}</p>
                         <Badge variant="outline" className="text-xs capitalize">
-                          {activity.type}
+                          {activity.type === 'assignment_change' ? 'Reassignment' : activity.type}
                         </Badge>
                         {isEmailActivity && (
                           <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
                             Click to View Email
                           </Badge>
                         )}
+                        {/* BATCH 1: Assignment method badge */}
+                        {isAssignmentChange && assignmentData?.method && (
+                          <Badge variant="outline" className="text-xs bg-gray-50 text-gray-600 border-gray-200">
+                            {assignmentData.method}
+                          </Badge>
+                        )}
                       </div>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        {activity.description}
-                      </p>
+                      {/* BATCH 1: Enhanced display for assignment changes */}
+                      {isAssignmentChange && assignmentData ? (
+                        <div className="text-sm text-muted-foreground mt-1 space-y-1">
+                          <p className="flex items-center gap-1">
+                            <span className="font-medium">{assignmentData.fromAssignedToName || 'Unassigned'}</span>
+                            <ArrowRightLeft className="w-3 h-3 mx-1" />
+                            <span className="font-medium text-foreground">{assignmentData.toAssignedToName || 'Unassigned'}</span>
+                          </p>
+                          <p className="text-xs">
+                            Changed by {assignmentData.changedBy}
+                            {assignmentData.changedByRole && ` (${assignmentData.changedByRole})`}
+                          </p>
+                          {assignmentData.reason && (
+                            <p className="text-xs italic">Reason: {assignmentData.reason}</p>
+                          )}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-muted-foreground mt-1">
+                          {activity.description}
+                        </p>
+                      )}
                       <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
                         <Clock className="w-3 h-3" />
                         {formatDate(activity.createdAt)}
