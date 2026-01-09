@@ -34,10 +34,13 @@ function looksLikeQuality(headers: string[]): boolean {
 }
 
 export async function POST(req: Request) {
+  let currentUserId: string | null = null;
+
   try {
     // Auth guard: only MANAGER or OWNER can import inventory
     try {
-      await requireRole(["manager", "owner"]);
+      const session = await requireRole(["manager", "owner"]);
+      currentUserId = session?.user?.id || null;
     } catch (error: any) {
       if (error.message === "UNAUTHORIZED") {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -237,18 +240,59 @@ export async function POST(req: Request) {
 
     // SYNC MODE: Delete items from this manufacturer not in new list
     let deleted = 0;
+    let deletedVins: string[] = [];
     if (modeParam === 'sync') {
-      console.log(`[inventory/import] SYNC mode: Deleting ${manufacturer} items not in new list...`);
-      const deleteResult = await prisma.trailer.deleteMany({
+      console.log(`[inventory/import] SYNC mode: Finding ${manufacturer} items not in new list (${importedVins.size} VINs imported)...`);
+
+      // First, find what will be deleted (for logging and reporting)
+      const toDelete = await prisma.trailer.findMany({
         where: {
           manufacturer: manufacturer,
           vin: {
             notIn: Array.from(importedVins)
           }
-        }
+        },
+        select: { vin: true, stockNumber: true }
       });
-      deleted = deleteResult.count;
-      console.log(`[inventory/import] Deleted ${deleted} items from ${manufacturer}`);
+
+      deletedVins = toDelete.map(t => t.vin);
+      console.log(`[inventory/import] Found ${toDelete.length} items to delete from ${manufacturer}:`, toDelete.slice(0, 10)); // Log first 10
+
+      if (toDelete.length > 0) {
+        const deleteResult = await prisma.trailer.deleteMany({
+          where: {
+            manufacturer: manufacturer,
+            vin: {
+              notIn: Array.from(importedVins)
+            }
+          }
+        });
+        deleted = deleteResult.count;
+        console.log(`[inventory/import] Deleted ${deleted} items from ${manufacturer}`);
+      }
+    }
+
+    // Create upload report for tracking
+    const fileName = file.name || 'Unknown';
+    try {
+      await prisma.uploadReport.create({
+        data: {
+          fileName,
+          manufacturer,
+          uploadedBy: currentUserId || 'system',
+          totalInUpload: rows.length,
+          newTrailers: upserts,
+          updatedTrailers: 0,
+          removedTrailers: deleted,
+          newVins: Array.from(importedVins),
+          updatedVins: [],
+          removedVins: deletedVins, // Track which VINs were removed
+        },
+      });
+      console.log(`[inventory/import] Created upload report for ${fileName}`);
+    } catch (reportErr) {
+      console.error('[inventory/import] Failed to create upload report:', reportErr);
+      // Don't fail the import if report creation fails
     }
 
     return NextResponse.json({ ok:true, manufacturer, upserts, skipped, deleted, mode: modeParam });
