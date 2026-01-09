@@ -130,40 +130,63 @@ export default function CreditApplicationsPage() {
       {/* Rep Code Tutorial Carousel */}
       <RepCodeTutorialCarousel onCopyLink={handleCopyLink} />
 
-      {/* Create Link Card */}
-      <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Copy className="h-5 w-5" />
-            Your Credit Application Link
+      {/* Create Link Card - VIBRANT DESIGN */}
+      <Card className="border-4 border-[#E96114] bg-gradient-to-br from-[#E96114]/20 via-[#09213C]/30 to-[#E96114]/10 shadow-2xl shadow-[#E96114]/20 overflow-hidden relative">
+        {/* Animated background glow */}
+        <div className="absolute inset-0 bg-gradient-to-r from-[#E96114]/10 via-transparent to-[#E96114]/10 animate-pulse" />
+
+        <CardHeader className="relative pb-2">
+          <div className="flex items-center justify-center gap-3 mb-2">
+            <div className="p-3 bg-[#E96114] rounded-full shadow-lg shadow-[#E96114]/50">
+              <Copy className="h-8 w-8 text-white" />
+            </div>
+          </div>
+          <CardTitle className="text-center text-3xl font-extrabold bg-gradient-to-r from-[#E96114] to-orange-400 bg-clip-text text-transparent">
+            🔗 Your Credit Application Link
           </CardTitle>
+          <p className="text-center text-lg text-muted-foreground mt-2 font-medium">
+            ⬆️ The illustrations above show how this link works for your customers ⬆️
+          </p>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-6 relative pt-4">
           {repCode ? (
-            <div className="space-y-3">
-              <p className="text-sm text-muted-foreground">
-                Share this link with customers. All applications submitted through this link will be automatically assigned to you.
-              </p>
-              <div className="flex gap-2">
+            <div className="space-y-5">
+              <div className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 border-2 border-green-500/50 rounded-xl p-4 text-center">
+                <p className="text-lg font-semibold text-green-400">
+                  ✅ Share this link with customers — All applications will be assigned to YOU automatically!
+                </p>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-3">
                 <Input
                   readOnly
                   value={`https://remotivetrailers.com/credit-application/${repCode}`}
-                  className="flex-1 font-mono text-sm"
+                  className="flex-1 font-mono text-base sm:text-lg h-14 border-2 border-[#E96114]/50 bg-background/80 font-semibold"
                 />
-                <Button onClick={handleCopyLink} size="lg" className="gap-2">
-                  <Copy className="h-4 w-4" />
-                  Copy Link
+                <Button
+                  onClick={handleCopyLink}
+                  size="lg"
+                  className="h-14 px-8 text-lg font-bold gap-3 bg-gradient-to-r from-[#E96114] to-orange-500 hover:from-[#E96114] hover:to-orange-400 shadow-lg shadow-[#E96114]/40 transition-all hover:scale-105"
+                >
+                  <Copy className="h-6 w-6" />
+                  📋 COPY LINK
                 </Button>
-                <Button variant="outline" asChild>
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="h-14 px-4 border-2 border-[#E96114]/50 hover:bg-[#E96114]/20"
+                  asChild
+                >
                   <Link href={`https://remotivetrailers.com/credit-application/${repCode}`} target="_blank">
-                    <ExternalLink className="h-4 w-4" />
+                    <ExternalLink className="h-6 w-6" />
                   </Link>
                 </Button>
               </div>
             </div>
           ) : (
-            <div className="text-center py-4">
-              <p className="text-sm text-muted-foreground">Loading your rep code...</p>
+            <div className="text-center py-8">
+              <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-[#E96114] border-r-transparent"></div>
+              <p className="text-lg text-muted-foreground mt-4">Loading your rep code...</p>
             </div>
           )}
         </CardContent>

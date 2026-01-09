@@ -276,7 +276,7 @@ export function CopyLinkCelebration({
               className="flex-1 border-slate-600 hover:bg-slate-700 text-white"
               size="lg"
             >
-              I Got It, Close
+              I will keep an eye and make sure they fill out the form and check the CRM
             </Button>
             <Button
               onClick={handleAddToCRM}
@@ -284,7 +284,7 @@ export function CopyLinkCelebration({
               size="lg"
             >
               <FileText className="w-5 h-5 mr-2" />
-              Add Customer to CRM Now
+              Rather add customer to CRM now I have all their info
             </Button>
           </DialogFooter>
         </DialogContent>
