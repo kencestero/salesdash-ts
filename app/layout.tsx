@@ -24,17 +24,15 @@ export const metadata = {
   },
   icons: {
     icon: [
-      { url: '/logo.png', type: 'image/png' },
+      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
       { url: '/favicon.ico', sizes: 'any' },
     ],
-    shortcut: '/logo.png',
-    apple: '/logo.png',
+    shortcut: '/favicon-32x32.png',
+    apple: '/apple-touch-icon.png',
     other: [
-      {
-        rel: 'icon',
-        type: 'image/png',
-        url: '/logo.png',
-      },
+      { rel: 'icon', type: 'image/png', sizes: '192x192', url: '/favicon-192x192.png' },
+      { rel: 'icon', type: 'image/png', sizes: '512x512', url: '/favicon-512x512.png' },
     ],
   },
   manifest: '/manifest.json',
