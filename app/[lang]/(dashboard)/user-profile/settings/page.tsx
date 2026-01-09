@@ -7,6 +7,7 @@ import PersonalDetails from "./personal-details"
 import ChangePassword from "./change-password"
 import CommingSoon from "./comming-soon";
 import NotificationSettings from "./notification-settings";
+import CRMPreferencesSettings from "./crm-preferences";
 
 const Settings = () => {
   const tabs: {
@@ -24,6 +25,10 @@ const Settings = () => {
       {
         label: "Notifications",
         value: "notifications"
+      },
+      {
+        label: "CRM Preferences",
+        value: "crm"
       },
       {
         label: "Others",
@@ -62,6 +67,9 @@ const Settings = () => {
           </TabsContent>
           <TabsContent value="notifications" className="mt-0">
             <NotificationSettings />
+          </TabsContent>
+          <TabsContent value="crm" className="mt-0">
+            <CRMPreferencesSettings />
           </TabsContent>
           <TabsContent value="others" className="mt-0">
             <CommingSoon />

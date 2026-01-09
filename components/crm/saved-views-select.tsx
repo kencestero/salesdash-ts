@@ -42,6 +42,7 @@ interface SavedViewsSelectProps {
   onViewSelect: (filters: FilterState) => void;
   onViewClear: () => void;
   userRole?: string;
+  initialViewId?: string | null; // From user's CRM preferences
 }
 
 export function SavedViewsSelect({
@@ -49,12 +50,14 @@ export function SavedViewsSelect({
   onViewSelect,
   onViewClear,
   userRole = "salesperson",
+  initialViewId,
 }: SavedViewsSelectProps) {
   const [views, setViews] = useState<SavedView[]>([]);
   const [loading, setLoading] = useState(false);
-  const [selectedViewId, setSelectedViewId] = useState<string>("");
+  const [selectedViewId, setSelectedViewId] = useState<string>(initialViewId || "");
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [initialized, setInitialized] = useState(false);
 
   // Save dialog state
   const [viewName, setViewName] = useState("");
@@ -72,11 +75,24 @@ export function SavedViewsSelect({
         const data = await response.json();
         setViews(data.views || []);
 
-        // If there's a default view and no view is selected, auto-select it
-        const defaultView = data.views?.find((v: SavedView) => v.isDefault);
-        if (defaultView && !selectedViewId) {
-          setSelectedViewId(defaultView.id);
-          onViewSelect(defaultView.filters as FilterState);
+        // Auto-select default view on first load
+        if (!initialized) {
+          // Priority: initialViewId (from user preferences) > view marked as isDefault > none
+          let viewToSelect: SavedView | undefined;
+
+          if (initialViewId) {
+            viewToSelect = data.views?.find((v: SavedView) => v.id === initialViewId);
+          }
+
+          if (!viewToSelect) {
+            viewToSelect = data.views?.find((v: SavedView) => v.isDefault);
+          }
+
+          if (viewToSelect) {
+            setSelectedViewId(viewToSelect.id);
+            onViewSelect(viewToSelect.filters as FilterState);
+          }
+          setInitialized(true);
         }
       }
     } catch (error) {

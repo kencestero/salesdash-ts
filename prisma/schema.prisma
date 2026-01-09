@@ -151,6 +151,10 @@ model UserProfile {
   lastSeen   DateTime  @default(now())
   isOnline   Boolean   @default(false)
 
+  // CRM Preferences (JSON - user-specific settings)
+  // Structure: { defaultViewId, defaultSort, followUpDays, overdueReminders, emailSignature, fromNameFormat }
+  crmPreferences  Json?
+
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 

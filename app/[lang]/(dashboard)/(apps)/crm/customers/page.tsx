@@ -107,6 +107,16 @@ const statusIcons: Record<string, any> = {
   lost: XCircle,
 };
 
+// CRM Preferences type
+interface CRMPreferences {
+  defaultViewId: string | null;
+  defaultSort: "newest" | "oldest" | "priority" | "lastActivity";
+  followUpDays: number;
+  overdueReminders: boolean;
+  emailSignature: string;
+  fromNameFormat: "name" | "nameCompany";
+}
+
 export default function CustomersPage() {
   const { data: session } = useSession();
   const searchParams = useSearchParams();
@@ -117,6 +127,8 @@ export default function CustomersPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [canAdminCRM, setCanAdminCRM] = useState(false);
+  const [crmPreferences, setCrmPreferences] = useState<CRMPreferences | null>(null);
+  const [preferencesLoaded, setPreferencesLoaded] = useState(false);
 
   // Advanced filters state - initialize from URL
   const [advancedFilters, setAdvancedFilters] = useState<FilterState>(() => {
@@ -136,22 +148,34 @@ export default function CustomersPage() {
     setAdvancedFilters(searchParamsToFilters(searchParams));
   }, [searchParams]);
 
-  // Check if user has CRM admin permission
+  // Fetch user profile and CRM preferences
   useEffect(() => {
-    async function checkCRMAdminPermission() {
+    async function fetchUserData() {
       try {
-        const response = await fetch("/api/user/profile");
-        if (response.ok) {
-          const data = await response.json();
+        // Fetch profile and CRM preferences in parallel
+        const [profileRes, prefsRes] = await Promise.all([
+          fetch("/api/user/profile"),
+          fetch("/api/user/crm-preferences"),
+        ]);
+
+        if (profileRes.ok) {
+          const data = await profileRes.json();
           // Check if user is owner, director, or has canAdminCRM flag
           const isOwnerOrDirector = ["owner", "director"].includes(data.profile?.role);
           setCanAdminCRM(isOwnerOrDirector || data.profile?.canAdminCRM === true);
         }
+
+        if (prefsRes.ok) {
+          const prefsData = await prefsRes.json();
+          setCrmPreferences(prefsData.preferences);
+        }
       } catch (error) {
-        console.error("Error checking CRM admin permission:", error);
+        console.error("Error fetching user data:", error);
+      } finally {
+        setPreferencesLoaded(true);
       }
     }
-    checkCRMAdminPermission();
+    fetchUserData();
   }, []);
 
   // Fetch customers with all filters
@@ -486,15 +510,18 @@ export default function CustomersPage() {
             />
 
             {/* Saved Views Selector */}
-            <SavedViewsSelect
-              currentFilters={advancedFilters}
-              onViewSelect={(filters) => {
-                setAdvancedFilters(filters);
-                // Also clear legacy status filter when loading a view
-                setStatusFilter(["all"]);
-              }}
-              onViewClear={clearFilters}
-            />
+            {preferencesLoaded && (
+              <SavedViewsSelect
+                currentFilters={advancedFilters}
+                onViewSelect={(filters) => {
+                  setAdvancedFilters(filters);
+                  // Also clear legacy status filter when loading a view
+                  setStatusFilter(["all"]);
+                }}
+                onViewClear={clearFilters}
+                initialViewId={crmPreferences?.defaultViewId}
+              />
+            )}
           </div>
         </CardContent>
       </Card>

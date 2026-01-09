@@ -5,7 +5,17 @@ import { prisma } from "@/lib/prisma";
 import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
-const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || "Remotive Logistics Sales <noreply@mjsalesdash.com>";
+const FROM_DOMAIN = process.env.RESEND_FROM_DOMAIN || "remotivelogistics.com";
+
+// CRM Preferences type
+interface CRMPreferences {
+  defaultViewId?: string | null;
+  defaultSort?: string;
+  followUpDays?: number;
+  overdueReminders?: boolean;
+  emailSignature?: string;
+  fromNameFormat?: "name" | "nameCompany";
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -18,7 +28,7 @@ export async function POST(req: NextRequest) {
     const customerId = formData.get("customerId") as string;
     const to = formData.get("to") as string;
     const subject = formData.get("subject") as string;
-    const body = formData.get("body") as string;
+    let body = formData.get("body") as string;
 
     if (!to || !subject || !body) {
       return NextResponse.json(
@@ -26,6 +36,37 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
+
+    // Get user with profile and CRM preferences
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      include: { profile: true },
+    });
+
+    // Build From name based on user preferences
+    let fromName = "Remotive Logistics Sales";
+    if (user?.profile) {
+      const userName = user.profile.firstName
+        ? `${user.profile.firstName} ${user.profile.lastName || ""}`.trim()
+        : user.name || "Sales Rep";
+
+      const crmPrefs = user.profile.crmPreferences as CRMPreferences | null;
+      const fromNameFormat = crmPrefs?.fromNameFormat || "nameCompany";
+
+      if (fromNameFormat === "name") {
+        fromName = userName;
+      } else {
+        fromName = `${userName} (Remotive Logistics)`;
+      }
+
+      // Append email signature if configured
+      const emailSignature = crmPrefs?.emailSignature;
+      if (emailSignature && emailSignature.trim()) {
+        body = `${body}\n\n${emailSignature}`;
+      }
+    }
+
+    const fromEmail = `${fromName} <noreply@${FROM_DOMAIN}>`;
 
     // Get attachments if any
     const attachmentFiles = formData.getAll("attachments") as File[];
@@ -42,7 +83,7 @@ export async function POST(req: NextRequest) {
 
     // Send email via Resend
     const { data, error } = await resend.emails.send({
-      from: FROM_EMAIL.replace(/['"]/g, ""),
+      from: fromEmail.replace(/['"]/g, ""),
       to: [to],
       subject,
       text: body,
@@ -57,11 +98,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Log email in database
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-    });
-
+    // Log email in database (user already fetched above)
     let createdEmailId: string | undefined;
     let createdActivityId: string | undefined;
 
