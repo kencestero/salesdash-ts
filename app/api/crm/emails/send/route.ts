@@ -17,6 +17,47 @@ interface CRMPreferences {
   fromNameFormat?: "name" | "nameCompany";
 }
 
+// Helper: Get team member IDs for a manager
+async function getTeamMemberIds(managerId: string): Promise<string[]> {
+  const teamMembers = await prisma.userProfile.findMany({
+    where: { managerId },
+    select: { userId: true },
+  });
+  return teamMembers.map((m) => m.userId);
+}
+
+// Helper: Check if user can access customer
+async function canAccessCustomer(
+  user: { id: string; profile: { role: string; canAdminCRM?: boolean | null } | null },
+  customerId: string
+): Promise<boolean> {
+  const role = user.profile?.role || "salesperson";
+  const isCRMAdmin = user.profile?.canAdminCRM ?? false;
+
+  if (["owner", "director"].includes(role) || isCRMAdmin) {
+    return true;
+  }
+
+  const customer = await prisma.customer.findUnique({
+    where: { id: customerId },
+    select: { assignedToId: true, managerId: true },
+  });
+
+  if (!customer) return false;
+
+  if (role === "manager") {
+    const teamMemberIds = await getTeamMemberIds(user.id);
+    teamMemberIds.push(user.id);
+    return (
+      teamMemberIds.includes(customer.assignedToId || "") ||
+      customer.managerId === user.id
+    );
+  }
+
+  // Salesperson
+  return customer.assignedToId === user.id;
+}
+
 export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -42,6 +83,18 @@ export async function POST(req: NextRequest) {
       where: { email: session.user.email },
       include: { profile: true },
     });
+
+    if (!user?.profile) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    // === ROLE-BASED VISIBILITY CHECK (Critical Security Fix) ===
+    if (customerId) {
+      const hasAccess = await canAccessCustomer(user as any, customerId);
+      if (!hasAccess) {
+        return NextResponse.json({ error: "Customer not found" }, { status: 404 });
+      }
+    }
 
     // Build From name based on user preferences
     let fromName = "Remotive Logistics Sales";

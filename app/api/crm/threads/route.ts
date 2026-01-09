@@ -162,6 +162,40 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // === ROLE-BASED VISIBILITY CHECK (Critical Security Fix) ===
+    const role = currentUser.profile?.role || "salesperson";
+    const isCRMAdmin = currentUser.profile?.canAdminCRM ?? false;
+    const isOwnerOrDirector = ["owner", "director"].includes(role);
+    const isManager = role === "manager";
+    const isSalesperson = role === "salesperson" && !isCRMAdmin;
+
+    let canAccess = false;
+
+    if (isOwnerOrDirector || isCRMAdmin) {
+      canAccess = true;
+    } else if (isManager) {
+      // Manager can create threads for their team's customers
+      const teamMembers = await prisma.userProfile.findMany({
+        where: { managerId: currentUser.id },
+        select: { userId: true },
+      });
+      const teamMemberIds = teamMembers.map((m) => m.userId);
+      teamMemberIds.push(currentUser.id);
+      canAccess =
+        teamMemberIds.includes(customer.assignedToId || "") ||
+        customer.managerId === currentUser.id;
+    } else if (isSalesperson) {
+      // Salesperson can only create threads for their own customers
+      canAccess = customer.assignedToId === currentUser.id;
+    }
+
+    if (!canAccess) {
+      return NextResponse.json(
+        { error: "Customer not found" },
+        { status: 404 }
+      );
+    }
+
     // Check if thread already exists for this customer
     let thread = await prisma.messageThread.findFirst({
       where: { customerId },

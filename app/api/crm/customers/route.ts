@@ -7,6 +7,15 @@ import { CreateCustomerSchema } from "@/lib/validation";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
+// Helper: Get team member IDs for a manager
+async function getTeamMemberIds(managerId: string): Promise<string[]> {
+  const teamMembers = await prisma.userProfile.findMany({
+    where: { managerId },
+    select: { userId: true },
+  });
+  return teamMembers.map((m) => m.userId);
+}
+
 // GET /api/crm/customers - List customers with filtering
 export async function GET(req: NextRequest) {
   try {
@@ -14,6 +23,22 @@ export async function GET(req: NextRequest) {
     if (!session?.user?.email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    // Get current user with profile for role-based filtering
+    const currentUser = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      include: { profile: true },
+    });
+
+    if (!currentUser?.profile) {
+      return NextResponse.json({ error: "User profile not found" }, { status: 404 });
+    }
+
+    const userRole = currentUser.profile.role;
+    const isCRMAdmin = currentUser.profile.canAdminCRM ?? false;
+    const isOwnerOrDirector = ["owner", "director"].includes(userRole);
+    const isManager = userRole === "manager";
+    const isSalesperson = userRole === "salesperson" && !isCRMAdmin;
 
     // Get query parameters for filtering
     const { searchParams } = new URL(req.url);
@@ -176,9 +201,28 @@ export async function GET(req: NextRequest) {
       where.nextFollowUpDate = { lt: new Date() };
     }
 
-    // === Text search (OR across multiple fields) ===
-    if (search) {
+    // === ROLE-BASED VISIBILITY (Critical Security Fix) ===
+    // This MUST be applied to prevent reps from seeing other reps' customers
+    if (isSalesperson) {
+      // Salesperson: can ONLY see customers assigned to them
+      where.assignedToId = currentUser.id;
+    } else if (isManager && !isCRMAdmin) {
+      // Manager: can see customers assigned to their team OR where managerId matches
+      const teamMemberIds = await getTeamMemberIds(currentUser.id);
+      // Include self in team for edge cases
+      teamMemberIds.push(currentUser.id);
+
       where.OR = [
+        { assignedToId: { in: teamMemberIds } },
+        { managerId: currentUser.id },
+      ];
+    }
+    // Owner/Director/CRM Admin: no filter applied - can see all
+
+    // === Text search (OR across multiple fields) ===
+    // Note: If search is used with role filtering, we need to combine properly
+    if (search) {
+      const searchConditions = [
         { firstName: { contains: search, mode: "insensitive" } },
         { lastName: { contains: search, mode: "insensitive" } },
         { email: { contains: search, mode: "insensitive" } },
@@ -187,6 +231,19 @@ export async function GET(req: NextRequest) {
         { vin: { contains: search.toUpperCase(), mode: "insensitive" } },
         { stockNumber: { contains: search, mode: "insensitive" } },
       ];
+
+      // If we already have an OR clause from role filtering, we need to use AND
+      if (where.OR) {
+        // Wrap existing OR in AND with search OR
+        const existingOR = where.OR;
+        delete where.OR;
+        where.AND = [
+          { OR: existingOR },
+          { OR: searchConditions },
+        ];
+      } else {
+        where.OR = searchConditions;
+      }
     }
 
     // Fetch customers with related data using tight select projections

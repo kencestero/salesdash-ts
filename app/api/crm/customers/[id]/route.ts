@@ -251,13 +251,23 @@ export async function PATCH(req: NextRequest, props: { params: Promise<{ id: str
   }
 }
 
-// GET /api/crm/customers/[id] - Get single customer
+// GET /api/crm/customers/[id] - Get single customer with visibility check
 export async function GET(req: NextRequest, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Get current user with profile for role-based access
+    const currentUser = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      include: { profile: true },
+    });
+
+    if (!currentUser?.profile) {
+      return NextResponse.json({ error: "User profile not found" }, { status: 404 });
     }
 
     const { id } = params;
@@ -284,6 +294,35 @@ export async function GET(req: NextRequest, props: { params: Promise<{ id: strin
     });
 
     if (!customer) {
+      return NextResponse.json({ error: "Customer not found" }, { status: 404 });
+    }
+
+    // === ROLE-BASED VISIBILITY CHECK (Critical Security Fix) ===
+    const userRole = currentUser.profile.role;
+    const isCRMAdmin = currentUser.profile.canAdminCRM ?? false;
+    const isOwnerOrDirector = ["owner", "director"].includes(userRole);
+    const isManager = userRole === "manager";
+    const isSalesperson = userRole === "salesperson" && !isCRMAdmin;
+
+    let canView = false;
+
+    if (isOwnerOrDirector || isCRMAdmin) {
+      // Owner/Director/CRM Admin: can view all
+      canView = true;
+    } else if (isManager) {
+      // Manager: can view if customer is assigned to their team or managerId matches
+      const teamMemberIds = await getTeamMemberIds(currentUser.id);
+      teamMemberIds.push(currentUser.id); // Include self
+      canView =
+        teamMemberIds.includes(customer.assignedToId || "") ||
+        customer.managerId === currentUser.id;
+    } else if (isSalesperson) {
+      // Salesperson: can ONLY view customers assigned to them
+      canView = customer.assignedToId === currentUser.id;
+    }
+
+    if (!canView) {
+      // Return 404 to not reveal existence of customer
       return NextResponse.json({ error: "Customer not found" }, { status: 404 });
     }
 
