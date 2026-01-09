@@ -173,11 +173,10 @@ export function CopyLinkCelebration({
       {/* Celebration Modal */}
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent
-          size="3xl"
-          className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border-2 border-[#E96114] text-white max-h-[90vh] overflow-y-auto"
+          className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border-2 border-[#E96114] text-white max-h-[90vh] overflow-y-auto w-[95vw] max-w-2xl mx-auto p-4 sm:p-6"
         >
           {/* Header */}
-          <DialogHeader className="space-y-4">
+          <DialogHeader className="space-y-3">
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
@@ -186,7 +185,7 @@ export function CopyLinkCelebration({
             >
               <div className="relative">
                 <div className="absolute inset-0 bg-gradient-to-r from-[#E96114] to-[#09213C] blur-xl opacity-50 animate-pulse" />
-                <CheckCircle2 className="w-20 h-20 text-green-400 relative" />
+                <CheckCircle2 className="w-16 h-16 sm:w-20 sm:h-20 text-green-400 relative" />
               </div>
             </motion.div>
 
@@ -197,53 +196,53 @@ export function CopyLinkCelebration({
                 transition={{ delay: 0.2 }}
                 className="space-y-2"
               >
-                <div className="text-4xl font-bold bg-gradient-to-r from-[#E96114] to-[#09213C] bg-clip-text text-transparent">
+                <div className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-[#E96114] to-[#09213C] bg-clip-text text-transparent">
                   🎉 Great! You Copied the Link! 🎉
                 </div>
-                <div className="flex items-center justify-center gap-2 text-xl text-green-400">
-                  <Clipboard className="w-6 h-6" />
-                  <span>Credit Application Link → Clipboard ✅</span>
+                <div className="flex items-center justify-center gap-2 text-base sm:text-lg md:text-xl text-green-400">
+                  <Clipboard className="w-5 h-5 sm:w-6 sm:h-6" />
+                  <span>Link → Clipboard ✅</span>
                 </div>
               </motion.div>
             </DialogTitle>
           </DialogHeader>
 
           {/* Main Content */}
-          <div className="space-y-6 py-6">
+          <div className="space-y-4 sm:space-y-6 py-4 sm:py-6">
             {/* Warning Banner */}
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.4 }}
-              className="bg-gradient-to-r from-red-500/20 to-orange-500/20 border-2 border-orange-500 rounded-xl p-4 text-center"
+              className="bg-gradient-to-r from-red-500/20 to-orange-500/20 border-2 border-orange-500 rounded-xl p-3 sm:p-4 text-center"
             >
-              <div className="text-2xl font-bold text-orange-400 flex items-center justify-center gap-2">
-                <Sparkles className="w-6 h-6" />
-                IMPORTANT NEXT STEPS
-                <Sparkles className="w-6 h-6" />
+              <div className="text-lg sm:text-xl md:text-2xl font-bold text-orange-400 flex items-center justify-center gap-2">
+                <Sparkles className="w-5 h-5 sm:w-6 sm:h-6" />
+                <span>IMPORTANT NEXT STEPS</span>
+                <Sparkles className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
             </motion.div>
 
             {/* Steps */}
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {steps.map((step, index) => (
                 <motion.div
                   key={index}
-                  initial={{ opacity: 0, x: -50 }}
+                  initial={{ opacity: 0, x: -30 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.6 + index * 0.15 }}
-                  className={`flex gap-4 p-4 rounded-xl border-2 ${step.bgColor} border-opacity-50`}
+                  className={`flex gap-3 p-3 sm:p-4 rounded-xl border-2 ${step.bgColor} border-opacity-50`}
                 >
                   <div className={`flex-shrink-0 ${step.color}`}>
-                    <div className="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center border-2 border-current">
-                      <step.icon className="w-6 h-6" />
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-slate-800 flex items-center justify-center border-2 border-current">
+                      <step.icon className="w-5 h-5 sm:w-6 sm:h-6" />
                     </div>
                   </div>
-                  <div className="flex-1 space-y-2">
-                    <h3 className={`text-xl font-bold ${step.color}`}>
+                  <div className="flex-1 min-w-0">
+                    <h3 className={`text-base sm:text-lg md:text-xl font-bold ${step.color}`}>
                       {index + 1}. {step.title}
                     </h3>
-                    <p className="text-slate-300 leading-relaxed">
+                    <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
                       {step.description}
                     </p>
                   </div>
@@ -256,35 +255,32 @@ export function CopyLinkCelebration({
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 1.4 }}
-              className="bg-gradient-to-r from-green-500/20 to-blue-500/20 border-2 border-green-500 rounded-xl p-6 text-center"
+              className="bg-gradient-to-r from-green-500/20 to-blue-500/20 border-2 border-green-500 rounded-xl p-4 sm:p-6 text-center"
             >
-              <div className="text-3xl font-bold text-green-400 mb-2">
-                🍀 Good Luck on Your Potential Sale! 🍀
+              <div className="text-xl sm:text-2xl md:text-3xl font-bold text-green-400 mb-2">
+                🍀 Good Luck! 🍀
               </div>
-              <p className="text-slate-300">
-                Remember: You're not just selling trailers, you're helping
-                customers build their businesses!
+              <p className="text-sm sm:text-base text-slate-300">
+                You're helping customers build their businesses!
               </p>
             </motion.div>
           </div>
 
-          {/* Footer Buttons */}
-          <DialogFooter className="flex-col sm:flex-row gap-3">
+          {/* Footer Buttons - Stack on mobile */}
+          <DialogFooter className="flex-col gap-3 sm:gap-4">
             <Button
               onClick={() => onOpenChange(false)}
               variant="outline"
-              className="flex-1 border-slate-600 hover:bg-slate-700 text-white"
-              size="lg"
+              className="w-full border-slate-600 hover:bg-slate-700 text-white text-sm sm:text-base py-3 h-auto whitespace-normal"
             >
-              I will keep an eye and make sure they fill out the form and check the CRM
+              I'll watch the CRM for their submission
             </Button>
             <Button
               onClick={handleAddToCRM}
-              className="flex-1 bg-gradient-to-r from-[#E96114] to-[#09213C] hover:opacity-90 text-white font-bold"
-              size="lg"
+              className="w-full bg-gradient-to-r from-[#E96114] to-[#09213C] hover:opacity-90 text-white font-bold text-sm sm:text-base py-3 h-auto whitespace-normal"
             >
-              <FileText className="w-5 h-5 mr-2" />
-              Rather add customer to CRM now I have all their info
+              <FileText className="w-4 h-4 sm:w-5 sm:h-5 mr-2 flex-shrink-0" />
+              Add customer to CRM now
             </Button>
           </DialogFooter>
         </DialogContent>
