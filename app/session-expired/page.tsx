@@ -20,10 +20,10 @@ export default function SessionExpiredPage() {
       {/* Logo */}
       <div className="mb-8">
         <Image
-          src="/images/logo/remotive-logo.png"
+          src="/images/Remotivesaleshublogo.webp"
           alt="Remotive Logistics"
-          width={200}
-          height={60}
+          width={280}
+          height={90}
           className="object-contain"
           priority
         />

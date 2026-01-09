@@ -9,6 +9,7 @@ import { Copy, ExternalLink, Search, FileText } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
 import { CopyLinkCelebration } from "@/components/sales/CopyLinkCelebration";
+import { RepCodeTutorialCarousel } from "@/components/credit/RepCodeTutorialCarousel";
 
 interface CreditApplication {
   id: string;
@@ -125,6 +126,9 @@ export default function CreditApplicationsPage() {
           Create shareable application links and manage submissions
         </p>
       </div>
+
+      {/* Rep Code Tutorial Carousel */}
+      <RepCodeTutorialCarousel onCopyLink={handleCopyLink} />
 
       {/* Create Link Card */}
       <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
