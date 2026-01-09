@@ -216,47 +216,61 @@ pnpm dev
     </div>
 
     <script>
-        // Draw MJ logo on all canvases
-        function drawMJLogo(canvas) {
+        // Load Remotive logo SVG and draw on canvases
+        const logoImg = new Image();
+
+        function drawRemotiveLogo(canvas) {
             const ctx = canvas.getContext('2d');
             const size = canvas.width;
-            
-            // Background - rounded rectangle
-            ctx.fillStyle = '#ee6832';
-            const radius = size * 0.2;
-            ctx.beginPath();
-            ctx.moveTo(radius, 0);
-            ctx.lineTo(size - radius, 0);
-            ctx.quadraticCurveTo(size, 0, size, radius);
-            ctx.lineTo(size, size - radius);
-            ctx.quadraticCurveTo(size, size, size - radius, size);
-            ctx.lineTo(radius, size);
-            ctx.quadraticCurveTo(0, size, 0, size - radius);
-            ctx.lineTo(0, radius);
-            ctx.quadraticCurveTo(0, 0, radius, 0);
-            ctx.closePath();
-            ctx.fill();
-            
-            // Draw "MJ" text
-            ctx.fillStyle = 'white';
-            ctx.font = `bold ${size * 0.4}px Arial`;
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            
-            // For smaller sizes, just use "M"
-            if (size <= 32) {
-                ctx.font = `bold ${size * 0.6}px Arial`;
-                ctx.fillText('M', size / 2, size / 2);
+
+            // Clear canvas
+            ctx.clearRect(0, 0, size, size);
+
+            // Draw the SVG logo scaled to fit
+            if (logoImg.complete && logoImg.naturalWidth > 0) {
+                ctx.drawImage(logoImg, 0, 0, size, size);
             } else {
-                ctx.fillText('MJ', size / 2, size / 2);
+                // Fallback: Draw "R" for Remotive if image not loaded
+                ctx.fillStyle = '#ee6832';
+                const radius = size * 0.2;
+                ctx.beginPath();
+                ctx.moveTo(radius, 0);
+                ctx.lineTo(size - radius, 0);
+                ctx.quadraticCurveTo(size, 0, size, radius);
+                ctx.lineTo(size, size - radius);
+                ctx.quadraticCurveTo(size, size, size - radius, size);
+                ctx.lineTo(radius, size);
+                ctx.quadraticCurveTo(0, size, 0, size - radius);
+                ctx.lineTo(0, radius);
+                ctx.quadraticCurveTo(0, 0, radius, 0);
+                ctx.closePath();
+                ctx.fill();
+
+                ctx.fillStyle = 'white';
+                ctx.font = `bold ${size * 0.6}px Arial`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('R', size / 2, size / 2);
             }
         }
-        
-        // Initialize all canvases
+
+        // Initialize all canvases when logo loads
         const sizes = [16, 32, 48, 64, 128, 256];
+
+        logoImg.onload = function() {
+            sizes.forEach(size => {
+                const canvas = document.getElementById(`canvas${size}`);
+                drawRemotiveLogo(canvas);
+            });
+        };
+
+        // Load the SVG logo
+        logoImg.src = 'Rlogosvg.svg';
+
+        // Also draw fallback immediately in case SVG takes time
         sizes.forEach(size => {
             const canvas = document.getElementById(`canvas${size}`);
-            drawMJLogo(canvas);
+            drawRemotiveLogo(canvas);
         });
         
         function downloadAllFavicons() {
