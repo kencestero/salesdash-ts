@@ -6,8 +6,8 @@ function SidebarLogo({ hovered }: { hovered?: boolean; }) {
   const { sidebarType, setCollapsed, collapsed } = useSidebar();
   return (
     <div className="px-4 py-4">
-      <div className="flex items-center">
-        <div className="flex flex-1 items-center gap-x-3">
+      <div className="flex items-center justify-center">
+        <div className="flex items-center gap-x-3">
           {collapsed && !hovered ? (
             // Show just the R icon when collapsed
             <Image

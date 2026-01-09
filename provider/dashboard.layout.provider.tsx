@@ -5,12 +5,11 @@ import { signOut, useSession } from "next-auth/react";
 import { AppTopbar } from "@/components/layout/AppTopbar";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import { cn } from "@/lib/utils";
-import { useSidebar, useThemeStore } from "@/store";
-import { motion, AnimatePresence } from "framer-motion";
-import { useRouter, usePathname } from "next/navigation";
+import { useSidebar } from "@/store";
+import { motion } from "framer-motion";
+import { usePathname } from "next/navigation";
 import Footer from "@/components/partials/footer";
 import { useMediaQuery } from "@/hooks/use-media-query";
-import ThemeCustomize from "@/components/partials/customizer/theme-customizer";
 import MobileSidebar from "@/components/partials/sidebar/mobile-sidebar";
 import HeaderSearch from "@/components/header-search";
 import { useMounted } from "@/hooks/use-mounted";
@@ -106,140 +105,33 @@ function SessionTimeout() {
   );
 }
 
+// Simplified layout - only vertical + popover sidebar
+// Removed: ThemeCustomize, semibox layout, horizontal layout, module sidebar
 const DashBoardLayoutProvider = ({ children, trans }: { children: React.ReactNode, trans: any }) => {
-  const { collapsed, sidebarType, setCollapsed, subMenu } = useSidebar();
+  const { collapsed } = useSidebar();
   const [open, setOpen] = React.useState(false);
-  const { layout } = useThemeStore();
   const location = usePathname();
   const isMobile = useMediaQuery("(min-width: 768px)");
   const mounted = useMounted();
+
   if (!mounted) {
     return <LayoutLoader />;
   }
-  if (layout === "semibox") {
-    return (
-      <>
-        <SessionTimeout />
-        <PasskeyPrompt />
-        <AppTopbar handleOpenSearch={() => setOpen(true)} trans={trans} />
-        <AppSidebar trans={trans} />
 
-        <div
-          className={cn("content-wrapper transition-all duration-150 ", {
-            "ltr:xl:ml-[72px] rtl:xl:mr-[72px]": collapsed,
-            "ltr:xl:ml-[272px] rtl:xl:mr-[272px]": !collapsed,
-          })}
-        >
-          <div
-            className={cn(
-              "pt-6 pb-8 px-4  page-min-height-semibox ",
-
-            )}
-          >
-            <div className="semibox-content-wrapper ">
-              <LayoutWrapper
-                isMobile={isMobile}
-                setOpen={setOpen}
-                open={open}
-                location={location}
-                trans={trans}
-              >
-                {children}
-              </LayoutWrapper>
-            </div>
-          </div>
-        </div>
-        <Footer handleOpenSearch={() => setOpen(true)} />
-        <ThemeCustomize />
-      </>
-    );
-  }
-  if (layout === "horizontal") {
-    return (
-      <>
-        <SessionTimeout />
-        <PasskeyPrompt />
-        <AppTopbar handleOpenSearch={() => setOpen(true)} trans={trans} />
-
-        <div className={cn("content-wrapper transition-all duration-150 ")}>
-          <div
-            className={cn(
-              "  pt-6 px-6 pb-8  page-min-height-horizontal ",
-              {}
-            )}
-          >
-            <LayoutWrapper
-              isMobile={isMobile}
-              setOpen={setOpen}
-              open={open}
-              location={location}
-              trans={trans}
-            >
-              {children}
-            </LayoutWrapper>
-          </div>
-        </div>
-        <Footer handleOpenSearch={() => setOpen(true)} />
-        <ThemeCustomize />
-      </>
-    );
-  }
-
-  if (sidebarType !== "module") {
-    return (
-      <>
-        <SessionTimeout />
-        <PasskeyPrompt />
-        <AppTopbar handleOpenSearch={() => setOpen(true)} trans={trans} />
-        <AppSidebar trans={trans} />
-
-        <div
-          className={cn("content-wrapper transition-all duration-150 ", {
-            "ltr:xl:ml-[248px] rtl:xl:mr-[248px] ": !collapsed,
-            "ltr:xl:ml-[72px] rtl:xl:mr-[72px]": collapsed,
-          })}
-        >
-          <div
-            className={cn(
-              "  pt-6 px-6 pb-8  page-min-height ",
-              {}
-            )}
-          >
-            <LayoutWrapper
-              isMobile={isMobile}
-              setOpen={setOpen}
-              open={open}
-              location={location}
-              trans={trans}
-            >
-              {children}
-            </LayoutWrapper>
-          </div>
-        </div>
-        <Footer handleOpenSearch={() => setOpen(true)} />
-        <ThemeCustomize />
-      </>
-    );
-  }
   return (
     <>
       <SessionTimeout />
-        <PasskeyPrompt />
+      <PasskeyPrompt />
       <AppTopbar handleOpenSearch={() => setOpen(true)} trans={trans} />
-      <Sidebar trans={trans} />
+      <AppSidebar trans={trans} />
 
       <div
         className={cn("content-wrapper transition-all duration-150 ", {
-          "ltr:xl:ml-[300px] rtl:xl:mr-[300px]": !collapsed,
+          "ltr:xl:ml-[248px] rtl:xl:mr-[248px] ": !collapsed,
           "ltr:xl:ml-[72px] rtl:xl:mr-[72px]": collapsed,
         })}
       >
-        <div
-          className={cn(
-            " layout-padding px-6 pt-6  page-min-height ",
-
-          )}
-        >
+        <div className="pt-6 px-6 pb-8 page-min-height">
           <LayoutWrapper
             isMobile={isMobile}
             setOpen={setOpen}
@@ -252,7 +144,6 @@ const DashBoardLayoutProvider = ({ children, trans }: { children: React.ReactNod
         </div>
       </div>
       <Footer handleOpenSearch={() => setOpen(true)} />
-      {isMobile && <ThemeCustomize />}
     </>
   );
 };
