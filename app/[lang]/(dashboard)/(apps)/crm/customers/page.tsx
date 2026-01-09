@@ -18,6 +18,7 @@ import {
   CheckCircle2,
   XCircle,
   AlertCircle,
+  Settings,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -115,8 +116,7 @@ export default function CustomersPage() {
   const [statusFilter, setStatusFilter] = useState<string[]>(["all"]);
   const [searchQuery, setSearchQuery] = useState("");
   const [showAddDialog, setShowAddDialog] = useState(false);
-  const [importing, setImporting] = useState(false);
-  const [importMessage, setImportMessage] = useState("");
+  const [canAdminCRM, setCanAdminCRM] = useState(false);
 
   // Advanced filters state - initialize from URL
   const [advancedFilters, setAdvancedFilters] = useState<FilterState>(() => {
@@ -135,6 +135,24 @@ export default function CustomersPage() {
     // Also restore filters from URL on mount
     setAdvancedFilters(searchParamsToFilters(searchParams));
   }, [searchParams]);
+
+  // Check if user has CRM admin permission
+  useEffect(() => {
+    async function checkCRMAdminPermission() {
+      try {
+        const response = await fetch("/api/user/profile");
+        if (response.ok) {
+          const data = await response.json();
+          // Check if user is owner, director, or has canAdminCRM flag
+          const isOwnerOrDirector = ["owner", "director"].includes(data.profile?.role);
+          setCanAdminCRM(isOwnerOrDirector || data.profile?.canAdminCRM === true);
+        }
+      } catch (error) {
+        console.error("Error checking CRM admin permission:", error);
+      }
+    }
+    checkCRMAdminPermission();
+  }, []);
 
   // Fetch customers with all filters
   const fetchCustomers = async () => {
@@ -170,7 +188,7 @@ export default function CustomersPage() {
       toast({
         title: "Error",
         description: "Failed to load customers",
-        variant: "destructive",
+        color: "destructive",
       });
     } finally {
       setLoading(false);
@@ -219,43 +237,6 @@ export default function CustomersPage() {
     }
 
     setAdvancedFilters(newFilters);
-  };
-
-  const importGoogleLeads = async () => {
-    try {
-      setImporting(true);
-      setImportMessage("Importing...");
-
-      const response = await fetch("/api/leads/import/google", { method: "POST" });
-
-      if (!response.ok) {
-        throw new Error("Import failed");
-      }
-
-      const data = await response.json();
-      setImportMessage(`✅ Imported: ${data.imported} | Skipped: ${data.skipped} | Total: ${data.total}`);
-
-      toast({
-        title: "Import Complete",
-        description: `Imported ${data.imported} leads, skipped ${data.skipped}`,
-      });
-
-      // Refresh the customer list
-      fetchCustomers();
-
-      // Clear message after 5 seconds
-      setTimeout(() => setImportMessage(""), 5000);
-    } catch (error) {
-      console.error("Error importing leads:", error);
-      setImportMessage("❌ Import failed");
-      toast({
-        title: "Error",
-        description: "Failed to import leads",
-        variant: "destructive",
-      });
-    } finally {
-      setImporting(false);
-    }
   };
 
   // Multi-select filter helper functions
@@ -347,15 +328,13 @@ export default function CustomersPage() {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <Button
-            onClick={importGoogleLeads}
-            disabled={importing}
-            className="bg-blue-500 hover:bg-blue-600 text-white"
-          >
-            {importing ? "Importing..." : "Import Google Leads"}
-          </Button>
-          {importMessage && (
-            <span className="text-sm text-default-600">{importMessage}</span>
+          {canAdminCRM && (
+            <Link href="/en/settings/crm">
+              <Button variant="outline" className="border-default-300">
+                <Settings className="w-4 h-4 mr-2" />
+                CRM Settings
+              </Button>
+            </Link>
           )}
           <Button
             onClick={() => setShowAddDialog(true)}
