@@ -5,6 +5,64 @@ import { notifyCustomerReply } from "@/lib/in-app-notifications";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
+// ============================================
+// Rate Limiting for Reply Portal POST
+// ============================================
+
+interface RateLimitEntry {
+  count: number;
+  firstRequestTime: number;
+}
+
+// In-memory rate limit store (per IP address)
+const rateLimitStore = new Map<string, RateLimitEntry>();
+
+// Rate limit configuration
+const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 minute
+const RATE_LIMIT_MAX_REQUESTS = 5; // 5 requests per minute
+const RATE_LIMIT_CLEANUP_INTERVAL_MS = 5 * 60 * 1000; // Clean up every 5 minutes
+
+// Periodic cleanup of stale entries
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, entry] of rateLimitStore.entries()) {
+    if (now - entry.firstRequestTime > RATE_LIMIT_WINDOW_MS * 2) {
+      rateLimitStore.delete(key);
+    }
+  }
+}, RATE_LIMIT_CLEANUP_INTERVAL_MS);
+
+/**
+ * Check rate limit for an IP address
+ * Returns true if request should be blocked
+ */
+function isRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const entry = rateLimitStore.get(ip);
+
+  if (!entry) {
+    // First request from this IP
+    rateLimitStore.set(ip, { count: 1, firstRequestTime: now });
+    return false;
+  }
+
+  // Check if window has expired
+  if (now - entry.firstRequestTime > RATE_LIMIT_WINDOW_MS) {
+    // Reset the window
+    rateLimitStore.set(ip, { count: 1, firstRequestTime: now });
+    return false;
+  }
+
+  // Within window - check count
+  if (entry.count >= RATE_LIMIT_MAX_REQUESTS) {
+    return true; // Rate limited
+  }
+
+  // Increment count
+  entry.count++;
+  return false;
+}
+
 // GET /api/reply-portal/[token] - Validate token and get thread info for customer
 export async function GET(
   req: NextRequest,
@@ -109,6 +167,19 @@ export async function POST(
   { params }: { params: Promise<{ token: string }> }
 ) {
   try {
+    // Rate limiting check
+    const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() ||
+               req.headers.get("x-real-ip") ||
+               "unknown";
+
+    if (isRateLimited(ip)) {
+      console.warn(`Rate limited reply portal request from IP: ${ip}`);
+      return NextResponse.json(
+        { error: "Too many requests. Please wait a moment before sending another message." },
+        { status: 429 }
+      );
+    }
+
     const { token } = await params;
 
     if (!token) {
@@ -166,8 +237,7 @@ export async function POST(
       );
     }
 
-    // Get request metadata
-    const ip = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown";
+    // Get request metadata (ip already extracted above for rate limiting)
     const userAgent = req.headers.get("user-agent") || "unknown";
 
     // Create the inbound message and update thread in a transaction

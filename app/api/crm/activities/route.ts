@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { calculateResponseTimeOnFirstContact } from "@/lib/crm-permissions";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -93,11 +94,15 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // Update customer's lastContactedAt
+    // Update customer's lastContactedAt and calculate responseTime if first contact
     if (type === "call" || type === "email" || type === "meeting") {
+      const responseTime = await calculateResponseTimeOnFirstContact(customerId);
       await prisma.customer.update({
         where: { id: customerId },
-        data: { lastContactedAt: new Date() },
+        data: {
+          lastContactedAt: new Date(),
+          ...(responseTime !== undefined && { responseTime }),
+        },
       });
     }
 

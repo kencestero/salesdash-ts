@@ -335,3 +335,91 @@ export async function GET(req: NextRequest, props: { params: Promise<{ id: strin
     );
   }
 }
+
+// DELETE /api/crm/customers/[id] - Delete customer (admin only)
+export async function DELETE(req: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Get current user with profile for role-based access
+    const currentUser = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      include: { profile: true },
+    });
+
+    if (!currentUser?.profile) {
+      return NextResponse.json({ error: "User profile not found" }, { status: 404 });
+    }
+
+    const { id } = params;
+
+    // === PERMISSION CHECK: Only Owner/Director/CRM Admin can delete ===
+    const userRole = currentUser.profile.role;
+    const isCRMAdmin = currentUser.profile.canAdminCRM ?? false;
+    const canDelete = ["owner", "director"].includes(userRole) || isCRMAdmin;
+
+    if (!canDelete) {
+      return NextResponse.json(
+        { error: "Only owners, directors, or CRM admins can delete customers" },
+        { status: 403 }
+      );
+    }
+
+    // Verify customer exists
+    const customer = await prisma.customer.findUnique({
+      where: { id },
+      select: { id: true, firstName: true, lastName: true },
+    });
+
+    if (!customer) {
+      return NextResponse.json({ error: "Customer not found" }, { status: 404 });
+    }
+
+    // Delete in transaction to handle related records
+    await prisma.$transaction(async (tx) => {
+      // Delete related records first (foreign key constraints)
+      await tx.activity.deleteMany({ where: { customerId: id } });
+      await tx.deal.deleteMany({ where: { customerId: id } });
+      await tx.creditApplication.deleteMany({ where: { customerId: id } });
+      await tx.quote.deleteMany({ where: { customerId: id } });
+      await tx.interest.deleteMany({ where: { customerId: id } });
+      await tx.message.deleteMany({ where: { customerId: id } });
+      await tx.messageThread.deleteMany({ where: { customerId: id } });
+
+      // Delete the customer
+      await tx.customer.delete({ where: { id } });
+    });
+
+    // Create audit log entry
+    await prisma.auditLog.create({
+      data: {
+        userId: currentUser.id,
+        userEmail: currentUser.email,
+        action: "delete",
+        entityType: "Customer",
+        entityId: id,
+        oldValue: {
+          firstName: customer.firstName,
+          lastName: customer.lastName,
+        },
+        newValue: null,
+        ipAddress: req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip"),
+        userAgent: req.headers.get("user-agent"),
+      },
+    });
+
+    console.log(`✅ Customer ${customer.firstName} ${customer.lastName} deleted by ${currentUser.email}`);
+
+    return NextResponse.json({ success: true });
+  } catch (error: any) {
+    console.error("Error deleting customer:", error);
+    return NextResponse.json(
+      { error: "Failed to delete customer", details: error.message },
+      { status: 500 }
+    );
+  }
+}

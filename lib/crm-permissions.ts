@@ -438,3 +438,242 @@ export function hasFullCRMVisibility(context: PermissionContext): boolean {
     context.canAdminCRM
   );
 }
+
+// ============================================
+// CRM Settings Helpers (Cached)
+// ============================================
+
+/**
+ * Parsed CRM Settings for enforcement
+ */
+export interface CRMSettingsData {
+  // Assignment Rules
+  require_rep_for_contacted: boolean;
+  require_rep_for_qualified: boolean;
+  lock_reassignment: boolean;
+  steal_protection: boolean;
+
+  // SLA
+  sla_new_lead_seconds: number;
+  escalation_enabled: boolean;
+  escalation_minutes: number;
+  escalation_chain: string[];
+  notification_channels: string[];
+
+  // Required Fields
+  required_for_qualified: string[];
+  required_for_applied: string[];
+  required_for_won: string[];
+  require_lost_reason: boolean;
+
+  // Import Settings
+  dedupe_on_import: "skip" | "merge" | "create";
+  dedupe_match_fields: string[];
+  default_lead_source: string;
+  auto_lock_duplicates: boolean;
+}
+
+// Default settings values
+const DEFAULT_CRM_SETTINGS: CRMSettingsData = {
+  require_rep_for_contacted: false,
+  require_rep_for_qualified: true,
+  lock_reassignment: false,
+  steal_protection: true,
+  sla_new_lead_seconds: 90,
+  escalation_enabled: true,
+  escalation_minutes: 5,
+  escalation_chain: ["manager", "director"],
+  notification_channels: ["in_app", "email"],
+  required_for_qualified: ["phone", "email"],
+  required_for_applied: ["trailerType", "financingType"],
+  required_for_won: ["trailerSize", "stockNumber"],
+  require_lost_reason: true,
+  dedupe_on_import: "skip",
+  dedupe_match_fields: ["email", "phone"],
+  default_lead_source: "Google Sheets",
+  auto_lock_duplicates: true,
+};
+
+// Cache for CRM settings (5 minute TTL)
+let settingsCache: CRMSettingsData | null = null;
+let settingsCacheExpiry: number = 0;
+const SETTINGS_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
+/**
+ * Get CRM settings from database with caching
+ * TTL: 5 minutes
+ */
+export async function getCRMSettings(): Promise<CRMSettingsData> {
+  const now = Date.now();
+
+  // Return cached settings if still valid
+  if (settingsCache && now < settingsCacheExpiry) {
+    return settingsCache;
+  }
+
+  // Fetch from database
+  const dbSettings = await prisma.cRMSetting.findMany();
+
+  // Build settings object from database values or defaults
+  const settings: CRMSettingsData = { ...DEFAULT_CRM_SETTINGS };
+
+  for (const setting of dbSettings) {
+    const key = setting.key as keyof CRMSettingsData;
+    if (key in settings) {
+      // Type-safe assignment based on expected type
+      const value = setting.value;
+      if (typeof value === "boolean" && typeof settings[key] === "boolean") {
+        (settings as any)[key] = value;
+      } else if (typeof value === "number" && typeof settings[key] === "number") {
+        (settings as any)[key] = value;
+      } else if (typeof value === "string" && typeof settings[key] === "string") {
+        (settings as any)[key] = value;
+      } else if (Array.isArray(value) && Array.isArray(settings[key])) {
+        (settings as any)[key] = value;
+      }
+    }
+  }
+
+  // Update cache
+  settingsCache = settings;
+  settingsCacheExpiry = now + SETTINGS_CACHE_TTL_MS;
+
+  return settings;
+}
+
+/**
+ * Invalidate settings cache (call after settings update)
+ */
+export function invalidateCRMSettingsCache(): void {
+  settingsCache = null;
+  settingsCacheExpiry = 0;
+}
+
+/**
+ * Check if a status transition requires an assigned rep
+ */
+export async function requiresRepForStatus(newStatus: string): Promise<boolean> {
+  const settings = await getCRMSettings();
+
+  if (newStatus === "Contacted" && settings.require_rep_for_contacted) {
+    return true;
+  }
+  if (newStatus === "Qualified" && settings.require_rep_for_qualified) {
+    return true;
+  }
+
+  return false;
+}
+
+/**
+ * Get required fields for a specific status
+ */
+export async function getRequiredFieldsForStatus(status: string): Promise<string[]> {
+  const settings = await getCRMSettings();
+
+  switch (status) {
+    case "Qualified":
+      return settings.required_for_qualified;
+    case "Applied":
+      return settings.required_for_applied;
+    case "Won":
+      return settings.required_for_won;
+    default:
+      return [];
+  }
+}
+
+/**
+ * Validate a status change against CRM settings
+ * Returns { valid: true } or { valid: false, error: string }
+ */
+export async function validateStatusChange(
+  customer: {
+    assignedToId: string | null;
+    phone: string | null;
+    email: string | null;
+    trailerType: string | null;
+    financingType: string | null;
+    trailerSize: string | null;
+    stockNumber: string | null;
+    lostReason: string | null;
+  },
+  newStatus: string,
+  lostReason?: string | null
+): Promise<{ valid: boolean; error?: string }> {
+  const settings = await getCRMSettings();
+
+  // Check rep assignment requirement
+  if (await requiresRepForStatus(newStatus)) {
+    if (!customer.assignedToId) {
+      return {
+        valid: false,
+        error: `A rep must be assigned before marking as ${newStatus}`,
+      };
+    }
+  }
+
+  // Check required fields
+  const requiredFields = await getRequiredFieldsForStatus(newStatus);
+  const fieldValues: Record<string, string | null> = {
+    phone: customer.phone,
+    email: customer.email,
+    trailerType: customer.trailerType,
+    financingType: customer.financingType,
+    trailerSize: customer.trailerSize,
+    stockNumber: customer.stockNumber,
+  };
+
+  for (const field of requiredFields) {
+    if (!fieldValues[field]) {
+      const friendlyName = field
+        .replace(/([A-Z])/g, " $1")
+        .replace(/^./, (str) => str.toUpperCase())
+        .trim();
+      return {
+        valid: false,
+        error: `${friendlyName} is required before marking as ${newStatus}`,
+      };
+    }
+  }
+
+  // Check lost reason requirement
+  if (newStatus === "Dead" && settings.require_lost_reason) {
+    if (!lostReason && !customer.lostReason) {
+      return {
+        valid: false,
+        error: "A lost reason is required when marking as Dead",
+      };
+    }
+  }
+
+  return { valid: true };
+}
+
+/**
+ * Calculate responseTime in minutes if this is the first contact
+ * Returns the responseTime value to set, or undefined if already contacted
+ */
+export async function calculateResponseTimeOnFirstContact(
+  customerId: string
+): Promise<number | undefined> {
+  const customer = await prisma.customer.findUnique({
+    where: { id: customerId },
+    select: { createdAt: true, lastContactedAt: true, responseTime: true },
+  });
+
+  if (!customer) return undefined;
+
+  // Already has responseTime calculated
+  if (customer.responseTime !== null) return undefined;
+
+  // Already contacted but no responseTime (legacy data) - calculate now
+  if (customer.lastContactedAt !== null && customer.responseTime === null) {
+    const diffMs = customer.lastContactedAt.getTime() - customer.createdAt.getTime();
+    return Math.round(diffMs / (1000 * 60)); // minutes
+  }
+
+  // This is the FIRST contact - calculate responseTime from now
+  const diffMs = Date.now() - customer.createdAt.getTime();
+  return Math.round(diffMs / (1000 * 60)); // minutes
+}

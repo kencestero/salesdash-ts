@@ -7,7 +7,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { buildPermissionContext, checkCRMPermission } from "@/lib/crm-permissions";
+import { buildPermissionContext, checkCRMPermission, validateStatusChange } from "@/lib/crm-permissions";
 import { onStatusChange } from "@/lib/follow-up-engine";
 
 export const dynamic = "force-dynamic";
@@ -25,7 +25,7 @@ export async function PATCH(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { customerIds, status } = body;
+    const { customerIds, status, lostReason } = body;
 
     if (!customerIds || !Array.isArray(customerIds) || customerIds.length === 0) {
       return NextResponse.json(
@@ -52,6 +52,9 @@ export async function PATCH(req: NextRequest) {
       where: { id: { in: customerIds } },
     });
 
+    // Track validation failures
+    const validationErrors: { customerId: string; name: string; error: string }[] = [];
+
     for (const customer of customers) {
       const canEdit = await checkCRMPermission(context, "edit", customer.id);
       if (!canEdit.allowed) {
@@ -60,6 +63,41 @@ export async function PATCH(req: NextRequest) {
           { status: 403 }
         );
       }
+
+      // 🔒 ENFORCE CRM SETTINGS: Validate status change against configured rules
+      const statusValidation = await validateStatusChange(
+        {
+          assignedToId: customer.assignedToId,
+          phone: customer.phone,
+          email: customer.email,
+          trailerType: customer.trailerType,
+          financingType: customer.financingType,
+          trailerSize: customer.trailerSize,
+          stockNumber: customer.stockNumber,
+          lostReason: customer.lostReason,
+        },
+        status,
+        lostReason
+      );
+
+      if (!statusValidation.valid) {
+        validationErrors.push({
+          customerId: customer.id,
+          name: `${customer.firstName} ${customer.lastName}`,
+          error: statusValidation.error || "Validation failed",
+        });
+      }
+    }
+
+    // If any customer fails validation, return all errors
+    if (validationErrors.length > 0) {
+      return NextResponse.json(
+        {
+          error: "Some customers cannot be updated to this status",
+          validationErrors,
+        },
+        { status: 400 }
+      );
     }
 
     // Update all customers
@@ -69,6 +107,8 @@ export async function PATCH(req: NextRequest) {
         status,
         lastActivityAt: new Date(),
         updatedAt: new Date(),
+        // Update lostReason if marking as dead
+        ...(status === "dead" && lostReason ? { lostReason } : {}),
       },
     });
 

@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import {
   buildPermissionContext,
   canAccessCRMSettings,
+  invalidateCRMSettingsCache,
 } from "@/lib/crm-permissions";
 
 export const dynamic = "force-dynamic";
@@ -277,6 +278,9 @@ export async function PATCH(req: NextRequest) {
         },
       });
     }
+
+    // Invalidate cache so new settings take effect immediately
+    invalidateCRMSettingsCache();
 
     return NextResponse.json({
       success: true,

@@ -11,7 +11,6 @@ import DashboardSelect from "@/components/dasboard-select";
 import TopTen from "./components/top-ten";
 import TopPage from "./components/top-page";
 import DatePickerWithRange from "@/components/date-picker-with-range";
-import RepCodeCard from "./components/rep-code-card";
 import InstallAppCard from "./components/install-app-card";
 import { LogDashboardVisitOnMount } from "@/components/dashboard/log-dashboard-visit";
 import { DashboardUsersCard } from "@/components/dashboard/dashboard-users-card";
@@ -34,9 +33,6 @@ const DashboardPageView = ({ trans }: DashboardPageViewProps) => {
         </div>
         <DatePickerWithRange />
       </div>
-
-      {/* Rep Code Card */}
-      <RepCodeCard />
 
       {/* Install App Card - shows when PWA is installable */}
       <InstallAppCard />

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { calculateResponseTimeOnFirstContact } from "@/lib/crm-permissions";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -245,6 +246,9 @@ export async function POST(
     const trimmedMessage = message.trim();
     const preview = trimmedMessage.substring(0, 200);
 
+    // Calculate responseTime before transaction if this is first contact
+    const responseTime = await calculateResponseTimeOnFirstContact(thread.customerId);
+
     // Create outbound message and update thread
     const [newMessage] = await prisma.$transaction([
       prisma.message.create({
@@ -271,12 +275,13 @@ export async function POST(
           unreadForManager: false,
         },
       }),
-      // Update customer's lastContactedAt
+      // Update customer's lastContactedAt and responseTime if first contact
       prisma.customer.update({
         where: { id: thread.customerId },
         data: {
           lastContactedAt: new Date(),
           lastActivityAt: new Date(),
+          ...(responseTime !== undefined && { responseTime }),
         },
       }),
       // Create activity log for CRM

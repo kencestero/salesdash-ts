@@ -57,12 +57,30 @@ export async function PATCH(req: NextRequest) {
       );
     }
 
-    // Update all customers
+    // Fetch customers before update for audit log (old values)
+    const customersBeforeUpdate = await prisma.customer.findMany({
+      where: { id: { in: customerIds } },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        assignedToId: true,
+        assignedToName: true,
+        managerId: true,
+      },
+    });
+
+    // Get target user's managerId (they should have a manager)
+    const targetManagerId = targetUser.profile?.managerId || null;
+
+    // Update all customers with assignedToId, managerId, and assignmentMethod
     const result = await prisma.customer.updateMany({
       where: { id: { in: customerIds } },
       data: {
         assignedToId,
         assignedToName: targetUser.profile?.firstName || targetUser.email || "",
+        managerId: targetManagerId,
+        assignmentMethod: "bulk_reassign",
         lastActivityAt: new Date(),
         updatedAt: new Date(),
       },
@@ -80,6 +98,34 @@ export async function PATCH(req: NextRequest) {
             description: `Reassigned to ${targetUser.profile?.firstName || targetUser.email} via bulk action by ${context.userEmail}`,
             status: "completed",
             completedAt: new Date(),
+          },
+        })
+      )
+    );
+
+    // Create audit log entries for each reassignment (assignment_change)
+    await Promise.all(
+      customersBeforeUpdate.map((customer) =>
+        prisma.auditLog.create({
+          data: {
+            userId: context.userId,
+            userEmail: context.userEmail,
+            action: "assignment_change",
+            entityType: "Customer",
+            entityId: customer.id,
+            oldValue: {
+              assignedToId: customer.assignedToId,
+              assignedToName: customer.assignedToName,
+              managerId: customer.managerId,
+            },
+            newValue: {
+              assignedToId,
+              assignedToName: targetUser.profile?.firstName || targetUser.email || "",
+              managerId: targetManagerId,
+              assignmentMethod: "bulk_reassign",
+            },
+            ipAddress: req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip"),
+            userAgent: req.headers.get("user-agent"),
           },
         })
       )

@@ -9,7 +9,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { buildPermissionContext, checkCRMPermission } from "@/lib/crm-permissions";
+import { buildPermissionContext, checkCRMPermission, validateStatusChange } from "@/lib/crm-permissions";
 import { syncCustomerFieldsToSheet } from "@/lib/google-sheets-sync";
 import {
   calculateLeadScore,
@@ -44,7 +44,7 @@ export async function PATCH(req: NextRequest, props: { params: Promise<{ id: str
     }
 
     const body = await req.json();
-    const { status } = body;
+    const { status, lostReason } = body;
 
     if (!status) {
       return NextResponse.json({ error: "Status is required" }, { status: 400 });
@@ -68,6 +68,29 @@ export async function PATCH(req: NextRequest, props: { params: Promise<{ id: str
       return NextResponse.json({ error: "Customer not found" }, { status: 404 });
     }
 
+    // 🔒 ENFORCE CRM SETTINGS: Validate status change against configured rules
+    const statusValidation = await validateStatusChange(
+      {
+        assignedToId: customer.assignedToId,
+        phone: customer.phone,
+        email: customer.email,
+        trailerType: customer.trailerType,
+        financingType: customer.financingType,
+        trailerSize: customer.trailerSize,
+        stockNumber: customer.stockNumber,
+        lostReason: customer.lostReason,
+      },
+      status,
+      lostReason
+    );
+
+    if (!statusValidation.valid) {
+      return NextResponse.json(
+        { error: statusValidation.error },
+        { status: 400 }
+      );
+    }
+
     // Recalculate lead score and related fields
     const { score } = calculateLeadScore(customer);
     const temperature = getLeadTemperature(score);
@@ -86,6 +109,8 @@ export async function PATCH(req: NextRequest, props: { params: Promise<{ id: str
         lastActivityAt: new Date(),
         updatedAt: new Date(),
         syncStatus: "pending", // Mark for sync
+        // Update lostReason if marking as dead
+        ...(status === "dead" && lostReason ? { lostReason } : {}),
       },
     });
 
