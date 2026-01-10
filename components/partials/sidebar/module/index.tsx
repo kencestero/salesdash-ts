@@ -15,7 +15,6 @@ import { useMediaQuery } from "@/hooks/use-media-query";
 import MenuOverlayPortal from "./MenuOverlayPortal";
 import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { SiteLogo } from "@/components/svg";
 import { motion } from "framer-motion";
 
 const ModuleSidebar = ({ trans }: { trans: any }) => {
@@ -178,7 +177,13 @@ const ModuleSidebar = ({ trans }: { trans: any }) => {
                   ease: "easeInOut"
                 }}
               >
-                <SiteLogo className="h-8 w-8" />
+                <Image
+                  src="/images/logo/remotive-r.png"
+                  alt="Remotive"
+                  width={32}
+                  height={32}
+                  priority
+                />
               </motion.div>
             </Link>
           </div>

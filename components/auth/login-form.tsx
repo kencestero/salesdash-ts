@@ -12,7 +12,6 @@ import toast from "react-hot-toast";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import Image from "next/image";
-import { SiteLogo } from "@/components/svg";
 import { Icon } from "@iconify/react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DEFAULT_LANG } from "@/lib/i18n";
@@ -72,7 +71,14 @@ const LogInForm = () => {
   return (
     <div className="w-full py-10">
       <Link href="/dashboard" className="inline-block">
-        <SiteLogo className="w-14 h-14" />
+        <Image
+          src="/images/logo/remotive-r.png"
+          alt="Remotive"
+          width={56}
+          height={56}
+          priority
+          className="drop-shadow-[0_0_8px_rgba(233,97,20,0.5)]"
+        />
       </Link>
       <div className="2xl:mt-8 mt-6 2xl:text-3xl text-2xl font-bold text-default-900">
         Game Time 🚀

@@ -104,17 +104,17 @@ const ProfileInfo = () => {
             {
               name: "Profile",
               icon: "heroicons:user",
-              href:"/user-profile/settings"
+              href:"/en/user-profile"
             },
             {
               name: "Page Access",
               icon: "heroicons:shield-check",
-              href:"/user-management"
+              href:"/en/user-management"
             },
             {
               name: "Secret Code Instructions",
               icon: "heroicons:key",
-              href:"/secret-code-instructions"
+              href:"/en/secret-code-instructions"
             },
             {
               name: "Welcome Help",
@@ -148,10 +148,10 @@ const ProfileInfo = () => {
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <Link href="/dashboard" className="cursor-pointer">
+          <Link href="/en/dashboard" className="cursor-pointer">
             <DropdownMenuItem className="flex items-center gap-2 text-sm font-medium text-default-600 capitalize px-3 py-1.5 dark:hover:bg-background cursor-pointer">
               <Icon icon="heroicons:user-group" className="w-4 h-4" />
-              team
+              Team
             </DropdownMenuItem>
           </Link>
           <DropdownMenuSub>

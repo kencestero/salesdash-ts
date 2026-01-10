@@ -1,7 +1,8 @@
 import React from "react";
 import { Search } from "lucide-react";
-import { SiteLogo } from "@/components/svg";
 import Link from "next/link";
+import Image from "next/image";
+
 const horizontalHeader = ({ handleOpenSearch }: { handleOpenSearch: () => void; }) => {
   return (
     <div className="flex items-center lg:gap-12 gap-3 ">
@@ -10,10 +11,16 @@ const horizontalHeader = ({ handleOpenSearch }: { handleOpenSearch: () => void; 
           href="/dashboard"
           className=" text-primary flex items-center gap-2"
         >
-          <SiteLogo className="h-7 w-7" />
-          <span className=" text-xl font-semibold lg:inline-block hidden">
+          <Image
+            src="/images/logo/remotive-r.png"
+            alt="Remotive"
+            width={28}
+            height={28}
+            priority
+          />
+          <span className=" text-xl font-semibold lg:inline-block hidden text-[#E96114]">
             {" "}
-            DashTail
+            Remotive
           </span>
         </Link>
       </div>

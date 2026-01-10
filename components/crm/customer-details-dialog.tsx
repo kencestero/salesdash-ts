@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -7,6 +8,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -22,8 +24,11 @@ import {
   Flame,
   Thermometer,
   Snowflake,
+  Truck,
 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { MarkAsSoldDialog } from "./mark-as-sold-dialog";
+import { useSession } from "next-auth/react";
 
 interface CustomerDetailsDialogProps {
   open: boolean;
@@ -55,7 +60,42 @@ export function CustomerDetailsDialog({
   onOpenChange,
   customer,
 }: CustomerDetailsDialogProps) {
+  const { data: session } = useSession();
+  const [showMarkAsSoldDialog, setShowMarkAsSoldDialog] = useState(false);
+  const [canMarkAsSold, setCanMarkAsSold] = useState(false);
+  const [linkedTrailer, setLinkedTrailer] = useState<any>(null);
+
   const initials = `${customer.firstName[0]}${customer.lastName[0]}`.toUpperCase();
+
+  // Check if user can mark as sold (owner, director, or canAdminCRM)
+  useEffect(() => {
+    const checkPermissions = async () => {
+      if (!session?.user?.email) return;
+
+      try {
+        const res = await fetch("/api/user/profile");
+        if (res.ok) {
+          const data = await res.json();
+          const role = data.profile?.role;
+          const canAdminCRM = data.profile?.canAdminCRM ?? false;
+          setCanMarkAsSold(
+            ["owner", "director"].includes(role) || canAdminCRM
+          );
+        }
+      } catch (error) {
+        console.error("Error checking permissions:", error);
+      }
+    };
+
+    if (open) {
+      checkPermissions();
+    }
+  }, [open, session]);
+
+  const handleMarkAsSoldSuccess = () => {
+    // Optionally refresh customer data or close dialog
+    onOpenChange(false);
+  };
 
   const temperatureConfig = {
     hot: { icon: Flame, color: "text-red-600", bg: "bg-red-100", label: "HOT" },
@@ -262,10 +302,21 @@ export function CustomerDetailsDialog({
 
             <TabsContent value="deals" className="p-4">
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold flex items-center gap-2">
-                  <DollarSign className="w-5 h-5" />
-                  Deals ({customer.deals?.length || 0})
-                </h3>
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold flex items-center gap-2">
+                    <DollarSign className="w-5 h-5" />
+                    Deals ({customer.deals?.length || 0})
+                  </h3>
+                  {canMarkAsSold && (
+                    <Button
+                      onClick={() => setShowMarkAsSoldDialog(true)}
+                      className="bg-green-600 hover:bg-green-700"
+                    >
+                      <Truck className="w-4 h-4 mr-2" />
+                      Mark as Sold
+                    </Button>
+                  )}
+                </div>
                 {customer.deals && customer.deals.length > 0 ? (
                   <div className="space-y-3">
                     {customer.deals.map((deal, index) => (
@@ -303,6 +354,21 @@ export function CustomerDetailsDialog({
           </ScrollArea>
         </Tabs>
       </DialogContent>
+
+      {/* Mark as Sold Dialog */}
+      <MarkAsSoldDialog
+        open={showMarkAsSoldDialog}
+        onOpenChange={setShowMarkAsSoldDialog}
+        customer={{
+          id: customer.id,
+          firstName: customer.firstName,
+          lastName: customer.lastName,
+          email: customer.email,
+          phone: customer.phone,
+        }}
+        trailer={linkedTrailer}
+        onSuccess={handleMarkAsSoldSuccess}
+      />
     </Dialog>
   );
 }

@@ -71,6 +71,19 @@ model User {
   dashboardVisits   DashboardVisit[]
   notifications     Notification[]
   notificationPreferences NotificationPreference?
+
+  // Social & Gamification System
+  friendships       Friendship[]       @relation("UserFriendships")
+  friendOf          Friendship[]       @relation("FriendOf")
+  blockedUsers      BlockedUser[]      @relation("UserBlocks")
+  blockedBy         BlockedUser[]      @relation("BlockedBy")
+  managedTeam       Team?              @relation("TeamManager")
+  teamMembership    TeamMember?        @relation("TeamMemberships")
+  earnedBadges      UserBadge[]        @relation("UserBadges")
+  monthlyGoals      MonthlyGoal[]      @relation("MonthlyGoals")
+  goalsSetForOthers MonthlyGoal[]      @relation("GoalsSetBy")
+  trainingCompletions TrainingCompletion[] @relation("TrainingCompletions")
+  salesStats        SalesStats?        @relation("SalesStats")
 }
 
 model VerificationToken {
@@ -398,7 +411,7 @@ model Deal {
 
   // Deal Info
   dealNumber      String   @unique
-  status          String   @default("pending") // "pending", "financing", "approved", "closed", "lost"
+  status          String   @default("pending") // "pending", "financing", "approved", "closed", "sold", "lost"
   dealType        String   // "cash", "finance", "trade"
 
   // Pricing
@@ -428,6 +441,32 @@ model Deal {
   // Notes
   notes           String?  @db.Text
 
+  // ========== MARK AS SOLD FIELDS ==========
+  // Delivery & Sale Info
+  deliveryDate      DateTime?    // When customer took delivery
+  soldByUserId      String?      // User ID of salesperson who sold
+  soldByRepCode     String?      // Rep code (e.g., "REP482756")
+  soldByName        String?      // Denormalized name for display
+
+  // Trailer snapshot at time of sale (for historical record)
+  trailerVin          String?    // VIN (auto-populated, editable)
+  trailerCost         Float?     // Cost at time of sale
+  trailerManufacturer String?    // e.g., "Diamond Cargo"
+  trailerCategory     String?    // e.g., "Enclosed"
+  trailerSize         String?    // e.g., "8.5 x 20"
+  trailerAxles        Int?       // Number of axles
+  trailerColor        String?    // From features array
+  trailerHeight       Float?     // Height if available
+  trailerStockNumber  String?    // Stock number
+
+  // Profit tracking
+  profit            Float?       // finalPrice - trailerCost
+  profitMargin      Float?       // Percentage ((finalPrice - cost) / cost * 100)
+
+  // Audit trail for mark as sold
+  markedSoldAt      DateTime?    // When marked as sold
+  markedSoldBy      String?      // User ID who marked as sold
+
   // Relations
   customer        Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
   trailer         Trailer? @relation(fields: [trailerId], references: [id])
@@ -436,6 +475,16 @@ model Deal {
   @@index([trailerId])
   @@index([salespersonId])
   @@index([status])
+  @@index([deliveryDate])
+  @@index([soldByUserId])
+  @@index([markedSoldAt])
+}
+
+// Deal Number Counter (for sequential deal numbers)
+model DealCounter {
+  id         String   @id @default("deal_counter")
+  lastNumber Int      @default(0)
+  updatedAt  DateTime @updatedAt
 }
 
 // Credit Application System
@@ -1406,4 +1455,206 @@ model AuditLog {
   @@index([action])
   @@index([createdAt])
   @@index([entityType, createdAt])  // For filtering by entity type + time range
+}
+
+// =============================================================================
+// PROFILE SOCIAL SYSTEM (Friends, Teams, Badges, Goals)
+// =============================================================================
+
+// Friend relationships - bidirectional social connections
+model Friendship {
+  id          String   @id @default(cuid())
+  userId      String              // User who initiated
+  friendId    String              // User being friended
+  status      String   @default("pending") // "pending", "accepted", "declined"
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User @relation("UserFriendships", fields: [userId], references: [id], onDelete: Cascade)
+  friend      User @relation("FriendOf", fields: [friendId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, friendId])
+  @@index([userId])
+  @@index([friendId])
+  @@index([status])
+}
+
+// Block list - users who are blocked from contacting
+model BlockedUser {
+  id          String   @id @default(cuid())
+  userId      String              // User who blocked
+  blockedId   String              // User who is blocked
+  reason      String?             // Optional reason
+  createdAt   DateTime @default(now())
+
+  user        User @relation("UserBlocks", fields: [userId], references: [id], onDelete: Cascade)
+  blocked     User @relation("BlockedBy", fields: [blockedId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, blockedId])
+  @@index([userId])
+  @@index([blockedId])
+}
+
+// Teams - Manager-based teams (auto-created when someone becomes a manager)
+model Team {
+  id          String   @id @default(cuid())
+  name        String              // e.g., "Ken's Team", "Danielle's Team"
+  description String?  @db.Text
+  managerId   String   @unique    // The manager who owns this team (links to User.id)
+  image       String?             // Team avatar/image
+  color       String?  @default("#E96114") // Team color for badges
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  manager     User @relation("TeamManager", fields: [managerId], references: [id], onDelete: Cascade)
+  members     TeamMember[]
+
+  @@index([managerId])
+  @@index([isActive])
+}
+
+// Team members - Links users to teams (max 10 per team)
+model TeamMember {
+  id        String   @id @default(cuid())
+  teamId    String
+  userId    String
+  role      String   @default("member") // "member" or "lead"
+  joinedAt  DateTime @default(now())
+
+  team      Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user      User @relation("TeamMemberships", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, userId])
+  @@unique([userId]) // A user can only be on ONE team
+  @@index([teamId])
+}
+
+// Badge definitions - Types of badges that can be earned
+model Badge {
+  id          String   @id @default(cuid())
+  name        String   @unique    // e.g., "10 Units Sold", "Enclosed Trailer Expert"
+  description String?  @db.Text
+  icon        String?             // Icon name or URL
+  color       String?  @default("#E96114")
+  category    String              // "sales_milestone", "trailer_type", "experience", "certification"
+  requirement Int?                // Number required to earn (e.g., 10 for "10 Units Sold")
+  trailerType String?             // For trailer-type badges (e.g., "6x10", "Enclosed")
+  isActive    Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  earnedBy    UserBadge[]
+
+  @@index([category])
+  @@index([isActive])
+}
+
+// User badges - Badges earned by users
+model UserBadge {
+  id        String   @id @default(cuid())
+  userId    String
+  badgeId   String
+  earnedAt  DateTime @default(now())
+  metadata  Json?                // Extra data (e.g., which trailers counted toward this)
+
+  user      User @relation("UserBadges", fields: [userId], references: [id], onDelete: Cascade)
+  badge     Badge @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, badgeId])
+  @@index([userId])
+  @@index([badgeId])
+  @@index([earnedAt])
+}
+
+// Monthly sales goals - Set by reps on 1st of month, editable by managers until 20th
+model MonthlyGoal {
+  id          String   @id @default(cuid())
+  userId      String
+  month       Int                 // 1-12
+  year        Int
+  targetUnits Int                 // 1-99 units
+  actualUnits Int      @default(0)
+  isLocked    Boolean  @default(false) // Locked after 20th of month
+  setByUserId String?             // Who set this goal (rep or manager)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User @relation("MonthlyGoals", fields: [userId], references: [id], onDelete: Cascade)
+  setBy       User? @relation("GoalsSetBy", fields: [setByUserId], references: [id])
+
+  @@unique([userId, month, year])
+  @@index([userId])
+  @@index([month, year])
+}
+
+// Training completion tracking - For Academy Certified badge
+model TrainingCompletion {
+  id          String   @id @default(cuid())
+  userId      String
+  moduleName  String              // e.g., "Sales Fundamentals", "Finance Options", "Product Knowledge"
+  completedAt DateTime @default(now())
+  score       Int?                // Optional quiz score
+  certificateUrl String?          // Link to certificate if generated
+
+  user        User @relation("TrainingCompletions", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, moduleName])
+  @@index([userId])
+}
+
+// Sales stats cache - Aggregated stats for quick profile display
+model SalesStats {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  totalUnitsSold  Int      @default(0)
+  totalRevenue    Float    @default(0)
+  totalProfit     Float    @default(0)
+  avgDealSize     Float    @default(0)
+
+  // By trailer type counts
+  enclosedCount   Int      @default(0)
+  utilityCount    Int      @default(0)
+  dumpCount       Int      @default(0)
+  flatbedCount    Int      @default(0)
+  otherCount      Int      @default(0)
+
+  // By size counts (for badges)
+  size6x10Count   Int      @default(0)
+  size6x12Count   Int      @default(0)
+  size7x14Count   Int      @default(0)
+  size7x16Count   Int      @default(0)
+  size8x16Count   Int      @default(0)
+  size8x20Count   Int      @default(0)
+  size8x24Count   Int      @default(0)
+  otherSizeCount  Int      @default(0)
+
+  // Time-based
+  monthlyUnits    Int      @default(0) // Current month
+  yearlyUnits     Int      @default(0) // Current year
+
+  // Experience
+  firstSaleAt     DateTime?
+  lastSaleAt      DateTime?
+
+  updatedAt       DateTime @updatedAt
+
+  user            User @relation("SalesStats", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([totalUnitsSold])
+  @@index([monthlyUnits])
+}
+
+// Help content - Contextual help for each section
+model HelpContent {
+  id          String   @id @default(cuid())
+  section     String   @unique    // e.g., "profile_friends", "profile_teams", "monthly_goal"
+  title       String
+  content     String   @db.Text   // Markdown content
+  rules       String?  @db.Text   // Rules/guidelines in markdown
+  videoUrl    String?             // Optional tutorial video
+  isActive    Boolean  @default(true)
+  updatedAt   DateTime @updatedAt
+
+  @@index([section])
 }

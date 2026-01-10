@@ -103,7 +103,7 @@ const slides: Slide[] = [
       "Financing talk: Conventional FIRST, RTO as backup",
     ],
     imagePlaceholder: "Sales tips illustration",
-    imageSrc: "/images/after signing.webp",
+    imageSrc: "/images/after-signing.webp",
     icon: Lightbulb,
     bgGradient: "from-purple-500/20 via-purple-500/5 to-transparent",
     accentColor: "text-purple-500",

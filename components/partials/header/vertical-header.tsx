@@ -3,8 +3,8 @@ import { useSidebar, useThemeStore } from "@/store";
 import { cn } from "@/lib/utils";
 import { Icon } from "@iconify/react";
 import { Search } from "lucide-react";
-import { SiteLogo } from "@/components/svg";
 import Link from "next/link";
+import Image from "next/image";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { motion } from "framer-motion";
 
@@ -86,7 +86,13 @@ const VerticalHeader: React.FC<VerticalHeaderProps> = ({ handleOpenSearch }) => 
           ease: "easeInOut"
         }}
       >
-        <SiteLogo className="h-7 w-7" />
+        <Image
+          src="/images/logo/remotive-r.png"
+          alt="Remotive"
+          width={28}
+          height={28}
+          priority
+        />
       </motion.div>
     </Link>
   );

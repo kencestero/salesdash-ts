@@ -1,4 +1,4 @@
-import { DollarSign } from "lucide-react";
+import { DollarSign, TrendingUp } from "lucide-react";
 import {
   Application,
   Chart,
@@ -875,6 +875,11 @@ export const menusConfig = {
             href: "/user-management",
           },
           {
+            title: "Team Progression",
+            icon: TrendingUp,
+            href: "/progression",
+          },
+          {
             title: "Photo Request",
             icon: Mail,
             href: "/request-photos",
@@ -1713,6 +1718,11 @@ export const menusConfig = {
         title: "Messages",
         icon: Messages,
         href: "/crm/messages",
+      },
+      {
+        title: "Sales Report",
+        icon: ChartBar,
+        href: "/reports/sales",
       },
       {
         isHeader: true,

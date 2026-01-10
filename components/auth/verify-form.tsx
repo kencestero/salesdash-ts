@@ -2,8 +2,8 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ChangeEvent, KeyboardEvent, useRef, useState } from "react";
-import { SiteLogo } from "../svg";
 import Link from "next/link";
+import Image from "next/image";
 
 const VerfiyForm = () => {
   const totalOtpField = 6;
@@ -49,7 +49,14 @@ const VerfiyForm = () => {
   return (
     <div className="w-full md:w-[480px] py-5">
       <Link href="/dashboard" className="inline-block">
-        <SiteLogo className="h-10 w-10 2xl:h-14 2xl:w-14 text-primary" />
+        <Image
+          src="/images/logo/remotive-r.png"
+          alt="Remotive"
+          width={56}
+          height={56}
+          priority
+          className="drop-shadow-[0_0_8px_rgba(233,97,20,0.5)]"
+        />
       </Link>
       <div className="2xl:mt-8 mt-6 2xl:text-3xl text-2xl font-bold text-default-900">
         Two Factor Verification
