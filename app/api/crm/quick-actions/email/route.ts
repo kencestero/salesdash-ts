@@ -41,10 +41,48 @@ export async function POST(req: NextRequest) {
     // Verify customer exists
     const customer = await prisma.customer.findUnique({
       where: { id: customerId },
+      select: {
+        id: true,
+        assignedToId: true,
+        managerId: true,
+        firstName: true,
+        lastName: true,
+        email: true,
+      },
     });
 
     if (!customer) {
       return NextResponse.json({ error: "Customer not found" }, { status: 404 });
+    }
+
+    // === PERMISSION CHECK: Verify user can access this customer ===
+    const role = user.profile?.role || "salesperson";
+    const isCRMAdmin = user.profile?.canAdminCRM ?? false;
+    const isOwnerOrDirector = ["owner", "director"].includes(role);
+
+    if (!isOwnerOrDirector && !isCRMAdmin) {
+      if (role === "salesperson") {
+        // Salespeople can only email their own customers
+        if (customer.assignedToId !== user.id) {
+          return NextResponse.json({ error: "Customer not found" }, { status: 404 });
+        }
+      } else if (role === "manager") {
+        // Managers can email their team's customers or customers where they are the manager
+        const teamMembers = await prisma.userProfile.findMany({
+          where: { managerId: user.id },
+          select: { userId: true },
+        });
+        const teamMemberIds = teamMembers.map((m) => m.userId);
+        teamMemberIds.push(user.id); // Include self
+
+        const canAccess =
+          teamMemberIds.includes(customer.assignedToId || "") ||
+          customer.managerId === user.id;
+
+        if (!canAccess) {
+          return NextResponse.json({ error: "Customer not found" }, { status: 404 });
+        }
+      }
     }
 
     // Send email

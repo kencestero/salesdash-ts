@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { validateStatusChange } from "@/lib/crm-permissions";
 
 export const dynamic = "force-dynamic";
 
@@ -126,6 +127,27 @@ export async function PATCH(req: NextRequest, props: { params: Promise<{ id: str
         if (newManagerId === undefined) {
           newManagerId = newRep.managerId;
         }
+      }
+    }
+
+    // === ENFORCE CRM SETTINGS: Validate status change if status is being changed ===
+    if (body.status && body.status !== existingCustomer.status) {
+      const statusValidation = await validateStatusChange(
+        {
+          assignedToId: body.assignedToId ?? existingCustomer.assignedToId,
+          phone: body.phone ?? existingCustomer.phone,
+          email: body.email ?? existingCustomer.email,
+          trailerType: body.trailerType ?? existingCustomer.trailerType,
+          financingType: body.financingType ?? existingCustomer.financingType,
+          trailerSize: body.trailerSize ?? existingCustomer.trailerSize,
+          stockNumber: body.stockNumber ?? existingCustomer.stockNumber,
+          lostReason: body.lostReason ?? existingCustomer.lostReason,
+        },
+        body.status,
+        body.lostReason
+      );
+      if (!statusValidation.valid) {
+        return NextResponse.json({ error: statusValidation.error }, { status: 400 });
       }
     }
 

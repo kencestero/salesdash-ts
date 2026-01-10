@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { CreateCustomerSchema } from "@/lib/validation";
+import { validateStatusChange } from "@/lib/crm-permissions";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -457,6 +458,28 @@ export async function POST(req: NextRequest) {
         salesRepName = assignedToName;
         managerId = crmAdmin.managerId;
         assignmentMethod = "intake";
+      }
+    }
+
+    // === ENFORCE CRM SETTINGS: Validate status if not default "new" ===
+    const targetStatus = status || "new";
+    if (targetStatus !== "new") {
+      const statusValidation = await validateStatusChange(
+        {
+          assignedToId,
+          phone,
+          email,
+          trailerType: body.trailerType,
+          financingType: body.financingType,
+          trailerSize: body.trailerSize,
+          stockNumber: body.stockNumber,
+          lostReason: body.lostReason,
+        },
+        targetStatus,
+        body.lostReason
+      );
+      if (!statusValidation.valid) {
+        return NextResponse.json({ error: statusValidation.error }, { status: 400 });
       }
     }
 

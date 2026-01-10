@@ -152,6 +152,14 @@ export default function CustomerProfilePage() {
   const [showEmailViewer, setShowEmailViewer] = useState(false);
   const [selectedEmail, setSelectedEmail] = useState<any>(null);
 
+  // User session state for role-based UI
+  const [currentUser, setCurrentUser] = useState<{
+    id: string;
+    role: string;
+    canAdminCRM: boolean;
+    teamMemberIds: string[];
+  } | null>(null);
+
   // Edit mode form state
   const [editForm, setEditForm] = useState({
     firstName: "",
@@ -170,6 +178,27 @@ export default function CustomerProfilePage() {
     stockNumber: "",
   });
   const [isSaving, setIsSaving] = useState(false);
+
+  // Fetch current user session for role-based UI
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      try {
+        const response = await fetch("/api/user/profile");
+        if (response.ok) {
+          const data = await response.json();
+          setCurrentUser({
+            id: data.profile?.userId || data.id,
+            role: data.profile?.role || "salesperson",
+            canAdminCRM: data.profile?.canAdminCRM || false,
+            teamMemberIds: data.teamMemberIds || [],
+          });
+        }
+      } catch (error) {
+        console.error("Failed to fetch current user:", error);
+      }
+    };
+    fetchCurrentUser();
+  }, []);
 
   // Fetch customer data
   useEffect(() => {
@@ -630,14 +659,17 @@ export default function CustomerProfilePage() {
                 <Edit className="w-4 h-4 mr-2" />
                 Edit
               </Button>
-              <Button
-                variant="outline"
-                className="text-destructive"
-                onClick={() => setShowDeleteDialog(true)}
-              >
-                <Trash2 className="w-4 h-4 mr-2" />
-                Delete
-              </Button>
+              {/* Only show delete button for owners, directors, and CRM admins */}
+              {(["owner", "director"].includes(currentUser?.role || "") || currentUser?.canAdminCRM) && (
+                <Button
+                  variant="outline"
+                  className="text-destructive"
+                  onClick={() => setShowDeleteDialog(true)}
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Delete
+                </Button>
+              )}
             </>
           )}
         </div>
@@ -1073,7 +1105,9 @@ export default function CustomerProfilePage() {
             currentFinanceApproval={customer.financeApprovalStatus}
             assignedManagerId={customer.assignedToId}
             assignedManagerName={customer.assignedToName || undefined}
-            userRole="owner" // TODO: Get from session
+            userRole={currentUser?.role || "salesperson"}
+            currentUserId={currentUser?.id}
+            teamMemberIds={currentUser?.teamMemberIds || []}
             // BATCH 1: Lost reason props
             currentLostReason={customer.lostReason}
             currentLostReasonNotes={customer.lostReasonNotes}
@@ -1088,7 +1122,9 @@ export default function CustomerProfilePage() {
             currentManagerId={customer.managerId}
             currentManagerName={customer.managerName}
             currentAssignmentMethod={customer.assignmentMethod}
-            userRole="owner" // TODO: Get from session
+            userRole={currentUser?.role || "salesperson"}
+            currentUserId={currentUser?.id}
+            teamMemberIds={currentUser?.teamMemberIds || []}
             onUpdate={fetchCustomer}
           />
 

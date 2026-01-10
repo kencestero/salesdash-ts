@@ -7,7 +7,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { buildPermissionContext, checkCRMPermission } from "@/lib/crm-permissions";
+import { buildPermissionContext, checkCRMPermission, applyPermissionFilter } from "@/lib/crm-permissions";
 
 export const dynamic = "force-dynamic";
 
@@ -42,9 +42,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Fetch customers
+    // Fetch customers - APPLY PERMISSION FILTER to prevent data leak
+    const permissionFilter = applyPermissionFilter(context);
     const customers = await prisma.customer.findMany({
-      where: { id: { in: customerIds } },
+      where: {
+        id: { in: customerIds },
+        ...permissionFilter, // Only export customers user has access to
+      },
       select: {
         firstName: true,
         lastName: true,
