@@ -11,6 +11,28 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(url, 307);
   }
 
+  // Paths that should NOT get /en prefix (they exist at root level)
+  const rootLevelPaths = [
+    "/apply",
+    "/demo-trailer-card",
+    "/particle-demo",
+    "/fire-demo",
+    "/fire-badge-demo",
+    "/playground",
+    "/test-pdf",
+    "/test/firebase-check",
+    "/session-expired",
+    "/credit-application",
+    "/reply",
+  ];
+
+  // Add /en prefix to paths that don't have it (except root-level paths)
+  const isRootLevel = rootLevelPaths.some((p) => url.pathname.startsWith(p));
+  if (!url.pathname.startsWith("/en") && !isRootLevel && !url.pathname.startsWith("/api")) {
+    url.pathname = `/en${url.pathname}`;
+    return NextResponse.redirect(url);
+  }
+
   const token = await getToken({ req, secret: process.env.AUTH_SECRET });
   const isAuthed = !!token?.id;
 
@@ -29,7 +51,9 @@ export async function middleware(req: NextRequest) {
     "/fire-badge-demo",
     "/playground",
     "/test-pdf",
-    "/test/firebase-check"
+    "/test/firebase-check",
+    "/credit-application",
+    "/reply",
   ];
 
   const isPublic = publicPaths.some((p) => url.pathname.startsWith(p));
@@ -39,60 +63,18 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // Paths that bypass payplan/disabled check (avoid redirect loops)
-  // These are allowed even if payplan not accepted or account disabled
-  const payplanBypassPaths = [
-    "/en/auth/payplan",
-    "/en/auth/account-disabled",
-    "/en/auth/login",
-    "/en/auth/logout",
-    "/en/auth/join",
-    "/api/auth/",
-    "/api/contractor-docs/upload", // Allow contractor doc upload before full access
-  ];
-
-  const bypassesPayplanCheck = payplanBypassPaths.some((p) => url.pathname.startsWith(p));
-
-  // For authenticated users on protected routes, check payplan/disabled status
-  if (isAuthed && !isPublic && !bypassesPayplanCheck) {
-    try {
-      // Build the check-status URL
-      const checkStatusUrl = new URL("/api/auth/check-status", req.url);
-
-      // Forward the cookies for auth
-      const response = await fetch(checkStatusUrl.toString(), {
-        headers: {
-          cookie: req.headers.get("cookie") || "",
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        const { accountStatus, payplanStatus } = data;
-
-        // Check if account is disabled (accountStatus starts with "disabled_")
-        if (accountStatus && accountStatus.startsWith("disabled_")) {
-          url.pathname = "/en/auth/account-disabled";
-          return NextResponse.redirect(url);
-        }
-
-        // Check if account is banned
-        if (accountStatus === "banned") {
-          url.pathname = "/en/auth/account-disabled";
-          return NextResponse.redirect(url);
-        }
-
-        // Check if payplan needs to be accepted
-        if (payplanStatus && payplanStatus !== "ACCEPTED") {
-          url.pathname = "/en/auth/payplan";
-          return NextResponse.redirect(url);
-        }
-      }
-    } catch (error) {
-      // If check fails, allow through (fail open to avoid blocking all users)
-      console.error("Payplan check failed:", error);
-    }
-  }
+  // PAYPLAN ENFORCEMENT DISABLED - Re-enable when admin-configurable payplan system is ready
+  // const payplanBypassPaths = [
+  //   "/en/auth/payplan",
+  //   "/en/auth/account-disabled",
+  //   "/en/auth/login",
+  //   "/en/auth/logout",
+  //   "/en/auth/join",
+  //   "/api/auth/",
+  //   "/api/contractor-docs/upload",
+  // ];
+  // const bypassesPayplanCheck = payplanBypassPaths.some((p) => url.pathname.startsWith(p));
+  // if (isAuthed && !isPublic && !bypassesPayplanCheck) { ... }
 
   return NextResponse.next();
 }
