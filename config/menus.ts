@@ -1725,6 +1725,11 @@ export const menusConfig = {
         href: "/reports/sales",
       },
       {
+        title: "Request Info",
+        icon: Mail,
+        href: "/request-info",
+      },
+      {
         isHeader: true,
         title: "Application",
       },
