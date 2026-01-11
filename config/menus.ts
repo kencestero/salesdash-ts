@@ -853,6 +853,11 @@ export const menusConfig = {
             icon: Envelope,
             href: "/sales-tools/requests/inbox",
           },
+          {
+            title: "My Documents",
+            icon: Files,
+            href: "/contractor-docs",
+          },
         ],
       },
       {
@@ -873,6 +878,11 @@ export const menusConfig = {
             title: "User Management",
             icon: Users,
             href: "/user-management",
+          },
+          {
+            title: "Contractor Docs",
+            icon: Files,
+            href: "/admin/contractor-docs",
           },
           {
             title: "Team Progression",
@@ -1730,6 +1740,11 @@ export const menusConfig = {
         href: "/request-info",
       },
       {
+        title: "My Documents",
+        icon: Files,
+        href: "/contractor-docs",
+      },
+      {
         isHeader: true,
         title: "Application",
       },
@@ -1737,6 +1752,11 @@ export const menusConfig = {
         title: "User Management",
         icon: Users,
         href: "/user-management",
+      },
+      {
+        title: "Contractor Docs",
+        icon: Files,
+        href: "/admin/contractor-docs",
       },
       {
         title: "Audit Log",

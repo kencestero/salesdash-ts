@@ -1,0 +1,303 @@
+/**
+ * Google Drive Service
+ *
+ * Handles uploading contractor documents (W-9, Agreements) to Google Drive.
+ * Uses a service account for authentication.
+ *
+ * Environment Variables Required:
+ * - GOOGLE_SERVICE_ACCOUNT_EMAIL
+ * - GOOGLE_PRIVATE_KEY
+ * - GOOGLE_DRIVE_CONTRACTOR_FOLDER_ID
+ */
+
+import { google } from "googleapis";
+
+const CONTRACTOR_FOLDER_ID = process.env.GOOGLE_DRIVE_CONTRACTOR_FOLDER_ID;
+
+interface UploadResult {
+  success: boolean;
+  fileId?: string;
+  webViewLink?: string;
+  error?: string;
+}
+
+interface DriveAuth {
+  auth: ReturnType<typeof google.auth.JWT>;
+  drive: ReturnType<typeof google.drive>;
+}
+
+/**
+ * Get authenticated Google Drive client
+ */
+function getDriveClient(): DriveAuth | null {
+  const serviceAccountEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
+  const privateKey = process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, "\n");
+
+  if (!serviceAccountEmail || !privateKey) {
+    console.error("Google Drive: Missing service account credentials");
+    return null;
+  }
+
+  const auth = new google.auth.JWT({
+    email: serviceAccountEmail,
+    key: privateKey,
+    scopes: ["https://www.googleapis.com/auth/drive.file"],
+  });
+
+  const drive = google.drive({ version: "v3", auth });
+  return { auth, drive };
+}
+
+/**
+ * Find or create a folder in Google Drive
+ */
+async function findOrCreateFolder(
+  drive: ReturnType<typeof google.drive>,
+  parentFolderId: string,
+  folderName: string
+): Promise<string | null> {
+  try {
+    // Search for existing folder
+    const searchResponse = await drive.files.list({
+      q: `name='${folderName}' and '${parentFolderId}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`,
+      fields: "files(id, name)",
+      spaces: "drive",
+    });
+
+    const existingFolder = searchResponse.data.files?.[0];
+    if (existingFolder?.id) {
+      return existingFolder.id;
+    }
+
+    // Create new folder
+    const createResponse = await drive.files.create({
+      requestBody: {
+        name: folderName,
+        mimeType: "application/vnd.google-apps.folder",
+        parents: [parentFolderId],
+      },
+      fields: "id",
+    });
+
+    return createResponse.data.id || null;
+  } catch (error) {
+    console.error(`Failed to find/create folder '${folderName}':`, error);
+    return null;
+  }
+}
+
+/**
+ * Ensure folder structure exists: /Contractors/YYYY/SubFolder
+ */
+async function ensureFolderStructure(
+  drive: ReturnType<typeof google.drive>,
+  docType: string
+): Promise<string | null> {
+  if (!CONTRACTOR_FOLDER_ID) {
+    console.error("GOOGLE_DRIVE_CONTRACTOR_FOLDER_ID not configured");
+    return null;
+  }
+
+  try {
+    // Get current year
+    const year = new Date().getFullYear().toString();
+
+    // Determine subfolder based on doc type
+    let subFolderName: string;
+    switch (docType) {
+      case "W9":
+        subFolderName = "W-9";
+        break;
+      case "CONTRACTOR_AGREEMENT":
+        subFolderName = "Agreements";
+        break;
+      default:
+        subFolderName = "Other";
+    }
+
+    // Create/find year folder under main contractor folder
+    const yearFolderId = await findOrCreateFolder(drive, CONTRACTOR_FOLDER_ID, year);
+    if (!yearFolderId) {
+      console.error(`Failed to create year folder: ${year}`);
+      return null;
+    }
+
+    // Create/find doc type subfolder under year folder
+    const docFolderId = await findOrCreateFolder(drive, yearFolderId, subFolderName);
+    if (!docFolderId) {
+      console.error(`Failed to create doc type folder: ${subFolderName}`);
+      return null;
+    }
+
+    return docFolderId;
+  } catch (error) {
+    console.error("Failed to ensure folder structure:", error);
+    return null;
+  }
+}
+
+/**
+ * Generate standardized file name
+ * Format: LASTNAME_FIRSTNAME_DOCTYPE_YYYY-MM-DD.ext
+ */
+export function generateFileName(
+  lastName: string,
+  firstName: string,
+  docType: string,
+  originalFileName: string
+): string {
+  const cleanLast = lastName.toUpperCase().replace(/[^A-Z]/g, "") || "UNKNOWN";
+  const cleanFirst = firstName.toUpperCase().replace(/[^A-Z]/g, "") || "UNKNOWN";
+
+  const date = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+
+  let docLabel: string;
+  switch (docType) {
+    case "W9":
+      docLabel = "W9";
+      break;
+    case "CONTRACTOR_AGREEMENT":
+      docLabel = "ContractorAgreement";
+      break;
+    default:
+      docLabel = "Document";
+  }
+
+  // Get file extension from original filename
+  const ext = originalFileName.split(".").pop()?.toLowerCase() || "pdf";
+
+  return `${cleanLast}_${cleanFirst}_${docLabel}_${date}.${ext}`;
+}
+
+/**
+ * Upload a file to Google Drive
+ */
+export async function uploadToGoogleDrive(params: {
+  fileName: string;
+  mimeType: string;
+  fileBuffer: Buffer;
+  docType: string;
+  userLastName: string;
+  userFirstName: string;
+}): Promise<UploadResult> {
+  const { fileName, mimeType, fileBuffer, docType, userLastName, userFirstName } = params;
+
+  const client = getDriveClient();
+  if (!client) {
+    return {
+      success: false,
+      error: "Google Drive service not configured",
+    };
+  }
+
+  const { drive } = client;
+
+  try {
+    // Ensure folder structure exists
+    const targetFolderId = await ensureFolderStructure(drive, docType);
+    if (!targetFolderId) {
+      return {
+        success: false,
+        error: "Failed to create folder structure in Google Drive",
+      };
+    }
+
+    // Generate standardized file name
+    const standardizedFileName = generateFileName(
+      userLastName,
+      userFirstName,
+      docType,
+      fileName
+    );
+
+    // Convert Buffer to Readable stream
+    const { Readable } = await import("stream");
+    const stream = new Readable();
+    stream.push(fileBuffer);
+    stream.push(null);
+
+    // Upload file
+    const response = await drive.files.create({
+      requestBody: {
+        name: standardizedFileName,
+        parents: [targetFolderId],
+      },
+      media: {
+        mimeType,
+        body: stream,
+      },
+      fields: "id, webViewLink",
+    });
+
+    if (!response.data.id) {
+      return {
+        success: false,
+        error: "Upload succeeded but no file ID returned",
+      };
+    }
+
+    return {
+      success: true,
+      fileId: response.data.id,
+      webViewLink: response.data.webViewLink || undefined,
+    };
+  } catch (error) {
+    console.error("Google Drive upload failed:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown upload error",
+    };
+  }
+}
+
+/**
+ * Get a file's download URL (for admin download)
+ * Returns a URL that can be used to download the file
+ */
+export async function getFileDownloadUrl(fileId: string): Promise<string | null> {
+  const client = getDriveClient();
+  if (!client) {
+    return null;
+  }
+
+  const { drive } = client;
+
+  try {
+    // Get file metadata to verify it exists
+    const file = await drive.files.get({
+      fileId,
+      fields: "id, name, mimeType",
+    });
+
+    if (!file.data.id) {
+      return null;
+    }
+
+    // Return the direct download link
+    // Format: https://drive.google.com/uc?export=download&id=FILE_ID
+    return `https://drive.google.com/uc?export=download&id=${fileId}`;
+  } catch (error) {
+    console.error("Failed to get file download URL:", error);
+    return null;
+  }
+}
+
+/**
+ * Delete a file from Google Drive
+ */
+export async function deleteFromGoogleDrive(fileId: string): Promise<boolean> {
+  const client = getDriveClient();
+  if (!client) {
+    return false;
+  }
+
+  const { drive } = client;
+
+  try {
+    await drive.files.delete({ fileId });
+    return true;
+  } catch (error) {
+    console.error("Failed to delete file from Google Drive:", error);
+    return false;
+  }
+}

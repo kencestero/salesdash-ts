@@ -8,7 +8,12 @@ export async function GET(req: NextRequest) {
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.email) {
-      return NextResponse.json({ needsJoinCode: false });
+      return NextResponse.json({
+        needsJoinCode: false,
+        accountStatus: null,
+        payplanStatus: null,
+        payplanVersion: null,
+      });
     }
 
     const user = await prisma.user.findUnique({
@@ -17,10 +22,18 @@ export async function GET(req: NextRequest) {
     });
 
     return NextResponse.json({
-      needsJoinCode: user?.profile?.needsJoinCode || false
+      needsJoinCode: user?.profile?.needsJoinCode || false,
+      accountStatus: user?.profile?.accountStatus || 'active',
+      payplanStatus: user?.profile?.payplanStatus || 'PENDING',
+      payplanVersion: user?.profile?.payplanVersion || null,
     });
   } catch (error) {
     console.error('Error checking user status:', error);
-    return NextResponse.json({ needsJoinCode: false });
+    return NextResponse.json({
+      needsJoinCode: false,
+      accountStatus: null,
+      payplanStatus: null,
+      payplanVersion: null,
+    });
   }
 }

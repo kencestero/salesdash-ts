@@ -84,6 +84,9 @@ model User {
   goalsSetForOthers MonthlyGoal[]      @relation("GoalsSetBy")
   trainingCompletions TrainingCompletion[] @relation("TrainingCompletions")
   salesStats        SalesStats?        @relation("SalesStats")
+
+  // Contractor Documents
+  contractorDocuments ContractorDocument[]
 }
 
 model VerificationToken {
@@ -159,6 +162,12 @@ model UserProfile {
   // Manager System Controls
   isAvailableAsManager Boolean @default(false) // Can appear in manager dropdown during signup
   isActive            Boolean @default(true)   // Account active status (for soft-delete/suspension)
+
+  // Payplan Acceptance Fields
+  payplanStatus       String    @default("PENDING")  // "PENDING" | "ACCEPTED" | "DECLINED"
+  payplanVersion      String?                         // e.g., "2026-01-11-v1"
+  payplanAcceptedAt   DateTime?
+  payplanDeclinedAt   DateTime?
 
   // User Presence Tracking (for chat online/offline status)
   lastSeen   DateTime  @default(now())
@@ -1657,4 +1666,26 @@ model HelpContent {
   updatedAt   DateTime @updatedAt
 
   @@index([section])
+}
+
+// =============================================================================
+// CONTRACTOR DOCUMENTS - Secure W-9 & Agreement Upload with Google Drive Sync
+// =============================================================================
+
+model ContractorDocument {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  docType       String   // "W9" | "CONTRACTOR_AGREEMENT"
+  fileName      String   // Original filename
+  storedPath    String?  // Local/S3 path (if using primary storage)
+  driveFileId   String?  // Google Drive file ID
+  driveUrl      String?  // Google Drive web view link (internal only - NOT exposed to reps)
+  uploadedAt    DateTime @default(now())
+  fileSize      Int      // Bytes
+  mimeType      String   // "application/pdf", "image/jpeg", etc.
+
+  @@index([userId])
+  @@index([docType])
+  @@index([uploadedAt])
 }
