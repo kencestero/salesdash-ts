@@ -39,7 +39,7 @@ export default function RepCodeCard() {
 
   const copyRepLink = () => {
     if (!repCode) return;
-    const link = `https://www.remotivelogistics.com/get-approved?rep=${repCode}`;
+    const link = `https://remotivelogistics.com/get-approved/${repCode}`;
     navigator.clipboard.writeText(link);
     toast({
       title: "Link Copied!",
