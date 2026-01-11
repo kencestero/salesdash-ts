@@ -81,7 +81,7 @@ export default function CreditApplicationsPage() {
       return;
     }
 
-    const url = `https://remotivelogistics.com/get-approved/${repCode}`;
+    const url = `https://remotivelogistics.com/get-approved?rep=${repCode}`;
     navigator.clipboard.writeText(url);
 
     toast.success("✅ Link Copied!", {
@@ -160,7 +160,7 @@ export default function CreditApplicationsPage() {
               <div className="flex flex-col sm:flex-row gap-3">
                 <Input
                   readOnly
-                  value={`https://remotivelogistics.com/get-approved/${repCode}`}
+                  value={`https://remotivelogistics.com/get-approved?rep=${repCode}`}
                   className="flex-1 font-mono text-base sm:text-lg h-14 border-2 border-[#E96114]/50 bg-background/80 font-semibold"
                 />
                 <Button
@@ -177,7 +177,7 @@ export default function CreditApplicationsPage() {
                   className="h-14 px-4 border-2 border-[#E96114]/50 hover:bg-[#E96114]/20"
                   asChild
                 >
-                  <Link href={`https://remotivelogistics.com/get-approved/${repCode}`} target="_blank">
+                  <Link href={`https://remotivelogistics.com/get-approved?rep=${repCode}`} target="_blank">
                     <ExternalLink className="h-6 w-6" />
                   </Link>
                 </Button>
