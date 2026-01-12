@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { validateCodeAndGetRole, getAllTodayCodes } from "@/lib/joinCode";
 import { checkRateLimit, resetRateLimit, sendRateLimitAlert } from "@/lib/rate-limiter";
+import { validateDailyCode } from "@/lib/daily-code";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -62,6 +63,12 @@ export async function POST(req: Request) {
   if (!role && testCodes[code.toUpperCase()]) {
     role = testCodes[code.toUpperCase()];
     console.log('✅ Using test code:', maskedCode, '→', role);
+  }
+
+  // If still no role, check if it's a valid daily code (from onboarding flow)
+  if (!role && validateDailyCode(code, true)) {
+    role = 'salesperson'; // Daily codes always create salesperson accounts
+    console.log('✅ Using daily onboarding code:', maskedCode, '→', role);
   }
 
   if (!role) {

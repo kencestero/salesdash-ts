@@ -1,18 +1,22 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import Image from "next/image";
 import { Icon } from "@iconify/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { DEFAULT_LANG } from "@/lib/i18n";
+import { useSearchParams } from "next/navigation";
 
-export default function RegisterPage() {
+function RegisterPageContent() {
+  const searchParams = useSearchParams();
+  const codeFromUrl = searchParams.get("code");
+
   // Feature flags
   const GOOGLE_ENABLED = process.env.NEXT_PUBLIC_GOOGLE_ENABLED === "true";
 
-  const [code, setCode] = useState("");
+  const [code, setCode] = useState(codeFromUrl || "");
   const [codeValidated, setCodeValidated] = useState(false);
   const [validatingCode, setValidatingCode] = useState(false);
   const [validatedRole, setValidatedRole] = useState<string>("");
@@ -70,6 +74,17 @@ export default function RegisterPage() {
     }
     fetchManagers();
   }, []);
+
+  // Auto-validate if code is provided in URL (from onboarding flow)
+  useEffect(() => {
+    if (codeFromUrl && codeFromUrl.length >= 6 && !codeValidated && !validatingCode) {
+      // Small delay to let UI render first
+      const timer = setTimeout(() => {
+        validateCode();
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [codeFromUrl]); // eslint-disable-line react-hooks/exhaustive-deps
 
 
   async function validateCode() {
@@ -707,5 +722,18 @@ export default function RegisterPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+// Wrap with Suspense for useSearchParams
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={
+      <div className="h-screen w-screen fixed inset-0 overflow-auto bg-[#0a1628] flex items-center justify-center">
+        <div className="text-white text-lg">Loading...</div>
+      </div>
+    }>
+      <RegisterPageContent />
+    </Suspense>
   );
 }

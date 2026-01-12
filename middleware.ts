@@ -24,6 +24,7 @@ export async function middleware(req: NextRequest) {
     "/session-expired",
     "/credit-application",
     "/reply",
+    "/onboarding", // Public onboarding flow (no auth required)
   ];
 
   // Add /en prefix to paths that don't have it (except root-level paths)
@@ -44,6 +45,7 @@ export async function middleware(req: NextRequest) {
     "/api/health",
     "/api/auth",
     "/api/join",
+    "/api/onboarding", // Daily code API
     "/apply",
     "/demo-trailer-card",
     "/particle-demo",
@@ -54,6 +56,7 @@ export async function middleware(req: NextRequest) {
     "/test/firebase-check",
     "/credit-application",
     "/reply",
+    "/onboarding", // Public onboarding flow
   ];
 
   const isPublic = publicPaths.some((p) => url.pathname.startsWith(p));
