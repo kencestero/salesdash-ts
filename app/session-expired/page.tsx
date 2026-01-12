@@ -16,7 +16,11 @@ export default function SessionExpiredPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-[#09213C] text-white px-4">
+    <div className="min-h-screen flex flex-col items-center justify-center text-white px-4 relative overflow-hidden"
+      style={{
+        background: "linear-gradient(135deg, #E96114 0%, #09213C 50%, #050d18 100%)"
+      }}
+    >
       {/* Logo */}
       <div className="mb-8">
         <Image
