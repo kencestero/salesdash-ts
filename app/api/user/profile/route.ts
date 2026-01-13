@@ -45,6 +45,7 @@ export async function GET() {
         id: user.id,
         name: user.name,
         email: user.email,
+        createdAt: user.createdAt,
       },
       profile: {
         id: user.profile.id,
@@ -62,6 +63,10 @@ export async function GET() {
         member: user.profile.member,
         avatarUrl: user.profile.avatarUrl,
         coverUrl: user.profile.coverUrl,
+        about: user.profile.about,
+        timezone: user.profile.timezone,
+        website: user.profile.website,
+        createdAt: user.profile.createdAt,
       },
     });
   } catch (error) {

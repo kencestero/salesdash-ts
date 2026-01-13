@@ -1,7 +1,6 @@
 "use client"
 import UserMeta from "./user-meta"
 import Socials from "./socials"
-import Skills from "./skills";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PersonalDetails from "./personal-details"
 import ChangePassword from "./change-password"
@@ -40,7 +39,6 @@ const Settings = () => {
       <div className="col-span-12 lg:col-span-4 space-y-6">
         <UserMeta />
         <Socials />
-        <Skills />
       </div>
       <div className="col-span-12 lg:col-span-8">
         <Tabs defaultValue="personal" className="p-0 px-1" >

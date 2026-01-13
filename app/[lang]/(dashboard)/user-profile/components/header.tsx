@@ -1,7 +1,7 @@
 "use client";
 import { Breadcrumbs, BreadcrumbItem } from "@/components/ui/breadcrumbs";
 import { Card, CardContent } from "@/components/ui/card";
-import { Home, Truck } from "lucide-react";
+import { Home, Truck, Camera, Loader2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -9,8 +9,14 @@ import { Icon } from "@iconify/react";
 import User from "@/public/images/avatar/user.png";
 import { cn } from "@/lib/utils";
 import { usePathname } from "next/navigation";
-import { Fragment, useState, useEffect } from "react";
+import { Fragment, useState, useEffect, useRef } from "react";
 import { Session } from "next-auth";
+import { ImageCropDialog } from "@/components/ui/image-crop-dialog";
+import { useToast } from "@/components/ui/use-toast";
+
+const MAX_BANNER_SIZE = 3 * 1024 * 1024; // 3MB
+const MAX_BANNER_WIDTH = 2560;
+const MAX_BANNER_HEIGHT = 1440;
 
 interface UserProfile {
   phone?: string;
@@ -18,6 +24,7 @@ interface UserProfile {
   zip?: string;
   role?: string;
   avatarUrl?: string;
+  coverUrl?: string;
 }
 
 interface HeaderProps {
@@ -27,11 +34,17 @@ interface HeaderProps {
 
 const Header = ({ session, userProfile }: HeaderProps) => {
   const location = usePathname();
+  const { toast } = useToast();
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [bannerUrl, setBannerUrl] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [cropDialogOpen, setCropDialogOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const bannerInputRef = useRef<HTMLInputElement>(null);
 
-  // Fetch avatar from profile API
+  // Fetch avatar and banner from profile API
   useEffect(() => {
-    const fetchAvatar = async () => {
+    const fetchProfile = async () => {
       try {
         const response = await fetch('/api/user/profile');
         if (response.ok) {
@@ -39,12 +52,15 @@ const Header = ({ session, userProfile }: HeaderProps) => {
           if (data.profile?.avatarUrl) {
             setAvatarUrl(data.profile.avatarUrl);
           }
+          if (data.profile?.coverUrl) {
+            setBannerUrl(data.profile.coverUrl);
+          }
         }
       } catch (error) {
-        console.error('Failed to fetch profile avatar:', error);
+        console.error('Failed to fetch profile:', error);
       }
     };
-    fetchAvatar();
+    fetchProfile();
   }, []);
 
   // Use real user data or fallback to defaults
@@ -60,6 +76,91 @@ const Header = ({ session, userProfile }: HeaderProps) => {
       .join("")
       .toUpperCase()
       .slice(0, 2);
+  };
+
+  const handleBannerSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Invalid file type",
+        description: "Please upload an image file (JPG, PNG, WebP)",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate file size (max 3MB)
+    if (file.size > MAX_BANNER_SIZE) {
+      toast({
+        title: "File too large",
+        description: "Please upload an image smaller than 3MB",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Create data URL for cropping
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setSelectedImage(reader.result as string);
+      setCropDialogOpen(true);
+    };
+    reader.readAsDataURL(file);
+
+    // Reset input
+    e.target.value = '';
+  };
+
+  const handleCropComplete = async (blob: Blob) => {
+    setCropDialogOpen(false);
+    setUploading(true);
+
+    try {
+      // Create FormData with the cropped image
+      const formData = new FormData();
+      formData.append('file', blob, 'banner.jpg');
+
+      const response = await fetch('/api/upload-banner', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Upload failed');
+      }
+
+      const data = await response.json();
+      const newBannerUrl = data.url;
+
+      // Update local state
+      setBannerUrl(newBannerUrl);
+
+      // Update profile in database
+      await fetch('/api/user/profile/update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ coverUrl: newBannerUrl }),
+      });
+
+      toast({
+        title: "Banner updated!",
+        description: "Your profile banner has been updated successfully",
+        variant: "default",
+      });
+    } catch (error) {
+      console.error('Banner upload error:', error);
+      toast({
+        title: "Upload failed",
+        description: "Failed to upload banner. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setUploading(false);
+      setSelectedImage(null);
+    }
   };
 
   return (
@@ -78,22 +179,64 @@ const Header = ({ session, userProfile }: HeaderProps) => {
       </Breadcrumbs>
       <Card className="mt-6 rounded-t-2xl overflow-hidden">
         <CardContent className="p-0">
-          {/* Trailer-themed gradient header */}
+          {/* Banner section with optional custom image */}
           <div
-            className="relative h-[200px] lg:h-[296px] rounded-t-2xl w-full bg-gradient-to-br from-[#09213C] via-[#0d2d52] to-[#E96114]"
+            className="relative h-[200px] lg:h-[296px] rounded-t-2xl w-full"
+            style={{
+              background: bannerUrl
+                ? undefined
+                : "linear-gradient(135deg, #09213C 0%, #0d2d52 50%, #E96114 100%)"
+            }}
           >
-            {/* Decorative overlay pattern */}
-            <div className="absolute inset-0 opacity-10">
-              <div className="absolute top-4 right-4 text-white/20">
-                <Truck className="w-32 h-32 lg:w-48 lg:h-48" />
+            {/* Custom banner image */}
+            {bannerUrl && (
+              <Image
+                src={bannerUrl}
+                alt="Profile banner"
+                fill
+                className="object-cover"
+                priority
+              />
+            )}
+
+            {/* Decorative overlay pattern (only shown when no custom banner) */}
+            {!bannerUrl && (
+              <div className="absolute inset-0 opacity-10">
+                <div className="absolute top-4 right-4 text-white/20">
+                  <Truck className="w-32 h-32 lg:w-48 lg:h-48" />
+                </div>
+                <div className="absolute bottom-20 left-1/3 text-white/10">
+                  <Truck className="w-24 h-24" />
+                </div>
               </div>
-              <div className="absolute bottom-20 left-1/3 text-white/10">
-                <Truck className="w-24 h-24" />
-              </div>
-            </div>
+            )}
 
             {/* Gradient overlay for better text readability */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+
+            {/* Banner upload button */}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="absolute top-4 right-4 bg-black/30 hover:bg-black/50 text-white backdrop-blur-sm"
+              onClick={() => bannerInputRef.current?.click()}
+              disabled={uploading}
+            >
+              {uploading ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <Camera className="w-4 h-4 mr-2" />
+              )}
+              {uploading ? "Uploading..." : "Change Banner"}
+            </Button>
+            <input
+              ref={bannerInputRef}
+              type="file"
+              className="hidden"
+              accept="image/*"
+              onChange={handleBannerSelect}
+              disabled={uploading}
+            />
 
             {/* User info section */}
             <div className="flex items-center gap-4 absolute ltr:left-10 rtl:right-10 -bottom-2 lg:-bottom-8">
@@ -163,6 +306,22 @@ const Header = ({ session, userProfile }: HeaderProps) => {
 
         </CardContent>
       </Card>
+
+      {/* Banner Crop Dialog */}
+      <ImageCropDialog
+        open={cropDialogOpen}
+        onClose={() => {
+          setCropDialogOpen(false);
+          setSelectedImage(null);
+        }}
+        imageSrc={selectedImage || ''}
+        aspect={16 / 9}
+        circularCrop={false}
+        maxWidth={MAX_BANNER_WIDTH}
+        maxHeight={MAX_BANNER_HEIGHT}
+        onCropComplete={handleCropComplete}
+        title="Crop Profile Banner"
+      />
     </Fragment>
   );
 };
