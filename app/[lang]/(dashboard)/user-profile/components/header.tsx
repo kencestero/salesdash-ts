@@ -214,11 +214,11 @@ const Header = ({ session, userProfile }: HeaderProps) => {
             {/* Gradient overlay for better text readability */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
 
-            {/* Banner upload button */}
+            {/* Banner upload button - positioned at bottom right */}
             <Button
               variant="ghost"
               size="sm"
-              className="absolute top-4 right-4 bg-black/30 hover:bg-black/50 text-white backdrop-blur-sm"
+              className="absolute bottom-5 right-6 rounded px-5 hidden lg:flex bg-black/30 hover:bg-black/50 text-white backdrop-blur-sm border border-white/30 z-10"
               onClick={() => bannerInputRef.current?.click()}
               disabled={uploading}
             >
@@ -266,12 +266,6 @@ const Header = ({ session, userProfile }: HeaderProps) => {
                 </div>
               </div>
             </div>
-            <Button asChild className="absolute bottom-5 ltr:right-6 rtl:left-6 rounded px-5 hidden lg:flex bg-white/20 hover:bg-white/30 backdrop-blur-sm border border-white/30" size="sm">
-              <Link href="/en/user-profile/settings">
-                <Icon className="w-4 h-4 ltr:mr-1 rtl:ml-1" icon="heroicons:pencil-square" />
-                Edit Profile
-              </Link>
-            </Button>
           </div>
           <div className="flex flex-wrap justify-end gap-4 lg:gap-8 pt-7 lg:pt-5 pb-4 px-6">
             {

@@ -55,8 +55,22 @@ export async function POST(req: NextRequest) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    const fileExtension = file.name.split(".").pop();
-    const fileName = `${session.user.id}-${Date.now()}.${fileExtension}`;
+    // Get file extension from name or default to jpg for cropped blobs
+    let fileExtension = file.name.split(".").pop();
+    if (!fileExtension || fileExtension === file.name) {
+      // If no extension found, determine from mime type
+      if (file.type === "image/png") {
+        fileExtension = "png";
+      } else if (file.type === "image/webp") {
+        fileExtension = "webp";
+      } else {
+        fileExtension = "jpg";
+      }
+    }
+
+    // Use email hash if id is not available
+    const userId = (session.user as any).id || session.user.email?.replace(/[^a-zA-Z0-9]/g, '') || 'unknown';
+    const fileName = `${userId}-${Date.now()}.${fileExtension}`;
     const filePath = path.join(uploadsDir, fileName);
 
     // Write file to disk
@@ -71,8 +85,10 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     console.error("Avatar upload error:", error);
+    console.error("Error details:", error instanceof Error ? error.message : String(error));
+    console.error("Stack:", error instanceof Error ? error.stack : "No stack");
     return NextResponse.json(
-      { error: "Failed to upload avatar" },
+      { error: "Failed to upload avatar", details: error instanceof Error ? error.message : String(error) },
       { status: 500 }
     );
   }

@@ -25,7 +25,10 @@ const Overview = () => {
     if (session?.user?.email) {
       fetch(`/api/user/profile`)
         .then(res => res.json())
-        .then(data => setUserProfile(data))
+        .then(data => {
+          // API returns { user: {...}, profile: {...} }
+          setUserProfile(data.profile || data);
+        })
         .catch(err => console.error("Error fetching profile:", err));
     }
   }, [session?.user?.email]);
