@@ -6,15 +6,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { User, ArrowRight, ArrowLeft } from 'lucide-react';
-import { toast } from 'sonner';
+
+const ONBOARDING_TOKEN_KEY = 'remotive_onboarding_token';
+const ONBOARDING_STATE_KEY = 'remotive_rep_onboarding';
 
 const US_STATES = [
   { value: 'AL', label: 'Alabama' },
@@ -69,12 +65,9 @@ const US_STATES = [
   { value: 'WY', label: 'Wyoming' },
 ];
 
-const ONBOARDING_STORAGE_KEY = 'remotive_onboarding';
-
 interface OnboardingState {
   payplanAccepted: boolean;
   payplanAcceptedAt?: string;
-  profileCompleted: boolean;
   profileData?: {
     firstName: string;
     lastName: string;
@@ -85,49 +78,54 @@ interface OnboardingState {
 
 function getOnboardingState(): OnboardingState {
   if (typeof window === 'undefined') {
-    return { payplanAccepted: false, profileCompleted: false };
+    return { payplanAccepted: false };
   }
   try {
-    const stored = localStorage.getItem(ONBOARDING_STORAGE_KEY);
+    const stored = sessionStorage.getItem(ONBOARDING_STATE_KEY);
     if (stored) {
       return JSON.parse(stored);
     }
   } catch (e) {
     console.error('Failed to parse onboarding state:', e);
   }
-  return { payplanAccepted: false, profileCompleted: false };
+  return { payplanAccepted: false };
 }
 
 function setOnboardingState(state: OnboardingState) {
   if (typeof window === 'undefined') return;
-  localStorage.setItem(ONBOARDING_STORAGE_KEY, JSON.stringify(state));
+  sessionStorage.setItem(ONBOARDING_STATE_KEY, JSON.stringify(state));
 }
 
-export default function OnboardingProfilePage() {
+export default function RepProfilePage() {
+  const [mounted, setMounted] = useState(false);
+  const [hasToken, setHasToken] = useState(false);
+  const router = useRouter();
+
+  // Form fields
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [phone, setPhone] = useState('');
   const [state, setState] = useState('');
-  const [mounted, setMounted] = useState(false);
-  const router = useRouter();
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     setMounted(true);
-    const onboardingState = getOnboardingState();
+    // Check if we have a valid token
+    const token = sessionStorage.getItem(ONBOARDING_TOKEN_KEY);
+    if (!token) {
+      router.push('/onboarding/rep');
+      return;
+    }
+    setHasToken(true);
 
     // Check if payplan was accepted
+    const onboardingState = getOnboardingState();
     if (!onboardingState.payplanAccepted) {
-      router.push('/onboarding/payplan');
+      router.push('/onboarding/rep/payplan');
       return;
     }
 
-    // Check if profile already completed
-    if (onboardingState.profileCompleted && onboardingState.profileData) {
-      router.push('/onboarding/invite');
-      return;
-    }
-
-    // Pre-fill if there's existing data
+    // Pre-fill if data exists
     if (onboardingState.profileData) {
       setFirstName(onboardingState.profileData.firstName || '');
       setLastName(onboardingState.profileData.lastName || '');
@@ -137,62 +135,63 @@ export default function OnboardingProfilePage() {
   }, [router]);
 
   const formatPhone = (value: string) => {
-    // Remove all non-digits
+    // Strip non-digits
     const digits = value.replace(/\D/g, '');
-
     // Format as (XXX) XXX-XXXX
-    if (digits.length <= 3) {
-      return digits;
-    } else if (digits.length <= 6) {
-      return `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
-    } else {
-      return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6, 10)}`;
-    }
+    if (digits.length <= 3) return digits;
+    if (digits.length <= 6) return `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
+    return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6, 10)}`;
   };
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPhone(formatPhone(e.target.value));
+    const formatted = formatPhone(e.target.value);
+    setPhone(formatted);
+  };
+
+  const validate = () => {
+    const newErrors: Record<string, string> = {};
+
+    if (!firstName.trim()) {
+      newErrors.firstName = 'First name is required';
+    }
+    if (!lastName.trim()) {
+      newErrors.lastName = 'Last name is required';
+    }
+    if (!phone.trim()) {
+      newErrors.phone = 'Phone number is required';
+    } else if (phone.replace(/\D/g, '').length < 10) {
+      newErrors.phone = 'Please enter a valid 10-digit phone number';
+    }
+    if (!state) {
+      newErrors.state = 'Please select your state';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleContinue = () => {
-    // Validate
-    if (!firstName.trim()) {
-      toast.error('Please enter your first name');
-      return;
-    }
-    if (!lastName.trim()) {
-      toast.error('Please enter your last name');
-      return;
-    }
-    if (!phone.trim() || phone.replace(/\D/g, '').length < 10) {
-      toast.error('Please enter a valid phone number');
-      return;
-    }
-    if (!state) {
-      toast.error('Please select your state');
-      return;
-    }
+    if (!validate()) return;
 
     const onboardingState = getOnboardingState();
     setOnboardingState({
       ...onboardingState,
-      profileCompleted: true,
       profileData: {
         firstName: firstName.trim(),
         lastName: lastName.trim(),
-        phone: phone.trim(),
+        phone,
         state,
       },
     });
 
-    router.push('/onboarding/invite');
+    router.push('/onboarding/rep/w9');
   };
 
   const handleBack = () => {
-    router.push('/onboarding/payplan');
+    router.push('/onboarding/rep/payplan');
   };
 
-  if (!mounted) {
+  if (!mounted || !hasToken) {
     return null;
   }
 
@@ -204,78 +203,92 @@ export default function OnboardingProfilePage() {
         </div>
         <CardTitle className="text-2xl">Your Information</CardTitle>
         <CardDescription className="text-gray-300">
-          Step 2 of 3: Tell us a bit about yourself
+          Step 2 of 4: Tell us a little about yourself
         </CardDescription>
       </CardHeader>
-      <CardContent className="pt-6 space-y-5">
-        {/* Name fields */}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="firstName" className="text-gray-200">
-              First Name
-            </Label>
-            <Input
-              id="firstName"
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
-              placeholder="John"
-              className="bg-white/10 border-white/20 text-white placeholder:text-gray-400 focus:border-[#E96114]"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="lastName" className="text-gray-200">
-              Last Name
-            </Label>
-            <Input
-              id="lastName"
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
-              placeholder="Doe"
-              className="bg-white/10 border-white/20 text-white placeholder:text-gray-400 focus:border-[#E96114]"
-            />
-          </div>
+      <CardContent className="pt-6 space-y-6">
+        {/* First Name */}
+        <div className="space-y-2">
+          <Label htmlFor="firstName" className="text-gray-200">
+            First Name <span className="text-red-400">*</span>
+          </Label>
+          <Input
+            id="firstName"
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
+            placeholder="Enter your first name"
+            className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
+          />
+          {errors.firstName && (
+            <p className="text-sm text-red-400">{errors.firstName}</p>
+          )}
+        </div>
+
+        {/* Last Name */}
+        <div className="space-y-2">
+          <Label htmlFor="lastName" className="text-gray-200">
+            Last Name <span className="text-red-400">*</span>
+          </Label>
+          <Input
+            id="lastName"
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
+            placeholder="Enter your last name"
+            className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
+          />
+          {errors.lastName && (
+            <p className="text-sm text-red-400">{errors.lastName}</p>
+          )}
         </div>
 
         {/* Phone */}
         <div className="space-y-2">
           <Label htmlFor="phone" className="text-gray-200">
-            Phone Number
+            Phone Number <span className="text-red-400">*</span>
           </Label>
           <Input
             id="phone"
-            type="tel"
             value={phone}
             onChange={handlePhoneChange}
-            placeholder="(555) 555-5555"
-            maxLength={14}
-            className="bg-white/10 border-white/20 text-white placeholder:text-gray-400 focus:border-[#E96114]"
+            placeholder="(555) 123-4567"
+            className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
           />
+          {errors.phone && (
+            <p className="text-sm text-red-400">{errors.phone}</p>
+          )}
         </div>
 
         {/* State */}
         <div className="space-y-2">
           <Label htmlFor="state" className="text-gray-200">
-            State
+            State <span className="text-red-400">*</span>
           </Label>
           <Select value={state} onValueChange={setState}>
-            <SelectTrigger className="bg-white/10 border-white/20 text-white focus:border-[#E96114]">
+            <SelectTrigger className="bg-white/10 border-white/20 text-white">
               <SelectValue placeholder="Select your state" />
             </SelectTrigger>
-            <SelectContent className="max-h-[300px]">
+            <SelectContent className="bg-[#0a1628] border-white/20 max-h-[300px]">
               {US_STATES.map((s) => (
-                <SelectItem key={s.value} value={s.value}>
+                <SelectItem
+                  key={s.value}
+                  value={s.value}
+                  className="text-white hover:bg-white/10"
+                >
                   {s.label}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
+          {errors.state && (
+            <p className="text-sm text-red-400">{errors.state}</p>
+          )}
         </div>
 
-        {/* Buttons */}
-        <div className="flex gap-3 pt-2">
+        {/* Navigation buttons */}
+        <div className="flex gap-4 pt-4">
           <Button
-            onClick={handleBack}
             variant="outline"
+            onClick={handleBack}
             className="flex-1 border-white/30 text-white hover:bg-white/10"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />

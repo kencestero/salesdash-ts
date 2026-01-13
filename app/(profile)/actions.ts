@@ -73,6 +73,15 @@ export async function getProfile() {
 
   return {
     email: user.email,
-    ...user.profile,
+    firstName: user.profile.firstName,
+    lastName: user.profile.lastName,
+    preferredName: user.profile.preferredName,
+    phone: user.profile.phone,
+    zipcode: user.profile.zipcode,
+    city: user.profile.city,
+    about: user.profile.about,
+    avatarUrl: user.profile.avatarUrl,
+    coverUrl: user.profile.coverUrl,
+    role: user.profile.role, // Include role for Recruitment Tools visibility
   };
 }

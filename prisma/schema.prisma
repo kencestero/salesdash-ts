@@ -1689,3 +1689,52 @@ model ContractorDocument {
   @@index([docType])
   @@index([uploadedAt])
 }
+
+// =============================================================================
+// ONE-TIME ONBOARDING TOKEN SYSTEM
+// Entry tokens for secure rep onboarding flow
+// =============================================================================
+
+model OnboardingToken {
+  id          String    @id @default(cuid())
+  token       String    @unique       // Unique entry token (nanoid)
+  type        String    @default("rep") // "rep" or "manager" (future)
+  used        Boolean   @default(false)
+  usedAt      DateTime?
+  createdBy   String                  // User ID of owner/director who created it
+  createdAt   DateTime  @default(now())
+  expiresAt   DateTime                // 24 hours from creation
+
+  // Link to signup code generated after onboarding completion
+  signupCode  SignupCode?
+
+  @@index([token])
+  @@index([createdBy])
+  @@index([expiresAt])
+  @@index([used])
+}
+
+model SignupCode {
+  id                String    @id @default(cuid())
+  code              String    @unique // 8-char uppercase code (e.g., "A7X9K2M4")
+  used              Boolean   @default(false)
+  usedAt            DateTime?
+  createdAt         DateTime  @default(now())
+  expiresAt         DateTime                // 24 hours from creation
+
+  // Link back to the onboarding token
+  onboardingTokenId String    @unique
+  onboardingToken   OnboardingToken @relation(fields: [onboardingTokenId], references: [id])
+
+  // Onboarding data collected during flow
+  firstName         String?
+  lastName          String?
+  phone             String?
+  state             String?
+  w9Url             String?   // Google Drive URL for W-9 document
+  w9DriveFileId     String?   // Google Drive file ID
+
+  @@index([code])
+  @@index([used])
+  @@index([expiresAt])
+}

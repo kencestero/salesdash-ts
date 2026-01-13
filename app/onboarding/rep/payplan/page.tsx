@@ -6,81 +6,82 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
-import { FileText, CheckCircle, ArrowRight } from 'lucide-react';
+import { FileText, CheckCircle, ArrowRight, AlertCircle } from 'lucide-react';
 
-// Payplan content
+const ONBOARDING_TOKEN_KEY = 'remotive_onboarding_token';
+const ONBOARDING_STATE_KEY = 'remotive_rep_onboarding';
+
+// New profit-based payplan content
 const PAYPLAN_CONTENT = `
-## Remotive Logistics Sales Rep Payplan
+## Remotive Logistics LLC — Sales Rep Pay Plan (Launch Phase)
 
-### Effective Date: January 11, 2026
+### Effective Date: January 2026
+**Version:** REP-PAYPLAN-LAUNCH-v1
 
-### 1. Commission Structure
+### 1) Classification
 
-As an independent sales representative for Remotive Logistics, you will earn commissions based on the following structure:
+Sales Reps operate as independent sales representatives (1099). This is a commission-based role.
 
-**Standard Commission Rates:**
-- Enclosed Trailers: 3% of sale price
-- Utility Trailers: 2.5% of sale price
-- Dump Trailers: 2.5% of sale price
-- Specialty/Custom Orders: 3.5% of sale price
+### 2) Commission Structure (Launch Phase)
 
-### 2. Payment Terms
+**Standard Commission:** 20% of Commissionable Gross Profit (GP)
 
-- Commissions are paid on the 15th and last day of each month
-- Minimum payout threshold: $100
-- Direct deposit required
+**Minimum Deal Requirement:** A deal must produce at least $2,000 in gross profit to qualify for commission and bonuses.
 
-### 3. Lead Assignment
+**Commissionable Gross Profit (GP) is calculated as:**
+- Sale Price
+- minus Trailer Cost
+- minus Delivery / transport costs (if paid by the company)
+- minus any other direct deal costs or discounts that reduce the trailer's profit
 
-- Leads are assigned on a rotating basis within your territory
-- You have 24 hours to make initial contact with assigned leads
-- Leads not contacted within 48 hours may be reassigned
-- Your "Response Time" metric affects lead priority
+(All costs must be recorded in SalesHub for the final GP calculation)
 
-### 4. Performance Requirements
+### 3) When Commission Is Earned
 
-**Minimum Monthly Requirements:**
-- Contact all assigned leads within 48 hours
-- Maintain a minimum of 2 sales per month after probationary period
-- Complete all required training modules
-- Attend weekly team calls when scheduled
+Commission is earned only on deals that are:
+- Funded/paid (cash cleared or lender funding confirmed), and
+- Recorded correctly in SalesHub, and
+- Meet the $2,000 minimum gross profit requirement.
 
-### 5. Territory & Exclusivity
+### 4) Payout Schedule (Weekly)
 
-- Territories are not exclusive
-- Cross-territory sales are permitted but may affect lead routing
-- Factory orders ship to customer location regardless of territory
+Commissions are paid weekly on Fridays based on funding time:
+- Deals funded before the weekly cutoff are paid that Friday.
+- If a deal is funded on Thursday after 1:00 PM (ET) or later, it will be paid the following Friday.
+- If funded on Wednesday (or earlier), it will be paid that Friday.
 
-### 6. Independent Contractor Status
+Cutoff times may be adjusted and published inside SalesHub.
 
-You acknowledge that you are an independent contractor, not an employee. You are responsible for:
-- Your own taxes (1099 will be provided)
-- Your own insurance
-- Your own equipment and workspace
-- Compliance with all applicable laws
+### 5) Unit Bonus Program (Monthly)
 
-### 7. Confidentiality
+In addition to commissions, Sales Reps may earn unit bonuses based on the number of funded and delivered deals within the month. Bonuses are paid on the SECOND Friday of the following month.
 
-You agree to keep all customer information, pricing, and company data confidential. Violation of this clause may result in immediate termination.
+**Bonus tiers:**
+- 5–8 units: +$100 per trailer
+- 9–12 units: +$125 per trailer
+- 13–15 units: +$150 per trailer
+- 16+ units: +$175 per trailer
 
-### 8. Termination
+**Bonus eligibility rules:**
+- Only deals that meet the $2,000 minimum gross profit requirement count toward unit bonuses.
+- Deals must be funded and delivered to count (unless explicitly approved otherwise in writing).
 
-Either party may terminate this agreement at any time with written notice. Upon termination:
-- All pending commissions will be paid within 30 days
-- CRM access will be revoked immediately
-- All company materials must be returned
+### 6) Payment Method
 
-### 9. Acceptance
+Commissions/bonuses will be paid using the company's chosen method at the time (ACH, direct deposit, etc.). Payment methods may change as we scale.
 
-By clicking "Continue" below, you acknowledge that you have read, understood, and agree to all terms outlined in this payplan.
+### 7) Updates & Launch Phase Note
+
+This "Launch Phase" pay plan is designed for the startup stage while staffing and operations are being built out. The company may update pay plan terms in the future. Any material changes will be published in writing with a new version number.
+
+### Acceptance
+
+By clicking "Accept & Continue" below, you acknowledge that you have read, understood, and agree to all terms outlined in this pay plan.
 `;
-
-const ONBOARDING_STORAGE_KEY = 'remotive_onboarding';
 
 interface OnboardingState {
   payplanAccepted: boolean;
   payplanAcceptedAt?: string;
-  profileCompleted: boolean;
   profileData?: {
     firstName: string;
     lastName: string;
@@ -91,35 +92,45 @@ interface OnboardingState {
 
 function getOnboardingState(): OnboardingState {
   if (typeof window === 'undefined') {
-    return { payplanAccepted: false, profileCompleted: false };
+    return { payplanAccepted: false };
   }
   try {
-    const stored = localStorage.getItem(ONBOARDING_STORAGE_KEY);
+    const stored = sessionStorage.getItem(ONBOARDING_STATE_KEY);
     if (stored) {
       return JSON.parse(stored);
     }
   } catch (e) {
     console.error('Failed to parse onboarding state:', e);
   }
-  return { payplanAccepted: false, profileCompleted: false };
+  return { payplanAccepted: false };
 }
 
 function setOnboardingState(state: OnboardingState) {
   if (typeof window === 'undefined') return;
-  localStorage.setItem(ONBOARDING_STORAGE_KEY, JSON.stringify(state));
+  sessionStorage.setItem(ONBOARDING_STATE_KEY, JSON.stringify(state));
 }
 
-export default function OnboardingPayplanPage() {
+export default function RepPayplanPage() {
   const [acknowledged, setAcknowledged] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [hasToken, setHasToken] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
     setMounted(true);
-    // Check if already accepted
+    // Check if we have a valid token
+    const token = sessionStorage.getItem(ONBOARDING_TOKEN_KEY);
+    if (!token) {
+      // No token - redirect to entry page
+      router.push('/onboarding/rep');
+      return;
+    }
+    setHasToken(true);
+
+    // Check if payplan already accepted
     const state = getOnboardingState();
     if (state.payplanAccepted) {
-      router.push('/onboarding/profile');
+      router.push('/onboarding/rep/profile');
     }
   }, [router]);
 
@@ -133,10 +144,10 @@ export default function OnboardingPayplanPage() {
       payplanAcceptedAt: new Date().toISOString(),
     });
 
-    router.push('/onboarding/profile');
+    router.push('/onboarding/rep/profile');
   };
 
-  if (!mounted) {
+  if (!mounted || !hasToken) {
     return null;
   }
 
@@ -146,9 +157,9 @@ export default function OnboardingPayplanPage() {
         <div className="mx-auto w-16 h-16 bg-[#E96114]/20 rounded-full flex items-center justify-center mb-4">
           <FileText className="w-8 h-8 text-[#E96114]" />
         </div>
-        <CardTitle className="text-2xl">Sales Rep Payplan</CardTitle>
+        <CardTitle className="text-2xl">Sales Rep Pay Plan</CardTitle>
         <CardDescription className="text-gray-300">
-          Step 1 of 3: Review and accept the payplan to continue
+          Step 1 of 4: Review and accept the pay plan to continue
         </CardDescription>
       </CardHeader>
       <CardContent className="pt-6 space-y-6">
@@ -185,7 +196,7 @@ export default function OnboardingPayplanPage() {
             htmlFor="acknowledge"
             className="text-sm font-medium leading-tight cursor-pointer text-gray-200"
           >
-            I have read and agree to the Remotive Logistics Sales Rep Payplan
+            I have read and agree to the Remotive Logistics Sales Rep Pay Plan
           </Label>
         </div>
 
