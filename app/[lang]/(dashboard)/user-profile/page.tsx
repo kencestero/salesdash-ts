@@ -10,6 +10,7 @@ import Friends from "./overview/friends";
 import TeamCard from "./overview/team-card";
 import BadgesCard from "./overview/badges-card";
 import MonthlyGoal from "./overview/monthly-goal";
+import RecruitmentTools from "./overview/recruitment-tools";
 
 interface UserProfile {
   phone?: string;
@@ -46,6 +47,7 @@ const Overview = () => {
       {/* Right Column */}
       <div className="col-span-12 lg:col-span-8 space-y-6">
         <About session={session} userProfile={userProfile} />
+        <RecruitmentTools userRole={userProfile?.role} />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Friends />
           <TeamCard />
