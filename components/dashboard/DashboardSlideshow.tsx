@@ -332,7 +332,7 @@ export function DashboardSlideshow() {
 
           {/* Pause/Play indicator */}
           <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
-            <Badge variant="secondary" className="bg-black/50 text-white text-xs">
+            <Badge variant="soft" className="bg-black/50 text-white text-xs">
               {isPaused ? (
                 <>
                   <Pause className="w-3 h-3 mr-1" /> Paused

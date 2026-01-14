@@ -125,7 +125,7 @@ export default function DashboardContentManager() {
       }
     } catch (error) {
       console.error("Error fetching slideshows:", error);
-      toast({ title: "Error", description: "Failed to load slideshows", variant: "destructive" });
+      toast({ title: "Error", description: "Failed to load slideshows", color: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -138,7 +138,7 @@ export default function DashboardContentManager() {
   // Create new slideshow
   const handleCreateSlideshow = async () => {
     if (!newSlideshowName.trim()) {
-      toast({ title: "Error", description: "Please enter a name", variant: "destructive" });
+      toast({ title: "Error", description: "Please enter a name", color: "destructive" });
       return;
     }
 
@@ -159,10 +159,10 @@ export default function DashboardContentManager() {
         setSelectedSlideshow(data.slideshow);
       } else {
         const error = await response.json();
-        toast({ title: "Error", description: error.error, variant: "destructive" });
+        toast({ title: "Error", description: error.error, color: "destructive" });
       }
     } catch (error) {
-      toast({ title: "Error", description: "Failed to create slideshow", variant: "destructive" });
+      toast({ title: "Error", description: "Failed to create slideshow", color: "destructive" });
     } finally {
       setSaving(false);
     }
@@ -185,10 +185,10 @@ export default function DashboardContentManager() {
         await fetchSlideshows();
       } else {
         const error = await response.json();
-        toast({ title: "Error", description: error.error, variant: "destructive" });
+        toast({ title: "Error", description: error.error, color: "destructive" });
       }
     } catch (error) {
-      toast({ title: "Error", description: "Failed to update settings", variant: "destructive" });
+      toast({ title: "Error", description: "Failed to update settings", color: "destructive" });
     } finally {
       setSaving(false);
     }
@@ -211,7 +211,7 @@ export default function DashboardContentManager() {
         await fetchSlideshows();
       }
     } catch (error) {
-      toast({ title: "Error", description: "Failed to delete slideshow", variant: "destructive" });
+      toast({ title: "Error", description: "Failed to delete slideshow", color: "destructive" });
     } finally {
       setSaving(false);
     }
@@ -242,10 +242,10 @@ export default function DashboardContentManager() {
         toast({ title: "Success", description: "File uploaded" });
       } else {
         const error = await response.json();
-        toast({ title: "Error", description: error.error, variant: "destructive" });
+        toast({ title: "Error", description: error.error, color: "destructive" });
       }
     } catch (error) {
-      toast({ title: "Error", description: "Failed to upload file", variant: "destructive" });
+      toast({ title: "Error", description: "Failed to upload file", color: "destructive" });
     } finally {
       setUploading(false);
     }
@@ -279,10 +279,10 @@ export default function DashboardContentManager() {
         await fetchSlideshows();
       } else {
         const error = await response.json();
-        toast({ title: "Error", description: error.error, variant: "destructive" });
+        toast({ title: "Error", description: error.error, color: "destructive" });
       }
     } catch (error) {
-      toast({ title: "Error", description: "Failed to save slide", variant: "destructive" });
+      toast({ title: "Error", description: "Failed to save slide", color: "destructive" });
     } finally {
       setSaving(false);
     }
@@ -303,7 +303,7 @@ export default function DashboardContentManager() {
         await fetchSlideshows();
       }
     } catch (error) {
-      toast({ title: "Error", description: "Failed to delete slide", variant: "destructive" });
+      toast({ title: "Error", description: "Failed to delete slide", color: "destructive" });
     } finally {
       setSaving(false);
     }
@@ -484,7 +484,7 @@ export default function DashboardContentManager() {
                           <Badge variant="outline" className="text-xs">
                             {index + 1}
                           </Badge>
-                          <Badge variant="secondary" className="text-xs">
+                          <Badge variant="soft" className="text-xs">
                             {slide.contentType}
                           </Badge>
                         </div>
@@ -505,7 +505,7 @@ export default function DashboardContentManager() {
                         <p className="text-sm font-medium truncate">{slide.title}</p>
                       )}
                       {!slide.isActive && (
-                        <Badge variant="secondary" className="mt-1">
+                        <Badge variant="soft" className="mt-1">
                           Inactive
                         </Badge>
                       )}
@@ -600,7 +600,7 @@ export default function DashboardContentManager() {
           </div>
           <DialogFooter className="flex justify-between">
             <Button
-              variant="destructive"
+              color="destructive"
               onClick={handleDeleteSlideshow}
               disabled={saving}
             >
