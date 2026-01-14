@@ -201,11 +201,31 @@ export async function uploadToGoogleDrive(params: {
       fileId: response.data.id,
       webViewLink: response.data.webViewLink || undefined,
     };
-  } catch (error) {
-    console.error("Google Drive upload failed:", error);
+  } catch (error: unknown) {
+    // Enhanced error logging for debugging
+    const err = error as { code?: number; message?: string; errors?: Array<{ message: string; domain: string; reason: string }> };
+    console.error("Google Drive upload failed:", {
+      message: err.message,
+      code: err.code,
+      errors: err.errors,
+      fullError: JSON.stringify(error, null, 2),
+    });
+    
+    // Build detailed error message
+    let errorMessage = "Upload failed";
+    if (err.code === 404) {
+      errorMessage = "Folder not found or not accessible by service account";
+    } else if (err.code === 403) {
+      errorMessage = "Permission denied - service account may not have Editor access";
+    } else if (err.code === 401) {
+      errorMessage = "Authentication failed - check service account credentials";
+    } else if (err.message) {
+      errorMessage = err.message;
+    }
+    
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Unknown upload error",
+      error: errorMessage,
     };
   }
 }
