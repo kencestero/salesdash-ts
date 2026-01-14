@@ -176,7 +176,7 @@ export async function uploadToGoogleDrive(params: {
     // Convert Buffer to Readable stream
     const stream = Readable.from(fileBuffer);
 
-    // Upload file
+    // Upload file (supportsAllDrives for Shared Drives)
     const response = await drive.files.create({
       requestBody: {
         name: standardizedFileName,
@@ -187,6 +187,7 @@ export async function uploadToGoogleDrive(params: {
         body: stream,
       },
       fields: "id, webViewLink",
+      supportsAllDrives: true,
     });
 
     if (!response.data.id) {

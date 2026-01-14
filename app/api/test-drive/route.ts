@@ -127,10 +127,11 @@ export async function GET() {
     const drive = google.drive({ version: "v3", auth });
 
     try {
-      // Try to get folder metadata
+      // Try to get folder metadata (supportsAllDrives for Shared Drives)
       const folderResponse = await drive.files.get({
         fileId: folderId,
         fields: "id, name, mimeType, owners, permissions",
+        supportsAllDrives: true,
       });
 
       results.push({
@@ -174,6 +175,8 @@ export async function GET() {
         q: `'${folderId}' in parents and trashed=false`,
         fields: "files(id, name, mimeType, createdTime)",
         pageSize: 5,
+        supportsAllDrives: true,
+        includeItemsFromAllDrives: true,
       });
 
       results.push({
@@ -210,6 +213,7 @@ export async function GET() {
           body: stream,
         },
         fields: "id, name, webViewLink",
+        supportsAllDrives: true,
       });
 
       results.push({
