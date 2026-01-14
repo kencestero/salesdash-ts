@@ -31,8 +31,8 @@ interface DriveAuth {
  * Get authenticated Google Drive client
  */
 function getDriveClient(): DriveAuth | null {
-  const serviceAccountEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
-  const privateKey = process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, "\n");
+  const serviceAccountEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL?.trim();
+  const privateKey = process.env.GOOGLE_PRIVATE_KEY?.trim().replace(/\\n/g, "\n");
 
   if (!serviceAccountEmail || !privateKey) {
     console.error("Google Drive: Missing service account credentials");

@@ -20,9 +20,9 @@ export async function GET() {
   }[] = [];
 
   // Step 1: Check environment variables
-  const serviceAccountEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
-  const privateKey = process.env.GOOGLE_PRIVATE_KEY;
-  const folderId = process.env.GOOGLE_DRIVE_CONTRACTOR_FOLDER_ID;
+  const serviceAccountEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL?.trim();
+  const privateKey = process.env.GOOGLE_PRIVATE_KEY?.trim();
+  const folderId = process.env.GOOGLE_DRIVE_CONTRACTOR_FOLDER_ID?.trim();
 
   if (!serviceAccountEmail) {
     results.push({
