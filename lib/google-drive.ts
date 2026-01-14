@@ -11,6 +11,7 @@
  */
 
 import { google } from "googleapis";
+import { Readable } from "stream";
 
 const CONTRACTOR_FOLDER_ID = process.env.GOOGLE_DRIVE_CONTRACTOR_FOLDER_ID;
 
@@ -41,7 +42,7 @@ function getDriveClient(): DriveAuth | null {
   const auth = new google.auth.JWT({
     email: serviceAccountEmail,
     key: privateKey,
-    scopes: ["https://www.googleapis.com/auth/drive.file"],
+    scopes: ["https://www.googleapis.com/auth/drive"],
   });
 
   const drive = google.drive({ version: "v3", auth });
@@ -87,53 +88,15 @@ async function findOrCreateFolder(
 }
 
 /**
- * Ensure folder structure exists: /Contractors/YYYY/SubFolder
+ * Get target folder ID - uploads directly to GOOGLE_DRIVE_CONTRACTOR_FOLDER_ID
+ * The folder structure is managed manually in Google Drive
  */
-async function ensureFolderStructure(
-  drive: ReturnType<typeof google.drive>,
-  docType: string
-): Promise<string | null> {
+function getTargetFolderId(): string | null {
   if (!CONTRACTOR_FOLDER_ID) {
     console.error("GOOGLE_DRIVE_CONTRACTOR_FOLDER_ID not configured");
     return null;
   }
-
-  try {
-    // Get current year
-    const year = new Date().getFullYear().toString();
-
-    // Determine subfolder based on doc type
-    let subFolderName: string;
-    switch (docType) {
-      case "W9":
-        subFolderName = "W-9";
-        break;
-      case "CONTRACTOR_AGREEMENT":
-        subFolderName = "Agreements";
-        break;
-      default:
-        subFolderName = "Other";
-    }
-
-    // Create/find year folder under main contractor folder
-    const yearFolderId = await findOrCreateFolder(drive, CONTRACTOR_FOLDER_ID, year);
-    if (!yearFolderId) {
-      console.error(`Failed to create year folder: ${year}`);
-      return null;
-    }
-
-    // Create/find doc type subfolder under year folder
-    const docFolderId = await findOrCreateFolder(drive, yearFolderId, subFolderName);
-    if (!docFolderId) {
-      console.error(`Failed to create doc type folder: ${subFolderName}`);
-      return null;
-    }
-
-    return docFolderId;
-  } catch (error) {
-    console.error("Failed to ensure folder structure:", error);
-    return null;
-  }
+  return CONTRACTOR_FOLDER_ID;
 }
 
 /**
@@ -193,12 +156,12 @@ export async function uploadToGoogleDrive(params: {
   const { drive } = client;
 
   try {
-    // Ensure folder structure exists
-    const targetFolderId = await ensureFolderStructure(drive, docType);
+    // Get target folder ID
+    const targetFolderId = getTargetFolderId();
     if (!targetFolderId) {
       return {
         success: false,
-        error: "Failed to create folder structure in Google Drive",
+        error: "Google Drive folder not configured",
       };
     }
 
@@ -211,10 +174,7 @@ export async function uploadToGoogleDrive(params: {
     );
 
     // Convert Buffer to Readable stream
-    const { Readable } = await import("stream");
-    const stream = new Readable();
-    stream.push(fileBuffer);
-    stream.push(null);
+    const stream = Readable.from(fileBuffer);
 
     // Upload file
     const response = await drive.files.create({
