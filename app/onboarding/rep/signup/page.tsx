@@ -309,15 +309,15 @@ export default function RepSignupPage() {
     return (
       <div className="min-h-screen text-white overflow-x-hidden relative">
         <div
-          className="fixed inset-0 z-0"
+          className="absolute inset-0 z-0"
           style={{
             backgroundImage: "url('/images/payplan-bg.jpg')",
             backgroundSize: "cover",
             backgroundPosition: "center top",
-            backgroundAttachment: "fixed",
+            minHeight: "100%",
           }}
         >
-          <div className="absolute inset-0 bg-black/70" />
+          <div className="absolute inset-0 bg-black/70" style={{ minHeight: "100%" }} />
         </div>
 
         <div className="relative z-10 max-w-lg mx-auto px-6 py-12">
@@ -343,16 +343,17 @@ export default function RepSignupPage() {
 
   return (
     <div className="min-h-screen text-white overflow-x-hidden relative">
-      {/* Background Image */}
+      {/* Background Image - Covers full page */}
       <div
-        className="absolute inset-0 z-0 min-h-full"
+        className="absolute inset-0 z-0"
         style={{
           backgroundImage: "url('/images/payplan-bg.jpg')",
           backgroundSize: "cover",
           backgroundPosition: "center top",
+          minHeight: "100%",
         }}
       >
-        <div className="absolute inset-0 bg-black/70" />
+        <div className="absolute inset-0 bg-black/70" style={{ minHeight: "100%" }} />
       </div>
 
       {/* Content */}

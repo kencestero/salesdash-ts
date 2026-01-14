@@ -87,6 +87,9 @@ model User {
 
   // Contractor Documents
   contractorDocuments ContractorDocument[]
+
+  // Dashboard Content
+  createdSlideshows   DashboardSlideshow[] @relation("SlideshowCreator")
 }
 
 model VerificationToken {
@@ -1243,6 +1246,10 @@ enum NotificationType {
   MEETING                // Meeting announcements
   NEW_FEATURE            // New tools/features available
   WELCOME                // Welcome message for new users
+
+  // Admin Notifications (Owner/Director only)
+  W9_SIGNED              // New contractor signed W-9 form
+  USER_REGISTERED        // New user completed registration
 }
 
 model Notification {
@@ -1739,4 +1746,75 @@ model SignupCode {
   @@index([code])
   @@index([used])
   @@index([expiresAt])
+}
+
+// ==========================================
+// Dashboard Announcement/Media System
+// ==========================================
+
+enum DashboardContentType {
+  IMAGE           // Single image
+  VIDEO           // Video file or YouTube embed
+  TEXT_ONLY       // Text announcement (no media)
+}
+
+enum DashboardLayoutType {
+  FULL_MEDIA      // Media takes entire box
+  MEDIA_CAPTION   // Media with text overlay/below
+  SPLIT_LEFT      // Media left, text right
+  SPLIT_RIGHT     // Text left, media right
+}
+
+model DashboardSlideshow {
+  id              String    @id @default(cuid())
+  name            String    // Internal name for management (e.g., "January Announcements")
+  isActive        Boolean   @default(true)
+  rotationSpeed   Int       @default(5000)  // Milliseconds between slides
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  createdById     String
+  createdBy       User      @relation("SlideshowCreator", fields: [createdById], references: [id])
+
+  slides          DashboardSlide[]
+}
+
+model DashboardSlide {
+  id              String              @id @default(cuid())
+  slideshowId     String
+  slideshow       DashboardSlideshow  @relation(fields: [slideshowId], references: [id], onDelete: Cascade)
+
+  // Content
+  contentType     DashboardContentType
+  layoutType      DashboardLayoutType @default(FULL_MEDIA)
+
+  // Media
+  mediaUrl        String?             // Google Drive URL or external URL
+  mediaDriveId    String?             // Google Drive file ID (for management)
+  mediaAlt        String?             // Alt text for images
+  youtubeId       String?             // YouTube video ID (if applicable)
+
+  // Text content
+  title           String?
+  description     String?             @db.Text
+  textColor       String?             @default("#FFFFFF")
+  backgroundColor String?             @default("#000000")
+
+  // Link (optional click-through)
+  linkUrl         String?
+  linkText        String?
+
+  // Display settings
+  displayOrder    Int                 @default(0)
+  isActive        Boolean             @default(true)
+
+  // Scheduling
+  startDate       DateTime?           // When to start showing
+  endDate         DateTime?           // When to stop showing
+
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+
+  @@index([slideshowId])
+  @@index([displayOrder])
+  @@index([isActive])
 }

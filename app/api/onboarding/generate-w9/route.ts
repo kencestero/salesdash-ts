@@ -15,6 +15,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
 import { prisma } from "@/lib/prisma";
 import { uploadToGoogleDrive } from "@/lib/google-drive";
+import { notifyW9Signed } from "@/lib/in-app-notifications";
 
 // Character set for signup codes (no ambiguous chars like 0/O, 1/I/L)
 const SIGNUP_CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -160,6 +161,13 @@ export async function POST(req: NextRequest) {
         w9DriveFileId: uploadResult.fileId || undefined,
         // Note: Address info stored later during actual signup
       },
+    });
+
+    // Notify owners/directors about the new W-9
+    await notifyW9Signed({
+      contractorName: body.name,
+      driveFileId: uploadResult.fileId,
+      driveViewLink: uploadResult.webViewLink,
     });
 
     // Return success with signup code

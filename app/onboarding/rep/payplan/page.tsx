@@ -83,16 +83,17 @@ export default function RepPayplanPage() {
 
   return (
     <div className="min-h-screen text-white overflow-x-hidden relative">
-      {/* Background Image - Fixed to viewport */}
+      {/* Background Image - Scrolls with content */}
       <div
-        className="fixed inset-0 z-0"
+        className="absolute inset-0 z-0"
         style={{
           backgroundImage: "url('/images/payplan-bg.jpg')",
           backgroundSize: "cover",
           backgroundPosition: "center top",
+          minHeight: "100%",
         }}
       >
-        <div className="absolute inset-0 bg-black/60" />
+        <div className="absolute inset-0 bg-black/60" style={{ minHeight: "100%" }} />
       </div>
 
       {/* Content */}

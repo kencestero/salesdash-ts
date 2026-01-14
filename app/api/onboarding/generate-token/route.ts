@@ -64,9 +64,9 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // Build the full URL
+    // Build the full URL - using clean path format that won't break in messages
     const baseUrl = process.env.NEXTAUTH_URL || "https://saleshub.remotivelogistics.com";
-    const fullUrl = `${baseUrl}/onboarding/rep?entry=${token}`;
+    const fullUrl = `${baseUrl}/join/${token}`;
 
     return NextResponse.json({
       success: true,

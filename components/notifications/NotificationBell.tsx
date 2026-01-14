@@ -41,6 +41,9 @@ const NOTIFICATION_ICONS: Record<string, string> = {
   MEETING: "heroicons:calendar",
   NEW_FEATURE: "heroicons:sparkles",
   WELCOME: "heroicons:hand-raised",
+  // Admin notifications
+  W9_SIGNED: "heroicons:document-check",
+  USER_REGISTERED: "heroicons:user-plus",
 };
 
 const NOTIFICATION_COLORS: Record<string, string> = {
@@ -52,6 +55,9 @@ const NOTIFICATION_COLORS: Record<string, string> = {
   STATUS_CHANGED: "text-purple-500",
   SYSTEM_ANNOUNCEMENT: "text-[#E96114]",
   TIP: "text-cyan-500",
+  // Admin notifications
+  W9_SIGNED: "text-green-500",
+  USER_REGISTERED: "text-blue-500",
 };
 
 export function NotificationBell() {
@@ -148,7 +154,12 @@ export function NotificationBell() {
       await markAsRead(notification.id);
     }
     if (notification.actionUrl) {
-      router.push(notification.actionUrl);
+      // Handle external URLs (like Google Drive links)
+      if (notification.actionUrl.startsWith("http")) {
+        window.open(notification.actionUrl, "_blank");
+      } else {
+        router.push(notification.actionUrl);
+      }
     }
     setIsOpen(false);
   };

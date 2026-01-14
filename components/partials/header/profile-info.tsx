@@ -22,11 +22,12 @@ import { WelcomeHelpDialog } from "@/components/dashboard/WelcomeHelpDialog";
 const ProfileInfo = () => {
   const { data: session } = useSession();
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [userRole, setUserRole] = useState<string | null>(null);
   const [showWelcomeDialog, setShowWelcomeDialog] = useState(false);
 
-  // Fetch user's uploaded avatar from profile
+  // Fetch user's uploaded avatar and role from profile
   useEffect(() => {
-    const fetchAvatar = async () => {
+    const fetchProfile = async () => {
       try {
         const response = await fetch('/api/user/profile');
         if (response.ok) {
@@ -34,16 +35,21 @@ const ProfileInfo = () => {
           if (data.profile?.avatarUrl) {
             setAvatarUrl(data.profile.avatarUrl);
           }
+          if (data.profile?.role) {
+            setUserRole(data.profile.role);
+          }
         }
       } catch (error) {
-        console.error('Failed to fetch profile avatar:', error);
+        console.error('Failed to fetch profile:', error);
       }
     };
 
     if (session?.user) {
-      fetchAvatar();
+      fetchProfile();
     }
   }, [session]);
+
+  const isAdmin = userRole === "owner" || userRole === "director";
 
   // Get initials from name (first 2 letters)
   const getInitials = (name?: string | null) => {
@@ -111,6 +117,12 @@ const ProfileInfo = () => {
               icon: "heroicons:shield-check",
               href:"/en/user-management"
             },
+            // Admin-only: Dashboard Content Manager
+            ...(isAdmin ? [{
+              name: "Dashboard Content",
+              icon: "heroicons:photo",
+              href:"/en/dashboard-content"
+            }] : []),
             {
               name: "Secret Code Instructions",
               icon: "heroicons:key",

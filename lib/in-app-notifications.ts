@@ -21,6 +21,9 @@ const NOTIFICATION_PREFERENCE_MAP: Record<NotificationType, keyof NotificationPr
   MEETING: "systemAnnouncements",
   NEW_FEATURE: "tipsAndTricks",
   WELCOME: null,
+  // Admin notifications - always enabled for owners/directors
+  W9_SIGNED: null,
+  USER_REGISTERED: null,
 };
 
 interface CreateNotificationParams {
@@ -175,4 +178,74 @@ export async function notifyCustomerReply(p: {
     data: { customerId: p.customerId, threadId: p.threadId, customerName: p.customerName },
     actionUrl: `/en/crm/messages?thread=${p.threadId}`
   });
+}
+
+// Admin Notifications (Owner/Director only)
+
+/**
+ * Notify owners/directors when a new contractor signs a W-9 form
+ */
+export async function notifyW9Signed(p: {
+  contractorName: string;
+  driveFileId?: string;
+  driveViewLink?: string;
+}): Promise<{ sent: number; failed: number }> {
+  // Get all owners and directors
+  const admins = await prisma.user.findMany({
+    where: {
+      profile: {
+        role: { in: ["owner", "director"] },
+        isActive: true,
+      },
+    },
+    select: { id: true },
+  });
+
+  let sent = 0, failed = 0;
+  for (const admin of admins) {
+    const result = await createNotification({
+      userId: admin.id,
+      type: "W9_SIGNED",
+      title: "New W-9 Signed",
+      message: `${p.contractorName} has signed their W-9 form and uploaded it to Google Drive.`,
+      data: { contractorName: p.contractorName, driveFileId: p.driveFileId },
+      actionUrl: p.driveViewLink || undefined,
+    });
+    if (result.success) sent++; else failed++;
+  }
+  return { sent, failed };
+}
+
+/**
+ * Notify owners/directors when a new user completes registration (email verified)
+ */
+export async function notifyUserRegistered(p: {
+  userName: string;
+  userEmail: string;
+  userId: string;
+}): Promise<{ sent: number; failed: number }> {
+  // Get all owners and directors
+  const admins = await prisma.user.findMany({
+    where: {
+      profile: {
+        role: { in: ["owner", "director"] },
+        isActive: true,
+      },
+    },
+    select: { id: true },
+  });
+
+  let sent = 0, failed = 0;
+  for (const admin of admins) {
+    const result = await createNotification({
+      userId: admin.id,
+      type: "USER_REGISTERED",
+      title: "New User Registered",
+      message: `${p.userName} (${p.userEmail}) has completed registration and verified their email.`,
+      data: { userName: p.userName, userEmail: p.userEmail, newUserId: p.userId },
+      actionUrl: `/en/user-management`,
+    });
+    if (result.success) sent++; else failed++;
+  }
+  return { sent, failed };
 }

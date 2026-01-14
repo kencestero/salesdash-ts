@@ -15,6 +15,7 @@ import InstallAppCard from "./components/install-app-card";
 import { LogDashboardVisitOnMount } from "@/components/dashboard/log-dashboard-visit";
 import { DashboardUsersCard } from "@/components/dashboard/dashboard-users-card";
 import { WelcomeHelpDialog } from "@/components/dashboard/WelcomeHelpDialog";
+import { DashboardSlideshow } from "@/components/dashboard/DashboardSlideshow";
 
 interface DashboardPageViewProps {
   trans: {
@@ -40,9 +41,12 @@ const DashboardPageView = ({ trans }: DashboardPageViewProps) => {
       {/* Welcome Help Dialog - shows on first visit */}
       <WelcomeHelpDialog />
 
-      {/* reports area */}
-      <div className="grid grid-cols-12  gap-6 ">
-        <div className="col-span-12 lg:col-span-8">
+      {/* Announcement Slideshow + Reports Area */}
+      <div className="grid grid-cols-12 gap-6">
+        <div className="col-span-12 lg:col-span-8 space-y-6">
+          {/* Dashboard Slideshow - News & Updates */}
+          <DashboardSlideshow />
+          {/* Reports Snapshot */}
           <ReportsSnapshot />
         </div>
         <div className="col-span-12 lg:col-span-4 space-y-6">

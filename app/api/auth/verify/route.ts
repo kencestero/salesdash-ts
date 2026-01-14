@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { generateUniqueSalespersonCode } from "@/lib/salespersonCode";
+import { notifyUserRegistered } from "@/lib/in-app-notifications";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -214,6 +215,13 @@ export async function GET(req: Request) {
     }
 
     console.log('🎉 Email verification complete for:', user.email);
+
+    // Notify owners/directors about the new user registration
+    await notifyUserRegistered({
+      userName: `${pendingUser.firstName} ${pendingUser.lastName}`,
+      userEmail: pendingUser.email,
+      userId: user.id,
+    });
 
     // 6. Redirect to login with success message
     return NextResponse.redirect(
