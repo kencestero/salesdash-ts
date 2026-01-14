@@ -139,7 +139,7 @@ export async function POST(req: NextRequest) {
     if (!uploadResult.success) {
       console.error("Google Drive upload failed:", uploadResult.error);
       return NextResponse.json(
-        { success: false, error: "Failed to upload W-9 to secure storage" },
+        { success: false, error: `Failed to upload W-9: ${uploadResult.error}` },
         { status: 500 }
       );
     }

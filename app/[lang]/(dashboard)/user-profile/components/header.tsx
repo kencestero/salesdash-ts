@@ -63,10 +63,25 @@ const Header = ({ session, userProfile }: HeaderProps) => {
     fetchProfile();
   }, []);
 
+  // Map database role to display title
+  const getRoleDisplayTitle = (role: string | undefined): string => {
+    switch (role) {
+      case 'owner':
+        return 'CEO';
+      case 'director':
+        return 'Director of Sales';
+      case 'manager':
+        return 'Team Sales Manager';
+      case 'salesperson':
+      default:
+        return 'Sales Representative';
+    }
+  };
+
   // Use real user data or fallback to defaults
   const userName = session?.user?.name || "User";
   const userImage = avatarUrl || session?.user?.image || User;
-  const userRole = userProfile?.role || "Sales Representative";
+  const userRole = getRoleDisplayTitle(userProfile?.role);
 
   // Get initials for avatar fallback
   const getInitials = (name: string) => {
