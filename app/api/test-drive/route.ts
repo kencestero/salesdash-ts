@@ -123,50 +123,72 @@ export async function GET() {
       });
     }
 
-    // Step 3: Try to access the folder
+    // Step 3: Try to access the folder (or Shared Drive)
     const drive = google.drive({ version: "v3", auth });
 
+    // First try as a Shared Drive
+    let isSharedDrive = false;
     try {
-      // Try to get folder metadata (supportsAllDrives for Shared Drives)
-      const folderResponse = await drive.files.get({
-        fileId: folderId,
-        fields: "id, name, mimeType, owners, permissions",
-        supportsAllDrives: true,
+      const driveResponse = await drive.drives.get({
+        driveId: folderId,
+        fields: "id, name",
       });
 
       results.push({
         step: "folder_access",
         status: "success",
-        message: `Successfully accessed folder: ${folderResponse.data.name}`,
+        message: `Successfully accessed Shared Drive: ${driveResponse.data.name}`,
         details: {
-          id: folderResponse.data.id,
-          name: folderResponse.data.name,
-          mimeType: folderResponse.data.mimeType,
+          id: driveResponse.data.id,
+          name: driveResponse.data.name,
+          type: "shared_drive",
         },
       });
-    } catch (folderError: unknown) {
-      const err = folderError as { code?: number; message?: string; errors?: Array<{ message: string; reason: string }> };
-      results.push({
-        step: "folder_access",
-        status: "error",
-        message: `Failed to access folder: ${err.message}`,
-        details: {
-          code: err.code,
-          errors: err.errors,
-          folderId,
-        },
-      });
+      isSharedDrive = true;
+    } catch {
+      // Not a Shared Drive root, try as regular folder
+      try {
+        const folderResponse = await drive.files.get({
+          fileId: folderId,
+          fields: "id, name, mimeType, owners, permissions",
+          supportsAllDrives: true,
+        });
 
-      return NextResponse.json({
-        success: false,
-        error: `Cannot access folder (code ${err.code}): ${err.message}`,
-        results,
-        suggestion: err.code === 404
-          ? "The folder ID may be wrong, or the service account doesn't have access. Share the folder with the service account email."
-          : err.code === 403
-          ? "The service account doesn't have permission. Make sure it has Editor access to the folder."
-          : "Check the error details above.",
-      });
+        results.push({
+          step: "folder_access",
+          status: "success",
+          message: `Successfully accessed folder: ${folderResponse.data.name}`,
+          details: {
+            id: folderResponse.data.id,
+            name: folderResponse.data.name,
+            mimeType: folderResponse.data.mimeType,
+            type: "folder",
+          },
+        });
+      } catch (folderError: unknown) {
+        const err = folderError as { code?: number; message?: string; errors?: Array<{ message: string; reason: string }> };
+        results.push({
+          step: "folder_access",
+          status: "error",
+          message: `Failed to access folder: ${err.message}`,
+          details: {
+            code: err.code,
+            errors: err.errors,
+            folderId,
+          },
+        });
+
+        return NextResponse.json({
+          success: false,
+          error: `Cannot access folder (code ${err.code}): ${err.message}`,
+          results,
+          suggestion: err.code === 404
+            ? "The folder ID may be wrong, or the service account doesn't have access. Share the folder with the service account email."
+            : err.code === 403
+            ? "The service account doesn't have permission. Make sure it has Editor access to the folder."
+            : "Check the error details above.",
+        });
+      }
     }
 
     // Step 4: Try to list files in the folder
