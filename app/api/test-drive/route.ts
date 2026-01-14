@@ -10,6 +10,7 @@
 
 import { NextResponse } from "next/server";
 import { google } from "googleapis";
+import { Readable } from "stream";
 
 export async function GET() {
   const results: {
@@ -197,7 +198,6 @@ export async function GET() {
     // Step 5: Try a test upload (small text file)
     try {
       const testContent = `Test file created at ${new Date().toISOString()}`;
-      const { Readable } = await import("stream");
       const stream = Readable.from(Buffer.from(testContent));
 
       const uploadResponse = await drive.files.create({
