@@ -188,6 +188,22 @@ const ChatPage = () => {
     return () => clearInterval(contactPollingInterval);
   }, [refetchContact]);
 
+  // Visibility change: Immediately refetch when tab becomes visible
+  // This fixes the browser throttling issue where setInterval slows down in background tabs
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        refetchContact();
+        if (selectedChatId) {
+          refetchMessage();
+        }
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, [refetchContact, refetchMessage, selectedChatId]);
+
   // handle search bar
 
   const handleSetIsOpenSearch = () => {
