@@ -11,7 +11,7 @@ import { prisma } from "@/lib/prisma";
 import { google } from "googleapis";
 import { Readable } from "stream";
 
-const DASHBOARD_MEDIA_FOLDER_ID = process.env.GOOGLE_DRIVE_DASHBOARD_FOLDER_ID;
+const DASHBOARD_MEDIA_FOLDER_ID = process.env.GOOGLE_DRIVE_DASHBOARD_FOLDER_ID?.trim();
 
 function getDriveClient() {
   const serviceAccountEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL?.trim();

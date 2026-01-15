@@ -13,7 +13,7 @@
 import { google } from "googleapis";
 import { Readable } from "stream";
 
-const CONTRACTOR_FOLDER_ID = process.env.GOOGLE_DRIVE_CONTRACTOR_FOLDER_ID;
+const CONTRACTOR_FOLDER_ID = process.env.GOOGLE_DRIVE_CONTRACTOR_FOLDER_ID?.trim();
 
 interface UploadResult {
   success: boolean;
