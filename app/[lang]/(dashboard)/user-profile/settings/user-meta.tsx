@@ -10,6 +10,7 @@ import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { RoleBadge } from "@/components/ui/role-badge";
 import { ImageCropDialog } from "@/components/ui/image-crop-dialog";
+import { useUploadThing } from "@/lib/uploadthing";
 
 const MAX_AVATAR_SIZE = 2 * 1024 * 1024; // 2MB
 const MAX_AVATAR_DIMENSION = 1920; // 1920px max
@@ -22,6 +23,22 @@ const UserMeta = () => {
   const [cropDialogOpen, setCropDialogOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [userRole, setUserRole] = useState<string>("salesperson");
+
+  // UploadThing hook for avatar uploads (works on Vercel)
+  const { startUpload, isUploading } = useUploadThing("avatarUploader", {
+    onClientUploadComplete: () => {
+      // Handled in handleCropComplete
+    },
+    onUploadError: (error) => {
+      console.error("UploadThing error:", error);
+      toast({
+        title: "Upload failed",
+        description: error.message || "Failed to upload avatar. Please try again.",
+        variant: "destructive",
+      });
+      setUploading(false);
+    },
+  });
 
   // Fetch profile data on mount
   useEffect(() => {
@@ -89,21 +106,17 @@ const UserMeta = () => {
     setUploading(true);
 
     try {
-      // Create FormData with the cropped image
-      const formData = new FormData();
-      formData.append('file', blob, 'avatar.jpg');
+      // Convert blob to File for UploadThing
+      const file = new File([blob], `avatar-${Date.now()}.jpg`, { type: 'image/jpeg' });
 
-      const response = await fetch('/api/upload-avatar', {
-        method: 'POST',
-        body: formData,
-      });
+      // Upload via UploadThing (cloud storage - works on Vercel)
+      const uploadResult = await startUpload([file]);
 
-      if (!response.ok) {
-        throw new Error('Upload failed');
+      if (!uploadResult || uploadResult.length === 0) {
+        throw new Error('Upload failed - no result returned');
       }
 
-      const data = await response.json();
-      const newAvatarUrl = data.url;
+      const newAvatarUrl = uploadResult[0].ufsUrl || uploadResult[0].url;
 
       // Update local state
       setAvatarUrl(newAvatarUrl);
