@@ -853,11 +853,6 @@ export const menusConfig = {
             icon: Envelope,
             href: "/sales-tools/requests/inbox",
           },
-          {
-            title: "My Documents",
-            icon: Files,
-            href: "/contractor-docs",
-          },
         ],
       },
       {
@@ -1743,11 +1738,6 @@ export const menusConfig = {
         title: "Request Info",
         icon: Mail,
         href: "/request-info",
-      },
-      {
-        title: "My Documents",
-        icon: Files,
-        href: "/contractor-docs",
       },
       {
         isHeader: true,
