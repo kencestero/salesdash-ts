@@ -149,13 +149,17 @@ const UserMeta = () => {
       <Card>
         <CardContent className="p-6 flex flex-col items-center">
           <div className="w-[124px] h-[124px] relative rounded-full">
-            <Image
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
               src={avatarUrl}
               alt="avatar"
               width={124}
               height={124}
               className="w-full h-full object-cover rounded-full"
-              priority={true}
+              onError={(e) => {
+                // Fallback to default avatar on error
+                (e.target as HTMLImageElement).src = '/images/avatar/avatar-3.jpg';
+              }}
             />
             <Button asChild
               size="icon"

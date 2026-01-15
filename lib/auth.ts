@@ -234,12 +234,16 @@ export const authOptions = {
       if (session?.user && token?.id) {
         session.user.id = token.id;
 
-        // Fetch user profile to attach role
+        // Fetch user profile to attach role and avatar
         const userProfile = await prisma.userProfile.findUnique({
           where: { userId: token.id },
         });
         if (userProfile) {
           session.user.role = userProfile.role;
+          // Include avatar URL in session
+          if (userProfile.avatarUrl) {
+            session.user.image = userProfile.avatarUrl;
+          }
         }
       }
       return session;

@@ -1730,6 +1730,11 @@ export const menusConfig = {
         href: "/crm/messages",
       },
       {
+        title: "My Sales",
+        icon: ChartBar,
+        href: "/reports/my-sales",
+      },
+      {
         title: "Sales Report",
         icon: ChartBar,
         href: "/reports/sales",

@@ -205,12 +205,15 @@ const Header = ({ session, userProfile }: HeaderProps) => {
           >
             {/* Custom banner image */}
             {bannerUrl && (
-              <Image
+              /* eslint-disable-next-line @next/next/no-img-element */
+              <img
                 src={bannerUrl}
                 alt="Profile banner"
-                fill
-                className="object-cover"
-                priority
+                className="absolute inset-0 w-full h-full object-cover"
+                onError={(e) => {
+                  // Hide banner on error to show gradient fallback
+                  (e.target as HTMLImageElement).style.display = 'none';
+                }}
               />
             )}
 
@@ -257,20 +260,25 @@ const Header = ({ session, userProfile }: HeaderProps) => {
             <div className="flex items-center gap-4 absolute ltr:left-10 rtl:right-10 -bottom-2 lg:-bottom-8">
               <div className="relative">
                 {typeof userImage === 'string' ? (
-                  <Image
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img
                     src={userImage}
                     alt={userName}
                     width={128}
                     height={128}
                     className="h-20 w-20 lg:w-32 lg:h-32 rounded-full object-cover border-4 border-white shadow-lg"
+                    onError={(e) => {
+                      // Hide broken image and show initials instead
+                      (e.target as HTMLImageElement).style.display = 'none';
+                      (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+                    }}
                   />
-                ) : (
-                  <div className="h-20 w-20 lg:w-32 lg:h-32 rounded-full bg-[#E96114] border-4 border-white shadow-lg flex items-center justify-center">
-                    <span className="text-2xl lg:text-4xl font-bold text-white">
-                      {getInitials(userName)}
-                    </span>
-                  </div>
-                )}
+                ) : null}
+                <div className={`h-20 w-20 lg:w-32 lg:h-32 rounded-full bg-[#E96114] border-4 border-white shadow-lg flex items-center justify-center ${typeof userImage === 'string' ? 'hidden absolute inset-0' : ''}`}>
+                  <span className="text-2xl lg:text-4xl font-bold text-white">
+                    {getInitials(userName)}
+                  </span>
+                </div>
                 {/* Online indicator */}
                 <div className="absolute bottom-1 right-1 lg:bottom-2 lg:right-2 w-4 h-4 lg:w-5 lg:h-5 bg-green-500 rounded-full border-2 border-white" />
               </div>
