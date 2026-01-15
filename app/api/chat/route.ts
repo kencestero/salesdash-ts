@@ -30,27 +30,30 @@ export async function GET(request: NextRequest, response: NextResponse) {
       },
     });
 
-    // Get chats from Firebase for this user
-    const chatsRef = collection(db, "chats");
-    const chatsQuery = query(
-      chatsRef,
-      where("participants", "array-contains", session.user.id)
-    );
-    const chatsSnapshot = await getDocs(chatsQuery);
-
+    // Get chats from Firebase for this user (if Firebase is configured)
     const chatsMap = new Map();
-    chatsSnapshot.docs.forEach((doc) => {
-      const data = doc.data();
-      const otherUserId = data.participants.find((p: string) => p !== session.user.id);
-      if (otherUserId) {
-        chatsMap.set(otherUserId, {
-          id: doc.id,
-          unseenMsgs: data.unseenMsgs || 0,
-          lastMessage: data.lastMessage || null,
-          lastMessageTime: data.lastMessageTime?.toDate?.()?.toISOString() || null,
-        });
-      }
-    });
+
+    if (db) {
+      const chatsRef = collection(db, "chats");
+      const chatsQuery = query(
+        chatsRef,
+        where("participants", "array-contains", session.user.id)
+      );
+      const chatsSnapshot = await getDocs(chatsQuery);
+
+      chatsSnapshot.docs.forEach((doc) => {
+        const data = doc.data();
+        const otherUserId = data.participants.find((p: string) => p !== session.user.id);
+        if (otherUserId) {
+          chatsMap.set(otherUserId, {
+            id: doc.id,
+            unseenMsgs: data.unseenMsgs || 0,
+            lastMessage: data.lastMessage || null,
+            lastMessageTime: data.lastMessageTime?.toDate?.()?.toISOString() || null,
+          });
+        }
+      });
+    }
 
     // Combine users with their chat data
     const contactsWithChats = users.map((user) => {
