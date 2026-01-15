@@ -191,6 +191,8 @@ const ChatPage = () => {
   // Visibility change: Immediately refetch when tab becomes visible
   // This fixes the browser throttling issue where setInterval slows down in background tabs
   useEffect(() => {
+    if (typeof window === 'undefined') return; // Guard for SSR - document doesn't exist on server
+
     const handleVisibilityChange = () => {
       if (document.visibilityState === "visible") {
         refetchContact();
